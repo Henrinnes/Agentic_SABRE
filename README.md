@@ -9,6 +9,8 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python -m SABRE_AGENTIC.cli demo # run a stub demo
 
+---
+
 ## SABRE_AGENTIC/__init__.py
   ```python
   __all__ = ["contracts", "orchestrator"]
