@@ -8,6 +8,7 @@ Minimal skeleton to wrap your ransomware detectors in an agentic orchestrator wi
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python -m Agentic_sabre.cli demo # run a stub demo
+python -m Agentic_SABRE demo # just in case
 
 ---
 
