@@ -3,9 +3,8 @@ A self-adaptive, reasoning-based cybersecurity agents framework
 
 Minimal skeleton to wrap your ransomware detectors in an agentic orchestrator with uncertainty-aware triage.
 
-
 ## Quickstart
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python -m sabread.cli demo # run a stub demo
+python -m SABRE_AGENTIC.cli demo # run a stub demo
