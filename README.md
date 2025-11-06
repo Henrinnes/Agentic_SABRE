@@ -10,6 +10,7 @@ pip install -r requirements.txt
 python -m Agentic_sabre.cli demo # run a stub demo
 python -m Agentic_SABRE demo # just in case
 
+python -m Agentic_SABRE.cli demo --tau 0.82 --kappa 0.14 --tau-high 0.96 --kappa-low 0.06
 ---
 
 
