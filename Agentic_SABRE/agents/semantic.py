@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 
 from ..contracts import AgentOutput
+# from Agentic_SABRE.contracts import AgentOutput
 
 # === SAME ARCH as training ===
 class CNNSemanticAgent(nn.Module):
