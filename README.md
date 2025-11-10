@@ -28,7 +28,7 @@ This codebase turns SABRE into a self‐adaptation agentic framework:
 - Decision Agent (fusion)
 - Policy layer (τ, κ, τ_high, κ_low) for ALLOW / ESCALATE / AUTO_CONTAIN
 
-This matches the extension direction required for journal quality work (e.g., KBS) because it adds autonomy, uncertainty reasoning, and explicit policy.
+This adds autonomy, uncertainty reasoning, and explicit policy.
 
 
 ---
