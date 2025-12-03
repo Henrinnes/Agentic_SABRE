@@ -12,19 +12,17 @@ from .contracts import AgentOutput
 Action = Literal["ALLOW", "ESCALATE", "AUTO_CONTAIN"]
 
 
-# --- simple sinks (replace with your real integrations later) ---
 @dataclass
 class TicketSink:
     system: str = "stdout"
     def create_ticket(self, payload: Dict[str, Any]) -> None:
-        # TODO: replace with real ticketing (TheHive/Jira/ServiceNow/etc.)
         print(f"[TICKET->{self.system}] {payload}")
+
 
 @dataclass
 class ActionSink:
     system: str = "stdout"
     def isolate_host(self, host: str, reason: str) -> None:
-        # TODO: replace with real SOAR/EDR action
         print(f"[ACTION->{self.system}] isolate_host host={host} reason={reason}")
     def kill_process(self, pid: int | None, reason: str) -> None:
         print(f"[ACTION->{self.system}] kill_process pid={pid} reason={reason}")
@@ -44,21 +42,24 @@ class Orchestrator:
         κ: float = 0.15,
         τ_high: float | None = 0.95,
         κ_low: float | None = 0.08,
+        decision_artifact: str | None = "checkpoints/decision_fuser.json",
     ):
         self.sem = SemanticAgent()
         self.beh = BehavioralAgent()
-        self.dec = DecisionAgent()
+        # use_uncertainties=True so we pass σ_sem, σ_beh as extra inputs
+        self.dec = DecisionAgent(
+            artifact_path=decision_artifact,
+            use_uncertainties=True,
+        )
 
         self.τ = float(τ)
         self.κ = float(κ)
         self.τ_high = None if τ_high is None else float(τ_high)
         self.κ_low = None if κ_low is None else float(κ_low)
 
-        # sinks (swap these with real integrations)
         self.tickets = TicketSink()
         self.actions = ActionSink()
 
-    # ---- decision policy ----------------------------------------------------
     def _decide(self, fused_p: float, uncert_max: float) -> Action:
         if self.τ_high is not None and self.κ_low is not None:
             if fused_p >= self.τ_high and uncert_max <= self.κ_low:
@@ -67,7 +68,6 @@ class Orchestrator:
             return "ESCALATE"
         return "ALLOW"
 
-    # ---- main entry ---------------------------------------------------------
     def handle(
         self,
         x_sem: Dict[str, Any],
@@ -76,20 +76,26 @@ class Orchestrator:
     ) -> Dict[str, Any]:
         context = context or {}
 
-        # 1) score with agents
+        # 1) score with base agents (MC Dropout)
         o_sem: AgentOutput = self.sem.score(x_sem)
         o_beh: AgentOutput = self.beh.score(x_beh)
-        fused: AgentOutput = self.dec.score({"p_sem": o_sem.prob, "p_beh": o_beh.prob})
 
-        # 2) apply policy
+        # 2) fuse scores with decision MLP (optionally calibrated)
+        fused: AgentOutput = self.dec.score({
+            "p_sem": o_sem.prob,
+            "p_beh": o_beh.prob,
+            "σ_sem": o_sem.uncert,
+            "σ_beh": o_beh.uncert,
+        })
+
         uncert_max = max(o_sem.uncert, o_beh.uncert)
         decision: Action = self._decide(fused.prob, uncert_max)
 
-        # 3) route actions (your requested snippet, expanded)
+        # 3) side-effects (stubbed; replace with SOAR/ticketing)
         if decision == "AUTO_CONTAIN":
-            # e.g., call your SOAR/EDR wrappers
             # self.actions.kill_process(pid=context.get("pid"), reason="High risk, low uncertainty")
-            # self.actions.isolate_host(host=context.get("host", "unknown"), reason="High risk, low uncertainty")
+            # self.actions.isolate_host(host=context.get("host", "unknown"),
+            #                           reason="High risk, low uncertainty")
             pass
         elif decision == "ESCALATE":
             # self.tickets.create_ticket({
@@ -105,7 +111,7 @@ class Orchestrator:
             # })
             pass
 
-        # 4) return rich result (for logs/CLI/UI)
+        # 4) return rich result
         return {
             "decision": decision,
             "score_fused": fused.prob,
