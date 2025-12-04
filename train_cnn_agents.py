@@ -31,11 +31,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # ---------- load data ----------
 # adjust these paths to your real parquet locations
-df_sem = pd.read_parquet("semantic_dataset_with_embeddings.parquet")
+df_sem = pd.read_parquet(r'C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\semantic_dataset_with_embeddings.parquet')
 X_sem = np.stack(df_sem["embedding"].values).astype(np.float32)
 y_sem = df_sem["label"].astype(np.float32).values
 
-df_beh = pd.read_parquet("combined_i3-gen12_datasetF.parquet")
+df_beh = pd.read_parquet(r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet")
 behavior_columns = [
     'avg_read_throughput', 'avg_write_throughput',
     'read_LBA_variance', 'write_LBA_variance',
@@ -83,12 +83,68 @@ class CNNBehavioralAgent(nn.Module):
     def forward(self, x):
         return self.model(x).squeeze(-1)
 
-def train_cnn(model, X, y, epochs=10, lr=1e-3, is_cnn=True):
+# def train_cnn(model, X, y, epochs=15, lr=1e-3, is_cnn=True):
+#     X_train, X_test, y_train, y_test = train_test_split(
+#         X, y, stratify=y, test_size=0.2, random_state=42
+#     )
+#     sm = SMOTE(random_state=42)
+#     X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
+
+#     X_train_t = to_tensor(X_train_res, unsqueeze=is_cnn)
+#     y_train_t = to_tensor(y_train_res)
+#     X_test_t  = to_tensor(X_test, unsqueeze=is_cnn)
+#     y_test_t  = to_tensor(y_test)
+
+#     model.to(device)
+#     opt = torch.optim.Adam(model.parameters(), lr=lr)
+#     crit = nn.BCELoss()
+
+#     train_loader = DataLoader(TensorDataset(X_train_t, y_train_t), batch_size=32, shuffle=True)
+#     test_loader  = DataLoader(TensorDataset(X_test_t, y_test_t),  batch_size=32)
+
+#     for _ in range(epochs):
+#         model.train()
+#         for xb, yb in train_loader:
+#             xb, yb = xb.to(device), yb.to(device)
+#             p = model(xb)
+#             loss = crit(p, yb)
+#             opt.zero_grad()
+#             loss.backward()
+#             opt.step()
+
+#     model.eval()
+#     preds, targs = [], []
+#     with torch.no_grad():
+#         for xb, yb in test_loader:
+#             xb = xb.to(device)
+#             p = model(xb)
+#             preds.extend((p > 0.5).int().cpu().numpy())
+#             targs.extend(yb.cpu().numpy())
+#     acc = accuracy_score(targs, preds)
+#     return model, acc
+
+
+
+
+def train_cnn(
+    model,
+    X,
+    y,
+    epochs=15,          # was 10
+    lr=1e-3,
+    is_cnn=True,
+    batch_size=256,     # was 32
+    use_smote=True,     # new flag
+):
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, stratify=y, test_size=0.2, random_state=42
     )
-    sm = SMOTE(random_state=42)
-    X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
+
+    if use_smote:
+        sm = SMOTE(random_state=42)
+        X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
+    else:
+        X_train_res, y_train_res = X_train, y_train
 
     X_train_t = to_tensor(X_train_res, unsqueeze=is_cnn)
     y_train_t = to_tensor(y_train_res)
@@ -99,8 +155,15 @@ def train_cnn(model, X, y, epochs=10, lr=1e-3, is_cnn=True):
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     crit = nn.BCELoss()
 
-    train_loader = DataLoader(TensorDataset(X_train_t, y_train_t), batch_size=32, shuffle=True)
-    test_loader  = DataLoader(TensorDataset(X_test_t, y_test_t),  batch_size=32)
+    train_loader = DataLoader(
+        TensorDataset(X_train_t, y_train_t),
+        batch_size=batch_size,
+        shuffle=True,
+    )
+    test_loader  = DataLoader(
+        TensorDataset(X_test_t, y_test_t),
+        batch_size=batch_size,
+    )
 
     for _ in range(epochs):
         model.train()
@@ -123,15 +186,51 @@ def train_cnn(model, X, y, epochs=10, lr=1e-3, is_cnn=True):
     acc = accuracy_score(targs, preds)
     return model, acc
 
+
+# if __name__ == "__main__":
+#     print("Training Semantic CNN...")
+#     sem_model, acc_sem = train_cnn(CNNSemanticAgent(X_sem.shape[1], dropout=0.3),
+#                                    X_sem, y_sem, is_cnn=True)
+#     print(f"Semantic accuracy: {acc_sem:.4f}")
+
+#     print("Training Behavioural CNN...")
+#     beh_model, acc_beh = train_cnn(CNNBehavioralAgent(X_beh.shape[1], dropout=0.3),
+#                                    X_beh, y_beh, is_cnn=True)
+#     print(f"Behavioural accuracy: {acc_beh:.4f}")
+
+#     ckpt_dir = Path("checkpoints")
+#     ckpt_dir.mkdir(exist_ok=True)
+#     torch.save(sem_model.state_dict(), ckpt_dir/"semantic_cnn.pt")
+#     torch.save(beh_model.state_dict(), ckpt_dir/"behavioral_cnn.pt")
+#     meta = {
+#         "semantic_input_dim": int(X_sem.shape[1]),
+#         "behavioral_input_dim": int(X_beh.shape[1])
+#     }
+#     (ckpt_dir/"metadata.json").write_text(json.dumps(meta, indent=2))
+#     print("Saved checkpoints and metadata in ./checkpoints/")
+
+
 if __name__ == "__main__":
     print("Training Semantic CNN...")
-    sem_model, acc_sem = train_cnn(CNNSemanticAgent(X_sem.shape[1], dropout=0.3),
-                                   X_sem, y_sem, is_cnn=True)
+    sem_model, acc_sem = train_cnn(
+        CNNSemanticAgent(X_sem.shape[1], dropout=0.3),
+        X_sem, y_sem,
+        epochs=15,
+        batch_size=256,
+        is_cnn=True,
+        use_smote=True,   # SMOTE as in diagram
+    )
     print(f"Semantic accuracy: {acc_sem:.4f}")
 
     print("Training Behavioural CNN...")
-    beh_model, acc_beh = train_cnn(CNNBehavioralAgent(X_beh.shape[1], dropout=0.3),
-                                   X_beh, y_beh, is_cnn=True)
+    beh_model, acc_beh = train_cnn(
+        CNNBehavioralAgent(X_beh.shape[1], dropout=0.3),
+        X_beh, y_beh,
+        epochs=15,
+        batch_size=256,
+        is_cnn=True,
+        use_smote=True,   # still matching framework
+    )
     print(f"Behavioural accuracy: {acc_beh:.4f}")
 
     ckpt_dir = Path("checkpoints")

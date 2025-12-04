@@ -168,32 +168,61 @@ class DecisionTrainer:
         # restore best
         self.model.load_state_dict(best_state)
 
-        # optional temperature scaling on validation set
+        # # optional temperature scaling on validation set
+        # if self.cfg.temperature_scale:
+        #     self.temp = TemperatureScaler()
+        #     self.temp.to(device)
+        #     # Fit T by minimizing NLL on validation probs
+        #     optT = torch.optim.LBFGS(self.temp.parameters(), lr=0.1, max_iter=50)
+
+        #     def nll_on_va():
+        #         optT.zero_grad(set_to_none=True)
+        #         nlls = []
+        #         self.model.eval()
+        #         with torch.no_grad():
+        #             for xb, yb in va_loader:
+        #                 xb, yb = xb.to(device), yb.to(device)
+        #                 p = self.model(xb)
+        #                 p_cal = self.temp(p)
+        #                 eps = 1e-6
+        #                 nll = -(yb * torch.log(p_cal.clamp(eps, 1-eps)) +
+        #                         (1 - yb) * torch.log(1 - p_cal.clamp(eps, 1-eps))).mean()
+        #                 nlls.append(nll)
+        #         loss = torch.stack(nlls).mean()
+        #         loss.backward()
+        #         return loss
+
+        #     optT.step(nll_on_va)
+
+        # return self
         if self.cfg.temperature_scale:
             self.temp = TemperatureScaler()
             self.temp.to(device)
-            # Fit T by minimizing NLL on validation probs
             optT = torch.optim.LBFGS(self.temp.parameters(), lr=0.1, max_iter=50)
 
-            def nll_on_va():
+            def closure():
                 optT.zero_grad(set_to_none=True)
                 nlls = []
                 self.model.eval()
                 with torch.no_grad():
+                    logits_list = []
+                    y_list = []
                     for xb, yb in va_loader:
                         xb, yb = xb.to(device), yb.to(device)
                         p = self.model(xb)
-                        p_cal = self.temp(p)
-                        eps = 1e-6
-                        nll = -(yb * torch.log(p_cal.clamp(eps, 1-eps)) +
-                                (1 - yb) * torch.log(1 - p_cal.clamp(eps, 1-eps))).mean()
-                        nlls.append(nll)
-                loss = torch.stack(nlls).mean()
-                loss.backward()
-                return loss
+                        logits_list.append(p.detach())   # detach: we only optimise T
+                        y_list.append(yb.detach())
+                p_all = torch.cat(logits_list, dim=0)
+                y_all = torch.cat(y_list, dim=0)
 
-            optT.step(nll_on_va)
+                p_cal = self.temp(p_all)
+                eps = 1e-6
+                nll = -(y_all * torch.log(p_cal.clamp(eps, 1-eps)) +
+                        (1 - y_all) * torch.log(1 - p_cal.clamp(eps, 1-eps))).mean()
+                nll.backward()
+                return nll
 
+            optT.step(closure)
         return self
 
     # serialize minimal artifacts

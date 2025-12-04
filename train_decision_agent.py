@@ -11,8 +11,8 @@ from Agentic_SABRE.agents.decision import DecisionTrainer, DecisionTrainConfig
 
 def main():
     # 1) Load datasets (same ones used for CNN training)
-    df_sem = pd.read_parquet("semantic_dataset_with_embeddings.parquet")
-    df_beh = pd.read_parquet("combined_i3-gen12_datasetF.parquet")
+    df_sem = pd.read_parquet(r'C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\semantic_dataset_with_embeddings.parquet')
+    df_beh = pd.read_parquet(r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet")
 
     # assume labels aligned / same length; if not, you’ll need your pairing logic
     y = df_sem["label"].astype(np.float32).values
