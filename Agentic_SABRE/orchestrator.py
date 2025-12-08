@@ -9,6 +9,13 @@ from .agents.behavioural import BehavioralAgent
 from .agents.decision import DecisionAgent
 from .contracts import AgentOutput
 
+import json
+from pathlib import Path
+
+def load_auto_policy(path: str = "checkpoints/policy_auto.json"):
+    blob = json.loads(Path(path).read_text())
+    return blob
+    
 Action = Literal["ALLOW", "ESCALATE", "AUTO_CONTAIN"]
 
 

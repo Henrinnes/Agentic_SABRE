@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 
-from Agentic_SABRE.orchestrator import Orchestrator
+from Agentic_SABRE.orchestrator import Orchestrator, load_auto_policy
 
 behavior_columns = [
     'avg_read_throughput', 'avg_write_throughput',
@@ -65,11 +65,23 @@ if __name__ == "__main__":
     X_beh = df_beh[behavior_columns].to_numpy(dtype=np.float32)
     y_beh = df_beh["label"].astype(int).values
 
+    # orch = Orchestrator(
+    #     τ=0.80, κ=0.15,
+    #     τ_high=0.95, κ_low=0.08,
+    #     decision_artifact="checkpoints/decision_fuser.json"
+    # )
+    
+    # load auto-tuned policy
+    policy = json.loads(Path("checkpoints/policy_auto.json").read_text())
+
     orch = Orchestrator(
-        τ=0.80, κ=0.15,
-        τ_high=0.95, κ_low=0.08,
-        decision_artifact="checkpoints/decision_fuser.json"
+        τ=policy["tau"],
+        κ=policy["kappa"],
+        τ_high=policy["tau_high"],
+        κ_low=policy["kappa_low"],
+        decision_artifact="checkpoints/decision_fuser.json",
     )
+
 
     rd_results = evaluate_dataset("RDset", X_sem, y_sem, X_beh[:len(y_sem)], y_sem, orch)
     beh_results = evaluate_dataset("RanSMAP", X_sem[:len(y_beh)], y_beh, X_beh, y_beh, orch)
