@@ -72,7 +72,9 @@ if __name__ == "__main__":
     # )
     
     # load auto-tuned policy
-    policy = json.loads(Path("checkpoints/policy_auto.json").read_text())
+    # policy = json.loads(Path("checkpoints/policy_auto.json").read_text())
+    policy = json.loads(Path("checkpoints/policy_low_escalation.json").read_text())
+
 
     orch = Orchestrator(
         τ=policy["tau"],
