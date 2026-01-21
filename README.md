@@ -99,3 +99,21 @@ Agentic_SABRE/
 ├── behavioural_feature_importance.py
 ├── plot_calibration_fusion.py
 └── README.md
+
+Quickstart
+Environment setup
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+Run a demo
+python -m Agentic_SABRE.cli demo
+
+
+You may explicitly configure the triage policy thresholds:
+
+python -m Agentic_SABRE.cli demo \
+  --tau 0.82 \
+  --kappa 0.14 \
+  --tau-high 0.96 \
+  --kappa-low 0.06
