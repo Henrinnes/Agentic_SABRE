@@ -80,11 +80,10 @@ Agentic_SABRE/
 ├── plot_calibration_fusion.py
 └── README.md
 
-## Quickstart
+Quickstart
 
-### 1. Environment setup
+1. Environment setup
 
-```text
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
