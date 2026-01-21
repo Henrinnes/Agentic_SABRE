@@ -92,7 +92,7 @@ pip install -r requirements.txt
 python -m Agentic_SABRE.cli demo
 
 
-**You can also explicitly specify policy parameters:**
+You can also explicitly specify policy parameters:
 
 python -m Agentic_SABRE.cli demo \
   --tau 0.82 \
