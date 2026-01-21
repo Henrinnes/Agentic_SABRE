@@ -25,7 +25,7 @@ This codebase turns SABRE into a self‐adaptation agentic framework:
 
 - Semantic Agent (MC-Dropout CNN on embedding vector)
 - Behavioural Agent (MC-Dropout CNN on behavioural time window features)
-- Decision Agent (fusion)
+- Decision Agent (Score pool fusion)
 - Policy layer (τ, κ, τ_high, κ_low) for ALLOW / ESCALATE / AUTO_CONTAIN
 
 This adds autonomy, uncertainty reasoning, and explicit policy.
