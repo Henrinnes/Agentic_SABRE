@@ -163,3 +163,15 @@ class SemanticAgent:
         mean_p, std_p, _ = self._mc_dropout(vec)
         extras = {"note": "semantic MC Dropout"}
         return AgentOutput(prob=mean_p, uncert=std_p, extras=extras)
+
+    @torch.no_grad()
+    def score_batch(self, inputs: List[Dict[str, Any]]) -> List[AgentOutput]:
+        """MC Dropout over a batch. Runs T passes on [B,1,D] — far more GPU-efficient than T*B single calls."""
+        vecs = np.stack([np.asarray(x["embedding"], dtype=np.float32) for x in inputs])  # [B, D]
+        t = torch.from_numpy(vecs).unsqueeze(1).to(self.device)  # [B, 1, D]
+        self.model.apply(_enable_dropout_only)
+        preds = torch.stack([self.model(t) for _ in range(self.T)])  # [T, B]
+        means = preds.mean(0).cpu().numpy()   # [B]
+        stds  = preds.std(0).cpu().numpy()    # [B]
+        return [AgentOutput(prob=float(m), uncert=float(s), extras={"note": "semantic MC Dropout"})
+                for m, s in zip(means, stds)]

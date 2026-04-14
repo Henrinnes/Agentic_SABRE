@@ -1,4 +1,30 @@
 {
   "semantic_input_dim": 384,
-  "behavioral_input_dim": 16
+  "behavioral_input_dim": 16,
+  "knowledge_input_dim": 23,
+  "knowledge_features": [
+    "Tool_Total_Mentions",
+    "Tactic_Total_Mentions",
+    "Tactic_Initial_Access",
+    "Tactic_Execution",
+    "Tactic_Persistence",
+    "Tactic_Privilege_Escalation",
+    "Tactic_Credential_Access",
+    "Tactic_Lateral_Movement",
+    "Tactic_Discovery",
+    "Tactic_Command_and_Control",
+    "Tactic_Exfiltration",
+    "Tactic_Impact",
+    "Tool_Cobalt_Strike",
+    "Tool_Mimikatz",
+    "Tool_PsExec",
+    "Tool_Rclone",
+    "Tool_MegaNZ",
+    "Tool_AnyDesk",
+    "Tool_TeamViewer",
+    "Tool_BloodHound",
+    "Platform_Windows",
+    "Platform_Linux",
+    "Platform_ESXi"
+  ]
 }
