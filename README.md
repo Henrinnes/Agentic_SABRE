@@ -62,9 +62,33 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 
 ---
 
+## Adaptive MC Dropout
+
+All agents (semantic, behavioural, knowledge) use **adaptive MC Dropout** for uncertainty quantification. Rather than a fixed number of forward passes, each agent runs passes in groups of 5 and stops when the uncertainty estimate converges:
+
+$$|\sigma_{t} - \sigma_{t-5}| < \text{tol}$$
+
+| Parameter | Default | Description |
+|---|---|---|
+| `T` | `None` | Fixed passes. `None` enables adaptive mode. |
+| `min_T` | `5` | Minimum passes before checking convergence. |
+| `max_T` | `50` | Hard cap on passes in adaptive mode. |
+| `tol` | `1e-3` | Convergence threshold on σ change. |
+
+To use a fixed number of passes (e.g. to reproduce paper results at T=10):
+
+```python
+from Agentic_SABRE.agents.semantic import SemanticAgent
+agent = SemanticAgent(T=10)
+```
+
+Each `AgentOutput.extras` includes `passes_used` so you can observe how many passes were actually needed per sample.
+
+---
+
 ## GPU-Accelerated Batch Inference
 
-All agents support both single-sample and **batched inference** on GPU. Batching runs T MC Dropout passes over the full batch $[B, 1, D]$ simultaneously rather than $T \times B$ serial calls.
+All agents support both single-sample and **batched inference** on GPU. Batching runs MC Dropout passes over the full batch $[B, 1, D]$ simultaneously, with the same adaptive convergence logic applied across the batch.
 
 | Mode | Throughput | Speedup |
 |---|---|---|
