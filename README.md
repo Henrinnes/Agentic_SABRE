@@ -4,7 +4,7 @@
 
 This repository provides the reference implementation accompanying the paper:
 
-> *Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent Framework for Adaptive Ransomware Detection* :contentReference[oaicite:1]{index=1}
+> *Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent Framework for Adaptive Ransomware Detection*
 
 Agentic_SABRE is a self-adaptive, reasoning-based cybersecurity framework designed to detect ransomware under **concept drift**, **behavioural polymorphism**, and **uncertainty**. The system decomposes detection into specialised agents, explicitly quantifies epistemic uncertainty via Monte Carlo Dropout, and applies a **risk- and uncertainty-aware triage policy** to decide whether to automatically contain, escalate, or allow execution.
 
@@ -24,55 +24,56 @@ Agentic SABRE addresses these limitations by introducing an **agentic, uncertain
 
 ## System Overview
 
-Agentic SABRE is a **neuro-symbolic multi-agent system** composed of four main components:
+Agentic SABRE is a **neuro-symbolic multi-agent system** with two pipeline configurations:
 
-### 1. Semantic Agent
-- Operates on semantic representations derived from static artefacts (e.g., PE metadata, entropy descriptors).
-- Encodes structured metadata into dense embeddings.
-- Implemented as a 1D CNN with Monte Carlo Dropout.
-- Produces a predictive mean score \( \bar{p}_{sem} \) and epistemic uncertainty \( \sigma_{sem} \).
+### 2-Agent Pipeline (Semantic + Behavioural)
 
-### 2. Behavioural Agent
-- Operates on behavioural telemetry extracted from sliding windows of runtime activity.
-- Uses handcrafted statistical features (e.g., entropy dispersion, access variance).
-- Implemented as a 1D CNN with Monte Carlo Dropout.
-- Produces \( \bar{p}_{beh} \) and \( \sigma_{beh} \).
+| Agent | Input | Architecture | Output |
+|---|---|---|---|
+| **Semantic Agent** | PE metadata embeddings (384D) | 1D CNN + MC Dropout | $\bar{p}_{sem},\ \sigma_{sem}$ |
+| **Behavioural Agent** | Runtime telemetry features (16D) | 1D CNN + MC Dropout | $\bar{p}_{beh},\ \sigma_{beh}$ |
+| **Decision Agent** | Score space $[p_{sem}, p_{beh}, \sigma_{sem}, \sigma_{beh}]$ | MLP + CTGAN augmentation | $\hat{p} \in [0,1]$ |
 
-### 3. Decision Agent (Fusion Layer)
-- Learns to fuse semantic and behavioural scores into a unified ransomware risk estimate.
-- Trained as a lightweight MLP on the score space.
-- Enhanced using **CTGAN-based score-level augmentation** to improve robustness under class imbalance.
-- Outputs a fused risk score \( \hat{p} \in [0,1] \).
+### 3-Agent Pipeline (Semantic + Behavioural + Knowledge)
 
-### 4. Uncertainty-Aware Policy Layer
-- Aggregates epistemic uncertainty conservatively:
-  \[
-  \sigma_{max} = \max(\sigma_{sem}, \sigma_{beh})
-  \]
-- Applies a two-threshold triage policy governed by:
-  - risk thresholds \( \tau, \tau_{high} \)
-  - uncertainty thresholds \( \kappa, \kappa_{low} \)
+Extends the 2-agent pipeline with a third expert:
 
-Decision rules:
-- **AUTO-CONTAIN** if \( \hat{p} \ge \tau_{high} \land \sigma_{max} \le \kappa_{low} \)
-- **ESCALATE** if \( \hat{p} \ge \tau \lor \sigma_{max} > \kappa \)
-- **ALLOW** otherwise
+| Agent | Input | Architecture | Output |
+|---|---|---|---|
+| **Knowledge Agent** | MITRE ATT&CK + threat intel features (23D) | 1D CNN + MC Dropout | $\bar{p}_{know},\ \sigma_{know}$ |
 
-This design ensures uncertainty acts as a *stabilising control variable* rather than a secondary diagnostic.
+The Decision Agent fuses the 6D score space $[p_{sem}, p_{beh}, p_{know}, \sigma_{sem}, \sigma_{beh}, \sigma_{know}]$.
+
+### Uncertainty-Aware Policy Layer
+
+Uncertainty is aggregated conservatively:
+
+$$\sigma_{max} = \max(\sigma_{sem},\ \sigma_{beh}\ [,\ \sigma_{know}])$$
+
+Two-threshold triage policy:
+
+| Decision | Condition |
+|---|---|
+| **AUTO-CONTAIN** | $\hat{p} \ge \tau_{high}\ \land\ \sigma_{max} \le \kappa_{low}$ |
+| **ESCALATE** | $\hat{p} \ge \tau\ \lor\ \sigma_{max} > \kappa$ |
+| **ALLOW** | otherwise |
+
+Uncertainty acts as a *stabilising control variable* — not a secondary diagnostic.
 
 ---
 
-## Operational Pipeline
+## GPU-Accelerated Batch Inference
 
-At a high level, Agentic SABRE follows five stages:
+All agents support both single-sample and **batched inference** on GPU. Batching runs T MC Dropout passes over the full batch $[B, 1, D]$ simultaneously rather than $T \times B$ serial calls.
 
-1. Hybrid feature extraction (semantic embeddings + behavioural telemetry)
-2. Feature-level augmentation using SMOTE
-3. Base-agent training with MC Dropout inference
-4. Score fusion and CTGAN-based score augmentation
-5. Deployment-time uncertainty-aware triage
+| Mode | Throughput | Speedup |
+|---|---|---|
+| Single sample | ~33 samples/s | 1× |
+| Batch = 64 | ~2,500 samples/s | **77×** |
+| Batch = 256 | ~6,000 samples/s | **182×** |
+| Batch = 500 | ~7,800 samples/s | **239×** |
 
-The architecture directly corresponds to Algorithm 1–4 in the paper :contentReference[oaicite:2]{index=2}.
+*Benchmarked on NVIDIA RTX 3050 Laptop GPU (4 GB VRAM).*
 
 ---
 
@@ -81,39 +82,163 @@ The architecture directly corresponds to Algorithm 1–4 in the paper :contentRe
 ```text
 Agentic_SABRE/
 ├── Agentic_SABRE/
-│   ├── agents/                 # Semantic, Behavioural, Decision agents
-│   ├── Policies/               # Threshold definitions and policy logic
+│   ├── agents/
+│   │   ├── semantic.py          # Semantic CNN agent (score + score_batch)
+│   │   ├── behavioural.py       # Behavioural CNN agent (score + score_batch)
+│   │   ├── knowledge.py         # Knowledge CNN agent (score + score_batch)
+│   │   └── decision.py          # Fusion MLP agent (score + score_batch)
+│   ├── Policies/
 │   │   ├── __init__.py
-│   │   └── thresholds.py
-│   ├── orchestrator.py         # Uncertainty-aware triage logic
-│   ├── contracts.py            # Data and agent interfaces
-│   ├── cli.py                  # Command-line entry point
+│   │   └── thresholds.py        # Policy threshold utilities
+│   ├── orchestrator.py          # 2-agent orchestrator (handle + handle_batch)
+│   ├── orchestrator_3agent.py   # 3-agent orchestrator (handle + handle_batch)
+│   ├── contracts.py             # AgentOutput, FusionInput/Output interfaces
+│   ├── cli.py                   # Command-line entry point
 │   ├── __main__.py
 │   └── __init__.py
 │
-├── checkpoints/                # Trained models and experiment artefacts
-├── eval_semantic_agent.py      # Semantic agent evaluation
-├── eval_behaviour_agent.py     # Behavioural agent evaluation
-├── eval_fusion_policy.py       # Fusion and policy analysis
-├── behaviour_counterfactuals.py
-├── behavioural_feature_importance.py
-├── plot_calibration_fusion.py
+├── checkpoints/
+│   ├── semantic_cnn.pt              # Trained semantic CNN weights
+│   ├── behavioral_cnn.pt            # Trained behavioural CNN weights
+│   ├── knowledge_cnn.pt             # Trained knowledge CNN weights
+│   ├── knowledge_scaler.joblib      # StandardScaler for knowledge features
+│   ├── decision_fuser.json          # 2-agent fusion artifact
+│   ├── decision_fuser_3agent.json   # 3-agent fusion artifact
+│   ├── policy_auto.json             # Auto-tuned policy thresholds
+│   ├── policy_low_escalation.json   # Conservative (low escalation) policy
+│   └── metadata.json                # Feature dimension metadata
+│
+├── train_cnn_agents.py          # Train semantic + behavioural CNNs
+├── train_knowledge_agent.py     # Train knowledge CNN
+├── train_decision_agent.py      # Train fusion MLP (2-agent or 3-agent)
+├── tune_policy.py               # Auto-tune policy thresholds (Optuna)
+├── tune_policy_low_escalation.py
+│
+├── eval_fusion_policy.py        # Eval: 2-agent pipeline (per-agent + fusion)
+├── eval_fusion_policy_3agent.py # Eval: 3-agent pipeline
+├── eval_semantic_agent.py       # Eval: semantic agent standalone
+├── eval_behaviour_agent.py      # Eval: behavioural agent standalone
+├── eval_knowledge.py            # Eval: knowledge agent standalone
+│
+├── Smoke_test.py                # Import smoke test (2-agent)
+├── smoke_test_orchestrator.py   # End-to-end orchestrator smoke test
+├── test_orchestrator_3agent.py  # 3-agent orchestrator tests
+│
 └── README.md
+```
 
-Quickstart
-Environment setup
+---
+
+## Quickstart
+
+### Environment Setup
+
+```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+```
 
-Run a demo
+### GPU Support (Recommended)
+
+Install PyTorch with CUDA for ~200× faster batch inference:
+
+```bash
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+```
+
+All agents auto-detect CUDA and move to GPU on instantiation. No code changes required.
+
+### Run a Demo
+
+```bash
 python -m Agentic_SABRE.cli demo
+```
 
+With explicit policy thresholds:
 
-You may explicitly configure the triage policy thresholds:
-
+```bash
 python -m Agentic_SABRE.cli demo \
   --tau 0.82 \
   --kappa 0.14 \
   --tau-high 0.96 \
   --kappa-low 0.06
+```
+
+### Smoke Tests
+
+```bash
+python Smoke_test.py                  # imports only
+python smoke_test_orchestrator.py     # full 2-agent pipeline with random inputs
+python test_orchestrator_3agent.py    # full 3-agent pipeline with real data
+```
+
+---
+
+## Training Pipeline
+
+```bash
+# 1. Train base CNN agents
+python train_cnn_agents.py            # semantic + behavioural
+python train_knowledge_agent.py       # knowledge agent
+
+# 2. Train fusion MLP (generates decision_fuser_3agent.json)
+python train_decision_agent.py
+
+# 3. Tune policy thresholds
+python tune_policy.py                 # balanced escalation
+python tune_policy_low_escalation.py  # conservative escalation
+```
+
+---
+
+## Evaluation
+
+```bash
+# Per-agent evaluations (each on its native dataset)
+python eval_semantic_agent.py
+python eval_behaviour_agent.py
+python eval_knowledge.py
+
+# Full pipeline evaluations
+python eval_fusion_policy.py          # 2-agent pipeline
+python eval_fusion_policy_3agent.py   # 3-agent pipeline
+```
+
+> **Dataset note:** The semantic (RDset) and behavioural (RanSMAP) datasets are independent — no sample appears in both. Per-agent evaluations are fully valid. A true fusion evaluation requires a unified dataset with both modalities from the same executable instance.
+
+---
+
+## **Policy Parameters**
+
+| Parameter | Symbol | Role |
+|---|---|---|
+| `tau` | $\tau$ | Risk threshold — escalate if $\hat{p} \ge \tau$ |
+| `kappa` | $\kappa$ | Uncertainty threshold — escalate if $\sigma_{max} > \kappa$ |
+| `tau_high` | $\tau_{high}$ | High-confidence threshold — auto-contain if $\hat{p} \ge \tau_{high}$ |
+| `kappa_low` | $\kappa_{low}$ | Low-uncertainty threshold — auto-contain if $\sigma_{max} \le \kappa_{low}$ |
+
+Pre-tuned policies are stored in `checkpoints/policy_auto.json` and `checkpoints/policy_low_escalation.json`.
+
+---
+
+## Using `handle_batch` for High-Throughput Inference
+
+```python
+from Agentic_SABRE.orchestrator import Orchestrator
+import numpy as np
+
+orch = Orchestrator(decision_artifact="checkpoints/decision_fuser.json")
+
+# Build input lists
+x_sems = [{"embedding": np.random.rand(384).astype("float32")} for _ in range(256)]
+x_behs = [{"features":  np.random.rand(16).astype("float32")}  for _ in range(256)]
+
+# Single batched call — all 256 samples processed in parallel on GPU
+results = orch.handle_batch(x_sems, x_behs)
+
+for r in results:
+    print(r["decision"], r["score_fused"], r["uncert_max"])
+```
+
+For the 3-agent pipeline, use `Agentic_SABRE.orchestrator_3agent.Orchestrator` and add `x_knows` with 23D knowledge features.
