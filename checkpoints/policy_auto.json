@@ -1,12 +1,23 @@
 {
-  "tau": 0.999998927116394,
-  "kappa": 0.4582575559616089,
-  "tau_high": 0.99,
-  "kappa_low": 0.22912877798080444,
-  "balanced_accuracy": 0.8779050591430191,
-  "escalation_rate": 0.9520792235017732,
-  "tn": 32684,
-  "fp": 9898,
-  "fn": 9948,
-  "tp": 837105
+  "tau": 0.065035,
+  "kappa": 0.489405,
+  "tau_high": 0.994835,
+  "kappa_low": 0.382688,
+  "balanced_accuracy": 0.909,
+  "escalation_rate": 0.591,
+  "esc_penalty_used": 0.0,
+  "pipeline": 3,
+  "n_trials": 300,
+  "n_samples": 4000,
+  "triage": {
+    "AUTO_CONTAIN": 789,
+    "ESCALATE": 1575,
+    "ALLOW": 1636
+  },
+  "confusion": {
+    "tn": 1636,
+    "fp": 364,
+    "fn": 0,
+    "tp": 2000
+  }
 }
