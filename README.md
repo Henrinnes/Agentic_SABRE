@@ -229,7 +229,17 @@ python eval_fusion_policy.py          # 2-agent pipeline
 python eval_fusion_policy_3agent.py   # 3-agent pipeline
 ```
 
-> **Dataset note:** The semantic (RDset) and behavioural (RanSMAP) datasets are independent — no sample appears in both. Per-agent evaluations are fully valid. A true fusion evaluation requires a unified dataset with both modalities from the same executable instance.
+> **Dataset note:** All three datasets (RDset, RanSMAP, RansKnow) are independent — no sample appears in more than one. Per-agent evaluations on native datasets are fully valid. Fusion pipeline evaluations are cross-dataset and reflect semantic agent dominance, not true multi-modal fusion. A valid fusion eval requires a unified dataset with all modalities from the same executable instance.
+
+### 3-Agent Evaluation Results (stratified, balanced)
+
+| Agent | Dataset | Accuracy | ROC-AUC | Notes |
+|---|---|---|---|---|
+| Semantic | RDset (4,000 samples) | 1.0000 | 1.0000 | Near-perfect separation on static PE embeddings |
+| Behavioural | RanSMAP (2,000 samples) | 0.5680 | 0.6209 | Balanced eval — honest AUC, modest discrimination |
+| Knowledge | RansKnow (200 samples) | 0.9650 | 0.9953 | MITRE ATT&CK features are highly discriminative |
+
+The knowledge agent (0.9953 AUC) adds strong complementary signal to the fusion pipeline. The behavioural AUC of 0.62 is the honest balanced figure; the 0.9872 accuracy previously reported was from an imbalanced evaluation where 99.8% of RanSMAP samples are ransomware.
 
 ---
 
@@ -265,4 +275,20 @@ for r in results:
     print(r["decision"], r["score_fused"], r["uncert_max"])
 ```
 
-For the 3-agent pipeline, use `Agentic_SABRE.orchestrator_3agent.Orchestrator` and add `x_knows` with 23D knowledge features.
+For the 3-agent pipeline:
+
+```python
+from Agentic_SABRE.orchestrator_3agent import Orchestrator
+import numpy as np
+
+orch = Orchestrator(decision_artifact="checkpoints/decision_fuser_3agent.json")
+
+x_sems  = [{"embedding": np.random.rand(384).astype("float32")} for _ in range(256)]
+x_behs  = [{"features":  np.random.rand(16).astype("float32")}  for _ in range(256)]
+x_knows = [{"features":  np.random.rand(23).astype("float32")}  for _ in range(256)]
+
+results = orch.handle_batch(x_sems, x_behs, x_knows)
+
+for r in results:
+    print(r["decision"], r["score_fused"], r["uncert_max"])
+```
