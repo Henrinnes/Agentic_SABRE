@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Literal
+from typing import Any, Dict, List, Literal
 
 from .agents.semantic import SemanticAgent
 from .agents.behavioural import BehavioralAgent
@@ -182,3 +182,37 @@ class Orchestrator:
                 "kappa_low": self.κ_low,
             },
         }
+
+    def handle_batch(
+        self,
+        x_sems: List[Dict[str, Any]],
+        x_behs: List[Dict[str, Any]],
+        x_knows: List[Dict[str, Any]],
+        contexts: List[Dict[str, Any]] | None = None,
+    ) -> List[Dict[str, Any]]:
+        B = len(x_sems)
+        contexts = contexts or [{} for _ in range(B)]
+
+        o_sems  = self.sem.score_batch(x_sems)
+        o_behs  = self.beh.score_batch(x_behs)
+        o_knows = self.know.score_batch(x_knows)
+
+        fusion_inputs = [
+            {
+                "p_sem":   o_sems[i].prob,   "p_beh":   o_behs[i].prob,   "p_know":   o_knows[i].prob,
+                "σ_sem":   o_sems[i].uncert, "σ_beh":   o_behs[i].uncert, "σ_know":   o_knows[i].uncert,
+            }
+            for i in range(B)
+        ]
+        fused_outputs = self.dec.score_batch(fusion_inputs)
+
+        results = []
+        for i in range(B):
+            uncert_max = max(o_sems[i].uncert, o_behs[i].uncert, o_knows[i].uncert)
+            decision = self._decide(fused_outputs[i].prob, uncert_max)
+            results.append({
+                "decision":    decision,
+                "score_fused": fused_outputs[i].prob,
+                "uncert_max":  uncert_max,
+            })
+        return results
