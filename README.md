@@ -128,78 +128,82 @@ Agentic_SABRE/
 │   ├── knowledge_scaler.joblib             # StandardScaler for knowledge features
 │   ├── decision_fuser.json                 # 2-agent fusion artifact (4D input)
 │   ├── decision_fuser_3agent.json          # 3-agent fusion artifact (6D input)
-│   ├── policy_auto.json                    # Auto-tuned policy thresholds
+│   ├── policy_auto.json                    # Optuna-tuned policy thresholds (active)
 │   ├── policy_low_escalation.json          # Conservative (low escalation) policy
 │   ├── metadata.json                       # Feature dimension metadata
 │   ├── semantic_counterfactuals.csv        # CF results (all samples)
 │   ├── semantic_counterfactuals_50.csv     # CF results (50 borderline samples)
 │   ├── semantic_grad_saliency.npy          # Gradient saliency outputs
-│   └── semantic_perm_*.npy / .json         # Permutation importance outputs
+│   ├── semantic_perm_auc_drop.npy          # Permutation importance (AUC drop)
+│   ├── semantic_perm_nll_increase.npy      # Permutation importance (NLL increase)
+│   ├── semantic_permutation_importance.npy # Raw permutation importance scores
+│   └── semantic_perm_grouped_auc.json      # Grouped permutation importance
 │
 ├── Figures/                                ← All plots and diagrams
-│   ├── Prop_Agentic_Sabre_30_03_2025.png   # Architecture figure (ESWA paper)
-│   ├── Prop_Agentic_Sabre_08_11_2025.png   # Architecture figure (updated)
-│   ├── Agent_Performance_metrics.png
-│   ├── Behaviour_feature_importance.png
-│   ├── ROC_Curve_RDset.png
-│   ├── Roc_Curve_RanSMAP.png
-│   ├── Roc_Both.png
-│   ├── Triage_policy.png
-│   ├── Triage_policy_space.png
-│   ├── Reliability_Diagram_Fusion.png
-│   ├── calibration_semantic/behavioral/decision.png
-│   ├── CF_semantic.png
-│   ├── Rep_Beh_CFs.png
-│   ├── fig_semantic_cf_*.png               # Counterfactual diagnostic panels
-│   ├── uncertainty_comparison.png
-│   ├── Dec_layer_Triage.png
-│   ├── Escalate.png
-│   ├── auto_contain.png
-│   ├── CTGAN model.PNG
-│   └── Optuna6multiMetrics.png
+│   ├── Prop_Agentic_Sabre_30_03_2025.png   # Architecture figure (ESWA paper v1)
+│   ├── Prop_Agentic_Sabre_08_11_2025.png   # Architecture figure (ESWA paper v2)
+│   ├── Prop_Agentic_Sabre_26_01_2025_3Agents.png  # 3-agent architecture diagram
+│   ├── Prop_Multi_Agent_LLM_1.png          # Multi-agent LLM overview
+│   ├── Agent_Performance_metrics.png       # Per-agent metrics summary
+│   ├── Behaviour_feature_importance.png    # Permutation importance plot
+│   ├── ROC_Curve_RDset.png                 # ROC curve — RDset
+│   ├── Roc_Curve_RanSMAP.png              # ROC curve — RanSMAP
+│   ├── Roc_Both.png                        # Combined ROC curves
+│   ├── Triage_policy.png                   # Policy threshold diagram
+│   ├── Triage_policy_space.png             # Policy scatter (p_hat vs sigma)
+│   ├── Reliability_Diagram_Fusion.png      # Calibration reliability diagram
+│   ├── calibration_semantic.png            # Calibration — semantic agent
+│   ├── calibration_behavioral.png          # Calibration — behavioural agent
+│   ├── calibration_decision.png            # Calibration — decision agent
+│   ├── CF_semantic.png                     # Semantic counterfactual overview
+│   ├── Rep_Beh_CFs.png                     # Representative behavioural CFs
+│   ├── fig_semantic_cf_l2_hist.png         # CF L2 distance distribution
+│   ├── fig_semantic_cf_rel_hist.png        # CF relative distance distribution
+│   ├── fig_semantic_cf_p0_vs_l2.png        # CF score vs L2 scatter
+│   ├── fig_semantic_cf_steps_hist.png      # CF optimisation steps distribution
+│   ├── uncertainty_comparison.png          # Fixed-T vs adaptive-T uncertainty
+│   ├── Dec_layer_Triage.png                # Decision layer triage visualisation
+│   ├── Escalate.png                        # ESCALATE region illustration
+│   ├── auto_contain.png                    # AUTO-CONTAIN region illustration
+│   ├── CTGAN model.PNG                     # CTGAN augmentation diagram
+│   └── Optuna6multiMetrics.png             # Optuna multi-metric optimisation plot
 │
 ├── PDF files/                              ← ESWA paper submissions
 │   ├── Expert_Systems_with Applications_SABRE_Final.pdf    # v1
 │   └── Expert_Systems_With_Applications_SABRE_Final_1.pdf  # v2 (under review)
 │
-├── Training
-│   ├── train_cnn_agents.py                 # Train semantic + behavioural CNNs
-│   ├── train_knowledge_agent.py            # Train knowledge CNN
-│   └── train_decision_agent.py             # Train fusion MLP (2-agent or 3-agent)
+├── train_cnn_agents.py                     # Train semantic + behavioural CNNs
+├── train_knowledge_agent.py                # Train knowledge CNN
+├── train_decision_agent.py                 # Train fusion MLP (2-agent or 3-agent)
 │
-├── Policy tuning
-│   ├── tune_policy_optuna.py               # Bayesian optimisation (TPE, 2/3-agent, GPU-batched)
-│   ├── tune_policy.py                      # Grid search, balanced escalation
-│   └── tune_policy_low_escalation.py       # Grid search, conservative escalation
+├── tune_policy_optuna.py                   # Bayesian threshold tuning (recommended)
+├── tune_policy.py                          # Grid search, balanced escalation
+├── tune_policy_low_escalation.py           # Grid search, conservative escalation
 │
-├── Evaluation
-│   ├── eval_fusion_policy.py               # 2-agent pipeline (per-agent + fusion)
-│   ├── eval_fusion_policy_3agent.py        # 3-agent pipeline (per-agent + fusion)
-│   ├── eval_semantic_agent.py              # Semantic agent standalone
-│   ├── eval_behaviour_agent.py             # Behavioural agent standalone
-│   └── eval_knowledge.py                   # Knowledge agent standalone
+├── eval_fusion_policy.py                   # 2-agent pipeline evaluation
+├── eval_fusion_policy_3agent.py            # 3-agent pipeline evaluation
+├── eval_semantic_agent.py                  # Semantic agent standalone eval
+├── eval_behaviour_agent.py                 # Behavioural agent standalone eval
+├── eval_knowledge.py                       # Knowledge agent standalone eval
 │
-├── Explainability
-│   ├── semantic_counterfactuals.py
-│   ├── semantic_grad_saliency.py
-│   ├── semantic_permutation_importance.py
-│   ├── semantic_permutation_importance_grouped.py
-│   ├── behavioural_feature_importance.py
-│   └── behaviour_counterfactuals.py
+├── semantic_counterfactuals.py             # Semantic counterfactual generation
+├── semantic_grad_saliency.py               # Gradient saliency analysis
+├── semantic_permutation_importance.py      # Permutation importance (per-feature)
+├── semantic_permutation_importance_grouped.py  # Permutation importance (grouped)
+├── behavioural_feature_importance.py       # Behavioural permutation importance
+├── behaviour_counterfactuals.py            # Behavioural counterfactual generation
 │
-├── Plotting
-│   ├── plot_calibration_fusion.py
-│   ├── plot_roc_curves.py
-│   ├── plot_triage_scatter.py
-│   └── plot_semantic_cf_distribution.py
+├── plot_calibration_fusion.py              # Calibration / reliability diagrams
+├── plot_roc_curves.py                      # ROC curve plots
+├── plot_triage_scatter.py                  # Policy-space scatter plot
+├── plot_semantic_cf_distribution.py        # CF distance distribution plots
 │
-├── Tests
-│   ├── Smoke_test.py                       # Import smoke test
-│   ├── smoke_test_orchestrator.py          # 2-agent end-to-end test
-│   └── test_orchestrator_3agent.py         # 3-agent end-to-end test
+├── Smoke_test.py                           # Import smoke test
+├── smoke_test_orchestrator.py              # 2-agent end-to-end test
+├── test_orchestrator_3agent.py             # 3-agent end-to-end test
 │
-├── app.py                                  ← Streamlit dashboard
-├── SABRE_presentation_updated.pptx
+├── app.py                                  # Streamlit dashboard
+├── SABRE_presentation_updated.pptx         # Conference / review presentation
 ├── requirements.txt
 └── README.md
 ```
