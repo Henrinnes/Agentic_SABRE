@@ -197,9 +197,38 @@ Agentic_SABRE/
 │   ├── smoke_test_orchestrator.py          # 2-agent end-to-end test
 │   └── test_orchestrator_3agent.py         # 3-agent end-to-end test
 │
+├── app.py                                  ← Streamlit dashboard
 ├── SABRE_presentation_updated.pptx
 ├── requirements.txt
 └── README.md
+```
+
+---
+
+## Interactive Dashboard
+
+A Streamlit web dashboard is included for interactive inference, batch processing, and performance analysis.
+
+```bash
+python -m streamlit run app.py
+```
+
+Opens at **http://localhost:8501** automatically.
+
+### Tabs
+
+| Tab | Description |
+|---|---|
+| **🔍 Inference** | Single-sample inference. Demo mode (random inputs) or upload your own CSV feature vectors. Shows decision badge, per-agent risk + uncertainty gauges, and MC passes used. |
+| **📁 Batch** | Upload semantic, behavioural, and knowledge files (CSV or Parquet). Runs GPU-batched inference with a progress bar. Displays triage distribution pie chart, coloured results table, policy-space scatter plot, and CSV download. |
+| **📊 Dashboard** | Per-agent eval metrics table, live interactive policy-space scatter (updates as you move the threshold sliders), and a gallery of all saved figures grouped by category. |
+
+The **sidebar** controls the pipeline (2-agent / 3-agent) and four policy threshold sliders (τ, κ, τ_high, κ_low). Thresholds apply live to both inference and the dashboard visualisation.
+
+### Dependencies
+
+```bash
+pip install streamlit plotly pillow
 ```
 
 ---
