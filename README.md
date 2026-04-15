@@ -166,7 +166,8 @@ Agentic_SABRE/
 │   ├── Escalate.png                        # ESCALATE region illustration
 │   ├── auto_contain.png                    # AUTO-CONTAIN region illustration
 │   ├── CTGAN model.PNG                     # CTGAN augmentation diagram
-│   └── Optuna6multiMetrics.png             # Optuna multi-metric optimisation plot
+│   ├── Optuna6multiMetrics.png             # Optuna multi-metric optimisation plot
+│   └── claude code.png                     # Claude Code assisted development screenshot
 │
 ├── PDF files/                              ← ESWA paper submissions
 │   ├── Expert_Systems_with Applications_SABRE_Final.pdf    # v1
