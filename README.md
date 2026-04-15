@@ -168,8 +168,9 @@ Agentic_SABRE/
 │   └── train_decision_agent.py             # Train fusion MLP (2-agent or 3-agent)
 │
 ├── Policy tuning
-│   ├── tune_policy.py                      # Auto-tune thresholds (Optuna, balanced)
-│   └── tune_policy_low_escalation.py       # Conservative escalation tuning
+│   ├── tune_policy_optuna.py               # Bayesian optimisation (TPE, 2/3-agent, GPU-batched)
+│   ├── tune_policy.py                      # Grid search, balanced escalation
+│   └── tune_policy_low_escalation.py       # Grid search, conservative escalation
 │
 ├── Evaluation
 │   ├── eval_fusion_policy.py               # 2-agent pipeline (per-agent + fusion)
@@ -290,8 +291,9 @@ python train_knowledge_agent.py       # knowledge agent
 python train_decision_agent.py
 
 # 3. Tune policy thresholds
-python tune_policy.py                 # balanced escalation
-python tune_policy_low_escalation.py  # conservative escalation
+python tune_policy_optuna.py          # Bayesian optimisation (recommended)
+python tune_policy.py                 # grid search, balanced escalation
+python tune_policy_low_escalation.py  # grid search, conservative escalation
 ```
 
 ---
@@ -333,6 +335,34 @@ The knowledge agent (0.9953 AUC) adds strong complementary signal to the fusion 
 | `kappa_low` | $\kappa_{low}$ | Low-uncertainty threshold — auto-contain if $\sigma_{max} \le \kappa_{low}$ |
 
 Pre-tuned policies are stored in `checkpoints/policy_auto.json` and `checkpoints/policy_low_escalation.json`.
+
+---
+
+## Automatic Policy Threshold Tuning
+
+Thresholds are computed automatically from data — no manual tuning required.
+
+### Optuna (Recommended)
+
+`tune_policy_optuna.py` uses Bayesian optimisation (TPE sampler) to independently optimise all four thresholds over your dataset.
+
+```bash
+python tune_policy_optuna.py                     # 3-agent, 300 trials
+python tune_policy_optuna.py --pipeline 2        # 2-agent
+python tune_policy_optuna.py --trials 500        # more trials
+python tune_policy_optuna.py --esc-penalty 0.3   # penalise high escalation rate
+python tune_policy_optuna.py --out checkpoints/my_policy.json
+```
+
+| Feature | Optuna | Grid search |
+|---|---|---|
+| Search strategy | Bayesian (TPE) | Coarse 6×4 grid |
+| Threshold candidates | 300+ | 24 |
+| τ_high / κ_low | Independently optimised | Derived formulas |
+| Pipeline support | 2-agent and 3-agent | 2-agent only |
+| Inference | GPU-batched (~1.6s / 4,000 samples) | Single-sample (slow) |
+
+Results are saved to `checkpoints/policy_auto.json` and loaded automatically by the app and evaluation scripts.
 
 ---
 
