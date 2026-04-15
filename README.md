@@ -105,49 +105,100 @@ All agents support both single-sample and **batched inference** on GPU. Batching
 
 ```text
 Agentic_SABRE/
-├── Agentic_SABRE/
+├── Agentic_SABRE/                          ← Python package
 │   ├── agents/
-│   │   ├── semantic.py          # Semantic CNN agent (score + score_batch)
-│   │   ├── behavioural.py       # Behavioural CNN agent (score + score_batch)
-│   │   ├── knowledge.py         # Knowledge CNN agent (score + score_batch)
-│   │   └── decision.py          # Fusion MLP agent (score + score_batch)
+│   │   ├── semantic.py                     # Semantic CNN agent (score + score_batch)
+│   │   ├── behavioural.py                  # Behavioural CNN agent (score + score_batch)
+│   │   ├── knowledge.py                    # Knowledge CNN agent (score + score_batch)
+│   │   └── decision.py                     # Fusion MLP agent (score + score_batch)
 │   ├── Policies/
 │   │   ├── __init__.py
-│   │   └── thresholds.py        # Policy threshold utilities
-│   ├── orchestrator.py          # 2-agent orchestrator (handle + handle_batch)
-│   ├── orchestrator_3agent.py   # 3-agent orchestrator (handle + handle_batch)
-│   ├── contracts.py             # AgentOutput, FusionInput/Output interfaces
-│   ├── cli.py                   # Command-line entry point
-│   ├── __main__.py
-│   └── __init__.py
+│   │   └── thresholds.py                   # Policy threshold utilities
+│   ├── orchestrator.py                     # 2-agent orchestrator (handle + handle_batch)
+│   ├── orchestrator_3agent.py              # 3-agent orchestrator (handle + handle_batch)
+│   ├── contracts.py                        # AgentOutput dataclass
+│   ├── cli.py                              # Command-line entry point
+│   ├── __init__.py
+│   └── __main__.py
 │
-├── checkpoints/
-│   ├── semantic_cnn.pt              # Trained semantic CNN weights
-│   ├── behavioral_cnn.pt            # Trained behavioural CNN weights
-│   ├── knowledge_cnn.pt             # Trained knowledge CNN weights
-│   ├── knowledge_scaler.joblib      # StandardScaler for knowledge features
-│   ├── decision_fuser.json          # 2-agent fusion artifact
-│   ├── decision_fuser_3agent.json   # 3-agent fusion artifact
-│   ├── policy_auto.json             # Auto-tuned policy thresholds
-│   ├── policy_low_escalation.json   # Conservative (low escalation) policy
-│   └── metadata.json                # Feature dimension metadata
+├── checkpoints/                            ← Trained model artifacts
+│   ├── semantic_cnn.pt                     # Semantic CNN weights
+│   ├── behavioral_cnn.pt                   # Behavioural CNN weights
+│   ├── knowledge_cnn.pt                    # Knowledge CNN weights
+│   ├── knowledge_scaler.joblib             # StandardScaler for knowledge features
+│   ├── decision_fuser.json                 # 2-agent fusion artifact (4D input)
+│   ├── decision_fuser_3agent.json          # 3-agent fusion artifact (6D input)
+│   ├── policy_auto.json                    # Auto-tuned policy thresholds
+│   ├── policy_low_escalation.json          # Conservative (low escalation) policy
+│   ├── metadata.json                       # Feature dimension metadata
+│   ├── semantic_counterfactuals.csv        # CF results (all samples)
+│   ├── semantic_counterfactuals_50.csv     # CF results (50 borderline samples)
+│   ├── semantic_grad_saliency.npy          # Gradient saliency outputs
+│   └── semantic_perm_*.npy / .json         # Permutation importance outputs
 │
-├── train_cnn_agents.py          # Train semantic + behavioural CNNs
-├── train_knowledge_agent.py     # Train knowledge CNN
-├── train_decision_agent.py      # Train fusion MLP (2-agent or 3-agent)
-├── tune_policy.py               # Auto-tune policy thresholds (Optuna)
-├── tune_policy_low_escalation.py
+├── Figures/                                ← All plots and diagrams
+│   ├── Prop_Agentic_Sabre_30_03_2025.png   # Architecture figure (ESWA paper)
+│   ├── Prop_Agentic_Sabre_08_11_2025.png   # Architecture figure (updated)
+│   ├── Agent_Performance_metrics.png
+│   ├── Behaviour_feature_importance.png
+│   ├── ROC_Curve_RDset.png
+│   ├── Roc_Curve_RanSMAP.png
+│   ├── Roc_Both.png
+│   ├── Triage_policy.png
+│   ├── Triage_policy_space.png
+│   ├── Reliability_Diagram_Fusion.png
+│   ├── calibration_semantic/behavioral/decision.png
+│   ├── CF_semantic.png
+│   ├── Rep_Beh_CFs.png
+│   ├── fig_semantic_cf_*.png               # Counterfactual diagnostic panels
+│   ├── uncertainty_comparison.png
+│   ├── Dec_layer_Triage.png
+│   ├── Escalate.png
+│   ├── auto_contain.png
+│   ├── CTGAN model.PNG
+│   └── Optuna6multiMetrics.png
 │
-├── eval_fusion_policy.py        # Eval: 2-agent pipeline (per-agent + fusion)
-├── eval_fusion_policy_3agent.py # Eval: 3-agent pipeline
-├── eval_semantic_agent.py       # Eval: semantic agent standalone
-├── eval_behaviour_agent.py      # Eval: behavioural agent standalone
-├── eval_knowledge.py            # Eval: knowledge agent standalone
+├── PDF files/                              ← ESWA paper submissions
+│   ├── Expert_Systems_with Applications_SABRE_Final.pdf    # v1
+│   └── Expert_Systems_With_Applications_SABRE_Final_1.pdf  # v2 (under review)
 │
-├── Smoke_test.py                # Import smoke test (2-agent)
-├── smoke_test_orchestrator.py   # End-to-end orchestrator smoke test
-├── test_orchestrator_3agent.py  # 3-agent orchestrator tests
+├── Training
+│   ├── train_cnn_agents.py                 # Train semantic + behavioural CNNs
+│   ├── train_knowledge_agent.py            # Train knowledge CNN
+│   └── train_decision_agent.py             # Train fusion MLP (2-agent or 3-agent)
 │
+├── Policy tuning
+│   ├── tune_policy.py                      # Auto-tune thresholds (Optuna, balanced)
+│   └── tune_policy_low_escalation.py       # Conservative escalation tuning
+│
+├── Evaluation
+│   ├── eval_fusion_policy.py               # 2-agent pipeline (per-agent + fusion)
+│   ├── eval_fusion_policy_3agent.py        # 3-agent pipeline (per-agent + fusion)
+│   ├── eval_semantic_agent.py              # Semantic agent standalone
+│   ├── eval_behaviour_agent.py             # Behavioural agent standalone
+│   └── eval_knowledge.py                   # Knowledge agent standalone
+│
+├── Explainability
+│   ├── semantic_counterfactuals.py
+│   ├── semantic_grad_saliency.py
+│   ├── semantic_permutation_importance.py
+│   ├── semantic_permutation_importance_grouped.py
+│   ├── behavioural_feature_importance.py
+│   └── behaviour_counterfactuals.py
+│
+├── Plotting
+│   ├── plot_calibration_fusion.py
+│   ├── plot_roc_curves.py
+│   ├── plot_triage_scatter.py
+│   └── plot_semantic_cf_distribution.py
+│
+├── Tests
+│   ├── Smoke_test.py                       # Import smoke test
+│   ├── smoke_test_orchestrator.py          # 2-agent end-to-end test
+│   └── test_orchestrator_3agent.py         # 3-agent end-to-end test
+│
+├── SABRE_presentation_updated.pptx
+├── requirements.txt
 └── README.md
 ```
 
