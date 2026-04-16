@@ -14,7 +14,7 @@
 #         ...
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Protocol, Optional
+from typing import Any, Dict, List, Protocol, Optional
 
 
 @dataclass
@@ -32,10 +32,22 @@ class AgentOutput:
     extras:
         Optional dictionary for diagnostics or explanations
         (e.g., top features, model notes, intermediate signals).
+
+    consulted:
+        True if this agent's probability was adjusted by peer consultation.
+
+    consultation_peers:
+        Names of peer agents whose scores were used during consultation.
+
+    sample_id:
+        Optional UUID assigned by the orchestrator for feedback tracking.
     """
     prob: float
     uncert: float
     extras: Dict[str, Any] = field(default_factory=dict)
+    consulted: bool = False
+    consultation_peers: List[str] = field(default_factory=list)
+    sample_id: Optional[str] = None
 
 
 @dataclass

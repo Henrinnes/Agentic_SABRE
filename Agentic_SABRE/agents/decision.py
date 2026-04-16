@@ -561,6 +561,79 @@ class DecisionTrainer:
         tr.device = device
         return tr
 
+    @classmethod
+    def retrain_incremental(
+        cls,
+        base_artifact: str,
+        X_feedback: "np.ndarray",
+        y_feedback: "np.ndarray",
+        out_path: str,
+        feedback_repeat: int = 3,
+    ) -> "DecisionTrainer":
+        """
+        Retrain the decision MLP by appending analyst-feedback rows to the
+        base artifact's training distribution (approximated by random
+        Gaussian samples around the existing scaler parameters).
+
+        Parameters
+        ----------
+        base_artifact : str
+            Path to the existing decision_fuser_3agent.json artifact.
+        X_feedback : np.ndarray shape [N, 6]
+            Feedback feature rows from feedback_store.feedback_as_training_rows().
+        y_feedback : np.ndarray shape [N]
+            Expert correction labels (0 or 1).
+        out_path : str
+            Where to save the updated artifact.
+        feedback_repeat : int
+            Number of times feedback rows are duplicated for up-weighting.
+
+        Returns
+        -------
+        DecisionTrainer
+            The retrained trainer instance (artifact already saved to out_path).
+        """
+        if len(X_feedback) == 0:
+            raise ValueError("No feedback rows provided for incremental retraining.")
+
+        # Load existing trainer to harvest scaler stats
+        base = cls.load(base_artifact)
+
+        # Approximate original training distribution via scaler stats
+        rng = np.random.default_rng(42)
+        N_synth = max(200, len(X_feedback) * 10)
+        X_synth = rng.normal(
+            loc=base.scaler.mean_,
+            scale=base.scaler.scale_,
+            size=(N_synth, base.in_dim),
+        ).astype(np.float32)
+        # Clip to plausible probability range for prob columns (first 3)
+        X_synth[:, :3] = np.clip(X_synth[:, :3], 0.0, 1.0)
+        X_synth[:, 3:] = np.clip(X_synth[:, 3:], 0.0, 1.0)
+
+        # Assign synthetic labels using existing model
+        device = getattr(base, "device", torch.device("cpu"))
+        xt = base.scaler.transform(X_synth).astype(np.float32)
+        with torch.no_grad():
+            p_synth = base.model(torch.from_numpy(xt).to(device))
+            if base.temp is not None:
+                p_synth = base.temp(p_synth)
+        y_synth = (p_synth.cpu().numpy().reshape(-1) >= 0.5).astype(np.float32)
+
+        # Up-weight feedback by repeating rows
+        X_fb_rep = np.tile(X_feedback, (feedback_repeat, 1)).astype(np.float32)
+        y_fb_rep = np.tile(y_feedback, feedback_repeat).astype(np.float32)
+
+        # Combine
+        X_combined = np.concatenate([X_synth, X_fb_rep], axis=0)
+        y_combined = np.concatenate([y_synth, y_fb_rep], axis=0)
+
+        # Retrain with same config
+        new_trainer = cls(base.cfg)
+        new_trainer.fit(X_combined, y_combined)
+        new_trainer.save(out_path)
+        return new_trainer
+
 
 # -------------------- Runtime Agent API --------------------
 class DecisionAgent:

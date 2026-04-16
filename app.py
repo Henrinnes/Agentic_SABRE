@@ -92,9 +92,27 @@ def render_result(result, pipeline):
     )
     st.markdown("")
 
-    c1, c2 = st.columns(2)
+    c1, c2, c3 = st.columns(3)
     c1.metric("Fused risk score", f"{result['score_fused']:.4f}")
     c2.metric("Max uncertainty",  f"{result['uncert_max']:.4f}")
+    sample_id = result.get("sample_id", "")
+    c3.metric("Sample ID", sample_id[:8] + "…" if len(sample_id) > 8 else sample_id)
+
+    # Store last ESCALATE sample_id for the Feedback tab
+    if decision in ("ESCALATE", "AUTO_CONTAIN"):
+        st.session_state["last_sample_id"]     = sample_id
+        st.session_state["last_result"]        = result
+
+    # Consultation indicators
+    consultation = result.get("consultation_triggered", {})
+    if any(consultation.values()):
+        triggered_agents = [k for k, v in consultation.items() if v]
+        st.info(
+            f"**Peer consultation triggered** for: {', '.join(triggered_agents)}  "
+            f"(uncertainty exceeded per-agent κ_local threshold)",
+            icon="🔄",
+        )
+
     st.markdown("---")
 
     agents = result.get("by_agent", {})
@@ -104,7 +122,8 @@ def render_result(result, pipeline):
 
     for col, (name, data) in zip(cols, agents.items()):
         with col:
-            st.markdown(f"**{name.capitalize()}**")
+            consulted_badge = " 🔄" if data.get("consulted", False) else ""
+            st.markdown(f"**{name.capitalize()}{consulted_badge}**")
             if name != "fusion":
                 col.plotly_chart(
                     gauge(data.get("prob", 0),    "Risk",        agent_colors.get(name, "#888")),
@@ -117,6 +136,9 @@ def render_result(result, pipeline):
                 passes = data.get("extras", {}).get("passes_used")
                 if passes:
                     st.caption(f"MC passes used: {passes}")
+                raw_prob = data.get("extras", {}).get("raw_prob")
+                if raw_prob is not None:
+                    st.caption(f"Raw prob (pre-consult): {raw_prob:.4f}")
             else:
                 col.plotly_chart(
                     gauge(data.get("prob", 0), "Fused score", agent_colors["fusion"]),
@@ -169,7 +191,9 @@ orch = get_orch_2agent() if pipeline == "2-Agent" else get_orch_3agent()
 orch.τ = tau; orch.κ = kappa; orch.τ_high = tau_high; orch.κ_low = kappa_low
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab_infer, tab_batch, tab_dash = st.tabs(["🔍  Inference", "📁  Batch", "📊  Dashboard"])
+tab_infer, tab_batch, tab_dash, tab_feedback = st.tabs([
+    "🔍  Inference", "📁  Batch", "📊  Dashboard", "🗂️  Feedback"
+])
 
 # ════════════════════════════════════════════════════════════════════════════ #
 # TAB 1 — SINGLE SAMPLE INFERENCE
@@ -411,3 +435,143 @@ with tab_dash:
                         st.image(img, caption=Path(path).stem, use_column_width=True)
                     except Exception:
                         st.warning(f"Could not load {path}")
+
+# ════════════════════════════════════════════════════════════════════════════ #
+# TAB 4 — EXPERT FEEDBACK
+# ════════════════════════════════════════════════════════════════════════════ #
+with tab_feedback:
+    st.header("Expert Feedback Loop")
+    st.markdown(
+        "Submit analyst corrections for ESCALATE/AUTO_CONTAIN samples. "
+        "When enough corrections accumulate, retrain the decision MLP."
+    )
+
+    from Agentic_SABRE.feedback_store import (
+        append_feedback, feedback_count, load_feedback
+    )
+
+    FEEDBACK_LOG = "checkpoints/feedback/feedback_log.json"
+    RETRAIN_THRESHOLD = 20
+
+    # ── Feedback submission form ───────────────────────────────────────────
+    st.subheader("Submit Correction")
+
+    # Pre-fill sample_id from last ESCALATE result if available
+    last_id   = st.session_state.get("last_sample_id", "")
+    last_res  = st.session_state.get("last_result",    {})
+
+    with st.form("feedback_form"):
+        fb_sample_id = st.text_input(
+            "Sample ID",
+            value=last_id,
+            help="UUID from the inference result (auto-filled for last ESCALATE/AUTO_CONTAIN)",
+        )
+        fb_correction = st.radio(
+            "Expert correction",
+            options=[0, 1],
+            format_func=lambda x: "0 — Benign (false positive)" if x == 0 else "1 — Ransomware (confirmed)",
+            horizontal=True,
+        )
+        fb_expert_id = st.text_input("Analyst ID", value="analyst")
+        fb_reasoning = st.text_area("Reasoning (optional)")
+        fb_submit    = st.form_submit_button("Submit Correction", type="primary")
+
+    if fb_submit:
+        if not fb_sample_id.strip():
+            st.error("Sample ID is required.")
+        else:
+            # Extract agent scores from last result if IDs match
+            by_agent = last_res.get("by_agent", {}) if last_res.get("sample_id") == fb_sample_id else {}
+            sem_data  = by_agent.get("semantic",   {})
+            beh_data  = by_agent.get("behavioral", {})
+            know_data = by_agent.get("knowledge",  {})
+            consult   = last_res.get("consultation_triggered",
+                                     {"semantic": False, "behavioral": False, "knowledge": False})
+
+            n = append_feedback(
+                sample_id=fb_sample_id.strip(),
+                original_decision=last_res.get("decision", "UNKNOWN"),
+                p_sem=sem_data.get("prob",   0.5),
+                p_beh=beh_data.get("prob",   0.5),
+                p_know=know_data.get("prob", 0.5),
+                sigma_sem=sem_data.get("uncert",   0.0),
+                sigma_beh=beh_data.get("uncert",   0.0),
+                sigma_know=know_data.get("uncert", 0.0),
+                fused_prob=last_res.get("score_fused", 0.5),
+                expert_correction=int(fb_correction),
+                expert_id=fb_expert_id.strip() or "analyst",
+                reasoning=fb_reasoning.strip(),
+                consultation_triggered=consult,
+                log_path=FEEDBACK_LOG,
+            )
+            st.success(f"Correction saved. Total feedback records: **{n}**")
+
+    st.markdown("---")
+
+    # ── Progress bar + retrain trigger ────────────────────────────────────
+    st.subheader("Retraining Status")
+
+    n_feedback = feedback_count(FEEDBACK_LOG)
+    progress_val = min(n_feedback / RETRAIN_THRESHOLD, 1.0)
+
+    st.metric("Feedback records collected", n_feedback)
+    st.progress(progress_val, text=f"{n_feedback} / {RETRAIN_THRESHOLD} required to retrain")
+
+    retrain_ready = n_feedback >= RETRAIN_THRESHOLD
+    if not retrain_ready:
+        st.info(f"Collect {RETRAIN_THRESHOLD - n_feedback} more corrections to enable retraining.")
+
+    if st.button(
+        "Trigger Retrain",
+        disabled=not retrain_ready,
+        type="primary",
+        help="Retrain the decision MLP using all collected feedback rows.",
+    ):
+        from Agentic_SABRE.feedback_store import feedback_as_training_rows
+        from Agentic_SABRE.agents.decision import DecisionTrainer
+
+        with st.spinner("Retraining decision MLP…"):
+            X_fb, y_fb = feedback_as_training_rows(FEEDBACK_LOG)
+            base_artifact = "checkpoints/decision_fuser_3agent.json"
+            out_path      = "checkpoints/decision_fuser_3agent_updated.json"
+
+            if not Path(base_artifact).exists():
+                st.error(f"Base artifact not found: {base_artifact}")
+            else:
+                try:
+                    DecisionTrainer.retrain_incremental(
+                        base_artifact=base_artifact,
+                        X_feedback=X_fb,
+                        y_feedback=y_fb,
+                        out_path=out_path,
+                        feedback_repeat=3,
+                    )
+                    st.success(
+                        f"Retraining complete.  Updated model saved to `{out_path}`.  "
+                        "Promote manually by replacing the base artifact, or use "
+                        "`retrain_from_feedback.py --promote`."
+                    )
+                except Exception as exc:
+                    st.error(f"Retraining failed: {exc}")
+
+    st.markdown("---")
+
+    # ── Feedback log viewer ────────────────────────────────────────────────
+    st.subheader("Feedback Log")
+    records = load_feedback(FEEDBACK_LOG)
+    if records:
+        fb_df = pd.DataFrame(records)
+        display_cols = [
+            "timestamp", "sample_id", "original_decision",
+            "fused_prob", "expert_correction", "expert_id", "reasoning",
+        ]
+        display_cols = [c for c in display_cols if c in fb_df.columns]
+        st.dataframe(fb_df[display_cols], use_container_width=True, height=300)
+
+        csv_fb = fb_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "⬇  Download feedback log CSV",
+            csv_fb, "sabre_feedback.csv", "text/csv",
+        )
+    else:
+        st.info("No feedback records yet.  Submit corrections from inference results above.")

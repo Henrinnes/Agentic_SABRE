@@ -1,0 +1,5 @@
+{
+  "semantic":   {"tau_local": 0.80, "kappa_local": 1.0},
+  "behavioral": {"tau_local": 0.80, "kappa_local": 1.0},
+  "knowledge":  {"tau_local": 0.80, "kappa_local": 1.0}
+}
