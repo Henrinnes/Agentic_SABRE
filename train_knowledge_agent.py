@@ -70,7 +70,7 @@ class CNNKnowledgeAgent(nn.Module):
 # -----------------------------
 if __name__ == "__main__":
 
-    DATA_PATH = r"C:\Users\henri\SampleDatasets\Dataset_RansKnow\outputs\Knowledge_Agent_Features_307.csv"
+    DATA_PATH = r"/home/henrykabuye/Ransap/Publications 2026/Proposal_2026/Knowledge_Agent/outputs/Knowledge_Agent_Features_307.csv"
 
     CHECKPOINT_DIR = Path("checkpoints")
     CHECKPOINT_DIR.mkdir(exist_ok=True)

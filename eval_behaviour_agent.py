@@ -21,7 +21,7 @@ BEHAVIOR_COLUMNS = [
 
 if __name__ == "__main__":
     df_beh = pd.read_parquet(
-        r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet"
+        r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet"
     )
 
     X = df_beh[BEHAVIOR_COLUMNS].to_numpy(dtype=np.float32)

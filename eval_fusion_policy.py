@@ -89,9 +89,9 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------ #
     print("Loading datasets...")
     df_sem = pd.read_parquet(
-        r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\semantic_dataset_with_embeddings.parquet")
+        r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet")
     df_beh = pd.read_parquet(
-        r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet")
+        r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet")
     print(f"  RDset   (semantic) : {len(df_sem):,} rows  "
           f"(ransom={df_sem.label.sum():,}  benign={(df_sem.label==0).sum():,})")
     print(f"  RanSMAP (behavioral): {len(df_beh):,} rows  "

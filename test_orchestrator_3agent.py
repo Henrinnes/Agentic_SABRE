@@ -24,17 +24,17 @@
 
 # # sample semantic row
 # df_sem = pd.read_parquet(
-#     r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\semantic_dataset_with_embeddings.parquet"
+#     r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet"
 # )
 
 # # sample behavioural row
 # df_beh = pd.read_parquet(
-#     r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet"
+#     r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet"
 # )
 
 # # sample knowledge row
 # df_know = pd.read_csv(
-#     r"C:\Users\henri\SampleDatasets\Dataset_RansKnow\outputs\Knowledge_Agent_Features_307.csv"
+#     r"/home/henrykabuye/Ransap/Publications 2026/Proposal_2026/Knowledge_Agent/outputs/Knowledge_Agent_Features_307.csv"
 # )
 
 # sem_vec = np.asarray(df_sem.iloc[0]["embedding"], dtype=np.float32)
@@ -83,15 +83,15 @@ KNOW_DROP_COLS = [
 ]
 
 df_sem = pd.read_parquet(
-    r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\semantic_dataset_with_embeddings.parquet"
+    r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet"
 )
 
 df_beh = pd.read_parquet(
-    r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet"
+    r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet"
 )
 
 df_know = pd.read_csv(
-    r"C:\Users\henri\SampleDatasets\Dataset_RansKnow\outputs\Knowledge_Agent_Features_307.csv"
+    r"/home/henrykabuye/Ransap/Publications 2026/Proposal_2026/Knowledge_Agent/outputs/Knowledge_Agent_Features_307.csv"
 )
 
 sem_vec = np.asarray(df_sem.iloc[0]["embedding"], dtype=np.float32)

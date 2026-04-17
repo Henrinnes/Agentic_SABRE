@@ -31,11 +31,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # ---------- load data ----------
 # adjust these paths to your real parquet locations
-df_sem = pd.read_parquet(r'C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\semantic_dataset_with_embeddings.parquet')
+df_sem = pd.read_parquet(r'/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet')
 X_sem = np.stack(df_sem["embedding"].values).astype(np.float32)
 y_sem = df_sem["label"].astype(np.float32).values
 
-df_beh = pd.read_parquet(r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet")
+df_beh = pd.read_parquet(r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet")
 behavior_columns = [
     'avg_read_throughput', 'avg_write_throughput',
     'read_LBA_variance', 'write_LBA_variance',

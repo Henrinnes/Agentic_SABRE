@@ -11,7 +11,7 @@ from Agentic_SABRE.agents.semantic import SemanticAgent
 if __name__ == "__main__":
     # 1) load dataset
     df_sem = pd.read_parquet(
-        r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\semantic_dataset_with_embeddings.parquet"
+        r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet"
     )
     X = np.stack(df_sem["embedding"].values).astype(np.float32)
     y = df_sem["label"].astype(int).values

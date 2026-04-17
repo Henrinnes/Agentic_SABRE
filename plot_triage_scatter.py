@@ -29,10 +29,10 @@ def main():
     policy = json.loads(Path(policy_file).read_text())
 
     df_sem = pd.read_parquet(
-        r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\semantic_dataset_with_embeddings.parquet"
+        r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet"
     )
     df_beh = pd.read_parquet(
-        r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet"
+        r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet"
     )
 
     y_sem = df_sem["label"].astype(int).values

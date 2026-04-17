@@ -17,7 +17,7 @@ BEHAVIOR_COLUMNS = [
 
 def main():
     df_beh = pd.read_parquet(
-        r"C:\Users\henri\SampleDatasets\Dataset_RanSMAP_RDset\combined_i3-gen12_datasetF.parquet"
+        r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet"
     )
     X = df_beh[BEHAVIOR_COLUMNS].to_numpy(dtype=np.float32)
     y = df_beh["label"].astype(int).values
