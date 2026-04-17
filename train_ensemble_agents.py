@@ -53,6 +53,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
+from imblearn.over_sampling import SMOTE
 
 # ── Architecture imports (reuse exact same classes) ───────────────────────────
 from Agentic_SABRE.agents.semantic    import CNNSemanticAgent
@@ -192,7 +193,7 @@ def train_semantic_ensemble(
         ckpt = out_dir / f"seed_{i}.pt"
         torch.save(model.state_dict(), str(ckpt))
         results.append({"agent": "semantic", "seed": i, "acc": acc, "auc": auc})
-        print(f"  seed {i}  acc={acc:.4f}  auc={auc:.4f}  → {ckpt.name}")
+        print(f"  seed {i}  acc={acc:.4f}  auc={auc:.4f}  -> {ckpt.name}")
 
     return results
 
@@ -217,7 +218,11 @@ def train_behavioral_ensemble(
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=42
     )
-    print(f"  Train {len(X_train):,}  |  Test {len(X_test):,}  |  Input dim {X.shape[1]}")
+
+    # Apply SMOTE once — same resampled set for all members (matches MC-Dropout training)
+    sm = SMOTE(random_state=42)
+    X_train, y_train = sm.fit_resample(X_train, y_train)
+    print(f"  Train {len(X_train):,} (after SMOTE)  |  Test {len(X_test):,}  |  Input dim {X.shape[1]}")
 
     input_dim = X.shape[1]
     results = []
@@ -232,7 +237,7 @@ def train_behavioral_ensemble(
         ckpt = out_dir / f"seed_{i}.pt"
         torch.save(model.state_dict(), str(ckpt))
         results.append({"agent": "behavioral", "seed": i, "acc": acc, "auc": auc})
-        print(f"  seed {i}  acc={acc:.4f}  auc={auc:.4f}  → {ckpt.name}")
+        print(f"  seed {i}  acc={acc:.4f}  auc={auc:.4f}  -> {ckpt.name}")
 
     return results
 
@@ -268,7 +273,7 @@ def train_knowledge_ensemble(
     # Save shared scaler
     scaler_path = out_dir / "scaler.joblib"
     joblib.dump(scaler, str(scaler_path))
-    print(f"  Saved scaler → {scaler_path.name}")
+    print(f"  Saved scaler -> {scaler_path.name}")
     print(f"  Train {len(X_train):,}  |  Test {len(X_test):,}  |  Input dim {X_train.shape[1]}")
 
     input_dim = X_train.shape[1]
@@ -288,7 +293,7 @@ def train_knowledge_ensemble(
         ckpt = out_dir / f"seed_{i}.pt"
         torch.save(model.state_dict(), str(ckpt))
         results.append({"agent": "knowledge", "seed": i, "acc": acc, "auc": auc})
-        print(f"  seed {i}  acc={acc:.4f}  auc={auc:.4f}  → {ckpt.name}")
+        print(f"  seed {i}  acc={acc:.4f}  auc={auc:.4f}  -> {ckpt.name}")
 
     return results
 
@@ -296,6 +301,7 @@ def train_knowledge_ensemble(
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
+    global SEM_PARQUET, BEH_PARQUET, KNOW_CSV
     parser = argparse.ArgumentParser(
         description="Train deep ensemble members for SABRE UQ comparison"
     )
@@ -321,7 +327,6 @@ def main():
     args = parser.parse_args()
 
     # Allow overriding paths via CLI
-    global SEM_PARQUET, BEH_PARQUET, KNOW_CSV
     SEM_PARQUET = args.sem_parquet
     BEH_PARQUET = args.beh_parquet
     KNOW_CSV    = args.know_csv
@@ -361,7 +366,7 @@ def main():
     # Save summary
     summary_path = root / "ensemble_results.json"
     summary_path.write_text(json.dumps(all_results, indent=2))
-    print(f"\nSummary saved → {summary_path}")
+    print(f"\nSummary saved -> {summary_path}")
 
     # Pretty-print aggregated stats
     print("\n── Ensemble summary ──────────────────────────────────")
