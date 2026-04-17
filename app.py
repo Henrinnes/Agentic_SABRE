@@ -497,9 +497,9 @@ with tab_dash:
 
     st.subheader("Per-Agent Evaluation Results")
     metrics_df = pd.DataFrame([
-        {"Agent": "Semantic",    "Dataset": "RDset",    "Samples": 4000, "Accuracy": 1.0000, "ROC-AUC": 1.0000, "Notes": "Static PE embeddings (384D)"},
-        {"Agent": "Behavioural", "Dataset": "RanSMAP",  "Samples": "751K", "Accuracy": 0.9957, "ROC-AUC": 0.9994, "Notes": "Whole dataset, scaler normalised"},
-        {"Agent": "Knowledge",   "Dataset": "RansKnow", "Samples":  307,  "Accuracy": 0.9900, "ROC-AUC": 0.9993, "Notes": "MITRE ATT&CK features (23D)"},
+        {"Agent": "Semantic",    "Dataset": "RDset",    "Samples": "138,047", "Accuracy": 1.0000, "ROC-AUC": 1.0000, "Notes": "Static PE embeddings (384D)"},
+        {"Agent": "Behavioural", "Dataset": "RanSMAP",  "Samples": "751,588", "Accuracy": 0.9957, "ROC-AUC": 0.9994, "Notes": "Whole dataset, scaler normalised"},
+        {"Agent": "Knowledge",   "Dataset": "RansKnow", "Samples": "307",     "Accuracy": 0.9900, "ROC-AUC": 0.9993, "Notes": "MITRE ATT&CK features (23D)"},
     ])
     st.dataframe(metrics_df, use_container_width=True, hide_index=True)
 
