@@ -201,6 +201,20 @@ Agentic_SABRE/
 ├── test_orchestrator_3agent.py                 # 3-agent end-to-end test
 │
 ├── retrain_from_feedback.py                    # Incremental retrain from analyst feedback
+│
+├── data_pipeline/                              ← Dataset extraction & embedding notebooks
+│   ├── RanSMAPextract_final16May.ipynb         # Raw RanSMAP logs → 16-feature parquet
+│   ├── RanSMAP_Feature3_Embeddings.ipynb       # Batched sentence-embedding processor
+│   ├── dataset_embedding_processor.py          # Colab-ready script version
+│   ├── CADE_Embeddings_Master.ipynb            # PE metadata → 384D semantic embeddings
+│   └── CADE_Semantic_Agent.ipynb               # Semantic agent research & experiments
+│
+├── test_data/                                  ← Small sample files for demo / testing
+│   ├── semantic_test.parquet                   # 200 rows, 384D embeddings
+│   ├── behavioural_test.csv                    # 200 rows, 16 raw telemetry features
+│   └── knowledge_test.csv                      # 200 rows, 23 MITRE ATT&CK features
+│
+├── generate_test_batches.py                    # Script that created the test_data/ files
 ├── requirements.txt
 └── README.md
 ```
@@ -341,9 +355,33 @@ NVIDIA GTX 1070 Ti has CUDA compute capability 6.1 (Pascal). PyTorch builds from
 
 ---
 
+## Related Publication
+
+This framework builds on the following peer-reviewed work:
+
+> **Explainable and Uncertainty Aware AI-Based Ransomware Detection**
+> Henry Kabuye, Biju Issac, Rahul Yumlembam, Jeyamohan Neera
+> *IEEE Access*, vol. 13, pp. 106573–106589, 2025
+> DOI: [10.1109/ACCESS.2025.3581424](https://doi.org/10.1109/ACCESS.2025.3581424)
+
+```bibtex
+@article{kabuye2025explainable,
+  author  = {Henry Kabuye and Biju Issac and Rahul Yumlembam and Jeyamohan Neera},
+  title   = {Explainable and Uncertainty Aware {AI}-Based Ransomware Detection},
+  journal = {{IEEE} Access},
+  volume  = {13},
+  pages   = {106573--106589},
+  year    = {2025},
+  doi     = {10.1109/ACCESS.2025.3581424},
+  url     = {https://doi.org/10.1109/ACCESS.2025.3581424}
+}
+```
+
+---
+
 ## Citation
 
-If you use this work, please cite:
+If you use Agentic SABRE, please cite:
 
 ```bibtex
 @article{kabuye2025agenticsabre,
