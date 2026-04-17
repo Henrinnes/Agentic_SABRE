@@ -244,19 +244,30 @@ def make_demo_sem_features():
         return np.array(row["embedding"], dtype=np.float32)
     return np.random.rand(384).astype(np.float32)
 
+@st.cache_data(show_spinner=False)
+def load_know_cal_data():
+    """Load real RansKnow calibration data saved from the training dataset."""
+    p = Path("checkpoints/knowledge_cal_data.csv")
+    if p.exists():
+        return pd.read_csv(p)
+    return None
+
 def make_demo_know_features():
-    """In-distribution MITRE ATT&CK features (realistic integer counts)."""
-    meta = json.loads(Path("checkpoints/metadata.json").read_text())
-    know_cols = meta.get("knowledge_features", [])
-    n = len(know_cols) if know_cols else 23
-    raw = np.array([
-        np.random.randint(0, 15),  # Tool_Total_Mentions
-        np.random.randint(0, 15),  # Tactic_Total_Mentions
-        *[np.random.randint(0, 8) for _ in range(10)],  # 10 tactic columns
-        *[np.random.randint(0, 4) for _ in range(8)],   # 8 tool columns
-        *[np.random.randint(0, 2) for _ in range(3)],   # 3 platform flags
-    ], dtype=np.float32)
-    return raw[:n]
+    """Random real RansKnow row for in-distribution demo inputs."""
+    df_k = load_know_cal_data()
+    if df_k is not None:
+        row = df_k.sample(1).iloc[0]
+        feat_cols = [c for c in row.index if c != "label"]
+        return row[feat_cols].values.astype(np.float32)
+    # Fallback: use real per-class means from RansKnow (label randomly chosen)
+    label = np.random.randint(0, 2)
+    if label == 1:
+        raw = np.array([0.9, 31.0, 13.3, 4.7, 4.4, 1.5, 0.02, 1.1, 0.03, 0.8, 1.3, 4.0,
+                        0.6, 0.0, 0.0, 0.1, 0.0, 0.2, 0.0, 0.02, 4.5, 1.5, 0.6], dtype=np.float32)
+    else:
+        raw = np.array([0.02, 4.2, 1.5, 0.8, 0.9, 0.2, 0.0, 0.05, 0.0, 0.03, 0.2, 0.6,
+                        0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.6, 1.4, 0.15], dtype=np.float32)
+    return raw
 
 def build_animated_boundary_fig(df_res, tau_high, kappa, kappa_low):
     tau_vals = np.round(np.linspace(0.20, 0.95, 20), 2)
@@ -1104,32 +1115,29 @@ with tab_calib:
         return results
 
     def _cal_know_batch(n, label):
-        """Knowledge: high tactic counts for ransomware, low for benign."""
-        results = []
-        for _ in range(n):
-            if label == 1:
-                raw = np.array([
-                    np.random.randint(8, 15), np.random.randint(8, 15),
-                    *[np.random.randint(3, 8) for _ in range(10)],
-                    *[np.random.randint(1, 4) for _ in range(8)],
-                    *[np.random.randint(0, 2) for _ in range(3)],
-                ], dtype=np.float32)
-            else:
-                raw = np.array([
-                    np.random.randint(0, 4), np.random.randint(0, 4),
-                    *[np.random.randint(0, 3) for _ in range(10)],
-                    *[np.random.randint(0, 2) for _ in range(8)],
-                    *[np.random.randint(0, 2) for _ in range(3)],
-                ], dtype=np.float32)
-            results.append({"features": raw})
-        return results
+        """Knowledge: sample real RansKnow rows by label for accurate calibration."""
+        df_k = load_know_cal_data()
+        feat_cols = [c for c in df_k.columns if c != "label"] if df_k is not None else []
+        if df_k is not None and feat_cols:
+            pool = df_k[df_k["label"] == label]
+            rows = pool.sample(n, replace=True)
+            return [{"features": row[feat_cols].values.astype(np.float32)}
+                    for _, row in rows.iterrows()]
+        # Fallback: use real per-class means with small noise
+        means_1 = np.array([0.9, 31.0, 13.3, 4.7, 4.4, 1.5, 0.02, 1.1, 0.03, 0.8, 1.3, 4.0,
+                             0.6, 0.0, 0.0, 0.1, 0.0, 0.2, 0.0, 0.02, 4.5, 1.5, 0.6])
+        means_0 = np.array([0.02, 4.2, 1.5, 0.8, 0.9, 0.2, 0.0, 0.05, 0.0, 0.03, 0.2, 0.6,
+                             0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.6, 1.4, 0.15])
+        base = means_1 if label == 1 else means_0
+        return [{"features": np.clip(base + np.random.normal(0, base * 0.1 + 0.01), 0, None).astype(np.float32)}
+                for _ in range(n)]
 
     # ── Section 1: Fused Pipeline Reliability Diagram ─────────────────────────
     st.subheader("Fused Pipeline — Reliability Diagram & ECE")
     st.caption(
-        "Each modality is independently biased to reflect the label: "
-        "real PE embeddings for Semantic, scaler-biased telemetry for Behavioural, "
-        "count-biased MITRE features for Knowledge."
+        "Semantic: real PE embeddings sampled by label. "
+        "Behavioural: scaler-biased telemetry (upper/lower normalised half). "
+        "Knowledge: real RansKnow rows sampled by label (checkpoints/knowledge_cal_data.csv)."
     )
 
     cal_c1, cal_c2 = st.columns([1, 3])
