@@ -73,6 +73,23 @@ def get_beh_agent():
     from Agentic_SABRE.agents.behavioural import BehavioralAgent
     return BehavioralAgent(T=10, device="cpu")
 
+@st.cache_resource(show_spinner="Loading semantic agent…")
+def get_sem_agent():
+    from Agentic_SABRE.agents.semantic import SemanticAgent
+    return SemanticAgent(T=10, device="cpu")
+
+@st.cache_resource(show_spinner="Loading knowledge agent…")
+def get_know_agent():
+    from Agentic_SABRE.agents.knowledge import KnowledgeAgent
+    return KnowledgeAgent(T=10, device="cpu")
+
+@st.cache_data(show_spinner=False)
+def load_sem_demo_embeddings():
+    p = Path("checkpoints/demo_semantic_examples.parquet")
+    if p.exists():
+        return pd.read_parquet(p)
+    return None
+
 def apply_policy(p, u, tau, kappa, tau_high, kappa_low):
     if p >= tau_high and u <= kappa_low:
         return "AUTO_CONTAIN"
@@ -163,15 +180,21 @@ def render_triage_scatter(df):
     return fig
 
 # ── Explainability helpers ─────────────────────────────────────────────────────
+def _enable_dropout(model):
+    import torch.nn as nn
+    for m in model.modules():
+        if isinstance(m, nn.Dropout):
+            m.train()
+
 def collect_mc_samples(agent, features_raw, n_passes):
+    """Generic MC Dropout pass collector — works for any CNN agent."""
     import torch
-    from Agentic_SABRE.agents.behavioural import _enable_dropout_only
     vec = np.asarray(features_raw, dtype=np.float32)
-    if agent.scaler is not None:
+    if hasattr(agent, "scaler") and agent.scaler is not None:
         vec = agent.scaler.transform(vec.reshape(1, -1)).squeeze(0).astype(np.float32)
     model = agent.model
     inp = torch.tensor(vec).unsqueeze(0).unsqueeze(0).to(agent.device)
-    model.apply(_enable_dropout_only)
+    _enable_dropout(model)
     samples = []
     with torch.no_grad():
         for _ in range(n_passes):
@@ -204,6 +227,36 @@ def reliability_diagram_data(probs, labels, n_bins=10):
             bt.append(np.nan)
             bc.append(0)
     return np.array(bm), np.array(bt), np.array(bc)
+
+def make_demo_beh_features():
+    """In-distribution raw behavioural features sampled from scaler mean ± 1.5σ."""
+    agent = get_beh_agent()
+    if agent.scaler is not None:
+        z = np.random.uniform(-1.5, 1.5, size=len(agent.scaler.mean_)).astype(np.float64)
+        return (z * agent.scaler.scale_ + agent.scaler.mean_).astype(np.float32)
+    return np.random.rand(16).astype(np.float32)
+
+def make_demo_sem_features():
+    """Random real PE embedding from the saved demo set."""
+    demo = load_sem_demo_embeddings()
+    if demo is not None:
+        row = demo.sample(1).iloc[0]
+        return np.array(row["embedding"], dtype=np.float32)
+    return np.random.rand(384).astype(np.float32)
+
+def make_demo_know_features():
+    """In-distribution MITRE ATT&CK features (realistic integer counts)."""
+    meta = json.loads(Path("checkpoints/metadata.json").read_text())
+    know_cols = meta.get("knowledge_features", [])
+    n = len(know_cols) if know_cols else 23
+    raw = np.array([
+        np.random.randint(0, 15),  # Tool_Total_Mentions
+        np.random.randint(0, 15),  # Tactic_Total_Mentions
+        *[np.random.randint(0, 8) for _ in range(10)],  # 10 tactic columns
+        *[np.random.randint(0, 4) for _ in range(8)],   # 8 tool columns
+        *[np.random.randint(0, 2) for _ in range(3)],   # 3 platform flags
+    ], dtype=np.float32)
+    return raw[:n]
 
 def build_animated_boundary_fig(df_res, tau_high, kappa, kappa_low):
     tau_vals = np.round(np.linspace(0.20, 0.95, 20), 2)
@@ -653,40 +706,53 @@ with tab_feedback:
 with tab_explain:
     st.header("Agent Explainability")
 
-    # ── Section 1: MC Dropout Convergence Animation ──────────────────────────
+    _KNOW_COLS = json.loads(Path("checkpoints/metadata.json").read_text()).get("knowledge_features", [f"feat_{i}" for i in range(23)])
+
+    # ── Section 1: MC Dropout Convergence Animation — all three agents ────────
     st.subheader("MC Dropout Convergence Animation")
-    st.caption("Watch the probability estimate and uncertainty band converge pass-by-pass in real time.")
+    st.caption("Watch the probability estimate and uncertainty band converge pass-by-pass. Inputs are sampled from each agent's training distribution.")
 
     mc_c1, mc_c2 = st.columns([1, 3])
     with mc_c1:
-        mc_n = st.slider("Passes to animate", 10, 50, 30, key="mc_n")
+        mc_agent_sel = st.radio("Agent", ["Behavioural", "Semantic", "Knowledge"], key="mc_agent_sel")
+        mc_n    = st.slider("Passes to animate", 10, 50, 30, key="mc_n")
         mc_speed = st.select_slider("Speed", ["Fast", "Normal", "Slow"], value="Normal", key="mc_spd")
         mc_delay = {"Fast": 0.04, "Normal": 0.12, "Slow": 0.40}[mc_speed]
-        mc_run = st.button("▶ Animate Dropout", type="primary", key="mc_run")
+        mc_run  = st.button("▶ Animate Dropout", type="primary", key="mc_run")
 
     mc_ph = mc_c2.empty()
 
     if mc_run:
-        agent_mc = get_beh_agent()
-        feats_mc = np.random.rand(16).astype(np.float32)
+        if mc_agent_sel == "Behavioural":
+            agent_mc  = get_beh_agent()
+            feats_mc  = make_demo_beh_features()
+        elif mc_agent_sel == "Semantic":
+            agent_mc  = get_sem_agent()
+            feats_mc  = make_demo_sem_features()
+        else:
+            agent_mc  = get_know_agent()
+            feats_mc  = make_demo_know_features()
+
         raw_samples = collect_mc_samples(agent_mc, feats_mc, mc_n)
-        st.session_state["mc_last_feats"]   = feats_mc
-        st.session_state["mc_last_samples"] = raw_samples
+        st.session_state["mc_last_feats"]      = feats_mc
+        st.session_state["mc_last_samples"]    = raw_samples
+        st.session_state["mc_last_agent_sel"]  = mc_agent_sel
 
     if "mc_last_samples" in st.session_state and mc_run:
-        raw_samples = st.session_state["mc_last_samples"]
+        raw_samples    = st.session_state["mc_last_samples"]
+        agent_label    = st.session_state.get("mc_last_agent_sel", mc_agent_sel)
+        agent_color    = {"Behavioural": "#8e44ad", "Semantic": "#2980b9", "Knowledge": "#16a085"}[agent_label]
         for i in range(1, len(raw_samples) + 1):
-            sub = raw_samples[:i]
+            sub   = raw_samples[:i]
             means = [float(np.mean(sub[:j+1])) for j in range(i)]
-            stds  = [float(np.std(sub[:j+1]))  if j > 0 else 0.0 for j in range(i)]
+            stds  = [float(np.std(sub[:j+1])) if j > 0 else 0.0 for j in range(i)]
             xs    = list(range(1, i + 1))
-
-            fig_mc = go.Figure()
             upper = [m + 2*s for m, s in zip(means, stds)]
             lower = [m - 2*s for m, s in zip(means, stds)]
+            fig_mc = go.Figure()
             fig_mc.add_trace(go.Scatter(
                 x=xs + xs[::-1], y=upper + lower[::-1],
-                fill="toself", fillcolor="rgba(52,152,219,0.15)",
+                fill="toself", fillcolor=f"rgba(52,152,219,0.15)",
                 line=dict(color="rgba(0,0,0,0)"), name="±2σ",
             ))
             fig_mc.add_trace(go.Scatter(
@@ -695,14 +761,14 @@ with tab_explain:
             ))
             fig_mc.add_trace(go.Scatter(
                 x=xs, y=means, mode="lines+markers", name="Running mean",
-                line=dict(color="#2980b9", width=2.5), marker=dict(size=5),
+                line=dict(color=agent_color, width=2.5), marker=dict(size=5),
             ))
             fig_mc.add_hline(y=tau,      line_dash="dot", line_color="orange",
-                              annotation_text=f"τ", annotation_position="right")
+                              annotation_text="τ", annotation_position="right")
             fig_mc.add_hline(y=tau_high, line_dash="dot", line_color="red",
-                              annotation_text=f"τ_high", annotation_position="right")
+                              annotation_text="τ_high", annotation_position="right")
             fig_mc.update_layout(
-                title=f"Pass {i}/{mc_n}  —  mean = {means[-1]:.3f},  σ = {stds[-1]:.4f}",
+                title=f"{agent_label} agent — Pass {i}/{mc_n}  |  mean={means[-1]:.3f}  σ={stds[-1]:.4f}",
                 xaxis_title="Pass number", yaxis_title="p (predicted probability)",
                 yaxis_range=[-0.05, 1.05], height=380, margin=dict(t=50, b=30, r=80),
                 showlegend=(i == len(raw_samples)),
@@ -714,76 +780,117 @@ with tab_explain:
         final_std  = float(np.std(raw_samples))
         dec_mc = apply_policy(final_mean, final_std, tau, kappa, tau_high, kappa_low)
         st.success(
-            f"Converged — p̄ = **{final_mean:.4f}**, σ = **{final_std:.4f}**  →  "
+            f"{agent_label} agent — p̄ = **{final_mean:.4f}**, σ = **{final_std:.4f}**  →  "
             f"{DECISION_ICON[dec_mc]} **{dec_mc}**"
         )
 
     st.divider()
 
-    # ── Section 2: Gradient Saliency ─────────────────────────────────────────
-    st.subheader("Feature Gradient Saliency (Behavioral Agent)")
-    st.caption("Shows |∂output/∂feature| — which features the model is most sensitive to for the current input.")
+    # ── Section 2: Gradient Saliency — Behavioural + Knowledge + Semantic ─────
+    st.subheader("Feature Gradient Saliency")
+    st.caption("Shows |∂output/∂feature| (normalised) — which features the model reacts to most for the current input.")
 
+    sal_agent_sel = st.radio("Agent", ["Behavioural", "Knowledge", "Semantic (top-20 dims)"],
+                             horizontal=True, key="sal_agent_sel")
     sal_c1, sal_c2 = st.columns([1, 3])
     with sal_c1:
         use_mc_feats = st.checkbox("Use last MC Dropout input", value=True, key="use_mc_feats")
         sal_run = st.button("Compute Saliency", type="primary", key="sal_run")
 
     if sal_run:
-        agent_sal = get_beh_agent()
-        feats_sal = (st.session_state.get("mc_last_feats", np.random.rand(16).astype(np.float32))
-                     if use_mc_feats else np.random.rand(16).astype(np.float32))
+        if sal_agent_sel == "Behavioural":
+            agent_sal  = get_beh_agent()
+            feats_sal  = (st.session_state.get("mc_last_feats")
+                          if use_mc_feats and st.session_state.get("mc_last_agent_sel") == "Behavioural"
+                          else make_demo_beh_features())
+            feat_names = BEHAVIOR_COLUMNS
+        elif sal_agent_sel == "Knowledge":
+            agent_sal  = get_know_agent()
+            feats_sal  = (st.session_state.get("mc_last_feats")
+                          if use_mc_feats and st.session_state.get("mc_last_agent_sel") == "Knowledge"
+                          else make_demo_know_features())
+            feat_names = _KNOW_COLS
+        else:
+            agent_sal  = get_sem_agent()
+            feats_sal  = (st.session_state.get("mc_last_feats")
+                          if use_mc_feats and st.session_state.get("mc_last_agent_sel") == "Semantic"
+                          else make_demo_sem_features())
+            feat_names = [f"dim_{i}" for i in range(384)]
+
         try:
             sal = compute_gradient_saliency(agent_sal, feats_sal)
-            st.session_state["last_sal"] = sal / (sal.sum() + 1e-8)
+            sal_norm = sal / (sal.sum() + 1e-8)
+            st.session_state["last_sal"]       = sal_norm
+            st.session_state["last_sal_names"] = feat_names
+            st.session_state["last_sal_agent"] = sal_agent_sel
         except Exception as e:
             st.warning(f"Saliency failed: {e}")
 
     if "last_sal" in st.session_state:
-        sal_norm = st.session_state["last_sal"]
-        sorted_idx = np.argsort(sal_norm)
+        sal_norm   = st.session_state["last_sal"]
+        feat_names = st.session_state["last_sal_names"]
+        agent_lbl  = st.session_state["last_sal_agent"]
+
+        if agent_lbl == "Semantic (top-20 dims)":
+            top20 = np.argsort(sal_norm)[-20:]
+            sal_plot  = sal_norm[top20]
+            name_plot = [feat_names[i] for i in top20]
+        else:
+            sorted_idx = np.argsort(sal_norm)
+            sal_plot   = sal_norm[sorted_idx]
+            name_plot  = [feat_names[i] for i in sorted_idx]
+
         fig_sal = go.Figure(go.Bar(
-            x=sal_norm[sorted_idx],
-            y=[BEHAVIOR_COLUMNS[i] for i in sorted_idx],
-            orientation="h",
-            marker=dict(
-                color=sal_norm[sorted_idx],
-                colorscale="plasma",
-                showscale=True,
-                colorbar=dict(title="Saliency"),
-            ),
+            x=sal_plot, y=name_plot, orientation="h",
+            marker=dict(color=sal_plot, colorscale="plasma",
+                        showscale=True, colorbar=dict(title="Saliency")),
         ))
+        left_margin = 230 if agent_lbl != "Semantic (top-20 dims)" else 80
         fig_sal.update_layout(
-            title="Normalised gradient saliency — behavioral features",
+            title=f"Gradient saliency — {agent_lbl}",
             xaxis_title="|∂output/∂feature| (normalised)",
-            height=430, margin=dict(l=230, t=50),
+            height=max(350, len(name_plot) * 22 + 80),
+            margin=dict(l=left_margin, t=50),
         )
         sal_c2.plotly_chart(fig_sal, use_container_width=True)
 
     st.divider()
 
-    # ── Section 3: What-If Counterfactual Sliders ─────────────────────────────
+    # ── Section 3: What-If Counterfactual Sliders — Behavioural + Knowledge ───
     st.subheader("Counterfactual What-If Analysis")
-    st.caption(
-        "Sliders are in normalised feature space (0 = dataset mean, ±3 = ±3 std). "
-        "The risk gauge updates live as you drag."
-    )
 
-    wif_left, wif_right = st.columns(2)
-    for i, name in enumerate(BEHAVIOR_COLUMNS):
-        col = wif_left if i < 8 else wif_right
-        col.slider(name, -3.0, 3.0, 0.0, 0.1, key=f"wif_{name}")
+    wif_agent_sel = st.radio("Agent", ["Behavioural", "Knowledge"], horizontal=True, key="wif_agent_sel")
 
-    agent_wif = get_beh_agent()
-    norm_vals = np.array([st.session_state.get(f"wif_{n}", 0.0) for n in BEHAVIOR_COLUMNS], dtype=np.float32)
-    if agent_wif.scaler is not None:
-        raw_wif = agent_wif.scaler.inverse_transform(norm_vals.reshape(1, -1)).squeeze(0).astype(np.float32)
+    if wif_agent_sel == "Behavioural":
+        st.caption("Sliders are in normalised feature space (0 = dataset mean, ±3 = ±3 std). Risk gauge updates live.")
+        wif_left, wif_right = st.columns(2)
+        for i, name in enumerate(BEHAVIOR_COLUMNS):
+            col = wif_left if i < 8 else wif_right
+            col.slider(name, -3.0, 3.0, 0.0, 0.1, key=f"wif_beh_{name}")
+
+        agent_wif  = get_beh_agent()
+        norm_vals  = np.array([st.session_state.get(f"wif_beh_{n}", 0.0) for n in BEHAVIOR_COLUMNS], dtype=np.float32)
+        raw_wif    = (agent_wif.scaler.inverse_transform(norm_vals.reshape(1,-1)).squeeze(0).astype(np.float32)
+                      if agent_wif.scaler is not None else norm_vals)
+        wif_out    = agent_wif.score({"features": raw_wif})
+
     else:
-        raw_wif = norm_vals
+        st.caption("Sliders represent raw MITRE ATT&CK feature counts. Risk gauge updates live.")
+        # Integer-range sliders for knowledge features
+        _know_ranges = {
+            "Tool_Total_Mentions": (0, 20), "Tactic_Total_Mentions": (0, 20),
+        }
+        wif_left, wif_right = st.columns(2)
+        for i, name in enumerate(_KNOW_COLS):
+            lo, hi = _know_ranges.get(name, (0, 10))
+            col = wif_left if i < 12 else wif_right
+            col.slider(name, float(lo), float(hi), float((lo+hi)//2), 1.0, key=f"wif_know_{name}")
 
-    wif_out = agent_wif.score({"features": raw_wif})
+        agent_wif  = get_know_agent()
+        raw_wif    = np.array([st.session_state.get(f"wif_know_{n}", 0.0) for n in _KNOW_COLS], dtype=np.float32)
+        wif_out    = agent_wif.score({"features": raw_wif})
+
     dec_wif = apply_policy(wif_out.prob, wif_out.uncert, tau, kappa, tau_high, kappa_low)
-
     wif_g1, wif_g2, wif_badge = st.columns(3)
     wif_g1.plotly_chart(gauge(wif_out.prob,   "Risk (p̄)",        "#8e44ad"), use_container_width=True, key="wif_g1")
     wif_g2.plotly_chart(gauge(wif_out.uncert, "Uncertainty (σ)", "#e67e22"), use_container_width=True, key="wif_g2")
@@ -794,18 +901,17 @@ with tab_explain:
         unsafe_allow_html=True,
     )
 
-    # Semantic permutation importance radar (from saved checkpoint)
+    st.divider()
+
+    # ── Section 4: Permutation Importance — Semantic radar (saved) ────────────
     perm_path = Path("checkpoints/semantic_perm_grouped_auc.json")
     if perm_path.exists():
-        st.divider()
         st.subheader("Semantic Agent — Grouped Permutation Importance")
         perm_raw = json.loads(perm_path.read_text())
-        # Structure: {"top_groups": [{"dims": [...], "delta_auc_mean": ...}, ...]}
         groups = perm_raw.get("top_groups", [])
         if groups:
             names  = [f"Group {i+1}\n(dims {g['dims'][0]}…)" for i, g in enumerate(groups[:12])]
             values = [abs(float(g["delta_auc_mean"])) for g in groups[:12]]
-            # Add tiny jitter so radar isn't a flat circle when all values are ~0
             max_v  = max(values) if max(values) > 0 else 1e-15
             fig_radar = go.Figure(go.Scatterpolar(
                 r=values + [values[0]], theta=names + [names[0]],

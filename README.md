@@ -124,7 +124,7 @@ Opens at **http://localhost:8501**.
 | **📁 Batch** | Upload semantic, behavioural, and knowledge files (CSV or Parquet). GPU-batched inference with progress bar, triage pie chart, coloured results table, scatter plot, and CSV download. |
 | **📊 Dashboard** | Per-agent eval metrics, live interactive policy-space scatter (updates with sidebar sliders), and gallery of all saved evaluation figures. |
 | **🗂️ Feedback** | Submit analyst corrections for ESCALATE/AUTO_CONTAIN samples. Progress bar toward retraining threshold; one-click decision MLP retrain. |
-| **🧠 Explainability** | MC Dropout convergence animation (pass-by-pass live), gradient saliency bar chart, 16 live what-if counterfactual sliders, semantic permutation importance radar. |
+| **🧠 Explainability** | MC Dropout convergence animation for all three agents (Semantic / Behavioural / Knowledge) with in-distribution inputs. Gradient saliency bar chart for Behavioural and Knowledge (named features) and Semantic (top-20 embedding dims). What-if counterfactual sliders for Behavioural (normalised ±3σ) and Knowledge (raw MITRE ATT&CK counts). Semantic grouped permutation importance radar. |
 | **📡 Simulation** | Live attack-stream simulation — animated scrolling timeline with ±σ uncertainty band, decision heatmap grid (last 60 samples), 5-metric live counter. |
 | **🎯 Calibration** | Reliability diagram + ECE, per-agent uncertainty violin plots, adaptive vs fixed MC Dropout pass-efficiency comparison. |
 | **🔬 Analysis** | Plotly-native animated decision boundary (play/pause/scrub τ), risk score histogram with policy zone shading, per-agent agreement matrix heatmap, 2D score–uncertainty density contour. |
