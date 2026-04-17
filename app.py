@@ -313,9 +313,57 @@ with tab_infer:
 
     if mode == "Demo (random inputs)":
         if st.button("▶  Run Demo", type="primary"):
-            x_sem  = {"embedding": np.random.rand(384).astype("float32")}
-            x_beh  = {"features":  np.random.rand(16).astype("float32")}
-            x_know = {"features":  np.random.rand(23).astype("float32")}
+            # Semantic: randomly pick from saved real PE embeddings so the
+            # semantic agent receives in-distribution inputs
+            _sem_demo_path = Path("checkpoints/demo_semantic_examples.parquet")
+            if _sem_demo_path.exists():
+                _sem_demo = pd.read_parquet(_sem_demo_path)
+                _row = _sem_demo.sample(1).iloc[0]
+                x_sem = {"embedding": np.array(_row["embedding"], dtype="float32")}
+            else:
+                x_sem = {"embedding": np.random.rand(384).astype("float32")}
+
+            # Behavioural: sample from the scaler's own mean ± std so values are
+            # always in-distribution regardless of actual dataset magnitude
+            beh_agent = get_beh_agent()
+            if beh_agent.scaler is not None:
+                sc_mean  = beh_agent.scaler.mean_
+                sc_scale = beh_agent.scaler.scale_
+                # sample a normalised vector in [-1.5, 1.5] then inverse-transform
+                z = np.random.uniform(-1.5, 1.5, size=len(sc_mean)).astype(np.float64)
+                beh_raw = (z * sc_scale + sc_mean).astype(np.float32)
+            else:
+                beh_raw = np.random.rand(16).astype(np.float32)
+            x_beh = {"features": beh_raw}
+
+            # Knowledge: MITRE ATT&CK integer counts + binary platform flags
+            know_raw = np.array([
+                rng.integers(0, 15),   # Tool_Total_Mentions
+                rng.integers(0, 15),   # Tactic_Total_Mentions
+                rng.integers(0,  8),   # Tactic_Initial_Access
+                rng.integers(0,  8),   # Tactic_Execution
+                rng.integers(0,  8),   # Tactic_Persistence
+                rng.integers(0,  8),   # Tactic_Privilege_Escalation
+                rng.integers(0,  8),   # Tactic_Credential_Access
+                rng.integers(0,  8),   # Tactic_Lateral_Movement
+                rng.integers(0,  8),   # Tactic_Discovery
+                rng.integers(0,  8),   # Tactic_Command_and_Control
+                rng.integers(0,  8),   # Tactic_Exfiltration
+                rng.integers(0,  8),   # Tactic_Impact
+                rng.integers(0,  4),   # Tool_Cobalt_Strike
+                rng.integers(0,  4),   # Tool_Mimikatz
+                rng.integers(0,  4),   # Tool_PsExec
+                rng.integers(0,  4),   # Tool_Rclone
+                rng.integers(0,  4),   # Tool_MegaNZ
+                rng.integers(0,  4),   # Tool_AnyDesk
+                rng.integers(0,  4),   # Tool_TeamViewer
+                rng.integers(0,  4),   # Tool_BloodHound
+                rng.integers(0,  2),   # Platform_Windows
+                rng.integers(0,  2),   # Platform_Linux
+                rng.integers(0,  2),   # Platform_ESXi
+            ], dtype=np.float32)
+            x_know = {"features": know_raw}
+
             run = True
     else:
         st.info("Upload single-row CSV files. No header row — values only.")
