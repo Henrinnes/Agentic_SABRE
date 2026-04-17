@@ -226,10 +226,10 @@ if __name__ == "__main__":
     beh_model, acc_beh = train_cnn(
         CNNBehavioralAgent(X_beh.shape[1], dropout=0.3),
         X_beh, y_beh,
-        epochs=15,
-        batch_size=256,
+        epochs=10,
+        batch_size=32,
         is_cnn=True,
-        use_smote=True,   # still matching framework
+        use_smote=True,
     )
     print(f"Behavioural accuracy: {acc_beh:.4f}")
 
