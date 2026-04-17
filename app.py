@@ -391,29 +391,29 @@ with tab_infer:
 
             # Knowledge: MITRE ATT&CK integer counts + binary platform flags
             know_raw = np.array([
-                rng.integers(0, 15),   # Tool_Total_Mentions
-                rng.integers(0, 15),   # Tactic_Total_Mentions
-                rng.integers(0,  8),   # Tactic_Initial_Access
-                rng.integers(0,  8),   # Tactic_Execution
-                rng.integers(0,  8),   # Tactic_Persistence
-                rng.integers(0,  8),   # Tactic_Privilege_Escalation
-                rng.integers(0,  8),   # Tactic_Credential_Access
-                rng.integers(0,  8),   # Tactic_Lateral_Movement
-                rng.integers(0,  8),   # Tactic_Discovery
-                rng.integers(0,  8),   # Tactic_Command_and_Control
-                rng.integers(0,  8),   # Tactic_Exfiltration
-                rng.integers(0,  8),   # Tactic_Impact
-                rng.integers(0,  4),   # Tool_Cobalt_Strike
-                rng.integers(0,  4),   # Tool_Mimikatz
-                rng.integers(0,  4),   # Tool_PsExec
-                rng.integers(0,  4),   # Tool_Rclone
-                rng.integers(0,  4),   # Tool_MegaNZ
-                rng.integers(0,  4),   # Tool_AnyDesk
-                rng.integers(0,  4),   # Tool_TeamViewer
-                rng.integers(0,  4),   # Tool_BloodHound
-                rng.integers(0,  2),   # Platform_Windows
-                rng.integers(0,  2),   # Platform_Linux
-                rng.integers(0,  2),   # Platform_ESXi
+                np.random.randint(0, 15),   # Tool_Total_Mentions
+                np.random.randint(0, 15),   # Tactic_Total_Mentions
+                np.random.randint(0,  8),   # Tactic_Initial_Access
+                np.random.randint(0,  8),   # Tactic_Execution
+                np.random.randint(0,  8),   # Tactic_Persistence
+                np.random.randint(0,  8),   # Tactic_Privilege_Escalation
+                np.random.randint(0,  8),   # Tactic_Credential_Access
+                np.random.randint(0,  8),   # Tactic_Lateral_Movement
+                np.random.randint(0,  8),   # Tactic_Discovery
+                np.random.randint(0,  8),   # Tactic_Command_and_Control
+                np.random.randint(0,  8),   # Tactic_Exfiltration
+                np.random.randint(0,  8),   # Tactic_Impact
+                np.random.randint(0,  4),   # Tool_Cobalt_Strike
+                np.random.randint(0,  4),   # Tool_Mimikatz
+                np.random.randint(0,  4),   # Tool_PsExec
+                np.random.randint(0,  4),   # Tool_Rclone
+                np.random.randint(0,  4),   # Tool_MegaNZ
+                np.random.randint(0,  4),   # Tool_AnyDesk
+                np.random.randint(0,  4),   # Tool_TeamViewer
+                np.random.randint(0,  4),   # Tool_BloodHound
+                np.random.randint(0,  2),   # Platform_Windows
+                np.random.randint(0,  2),   # Platform_Linux
+                np.random.randint(0,  2),   # Platform_ESXi
             ], dtype=np.float32)
             x_know = {"features": know_raw}
 
