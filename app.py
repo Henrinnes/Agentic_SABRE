@@ -1141,8 +1141,13 @@ with tab_calib:
         orch_cal = get_orch_3agent() if pipeline == "3-Agent" else get_orch_2agent()
         orch_cal.τ = tau; orch_cal.κ = kappa; orch_cal.τ_high = tau_high; orch_cal.κ_low = kappa_low
 
+        # Load individual agents for per-agent calibration
+        # (handle_batch does not return by_agent, so we score each agent directly)
+        _a_sem  = get_sem_agent()
+        _a_beh  = get_beh_agent()
+        _a_know = get_know_agent() if pipeline == "3-Agent" else None
+
         probs_cal, labels_cal = [], []
-        # per-agent probs for individual calibration plots
         per_agent_cal = {"semantic": [], "behavioral": [], "knowledge": []}
 
         with st.spinner(f"Running {cal_n * 2} calibration samples…"):
@@ -1151,21 +1156,29 @@ with tab_calib:
                 x_behs_cal  = _cal_beh_batch(cal_n, label_val)
                 x_knows_cal = _cal_know_batch(cal_n, label_val)
 
+                # Fused pipeline score
                 if pipeline == "3-Agent":
                     results_cal = orch_cal.handle_batch(x_sems_cal, x_behs_cal, x_knows_cal)
                 else:
                     results_cal = orch_cal.handle_batch(x_sems_cal, x_behs_cal)
-
                 for r in results_cal:
                     probs_cal.append(r["score_fused"])
                     labels_cal.append(label_val)
-                    for aname in ["semantic", "behavioral", "knowledge"]:
-                        p = r.get("by_agent", {}).get(aname, {}).get("prob")
-                        if p is not None:
-                            per_agent_cal[aname].append((p, label_val))
 
-        st.session_state["cal_data"]       = (np.array(probs_cal), np.array(labels_cal))
-        st.session_state["cal_per_agent"]  = per_agent_cal
+                # Per-agent scores (direct, independent of orchestrator)
+                sem_outs  = _a_sem.score_batch(x_sems_cal)
+                beh_outs  = _a_beh.score_batch(x_behs_cal)
+                know_outs = _a_know.score_batch(x_knows_cal) if _a_know else []
+
+                for o in sem_outs:
+                    per_agent_cal["semantic"].append((o.prob, label_val))
+                for o in beh_outs:
+                    per_agent_cal["behavioral"].append((o.prob, label_val))
+                for o in know_outs:
+                    per_agent_cal["knowledge"].append((o.prob, label_val))
+
+        st.session_state["cal_data"]      = (np.array(probs_cal), np.array(labels_cal))
+        st.session_state["cal_per_agent"] = per_agent_cal
 
     if "cal_data" in st.session_state:
         probs_c, labels_c = st.session_state["cal_data"]
