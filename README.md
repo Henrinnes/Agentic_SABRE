@@ -1,56 +1,52 @@
-# Agentic_SABRE
+# Agentic SABRE
 
 **Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent Framework for Adaptive Ransomware Detection**
 
-This repository provides the reference implementation accompanying the paper:
+> *Submitted to Expert Systems with Applications (Elsevier), under review*
 
-> *Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent Framework for Adaptive Ransomware Detection*
-
-Agentic_SABRE is a self-adaptive, reasoning-based cybersecurity framework designed to detect ransomware under **concept drift**, **behavioural polymorphism**, and **uncertainty**. The system decomposes detection into specialised agents, explicitly quantifies epistemic uncertainty via Monte Carlo Dropout, and applies a **risk- and uncertainty-aware triage policy** to decide whether to automatically contain, escalate, or allow execution.
+**Author:** Henry Kabuye — henrinnes@yahoo.co.uk
 
 ---
 
-## Motivation
+## Overview
 
-Modern ransomware evolves rapidly, exhibiting semantic obfuscation, behavioural mimicry, and distributional drift. While machine learning detectors can achieve high in-distribution accuracy, most operate as monolithic classifiers that:
+Agentic SABRE is a self-adaptive, reasoning-based cybersecurity framework designed to detect ransomware under **concept drift**, **behavioural polymorphism**, and **uncertainty**. The system decomposes detection into specialised agents, explicitly quantifies epistemic uncertainty via Monte Carlo Dropout, and applies a **risk- and uncertainty-aware triage policy** to decide whether to automatically contain, escalate, or allow execution.
 
-- provide only point predictions,
-- lack calibrated uncertainty estimates,
+### Why it exists
+
+Modern ransomware evolves rapidly, exhibiting semantic obfuscation, behavioural mimicry, and distributional drift. Most ML detectors operate as monolithic classifiers that:
+
+- provide only point predictions with no uncertainty estimate,
+- cannot distinguish a confident correct prediction from a lucky one,
 - and offer no principled mechanism for human-in-the-loop escalation.
 
-Agentic SABRE addresses these limitations by introducing an **agentic, uncertainty-aware decision pipeline** in which autonomous containment is permitted *only* when both risk and confidence are sufficiently high. Ambiguous or borderline cases are conservatively escalated to human analysts, forming a calibrated interface between automation and oversight.
+Agentic SABRE addresses these limitations with an **agentic, uncertainty-aware decision pipeline** where autonomous containment is permitted *only* when both risk score and model confidence are sufficiently high. Ambiguous cases are conservatively escalated to human analysts.
 
 ---
 
-## System Overview
+## System Architecture
 
-Agentic SABRE is a **neuro-symbolic multi-agent system** with two pipeline configurations:
-
-### 2-Agent Pipeline (Semantic + Behavioural)
+### 2-Agent Pipeline
 
 | Agent | Input | Architecture | Output |
 |---|---|---|---|
-| **Semantic Agent** | PE metadata embeddings (384D) | 1D CNN + MC Dropout | $\bar{p}_{sem},\ \sigma_{sem}$ |
-| **Behavioural Agent** | Runtime telemetry features (16D) | 1D CNN + MC Dropout | $\bar{p}_{beh},\ \sigma_{beh}$ |
-| **Decision Agent** | Score space $[p_{sem}, p_{beh}, \sigma_{sem}, \sigma_{beh}]$ | MLP + CTGAN augmentation | $\hat{p} \in [0,1]$ |
+| **Semantic** | PE metadata embeddings (384D) | 1D CNN + MC Dropout | $\bar{p}_{sem},\ \sigma_{sem}$ |
+| **Behavioural** | Runtime telemetry (16D, StandardScaler normalised) | 1D CNN + MC Dropout | $\bar{p}_{beh},\ \sigma_{beh}$ |
+| **Decision** | $[p_{sem}, p_{beh}, \sigma_{sem}, \sigma_{beh}]$ | MLP + CTGAN augmentation | $\hat{p} \in [0,1]$ |
 
-### 3-Agent Pipeline (Semantic + Behavioural + Knowledge)
+### 3-Agent Pipeline
 
 Extends the 2-agent pipeline with a third expert:
 
 | Agent | Input | Architecture | Output |
 |---|---|---|---|
-| **Knowledge Agent** | MITRE ATT&CK + threat intel features (23D) | 1D CNN + MC Dropout | $\bar{p}_{know},\ \sigma_{know}$ |
+| **Knowledge** | MITRE ATT&CK + threat intel features (23D) | 1D CNN + MC Dropout | $\bar{p}_{know},\ \sigma_{know}$ |
 
 The Decision Agent fuses the 6D score space $[p_{sem}, p_{beh}, p_{know}, \sigma_{sem}, \sigma_{beh}, \sigma_{know}]$.
 
-### Uncertainty-Aware Policy Layer
-
-Uncertainty is aggregated conservatively:
+### Uncertainty-Aware Triage Policy
 
 $$\sigma_{max} = \max(\sigma_{sem},\ \sigma_{beh}\ [,\ \sigma_{know}])$$
-
-Two-threshold triage policy:
 
 | Decision | Condition |
 |---|---|
@@ -62,9 +58,33 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 
 ---
 
+## Evaluation Results
+
+### Per-Agent Performance (full dataset, stratified split)
+
+| Agent | Dataset | Samples | Accuracy | ROC-AUC | F1 | Notes |
+|---|---|---|---|---|---|---|
+| **Semantic** | RDset | 138,047 | 1.0000 | 1.0000 | 1.0000 | Static PE embeddings (384D) |
+| **Behavioural** | RanSMAP | 751,588 | 0.9957 | **0.9994** | 0.9978 | Whole dataset, StandardScaler normalised |
+| **Knowledge** | RansKnow | 307 | 0.9900 | **0.9993** | — | MITRE ATT&CK features (23D) |
+
+### 3-Agent Policy (Optuna-tuned, 4,000 samples)
+
+| Metric | Value |
+|---|---|
+| Balanced accuracy | **0.972** |
+| False negatives | **0** |
+| AUTO-CONTAIN | 1,697 samples |
+| ESCALATE | 415 samples |
+| ALLOW | 1,888 samples |
+
+> **Dataset note:** All three datasets are independent — no sample appears in more than one. Fusion pipeline metrics reflect semantic agent dominance. A valid multi-modal fusion evaluation requires a unified dataset with all modalities from the same executable instance.
+
+---
+
 ## Adaptive MC Dropout
 
-All agents (semantic, behavioural, knowledge) use **adaptive MC Dropout** for uncertainty quantification. Rather than a fixed number of forward passes, each agent runs passes in groups of 5 and stops when the uncertainty estimate converges:
+All agents use **adaptive MC Dropout** for uncertainty quantification. Rather than a fixed number of forward passes, each agent runs passes in groups of 5 and stops when uncertainty converges:
 
 $$|\sigma_{t} - \sigma_{t-5}| < \text{tol}$$
 
@@ -75,29 +95,41 @@ $$|\sigma_{t} - \sigma_{t-5}| < \text{tol}$$
 | `max_T` | `50` | Hard cap on passes in adaptive mode. |
 | `tol` | `1e-3` | Convergence threshold on σ change. |
 
-To use a fixed number of passes (e.g. to reproduce paper results at T=10):
-
 ```python
 from Agentic_SABRE.agents.semantic import SemanticAgent
-agent = SemanticAgent(T=10)
+
+agent = SemanticAgent(T=10)          # fixed — reproducible paper results
+agent = SemanticAgent(T=None)        # adaptive — stops early when confident
 ```
 
-Each `AgentOutput.extras` includes `passes_used` so you can observe how many passes were actually needed per sample.
+Each `AgentOutput.extras` includes `passes_used` so you can observe convergence per sample.
 
 ---
 
-## GPU-Accelerated Batch Inference
+## Interactive Dashboard
 
-All agents support both single-sample and **batched inference** on GPU. Batching runs MC Dropout passes over the full batch $[B, 1, D]$ simultaneously, with the same adaptive convergence logic applied across the batch.
+An 8-tab Streamlit dashboard is included for interactive inference, analysis, and explainability.
 
-| Mode | Throughput | Speedup |
-|---|---|---|
-| Single sample | ~33 samples/s | 1× |
-| Batch = 64 | ~2,500 samples/s | **77×** |
-| Batch = 256 | ~6,000 samples/s | **182×** |
-| Batch = 500 | ~7,800 samples/s | **239×** |
+```bash
+.venv/bin/python -m streamlit run app.py
+```
 
-*Benchmarked on NVIDIA RTX 3050 Laptop GPU (4 GB VRAM).*
+Opens at **http://localhost:8501**.
+
+### Tabs
+
+| Tab | Description |
+|---|---|
+| **🔍 Inference** | Single-sample inference. Demo mode or upload CSV feature vectors. Shows decision badge, per-agent risk + uncertainty gauges, and MC passes used. |
+| **📁 Batch** | Upload semantic, behavioural, and knowledge files (CSV or Parquet). GPU-batched inference with progress bar, triage pie chart, coloured results table, scatter plot, and CSV download. |
+| **📊 Dashboard** | Per-agent eval metrics, live interactive policy-space scatter (updates with sidebar sliders), and gallery of all saved evaluation figures. |
+| **🗂️ Feedback** | Submit analyst corrections for ESCALATE/AUTO_CONTAIN samples. Progress bar toward retraining threshold; one-click decision MLP retrain. |
+| **🧠 Explainability** | MC Dropout convergence animation (pass-by-pass live), gradient saliency bar chart, 16 live what-if counterfactual sliders, semantic permutation importance radar. |
+| **📡 Simulation** | Live attack-stream simulation — animated scrolling timeline with ±σ uncertainty band, decision heatmap grid (last 60 samples), 5-metric live counter. |
+| **🎯 Calibration** | Reliability diagram + ECE, per-agent uncertainty violin plots, adaptive vs fixed MC Dropout pass-efficiency comparison. |
+| **🔬 Analysis** | Plotly-native animated decision boundary (play/pause/scrub τ), risk score histogram with policy zone shading, per-agent agreement matrix heatmap, 2D score–uncertainty density contour. |
+
+The **sidebar** controls the pipeline (2-agent / 3-agent) and four live policy threshold sliders (τ, κ, τ_high, κ_low). All tabs update in real time.
 
 ---
 
@@ -105,136 +137,72 @@ All agents support both single-sample and **batched inference** on GPU. Batching
 
 ```text
 Agentic_SABRE/
-├── Agentic_SABRE/                          ← Python package
+├── Agentic_SABRE/                              ← Python package
 │   ├── agents/
-│   │   ├── semantic.py                     # Semantic CNN agent (score + score_batch)
-│   │   ├── behavioural.py                  # Behavioural CNN agent (score + score_batch)
-│   │   ├── knowledge.py                    # Knowledge CNN agent (score + score_batch)
-│   │   └── decision.py                     # Fusion MLP agent (score + score_batch)
-│   ├── Policies/
-│   │   ├── __init__.py
-│   │   └── thresholds.py                   # Policy threshold utilities
-│   ├── orchestrator.py                     # 2-agent orchestrator (handle + handle_batch)
-│   ├── orchestrator_3agent.py              # 3-agent orchestrator (handle + handle_batch)
-│   ├── contracts.py                        # AgentOutput dataclass
-│   ├── cli.py                              # Command-line entry point
-│   ├── __init__.py
-│   └── __main__.py
+│   │   ├── semantic.py                         # Semantic CNN (384D PE embeddings)
+│   │   ├── behavioural.py                      # Behavioural CNN (16D telemetry, scaler-aware)
+│   │   ├── knowledge.py                        # Knowledge CNN (23D MITRE ATT&CK)
+│   │   └── decision.py                         # Fusion MLP (CTGAN + temperature scaling)
+│   ├── Policies/thresholds.py                  # Triage policy logic
+│   ├── orchestrator.py                         # 2-agent pipeline (handle + handle_batch)
+│   ├── orchestrator_3agent.py                  # 3-agent pipeline (handle + handle_batch)
+│   ├── contracts.py                            # AgentOutput dataclass
+│   ├── consultation.py                         # Peer consultation protocol
+│   ├── feedback_store.py                       # Analyst feedback persistence
+│   └── cli.py                                  # Command-line entry point
 │
-├── checkpoints/                            ← Trained model artifacts
-│   ├── semantic_cnn.pt                     # Semantic CNN weights
-│   ├── behavioral_cnn.pt                   # Behavioural CNN weights
-│   ├── knowledge_cnn.pt                    # Knowledge CNN weights
-│   ├── knowledge_scaler.joblib             # StandardScaler for knowledge features
-│   ├── decision_fuser.json                 # 2-agent fusion artifact (4D input)
-│   ├── decision_fuser_3agent.json          # 3-agent fusion artifact (6D input)
-│   ├── policy_auto.json                    # Optuna-tuned policy thresholds (active)
-│   ├── policy_low_escalation.json          # Conservative (low escalation) policy
-│   ├── metadata.json                       # Feature dimension metadata
-│   ├── semantic_counterfactuals.csv        # CF results (all samples)
-│   ├── semantic_counterfactuals_50.csv     # CF results (50 borderline samples)
-│   ├── semantic_grad_saliency.npy          # Gradient saliency outputs
-│   ├── semantic_perm_auc_drop.npy          # Permutation importance (AUC drop)
-│   ├── semantic_perm_nll_increase.npy      # Permutation importance (NLL increase)
-│   ├── semantic_permutation_importance.npy # Raw permutation importance scores
-│   └── semantic_perm_grouped_auc.json      # Grouped permutation importance
+├── checkpoints/                                ← Trained model artefacts
+│   ├── semantic_cnn.pt                         # Semantic CNN weights
+│   ├── behavioral_cnn.pt                       # Behavioural CNN weights (full dataset)
+│   ├── behavioral_scaler.joblib                # StandardScaler for behavioural features
+│   ├── knowledge_cnn.pt                        # Knowledge CNN weights
+│   ├── knowledge_scaler.joblib                 # StandardScaler for knowledge features
+│   ├── decision_fuser.json                     # 2-agent fusion MLP artefact
+│   ├── decision_fuser_3agent.json              # 3-agent fusion MLP artefact
+│   ├── policy_auto.json                        # Optuna-tuned policy thresholds
+│   ├── policy_low_escalation.json              # Conservative policy variant
+│   ├── metadata.json                           # Feature dimension metadata
+│   └── semantic_perm_grouped_auc.json          # Grouped permutation importance
 │
-├── Figures/                                ← All plots and diagrams
-│   ├── Prop_Agentic_Sabre_30_03_2025.png   # Architecture figure (ESWA paper v1)
-│   ├── Prop_Agentic_Sabre_08_11_2025.png   # Architecture figure (ESWA paper v2)
-│   ├── Prop_Agentic_Sabre_26_01_2025_3Agents.png  # 3-agent architecture diagram
-│   ├── Prop_Multi_Agent_LLM_1.png          # Multi-agent LLM overview
-│   ├── Agent_Performance_metrics.png       # Per-agent metrics summary
-│   ├── Behaviour_feature_importance.png    # Permutation importance plot
-│   ├── ROC_Curve_RDset.png                 # ROC curve — RDset
-│   ├── Roc_Curve_RanSMAP.png              # ROC curve — RanSMAP
-│   ├── Roc_Both.png                        # Combined ROC curves
-│   ├── Triage_policy.png                   # Policy threshold diagram
-│   ├── Triage_policy_space.png             # Policy scatter (p_hat vs sigma)
-│   ├── Reliability_Diagram_Fusion.png      # Calibration reliability diagram
-│   ├── calibration_semantic.png            # Calibration — semantic agent
-│   ├── calibration_behavioral.png          # Calibration — behavioural agent
-│   ├── calibration_decision.png            # Calibration — decision agent
-│   ├── CF_semantic.png                     # Semantic counterfactual overview
-│   ├── Rep_Beh_CFs.png                     # Representative behavioural CFs
-│   ├── fig_semantic_cf_l2_hist.png         # CF L2 distance distribution
-│   ├── fig_semantic_cf_rel_hist.png        # CF relative distance distribution
-│   ├── fig_semantic_cf_p0_vs_l2.png        # CF score vs L2 scatter
-│   ├── fig_semantic_cf_steps_hist.png      # CF optimisation steps distribution
-│   ├── uncertainty_comparison.png          # Fixed-T vs adaptive-T uncertainty
-│   ├── Dec_layer_Triage.png                # Decision layer triage visualisation
-│   ├── Escalate.png                        # ESCALATE region illustration
-│   ├── auto_contain.png                    # AUTO-CONTAIN region illustration
-│   ├── CTGAN model.PNG                     # CTGAN augmentation diagram
-│   ├── Optuna6multiMetrics.png             # Optuna multi-metric optimisation plot
-│   └── claude code.png                     # Claude Code assisted development screenshot
+├── Figures/                                    ← 30 evaluation plots and architecture diagrams
+├── PDF files/                                  ← ESWA paper submissions (v1 + v2)
 │
-├── PDF files/                              ← ESWA paper submissions
-│   ├── Expert_Systems_with Applications_SABRE_Final.pdf    # v1
-│   └── Expert_Systems_With_Applications_SABRE_Final_1.pdf  # v2 (under review)
+├── app.py                                      # 8-tab Streamlit dashboard
 │
-├── train_cnn_agents.py                     # Train semantic + behavioural CNNs
-├── train_knowledge_agent.py                # Train knowledge CNN
-├── train_decision_agent.py                 # Train fusion MLP (2-agent or 3-agent)
+├── train_cnn_agents.py                         # Train semantic + behavioural CNNs
+│                                               #   auto imbalance handling: undersample → SMOTE
+│                                               #   StandardScaler saved for behavioural agent
+├── train_knowledge_agent.py                    # Train knowledge CNN
+├── train_decision_agent.py                     # Train fusion MLP (batched scoring)
 │
-├── tune_policy_optuna.py                   # Bayesian threshold tuning (recommended)
-├── tune_policy.py                          # Grid search, balanced escalation
-├── tune_policy_low_escalation.py           # Grid search, conservative escalation
+├── tune_policy_optuna.py                       # Bayesian threshold tuning (recommended)
+├── tune_policy.py                              # Grid search — balanced escalation
+├── tune_policy_low_escalation.py              # Grid search — conservative escalation
 │
-├── eval_fusion_policy.py                   # 2-agent pipeline evaluation
-├── eval_fusion_policy_3agent.py            # 3-agent pipeline evaluation
-├── eval_semantic_agent.py                  # Semantic agent standalone eval
-├── eval_behaviour_agent.py                 # Behavioural agent standalone eval
-├── eval_knowledge.py                       # Knowledge agent standalone eval
+├── eval_behaviour_agent.py                     # Behavioural agent standalone eval
+├── eval_semantic_agent.py                      # Semantic agent standalone eval
+├── eval_knowledge.py                           # Knowledge agent standalone eval
+├── eval_fusion_policy.py                       # 2-agent pipeline eval
+├── eval_fusion_policy_3agent.py                # 3-agent pipeline eval
 │
-├── semantic_counterfactuals.py             # Semantic counterfactual generation
-├── semantic_grad_saliency.py               # Gradient saliency analysis
-├── semantic_permutation_importance.py      # Permutation importance (per-feature)
+├── semantic_counterfactuals.py                 # Semantic counterfactual generation
+├── semantic_grad_saliency.py                   # Gradient saliency analysis
+├── semantic_permutation_importance.py          # Permutation importance (per-feature)
 ├── semantic_permutation_importance_grouped.py  # Permutation importance (grouped)
-├── behavioural_feature_importance.py       # Behavioural permutation importance
-├── behaviour_counterfactuals.py            # Behavioural counterfactual generation
+├── behavioural_feature_importance.py           # Behavioural permutation importance
+├── behaviour_counterfactuals.py                # Behavioural counterfactual generation
 │
-├── plot_calibration_fusion.py              # Calibration / reliability diagrams
-├── plot_roc_curves.py                      # ROC curve plots
-├── plot_triage_scatter.py                  # Policy-space scatter plot
-├── plot_semantic_cf_distribution.py        # CF distance distribution plots
+├── plot_calibration_fusion.py                  # Calibration / reliability diagrams
+├── plot_roc_curves.py                          # ROC curve plots
+├── plot_triage_scatter.py                      # Policy-space scatter plot
 │
-├── Smoke_test.py                           # Import smoke test
-├── smoke_test_orchestrator.py              # 2-agent end-to-end test
-├── test_orchestrator_3agent.py             # 3-agent end-to-end test
+├── Smoke_test.py                               # Import smoke test
+├── smoke_test_orchestrator.py                  # 2-agent end-to-end test
+├── test_orchestrator_3agent.py                 # 3-agent end-to-end test
 │
-├── app.py                                  # Streamlit dashboard
-├── SABRE_presentation_updated.pptx         # Conference / review presentation
+├── retrain_from_feedback.py                    # Incremental retrain from analyst feedback
 ├── requirements.txt
 └── README.md
-```
-
----
-
-## Interactive Dashboard
-
-A Streamlit web dashboard is included for interactive inference, batch processing, and performance analysis.
-
-```bash
-python -m streamlit run app.py
-```
-
-Opens at **http://localhost:8501** automatically.
-
-### Tabs
-
-| Tab | Description |
-|---|---|
-| **🔍 Inference** | Single-sample inference. Demo mode (random inputs) or upload your own CSV feature vectors. Shows decision badge, per-agent risk + uncertainty gauges, and MC passes used. |
-| **📁 Batch** | Upload semantic, behavioural, and knowledge files (CSV or Parquet). Runs GPU-batched inference with a progress bar. Displays triage distribution pie chart, coloured results table, policy-space scatter plot, and CSV download. |
-| **📊 Dashboard** | Per-agent eval metrics table, live interactive policy-space scatter (updates as you move the threshold sliders), and a gallery of all saved figures grouped by category. |
-
-The **sidebar** controls the pipeline (2-agent / 3-agent) and four policy threshold sliders (τ, κ, τ_high, κ_low). Thresholds apply live to both inference and the dashboard visualisation.
-
-### Dependencies
-
-```bash
-pip install streamlit plotly pillow
 ```
 
 ---
@@ -243,44 +211,46 @@ pip install streamlit plotly pillow
 
 ### Environment Setup
 
+> **GPU note:** The training and inference stack requires PyTorch with CUDA 11.8 if using Pascal-generation GPUs (GTX 1070/1080, compute capability 6.x). CUDA 12.x builds dropped support for those architectures.
+
 ```bash
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+source .venv/bin/activate
+
+# Pascal GPUs (sm_61, e.g. GTX 1070 Ti) — use CUDA 11.8 build
+pip install torch==2.0.1+cu118 --index-url https://download.pytorch.org/whl/cu118
+
+# Modern GPUs (sm_70+, e.g. RTX series)
+pip install torch --index-url https://download.pytorch.org/whl/cu124
+
+# Remaining dependencies
+pip install "numpy<2" pandas scikit-learn imbalanced-learn pyarrow optuna \
+            pynvml matplotlib rich typer joblib sdv \
+            streamlit plotly pillow
 ```
 
-### GPU Support (Recommended)
-
-Install PyTorch with CUDA for ~200× faster batch inference:
+### Run the Dashboard
 
 ```bash
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+.venv/bin/python -m streamlit run app.py
 ```
 
-All agents auto-detect CUDA and move to GPU on instantiation. No code changes required.
-
-### Run a Demo
+### Run a CLI Demo
 
 ```bash
-python -m Agentic_SABRE.cli demo
-```
+.venv/bin/python -m Agentic_SABRE.cli demo
 
-With explicit policy thresholds:
-
-```bash
-python -m Agentic_SABRE.cli demo \
-  --tau 0.82 \
-  --kappa 0.14 \
-  --tau-high 0.96 \
-  --kappa-low 0.06
+# With explicit thresholds
+.venv/bin/python -m Agentic_SABRE.cli demo \
+  --tau 0.40 --kappa 0.20 --tau-high 0.90 --kappa-low 0.19
 ```
 
 ### Smoke Tests
 
 ```bash
-python Smoke_test.py                  # imports only
-python smoke_test_orchestrator.py     # full 2-agent pipeline with random inputs
-python test_orchestrator_3agent.py    # full 3-agent pipeline with real data
+.venv/bin/python Smoke_test.py                 # imports
+.venv/bin/python smoke_test_orchestrator.py    # 2-agent end-to-end
+.venv/bin/python test_orchestrator_3agent.py   # 3-agent end-to-end
 ```
 
 ---
@@ -289,16 +259,23 @@ python test_orchestrator_3agent.py    # full 3-agent pipeline with real data
 
 ```bash
 # 1. Train base CNN agents
-python train_cnn_agents.py            # semantic + behavioural
-python train_knowledge_agent.py       # knowledge agent
+#    Behavioural agent: auto-detects 596:1 class imbalance,
+#    undersamples ransomware to 10K then applies SMOTE,
+#    fits and saves StandardScaler (behavioral_scaler.joblib)
+python train_cnn_agents.py
 
-# 2. Train fusion MLP (generates decision_fuser_3agent.json)
+# Train knowledge agent
+python train_knowledge_agent.py
+
+# 2. Train fusion MLP
+#    Uses batched score_batch() for fast score collection on 751K+ samples
 python train_decision_agent.py
 
-# 3. Tune policy thresholds
-python tune_policy_optuna.py          # Bayesian optimisation (recommended)
-python tune_policy.py                 # grid search, balanced escalation
-python tune_policy_low_escalation.py  # grid search, conservative escalation
+# 3. Tune policy thresholds (Bayesian, recommended)
+python tune_policy_optuna.py                     # 300 trials, 3-agent
+python tune_policy_optuna.py --pipeline 2        # 2-agent
+python tune_policy_optuna.py --trials 500        # more trials
+python tune_policy_optuna.py --esc-penalty 0.3   # penalise high escalation
 ```
 
 ---
@@ -306,91 +283,30 @@ python tune_policy_low_escalation.py  # grid search, conservative escalation
 ## Evaluation
 
 ```bash
-# Per-agent evaluations (each on its native dataset)
-python eval_semantic_agent.py
-python eval_behaviour_agent.py
-python eval_knowledge.py
+python eval_semantic_agent.py         # Semantic — RDset
+python eval_behaviour_agent.py        # Behavioural — RanSMAP (full 751K)
+python eval_knowledge.py              # Knowledge — RansKnow
 
-# Full pipeline evaluations
 python eval_fusion_policy.py          # 2-agent pipeline
 python eval_fusion_policy_3agent.py   # 3-agent pipeline
 ```
 
-> **Dataset note:** All three datasets (RDset, RanSMAP, RansKnow) are independent — no sample appears in more than one. Per-agent evaluations on native datasets are fully valid. Fusion pipeline evaluations are cross-dataset and reflect semantic agent dominance, not true multi-modal fusion. A valid fusion eval requires a unified dataset with all modalities from the same executable instance.
-
-### 3-Agent Evaluation Results (stratified, balanced)
-
-| Agent | Dataset | Accuracy | ROC-AUC | Notes |
-|---|---|---|---|---|
-| Semantic | RDset (4,000 samples) | 1.0000 | 1.0000 | Near-perfect separation on static PE embeddings |
-| Behavioural | RanSMAP (2,000 samples) | 0.5680 | 0.6209 | Balanced eval — honest AUC, modest discrimination |
-| Knowledge | RansKnow (200 samples) | 0.9650 | 0.9953 | MITRE ATT&CK features are highly discriminative |
-
-The knowledge agent (0.9953 AUC) adds strong complementary signal to the fusion pipeline. The behavioural AUC of 0.62 is the honest balanced figure; the 0.9872 accuracy previously reported was from an imbalanced evaluation where 99.8% of RanSMAP samples are ransomware.
-
 ---
 
-## **Policy Parameters**
+## Policy Parameters
 
 | Parameter | Symbol | Role |
 |---|---|---|
-| `tau` | $\tau$ | Risk threshold — escalate if $\hat{p} \ge \tau$ |
-| `kappa` | $\kappa$ | Uncertainty threshold — escalate if $\sigma_{max} > \kappa$ |
-| `tau_high` | $\tau_{high}$ | High-confidence threshold — auto-contain if $\hat{p} \ge \tau_{high}$ |
-| `kappa_low` | $\kappa_{low}$ | Low-uncertainty threshold — auto-contain if $\sigma_{max} \le \kappa_{low}$ |
+| `tau` | $\tau$ | Escalate if $\hat{p} \ge \tau$ |
+| `kappa` | $\kappa$ | Escalate if $\sigma_{max} > \kappa$ |
+| `tau_high` | $\tau_{high}$ | Auto-contain if $\hat{p} \ge \tau_{high}$ |
+| `kappa_low` | $\kappa_{low}$ | Auto-contain if $\sigma_{max} \le \kappa_{low}$ |
 
-Pre-tuned policies are stored in `checkpoints/policy_auto.json` and `checkpoints/policy_low_escalation.json`.
-
----
-
-## Automatic Policy Threshold Tuning
-
-Thresholds are computed automatically from data — no manual tuning required.
-
-### Optuna (Recommended)
-
-`tune_policy_optuna.py` uses Bayesian optimisation (TPE sampler) to independently optimise all four thresholds over your dataset.
-
-```bash
-python tune_policy_optuna.py                     # 3-agent, 300 trials
-python tune_policy_optuna.py --pipeline 2        # 2-agent
-python tune_policy_optuna.py --trials 500        # more trials
-python tune_policy_optuna.py --esc-penalty 0.3   # penalise high escalation rate
-python tune_policy_optuna.py --out checkpoints/my_policy.json
-```
-
-| Feature | Optuna | Grid search |
-|---|---|---|
-| Search strategy | Bayesian (TPE) | Coarse 6×4 grid |
-| Threshold candidates | 300+ | 24 |
-| τ_high / κ_low | Independently optimised | Derived formulas |
-| Pipeline support | 2-agent and 3-agent | 2-agent only |
-| Inference | GPU-batched (~1.6s / 4,000 samples) | Single-sample (slow) |
-
-Results are saved to `checkpoints/policy_auto.json` and loaded automatically by the app and evaluation scripts.
+Optuna-tuned values (3-agent): τ = 0.396, κ = 0.196, τ_high = 0.905, κ_low = 0.195
 
 ---
 
-## Using `handle_batch` for High-Throughput Inference
-
-```python
-from Agentic_SABRE.orchestrator import Orchestrator
-import numpy as np
-
-orch = Orchestrator(decision_artifact="checkpoints/decision_fuser.json")
-
-# Build input lists
-x_sems = [{"embedding": np.random.rand(384).astype("float32")} for _ in range(256)]
-x_behs = [{"features":  np.random.rand(16).astype("float32")}  for _ in range(256)]
-
-# Single batched call — all 256 samples processed in parallel on GPU
-results = orch.handle_batch(x_sems, x_behs)
-
-for r in results:
-    print(r["decision"], r["score_fused"], r["uncert_max"])
-```
-
-For the 3-agent pipeline:
+## High-Throughput Batch Inference
 
 ```python
 from Agentic_SABRE.orchestrator_3agent import Orchestrator
@@ -407,3 +323,43 @@ results = orch.handle_batch(x_sems, x_behs, x_knows)
 for r in results:
     print(r["decision"], r["score_fused"], r["uncert_max"])
 ```
+
+> Note: the behavioural agent automatically applies the saved `StandardScaler` at inference — pass raw feature values as recorded.
+
+---
+
+## Key Design Decisions
+
+**Why StandardScaler for the behavioural agent?**
+Raw RanSMAP telemetry features (LBA variance, GPA variance, memory counts) have magnitudes in the range 10¹⁰–10¹⁶. Without normalisation, 1D CNN activations saturate immediately and gradients vanish, causing the model to output a constant probability regardless of input. The scaler is fitted on training data and saved to `checkpoints/behavioral_scaler.joblib`; the `BehavioralAgent` class loads and applies it transparently.
+
+**Why not SMOTE on the full behavioural dataset?**
+RanSMAP has a 596:1 class imbalance (750K ransomware, 1.2K benign). Running SMOTE directly would require generating ~600K synthetic benign samples from 1K real ones, which exhausts RAM and takes hours. Instead, `train_cnn_agents.py` automatically detects extreme imbalance, undersamples the majority class to 10K, and then applies SMOTE to produce a balanced training set.
+
+**Why PyTorch 2.0.1+cu118 and not a newer build?**
+NVIDIA GTX 1070 Ti has CUDA compute capability 6.1 (Pascal). PyTorch builds from 2.2 onwards dropped support for sm_61. The cu118 build is the last to include Pascal support and still runs comfortably under the CUDA 12.x driver.
+
+---
+
+## Citation
+
+If you use this work, please cite:
+
+```bibtex
+@article{kabuye2025agenticsabre,
+  title   = {Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent
+             Framework for Adaptive Ransomware Detection},
+  author  = {Kabuye, Henry},
+  journal = {Expert Systems with Applications},
+  year    = {2025},
+  note    = {Under review}
+}
+```
+
+---
+
+## Author
+
+**Henry Kabuye**
+Email: henrinnes@yahoo.co.uk
+GitHub: [Henrinnes](https://github.com/Henrinnes)
