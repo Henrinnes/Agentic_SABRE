@@ -126,7 +126,7 @@ Opens at **http://localhost:8501**.
 | **🗂️ Feedback** | Submit analyst corrections for ESCALATE/AUTO_CONTAIN samples. Progress bar toward retraining threshold; one-click decision MLP retrain. |
 | **🧠 Explainability** | MC Dropout convergence animation for all three agents (Semantic / Behavioural / Knowledge) with in-distribution inputs. Gradient saliency bar chart for Behavioural and Knowledge (named features) and Semantic (top-20 embedding dims). What-if counterfactual sliders for Behavioural (normalised ±3σ) and Knowledge (raw MITRE ATT&CK counts). Semantic grouped permutation importance radar. |
 | **📡 Simulation** | Live attack-stream simulation — animated scrolling timeline with ±σ uncertainty band, decision heatmap grid (last 60 samples), 5-metric live counter. |
-| **🎯 Calibration** | Reliability diagram + ECE, per-agent uncertainty violin plots, adaptive vs fixed MC Dropout pass-efficiency comparison. |
+| **🎯 Calibration** | Fused pipeline reliability diagram + ECE using label-correlated synthetic inputs (real PE embeddings for Semantic, scaler-biased telemetry for Behavioural, count-biased MITRE features for Knowledge). Per-agent reliability diagrams with individual ECE scores. Per-agent uncertainty violin plots. Adaptive vs fixed MC Dropout pass-efficiency comparison (in-distribution inputs). Caveat note on the absence of a unified multi-modal test set. |
 | **🔬 Analysis** | Plotly-native animated decision boundary (play/pause/scrub τ), risk score histogram with policy zone shading, per-agent agreement matrix heatmap, 2D score–uncertainty density contour. |
 
 The **sidebar** controls the pipeline (2-agent / 3-agent) and four live policy threshold sliders (τ, κ, τ_high, κ_low). All tabs update in real time.

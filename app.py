@@ -1068,30 +1068,88 @@ with tab_sim:
 with tab_calib:
     st.header("Calibration & Uncertainty Analysis")
 
-    # ── Reliability Diagram ───────────────────────────────────────────────────
-    st.subheader("Reliability Diagram")
+    st.info(
+        "**Calibration caveat:** The three datasets (RDset, RanSMAP, RansKnow) have no shared samples — "
+        "no single executable has semantic + behavioural + knowledge features simultaneously. "
+        "Fused-pipeline calibration therefore uses label-correlated synthetic inputs: each modality is "
+        "independently biased to reflect the assigned label. Per-agent calibration uses each agent's own "
+        "in-distribution generator. Results are indicative, not a substitute for a unified multi-modal test set.",
+        icon="ℹ️",
+    )
+
+    # ── Helper: generate label-correlated synthetic batch for one modality ────
+    def _cal_sem_batch(n, label):
+        """Semantic: real demo embedding pool (label=1→ransomware rows, label=0→benign rows).
+        Falls back to biased normal if demo file is absent."""
+        demo = load_sem_demo_embeddings()
+        if demo is not None:
+            pool = demo[demo["label"] == label]
+            rows = pool.sample(n, replace=True)
+            return [{"embedding": np.array(r["embedding"], dtype="float32")} for _, r in rows.iterrows()]
+        mu = 0.75 if label == 1 else 0.25
+        return [{"embedding": np.clip(np.random.normal(mu, 0.25, 384), 0, 1).astype("float32")}
+                for _ in range(n)]
+
+    def _cal_beh_batch(n, label):
+        """Behavioural: scaler inverse-transform from biased normalised space."""
+        agent = get_beh_agent()
+        sc_mean, sc_scale = agent.scaler.mean_, agent.scaler.scale_
+        results = []
+        for _ in range(n):
+            # ransomware → z drawn from upper half; benign → lower half
+            z = np.random.uniform(0.2, 1.5, len(sc_mean)) if label == 1 \
+                else np.random.uniform(-1.5, -0.2, len(sc_mean))
+            raw = (z * sc_scale + sc_mean).astype(np.float32)
+            results.append({"features": raw})
+        return results
+
+    def _cal_know_batch(n, label):
+        """Knowledge: high tactic counts for ransomware, low for benign."""
+        results = []
+        for _ in range(n):
+            if label == 1:
+                raw = np.array([
+                    np.random.randint(8, 15), np.random.randint(8, 15),
+                    *[np.random.randint(3, 8) for _ in range(10)],
+                    *[np.random.randint(1, 4) for _ in range(8)],
+                    *[np.random.randint(0, 2) for _ in range(3)],
+                ], dtype=np.float32)
+            else:
+                raw = np.array([
+                    np.random.randint(0, 4), np.random.randint(0, 4),
+                    *[np.random.randint(0, 3) for _ in range(10)],
+                    *[np.random.randint(0, 2) for _ in range(8)],
+                    *[np.random.randint(0, 2) for _ in range(3)],
+                ], dtype=np.float32)
+            results.append({"features": raw})
+        return results
+
+    # ── Section 1: Fused Pipeline Reliability Diagram ─────────────────────────
+    st.subheader("Fused Pipeline — Reliability Diagram & ECE")
     st.caption(
-        "Bars show fraction-positive in each confidence bin. Perfect calibration = points on the diagonal. "
-        "Uses biased synthetic inputs (high-mean embedding ≈ ransomware, low-mean ≈ benign) "
-        "as a demo of pipeline calibration."
+        "Each modality is independently biased to reflect the label: "
+        "real PE embeddings for Semantic, scaler-biased telemetry for Behavioural, "
+        "count-biased MITRE features for Knowledge."
     )
 
     cal_c1, cal_c2 = st.columns([1, 3])
     with cal_c1:
-        cal_n    = st.slider("Samples per class", 50, 400, 150, step=50, key="cal_n")
-        cal_run  = st.button("Compute Calibration", type="primary", key="cal_run")
+        cal_n   = st.slider("Samples per class", 50, 400, 150, step=50, key="cal_n")
+        cal_run = st.button("Compute Calibration", type="primary", key="cal_run")
 
     if cal_run:
         orch_cal = get_orch_3agent() if pipeline == "3-Agent" else get_orch_2agent()
         orch_cal.τ = tau; orch_cal.κ = kappa; orch_cal.τ_high = tau_high; orch_cal.κ_low = kappa_low
 
         probs_cal, labels_cal = [], []
+        # per-agent probs for individual calibration plots
+        per_agent_cal = {"semantic": [], "behavioral": [], "knowledge": []}
+
         with st.spinner(f"Running {cal_n * 2} calibration samples…"):
-            for label_val, emb_mu in [(1, 0.75), (0, 0.25)]:
-                x_sems_cal  = [{"embedding": np.clip(np.random.normal(emb_mu, 0.25, 384), 0, 1).astype("float32")}
-                               for _ in range(cal_n)]
-                x_behs_cal  = [{"features": np.random.rand(16).astype("float32")} for _ in range(cal_n)]
-                x_knows_cal = [{"features": np.random.rand(23).astype("float32")} for _ in range(cal_n)]
+            for label_val in [1, 0]:
+                x_sems_cal  = _cal_sem_batch(cal_n, label_val)
+                x_behs_cal  = _cal_beh_batch(cal_n, label_val)
+                x_knows_cal = _cal_know_batch(cal_n, label_val)
 
                 if pipeline == "3-Agent":
                     results_cal = orch_cal.handle_batch(x_sems_cal, x_behs_cal, x_knows_cal)
@@ -1101,8 +1159,13 @@ with tab_calib:
                 for r in results_cal:
                     probs_cal.append(r["score_fused"])
                     labels_cal.append(label_val)
+                    for aname in ["semantic", "behavioral", "knowledge"]:
+                        p = r.get("by_agent", {}).get(aname, {}).get("prob")
+                        if p is not None:
+                            per_agent_cal[aname].append((p, label_val))
 
-        st.session_state["cal_data"] = (np.array(probs_cal), np.array(labels_cal))
+        st.session_state["cal_data"]       = (np.array(probs_cal), np.array(labels_cal))
+        st.session_state["cal_per_agent"]  = per_agent_cal
 
     if "cal_data" in st.session_state:
         probs_c, labels_c = st.session_state["cal_data"]
@@ -1116,8 +1179,7 @@ with tab_calib:
         ))
         gap_colors = np.abs(bt[valid] - bm[valid])
         fig_cal.add_trace(go.Bar(
-            x=bm[valid], y=bt[valid], width=0.07,
-            name="Model",
+            x=bm[valid], y=bt[valid], width=0.07, name="Model",
             marker=dict(color=gap_colors, colorscale="RdYlGn_r", cmin=0, cmax=0.3,
                         showscale=True, colorbar=dict(title="|gap|")),
         ))
@@ -1129,12 +1191,56 @@ with tab_calib:
         cal_c2.plotly_chart(fig_cal, use_container_width=True)
 
         ece = float(np.nansum(np.abs(bt - bm) * (bc / bc.sum())))
-        cal_c1.metric("ECE", f"{ece:.4f}")
-        cal_c1.caption("Expected Calibration Error — lower is better")
+        cal_c1.metric("ECE (fused)", f"{ece:.4f}")
+        cal_c1.caption("Expected Calibration Error — lower is better. 0 = perfectly calibrated.")
 
     st.divider()
 
-    # ── Per-Agent Uncertainty Violins ─────────────────────────────────────────
+    # ── Section 2: Per-Agent Reliability Diagrams ─────────────────────────────
+    st.subheader("Per-Agent Reliability Diagrams")
+    st.caption("Each agent evaluated independently using its own label-correlated in-distribution inputs.")
+
+    if "cal_per_agent" in st.session_state:
+        agent_cols = st.columns(3)
+        agent_names = ["semantic", "behavioral", "knowledge"]
+        agent_labels_disp = ["Semantic", "Behavioural", "Knowledge"]
+        for col, aname, alabel in zip(agent_cols, agent_names, agent_labels_disp):
+            pairs = st.session_state["cal_per_agent"].get(aname, [])
+            if not pairs:
+                col.info(f"No {alabel} data (2-Agent mode?)")
+                continue
+            ap = np.array([p for p, _ in pairs])
+            al = np.array([l for _, l in pairs])
+            abm, abt, abc = reliability_diagram_data(ap, al)
+            avalid = ~np.isnan(abt)
+            aece = float(np.nansum(np.abs(abt - abm) * (abc / abc.sum())))
+
+            fig_a = go.Figure()
+            fig_a.add_trace(go.Scatter(
+                x=[0, 1], y=[0, 1], mode="lines",
+                line=dict(color="gray", dash="dash", width=1), showlegend=False,
+            ))
+            fig_a.add_trace(go.Bar(
+                x=abm[avalid], y=abt[avalid], width=0.08,
+                marker=dict(
+                    color=np.abs(abt[avalid] - abm[avalid]),
+                    colorscale="RdYlGn_r", cmin=0, cmax=0.3,
+                ),
+                showlegend=False,
+            ))
+            fig_a.update_layout(
+                title=f"{alabel}<br><sup>ECE = {aece:.4f}</sup>",
+                xaxis_title="Confidence", yaxis_title="Fraction positive",
+                xaxis_range=[0, 1], yaxis_range=[0, 1],
+                height=300, margin=dict(t=60, b=40, l=50, r=20),
+            )
+            col.plotly_chart(fig_a, use_container_width=True)
+    else:
+        st.info("Click **Compute Calibration** above to populate per-agent diagrams.")
+
+    st.divider()
+
+    # ── Section 3: Per-Agent Uncertainty Violins ──────────────────────────────
     st.subheader("Per-Agent Uncertainty Distribution")
 
     if "batch_results_full" in st.session_state:
@@ -1160,9 +1266,9 @@ with tab_calib:
 
     st.divider()
 
-    # ── Adaptive vs Fixed MC Dropout Comparison ───────────────────────────────
+    # ── Section 4: Adaptive vs Fixed MC Dropout Comparison ───────────────────
     st.subheader("Adaptive vs Fixed MC Dropout — Pass Efficiency")
-    st.caption("Runs 50 random behavioral samples under each MC strategy and compares passes used vs uncertainty.")
+    st.caption("Runs 50 in-distribution behavioral samples under each MC strategy and compares passes used vs uncertainty.")
 
     adapt_run = st.button("Run Comparison", type="primary", key="adapt_run")
 
@@ -1175,12 +1281,16 @@ with tab_calib:
             ("Adaptive",   {"T": None, "min_T": 5, "max_T": 50, "tol": 1e-3}),
         ]
         comp_rows = []
+        _beh_ref = get_beh_agent()
+        _sc_mean, _sc_scale = _beh_ref.scaler.mean_, _beh_ref.scaler.scale_
         with st.spinner("Running comparison across 4 strategies × 50 samples…"):
             for label, kwargs in configs:
                 a = _BA(**kwargs, device="cpu")
                 passes_l, uncerts_l = [], []
                 for _ in range(50):
-                    out = a.score({"features": np.random.rand(16).astype(np.float32)})
+                    z   = np.random.uniform(-1.5, 1.5, len(_sc_mean)).astype(np.float64)
+                    raw = (z * _sc_scale + _sc_mean).astype(np.float32)
+                    out = a.score({"features": raw})
                     passes_l.append(out.extras["passes_used"])
                     uncerts_l.append(out.uncert)
                 comp_rows.append({
