@@ -2,7 +2,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from typing import Dict, Any, Tuple, List
+from typing import Dict, Any, Tuple, List, Optional
 
 import numpy as np
 import torch
@@ -43,6 +43,7 @@ class BehavioralAgent:
         self,
         checkpoint_path: str = "checkpoints/behavioral_cnn.pt",
         metadata_path: str = "checkpoints/metadata.json",
+        scaler_path: str = "checkpoints/behavioral_scaler.joblib",
         dropout: float = 0.3,
         T: int | None = None,
         min_T: int = 5,
@@ -50,19 +51,18 @@ class BehavioralAgent:
         tol: float = 1e-3,
         device: str | None = None,
     ):
-        """
-        T       : fixed number of MC Dropout passes (set to 10 to match paper).
-                  If None (default), uses adaptive mode: runs passes until
-                  uncertainty converges within `tol`, between `min_T` and `max_T`.
-        min_T   : minimum passes before checking convergence (adaptive mode only).
-        max_T   : hard cap on passes (adaptive mode only).
-        tol     : convergence threshold — stop when mean |sigma_new - sigma_old| < tol.
-        """
         meta = json.loads(Path(metadata_path).read_text())
         input_dim = int(meta["behavioral_input_dim"])
         self.model = CNNBehavioralAgent(input_dim, dropout)
         state = torch.load(checkpoint_path, map_location="cpu")
         self.model.load_state_dict(state, strict=True)
+
+        # Load scaler if available (added when training on raw high-magnitude features)
+        self.scaler = None
+        scaler_p = Path(scaler_path)
+        if scaler_p.exists():
+            import joblib
+            self.scaler = joblib.load(scaler_p)
 
         self.T = T
         self.min_T = min_T
@@ -73,6 +73,8 @@ class BehavioralAgent:
         self.model.eval()
 
     def _prepare(self, v: np.ndarray) -> torch.Tensor:
+        if self.scaler is not None:
+            v = self.scaler.transform(v.reshape(1, -1)).squeeze(0).astype(np.float32)
         t = torch.tensor(v, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
         return t.to(self.device)
 
@@ -102,6 +104,8 @@ class BehavioralAgent:
     def score_batch(self, inputs: List[Dict[str, Any]]) -> List[AgentOutput]:
         """MC Dropout over a batch. Runs passes on [B,1,D] — stops early when uncertainty converges."""
         vecs = np.stack([np.asarray(x["features"], dtype=np.float32) for x in inputs])  # [B, D]
+        if self.scaler is not None:
+            vecs = self.scaler.transform(vecs).astype(np.float32)
         t = torch.from_numpy(vecs).unsqueeze(1).to(self.device)  # [B, 1, D]
         self.model.apply(_enable_dropout_only)
         all_preds: List[torch.Tensor] = []

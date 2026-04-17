@@ -7,6 +7,8 @@ import torch
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+import joblib
 from torch.utils.data import DataLoader, TensorDataset
 from imblearn.over_sampling import SMOTE
 import random
@@ -130,21 +132,46 @@ def train_cnn(
     model,
     X,
     y,
-    epochs=15,          # was 10
+    epochs=15,
     lr=1e-3,
     is_cnn=True,
-    batch_size=256,     # was 32
-    use_smote=True,     # new flag
+    batch_size=256,
+    use_smote=True,
+    smote_imbalance_limit=50,   # if ratio > this, undersample majority then SMOTE
+    undersample_majority_to=10000,  # cap majority class before SMOTE for extreme imbalance
 ):
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, stratify=y, test_size=0.2, random_state=42
     )
 
+    n_pos = int((y_train == 1).sum())
+    n_neg = int((y_train == 0).sum())
+    majority_label = 1 if n_pos > n_neg else 0
+    minority_label = 1 - majority_label
+    n_majority = max(n_pos, n_neg)
+    n_minority = min(n_pos, n_neg)
+    imbalance_ratio = n_majority / max(n_minority, 1)
+
+    if use_smote and imbalance_ratio > smote_imbalance_limit:
+        # Undersample majority to `undersample_majority_to` then SMOTE to balance
+        print(f"  [INFO] Imbalance ratio {imbalance_ratio:.0f}:1 — undersampling majority to "
+              f"{undersample_majority_to:,} then applying SMOTE")
+        rng = np.random.default_rng(42)
+        maj_idx = np.where(y_train == majority_label)[0]
+        min_idx = np.where(y_train == minority_label)[0]
+        keep_maj = rng.choice(maj_idx, size=min(undersample_majority_to, len(maj_idx)), replace=False)
+        keep_idx = np.concatenate([keep_maj, min_idx])
+        X_train = X_train[keep_idx]
+        y_train = y_train[keep_idx]
+        print(f"  After undersampling: {(y_train == 1).sum()} ransomware, {(y_train == 0).sum()} benign")
+
     if use_smote:
         sm = SMOTE(random_state=42)
         X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
+        sampler = None
     else:
         X_train_res, y_train_res = X_train, y_train
+        sampler = None
 
     X_train_t = to_tensor(X_train_res, unsqueeze=is_cnn)
     y_train_t = to_tensor(y_train_res)
@@ -160,7 +187,7 @@ def train_cnn(
         batch_size=batch_size,
         shuffle=True,
     )
-    test_loader  = DataLoader(
+    test_loader = DataLoader(
         TensorDataset(X_test_t, y_test_t),
         batch_size=batch_size,
     )
@@ -223,11 +250,13 @@ if __name__ == "__main__":
     print(f"Semantic accuracy: {acc_sem:.4f}")
 
     print("Training Behavioural CNN...")
+    beh_scaler = StandardScaler()
+    X_beh_scaled = beh_scaler.fit_transform(X_beh).astype(np.float32)
     beh_model, acc_beh = train_cnn(
-        CNNBehavioralAgent(X_beh.shape[1], dropout=0.3),
-        X_beh, y_beh,
+        CNNBehavioralAgent(X_beh_scaled.shape[1], dropout=0.3),
+        X_beh_scaled, y_beh,
         epochs=10,
-        batch_size=32,
+        batch_size=256,
         is_cnn=True,
         use_smote=True,
     )
@@ -237,9 +266,12 @@ if __name__ == "__main__":
     ckpt_dir.mkdir(exist_ok=True)
     torch.save(sem_model.state_dict(), ckpt_dir/"semantic_cnn.pt")
     torch.save(beh_model.state_dict(), ckpt_dir/"behavioral_cnn.pt")
-    meta = {
-        "semantic_input_dim": int(X_sem.shape[1]),
-        "behavioral_input_dim": int(X_beh.shape[1])
-    }
-    (ckpt_dir/"metadata.json").write_text(json.dumps(meta, indent=2))
+    joblib.dump(beh_scaler, ckpt_dir/"behavioral_scaler.joblib")
+
+    # Update metadata preserving existing keys (knowledge agent etc.)
+    meta_path = ckpt_dir / "metadata.json"
+    meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+    meta["semantic_input_dim"] = int(X_sem.shape[1])
+    meta["behavioral_input_dim"] = int(X_beh_scaled.shape[1])
+    meta_path.write_text(json.dumps(meta, indent=2))
     print("Saved checkpoints and metadata in ./checkpoints/")

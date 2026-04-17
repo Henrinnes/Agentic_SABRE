@@ -338,47 +338,43 @@ def main():
     beh_agent = BehavioralAgent(T=10)
     know_agent = KnowledgeAgent(T=10)
 
-    # -----------------------------
-    # Collect semantic scores
-    # -----------------------------
-
-    p_sem, s_sem = [], []
-
-    for v in X_sem:
-        out = sem_agent.score({"embedding": v})
-        p_sem.append(out.prob)
-        s_sem.append(out.uncert)
-
-    p_sem = np.asarray(p_sem, dtype=np.float32)
-    s_sem = np.asarray(s_sem, dtype=np.float32)
+    BATCH = 512  # GPU batch size for score collection
 
     # -----------------------------
-    # Collect behavioural scores
+    # Collect semantic scores (batched)
     # -----------------------------
-
-    p_beh, s_beh = [], []
-
-    for v in X_beh:
-        out = beh_agent.score({"features": v})
-        p_beh.append(out.prob)
-        s_beh.append(out.uncert)
-
-    p_beh = np.asarray(p_beh, dtype=np.float32)
-    s_beh = np.asarray(s_beh, dtype=np.float32)
+    print(f"Scoring semantic ({len(X_sem):,} samples)...")
+    sem_inputs = [{"embedding": v} for v in X_sem]
+    sem_outs = []
+    for i in range(0, len(sem_inputs), BATCH):
+        sem_outs.extend(sem_agent.score_batch(sem_inputs[i:i+BATCH]))
+    p_sem = np.array([o.prob   for o in sem_outs], dtype=np.float32)
+    s_sem = np.array([o.uncert for o in sem_outs], dtype=np.float32)
+    print(f"  done — mean_p={p_sem.mean():.3f}")
 
     # -----------------------------
-    # Collect knowledge scores
+    # Collect behavioural scores (batched)
     # -----------------------------
+    print(f"Scoring behavioural ({len(X_beh):,} samples)...")
+    beh_inputs = [{"features": v} for v in X_beh]
+    beh_outs = []
+    for i in range(0, len(beh_inputs), BATCH):
+        beh_outs.extend(beh_agent.score_batch(beh_inputs[i:i+BATCH]))
+    p_beh = np.array([o.prob   for o in beh_outs], dtype=np.float32)
+    s_beh = np.array([o.uncert for o in beh_outs], dtype=np.float32)
+    print(f"  done — mean_p={p_beh.mean():.3f}")
 
-    p_know, s_know = [], []
-
-    for v in X_know:
-        out = know_agent.score({"features": v})
-        p_know.append(out.prob)
-        s_know.append(out.uncert)
-
-    p_know = np.asarray(p_know, dtype=np.float32)
-    s_know = np.asarray(s_know, dtype=np.float32)
+    # -----------------------------
+    # Collect knowledge scores (batched)
+    # -----------------------------
+    print(f"Scoring knowledge ({len(X_know):,} samples)...")
+    know_inputs = [{"features": v} for v in X_know]
+    know_outs = []
+    for i in range(0, len(know_inputs), BATCH):
+        know_outs.extend(know_agent.score_batch(know_inputs[i:i+BATCH]))
+    p_know = np.array([o.prob   for o in know_outs], dtype=np.float32)
+    s_know = np.array([o.uncert for o in know_outs], dtype=np.float32)
+    print(f"  done — mean_p={p_know.mean():.3f}")
 
     # -----------------------------
     # Build fusion dataset

@@ -37,6 +37,7 @@ if __name__ == "__main__":
           f"benign={len(y_test)-y_test.sum()}")
 
     agent = BehavioralAgent(T=10)
+    # scaler is applied automatically inside agent.score_batch if behavioral_scaler.joblib exists
 
     probs = agent.score_batch(
         [{"features": v} for v in X_test]
