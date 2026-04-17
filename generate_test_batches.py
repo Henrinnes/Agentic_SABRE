@@ -1,0 +1,146 @@
+"""
+generate_test_batches.py
+Creates small (~200-row) test batch files for all three agents.
+Output goes to test_data/ directory.
+
+Usage:
+    python generate_test_batches.py
+"""
+import json
+import numpy as np
+import pandas as pd
+from pathlib import Path
+
+SEED = 42
+rng  = np.random.default_rng(SEED)
+N    = 200   # rows — tiny, fast to upload
+
+Path("test_data").mkdir(exist_ok=True)
+
+# ── 1. Semantic (384D embeddings) ────────────────────────────────────────────
+# Ransomware embeddings cluster near 0.6–0.9; benign near 0.1–0.4
+labels = np.array([1]*100 + [0]*100)
+rng.shuffle(labels)
+
+embs = np.where(
+    labels[:, None] == 1,
+    rng.uniform(0.55, 0.95, (N, 384)).astype("float32"),
+    rng.uniform(0.05, 0.45, (N, 384)).astype("float32"),
+)
+
+# Parquet with 'embedding' column of arrays + label
+df_sem = pd.DataFrame({"label": labels})
+df_sem["embedding"] = list(embs)
+df_sem.to_parquet("test_data/semantic_test.parquet", index=False)
+
+# Also CSV (flat 384 columns + label)
+df_sem_csv = pd.DataFrame(embs, columns=[f"emb_{i}" for i in range(384)])
+df_sem_csv.insert(0, "label", labels)
+df_sem_csv.to_csv("test_data/semantic_test.csv", index=False)
+
+print(f"Semantic:    test_data/semantic_test.parquet  ({N} rows, 384-D)")
+print(f"             test_data/semantic_test.csv      ({N} rows, flat)")
+
+# ── 2. Behavioural (16D raw telemetry — realistic magnitude ranges) ───────────
+BEHAVIOR_COLUMNS = [
+    'avg_read_throughput', 'avg_write_throughput',
+    'read_LBA_variance', 'write_LBA_variance',
+    'write_entropy_mean', 'mem_read_entropy_mean', 'mem_write_entropy_mean',
+    'mem_readwrite_entropy_mean', 'mem_read_GPA_variance',
+    'mem_write_GPA_variance', 'mem_readwrite_GPA_variance',
+    'mem_exec_GPA_variance', 'mem_read_count', 'mem_write_count',
+    'mem_readwrite_count', 'mem_exec_count',
+]
+
+# Raw magnitudes matching the real dataset (scaler is applied inside the agent)
+def beh_sample(is_ransom, n):
+    if is_ransom:
+        return np.column_stack([
+            rng.uniform(1e8,  1e10, n),   # avg_read_throughput  (higher for ransom)
+            rng.uniform(5e8,  5e10, n),   # avg_write_throughput
+            rng.uniform(1e12, 1e15, n),   # read_LBA_variance
+            rng.uniform(5e12, 5e15, n),   # write_LBA_variance
+            rng.uniform(6.5,  8.0,  n),   # write_entropy_mean   (near-max entropy)
+            rng.uniform(5.0,  7.5,  n),   # mem_read_entropy_mean
+            rng.uniform(5.5,  7.8,  n),   # mem_write_entropy_mean
+            rng.uniform(5.0,  7.5,  n),   # mem_readwrite_entropy_mean
+            rng.uniform(1e12, 1e14, n),   # mem_read_GPA_variance
+            rng.uniform(1e12, 1e14, n),   # mem_write_GPA_variance
+            rng.uniform(1e12, 1e14, n),   # mem_readwrite_GPA_variance
+            rng.uniform(1e10, 1e13, n),   # mem_exec_GPA_variance
+            rng.uniform(1e5,  1e7,  n),   # mem_read_count
+            rng.uniform(1e5,  1e7,  n),   # mem_write_count
+            rng.uniform(5e4,  5e6,  n),   # mem_readwrite_count
+            rng.uniform(1e4,  1e6,  n),   # mem_exec_count
+        ]).astype("float32")
+    else:
+        return np.column_stack([
+            rng.uniform(1e6,  1e8,  n),
+            rng.uniform(1e6,  1e8,  n),
+            rng.uniform(1e9,  1e11, n),
+            rng.uniform(1e9,  1e11, n),
+            rng.uniform(2.0,  5.0,  n),
+            rng.uniform(1.5,  4.5,  n),
+            rng.uniform(1.5,  4.5,  n),
+            rng.uniform(1.5,  4.5,  n),
+            rng.uniform(1e9,  1e11, n),
+            rng.uniform(1e9,  1e11, n),
+            rng.uniform(1e9,  1e11, n),
+            rng.uniform(1e8,  1e10, n),
+            rng.uniform(1e3,  1e5,  n),
+            rng.uniform(1e3,  1e5,  n),
+            rng.uniform(5e2,  5e4,  n),
+            rng.uniform(1e2,  1e4,  n),
+        ]).astype("float32")
+
+X_beh_r = beh_sample(True,  100)
+X_beh_b = beh_sample(False, 100)
+X_beh   = np.vstack([X_beh_r, X_beh_b])
+y_beh   = np.array([1]*100 + [0]*100)
+shuffle  = rng.permutation(N)
+X_beh, y_beh = X_beh[shuffle], y_beh[shuffle]
+
+df_beh = pd.DataFrame(X_beh, columns=BEHAVIOR_COLUMNS)
+df_beh.insert(0, "label", y_beh)
+df_beh.to_csv("test_data/behavioural_test.csv", index=False)
+df_beh.to_parquet("test_data/behavioural_test.parquet", index=False)
+print(f"Behavioural: test_data/behavioural_test.csv       ({N} rows, raw magnitudes)")
+print(f"             test_data/behavioural_test.parquet")
+
+# ── 3. Knowledge (23D MITRE ATT&CK features) ─────────────────────────────────
+meta = json.loads(Path("checkpoints/metadata.json").read_text())
+KNOW_COLS = meta["knowledge_features"]  # 23 named columns
+
+def know_sample(is_ransom, n):
+    # 23 columns: Tool_Total(1), Tactic_Total(1), 10 Tactic_*(10), 8 Tool_*(8), 3 Platform_*(3)
+    if is_ransom:
+        totals    = rng.integers(1, 15, (n, 2))
+        tactics   = rng.integers(1,  8, (n, 10))
+        tools     = rng.integers(0,  3, (n, 8))
+        platforms = rng.integers(0,  2, (n, 3))
+    else:
+        totals    = rng.integers(0,  5, (n, 2))
+        tactics   = rng.integers(0,  3, (n, 10))
+        tools     = rng.integers(0,  2, (n, 8))
+        platforms = np.column_stack([rng.integers(0, 2, n), np.zeros((n, 2), dtype=int)])
+    return np.column_stack([totals, tactics, tools, platforms]).astype("float32")
+
+X_know_r = know_sample(True,  100)
+X_know_b = know_sample(False, 100)
+X_know   = np.vstack([X_know_r, X_know_b])
+y_know   = np.array([1]*100 + [0]*100)
+shuffle  = rng.permutation(N)
+X_know, y_know = X_know[shuffle], y_know[shuffle]
+
+df_know = pd.DataFrame(X_know, columns=KNOW_COLS)
+df_know.insert(0, "label", y_know)
+df_know.to_csv("test_data/knowledge_test.csv", index=False)
+print(f"Knowledge:   test_data/knowledge_test.csv         ({N} rows, 23 MITRE features)")
+
+# ── Summary ───────────────────────────────────────────────────────────────────
+total_mb = sum(p.stat().st_size for p in Path("test_data").iterdir()) / 1e6
+print(f"\nTotal test_data/ size: {total_mb:.2f} MB")
+print("\nDone. Upload these in the Batch tab:")
+print("  Semantic   → test_data/semantic_test.parquet  (or .csv)")
+print("  Behavioural→ test_data/behavioural_test.csv   (or .parquet)")
+print("  Knowledge  → test_data/knowledge_test.csv")
