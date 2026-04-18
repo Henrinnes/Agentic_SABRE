@@ -111,25 +111,29 @@ print(f"             test_data/behavioural_test.parquet")
 meta = json.loads(Path("checkpoints/metadata.json").read_text())
 KNOW_COLS = meta["knowledge_features"]  # 23 named columns
 
-def know_sample(is_ransom, n):
-    # 23 columns: Tool_Total(1), Tactic_Total(1), 10 Tactic_*(10), 8 Tool_*(8), 3 Platform_*(3)
-    if is_ransom:
-        totals    = rng.integers(1, 15, (n, 2))
-        tactics   = rng.integers(1,  8, (n, 10))
-        tools     = rng.integers(0,  3, (n, 8))
-        platforms = rng.integers(0,  2, (n, 3))
-    else:
-        totals    = rng.integers(0,  5, (n, 2))
-        tactics   = rng.integers(0,  3, (n, 10))
-        tools     = rng.integers(0,  2, (n, 8))
-        platforms = np.column_stack([rng.integers(0, 2, n), np.zeros((n, 2), dtype=int)])
-    return np.column_stack([totals, tactics, tools, platforms]).astype("float32")
+# Sample from real RansKnow data so values are in-distribution (same fix applied in app.py)
+_cal_path = Path("checkpoints/knowledge_cal_data.csv")
+if _cal_path.exists():
+    df_real = pd.read_csv(_cal_path)
+    feat_cols = [c for c in df_real.columns if c != "label"]
+    X_know_r = df_real[df_real["label"] == 1][feat_cols].sample(100, replace=True, random_state=SEED).values.astype("float32")
+    X_know_b = df_real[df_real["label"] == 0][feat_cols].sample(100, replace=True, random_state=SEED).values.astype("float32")
+else:
+    # Fallback: real per-class means with jitter (mirrors app.py fallback)
+    means_1 = np.array([0.9, 31.0, 13.3, 4.7, 4.4, 1.5, 0.02, 1.1, 0.03, 0.8, 1.3, 4.0,
+                         0.6, 0.0, 0.0, 0.1, 0.0, 0.2, 0.0, 0.02, 4.5, 1.5, 0.6])
+    means_0 = np.array([0.02, 4.2, 1.5, 0.8, 0.9, 0.2, 0.0, 0.05, 0.0, 0.03, 0.2, 0.6,
+                         0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.6, 1.4, 0.15])
+    X_know_r = np.clip(
+        means_1 + rng.standard_normal((100, len(means_1))) * (means_1 * 0.1 + 0.01), 0, None
+    ).astype("float32")
+    X_know_b = np.clip(
+        means_0 + rng.standard_normal((100, len(means_0))) * (means_0 * 0.1 + 0.01), 0, None
+    ).astype("float32")
 
-X_know_r = know_sample(True,  100)
-X_know_b = know_sample(False, 100)
-X_know   = np.vstack([X_know_r, X_know_b])
-y_know   = np.array([1]*100 + [0]*100)
-shuffle  = rng.permutation(N)
+X_know = np.vstack([X_know_r, X_know_b])
+y_know = np.array([1]*100 + [0]*100)
+shuffle = rng.permutation(N)
 X_know, y_know = X_know[shuffle], y_know[shuffle]
 
 df_know = pd.DataFrame(X_know, columns=KNOW_COLS)
