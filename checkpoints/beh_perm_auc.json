@@ -1,0 +1,39 @@
+{
+  "baseline_auc": 0.5801499999999999,
+  "feature_names": [
+    "avg_read_throughput",
+    "avg_write_throughput",
+    "read_LBA_variance",
+    "write_LBA_variance",
+    "write_entropy_mean",
+    "mem_read_entropy_mean",
+    "mem_write_entropy_mean",
+    "mem_readwrite_entropy_mean",
+    "mem_read_GPA_variance",
+    "mem_write_GPA_variance",
+    "mem_readwrite_GPA_variance",
+    "mem_exec_GPA_variance",
+    "mem_read_count",
+    "mem_write_count",
+    "mem_readwrite_count",
+    "mem_exec_count"
+  ],
+  "auc_drops": [
+    0.04675000000000007,
+    0.07584999999999997,
+    0.05445,
+    0.003549999999999942,
+    0.08474999999999999,
+    -0.013600000000000056,
+    0.07894999999999996,
+    -0.0010500000000001064,
+    0.08754999999999996,
+    0.023499999999999965,
+    0.04204999999999992,
+    0.0633499999999999,
+    0.1908499999999999,
+    0.09314999999999996,
+    0.0014999999999999458,
+    0.03374999999999995
+  ]
+}

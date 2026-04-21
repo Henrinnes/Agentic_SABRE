@@ -541,14 +541,14 @@ with tab_batch:
             pie = px.pie(results_df, names="decision", color="decision",
                          color_discrete_map=DECISION_COLOR, title="Triage distribution", hole=0.4)
             pie.update_layout(height=300, margin=dict(t=40, b=0))
-            st.plotly_chart(pie, use_container_width=True)
+            st.plotly_chart(pie, use_container_width=True, key="batch_pie")
         with col_table:
-            st.dataframe(results_df.style.applymap(
+            st.dataframe(results_df.style.map(
                 lambda v: f"background-color:{DECISION_COLOR.get(v,'')};color:white"
                           if v in DECISION_COLOR else "", subset=["decision"],
             ), use_container_width=True, height=300)
 
-        st.plotly_chart(render_triage_scatter(results_df), use_container_width=True)
+        st.plotly_chart(render_triage_scatter(results_df), use_container_width=True, key="batch_scatter")
         st.download_button("⬇  Download results CSV",
                            results_df.to_csv(index=False).encode("utf-8"),
                            "sabre_results.csv", "text/csv")
@@ -584,21 +584,24 @@ with tab_dash:
     fig_policy.add_vline(x=tau_high, line_dash="dash", line_color="red",    annotation_text=f"τ_high={tau_high:.2f}")
     fig_policy.add_hline(y=kappa,    line_dash="dash", line_color="orange", annotation_text=f"κ={kappa:.2f}")
     fig_policy.add_hline(y=kappa_low,line_dash="dash", line_color="red",    annotation_text=f"κ_low={kappa_low:.2f}")
-    st.plotly_chart(fig_policy, use_container_width=True)
+    st.plotly_chart(fig_policy, use_container_width=True, key="dash_policy")
 
     st.markdown("---")
     st.subheader("Saved Evaluation Figures")
     figure_groups = {
-        "ROC Curves": ["Figures/Roc_Both.png", "Figures/ROC_Curve_RDset.png", "Figures/Roc_Curve_RanSMAP.png"],
+        "ROC Curves": ["Figures/ROC_all_agents.png", "Figures/Roc_Both.png",
+                       "Figures/ROC_Curve_RDset.png", "Figures/Roc_Curve_RanSMAP.png"],
         "Calibration": ["Figures/calibration_semantic.png", "Figures/calibration_behavioral.png",
-                        "Figures/calibration_decision.png", "Figures/Reliability_Diagram_Fusion.png"],
+                        "Figures/calibration_knowledge.png", "Figures/calibration_decision.png",
+                        "Figures/Reliability_Diagram_Fusion.png"],
         "Triage & Uncertainty": ["Figures/Triage_policy.png", "Figures/Triage_policy_space.png",
                                   "Figures/uncertainty_comparison.png", "Figures/Dec_layer_Triage.png"],
         "Feature Importance & CFs": ["Figures/Behaviour_feature_importance.png",
                                       "Figures/CF_semantic.png", "Figures/Rep_Beh_CFs.png"],
         "Semantic CF Diagnostics": ["Figures/fig_semantic_cf_l2_hist.png", "Figures/fig_semantic_cf_p0_vs_l2.png",
                                      "Figures/fig_semantic_cf_rel_hist.png", "Figures/fig_semantic_cf_steps_hist.png"],
-        "Architecture": ["Figures/Prop_Agentic_Sabre_30_03_2025.png",
+        "Architecture": ["Figures/Prop_Agentic_Sabre_26_01_2025_3Agents.png",
+                         "Figures/Prop_Agentic_Sabre_30_03_2025.png",
                          "Figures/Prop_Agentic_Sabre_08_11_2025.png", "Figures/CTGAN model.PNG"],
     }
     for group_name, paths in figure_groups.items():
@@ -717,7 +720,10 @@ with tab_feedback:
 with tab_explain:
     st.header("Agent Explainability")
 
-    _KNOW_COLS = json.loads(Path("checkpoints/metadata.json").read_text()).get("knowledge_features", [f"feat_{i}" for i in range(23)])
+    try:
+        _KNOW_COLS = json.loads(Path("checkpoints/metadata.json").read_text()).get("knowledge_features", [f"feat_{i}" for i in range(23)])
+    except Exception:
+        _KNOW_COLS = [f"feat_{i}" for i in range(23)]
 
     # ── Section 1: MC Dropout Convergence Animation — all three agents ────────
     st.subheader("MC Dropout Convergence Animation")
@@ -784,7 +790,7 @@ with tab_explain:
                 yaxis_range=[-0.05, 1.05], height=380, margin=dict(t=50, b=30, r=80),
                 showlegend=(i == len(raw_samples)),
             )
-            mc_ph.plotly_chart(fig_mc, use_container_width=True)
+            mc_ph.plotly_chart(fig_mc, use_container_width=True, key="mc_chart")
             time.sleep(mc_delay)
 
         final_mean = float(np.mean(raw_samples))
@@ -863,7 +869,7 @@ with tab_explain:
             height=max(350, len(name_plot) * 22 + 80),
             margin=dict(l=left_margin, t=50),
         )
-        sal_c2.plotly_chart(fig_sal, use_container_width=True)
+        sal_c2.plotly_chart(fig_sal, use_container_width=True, key="sal_chart")
 
     st.divider()
 
@@ -914,32 +920,121 @@ with tab_explain:
 
     st.divider()
 
-    # ── Section 4: Permutation Importance — Semantic radar (saved) ────────────
-    perm_path = Path("checkpoints/semantic_perm_grouped_auc.json")
-    if perm_path.exists():
-        st.subheader("Semantic Agent — Grouped Permutation Importance")
-        perm_raw = json.loads(perm_path.read_text())
-        groups = perm_raw.get("top_groups", [])
-        if groups:
-            names  = [f"Group {i+1}\n(dims {g['dims'][0]}…)" for i, g in enumerate(groups[:12])]
-            values = [abs(float(g["delta_auc_mean"])) for g in groups[:12]]
-            max_v  = max(values) if max(values) > 0 else 1e-15
-            fig_radar = go.Figure(go.Scatterpolar(
-                r=values + [values[0]], theta=names + [names[0]],
-                fill="toself", fillcolor="rgba(41,128,185,0.2)",
-                line=dict(color="#2980b9"),
+    # ── Section 4: Permutation Importance — all three agents ─────────────────
+    st.subheader("Permutation Feature Importance")
+    st.caption("AUC drop when each feature (or group) is randomly shuffled. Higher drop = more important.")
+
+    perm_agent_tab = st.radio(
+        "Agent", ["Semantic (grouped)", "Behavioural", "Knowledge"],
+        horizontal=True, key="perm_agent_tab",
+    )
+
+    if perm_agent_tab == "Semantic (grouped)":
+        perm_path = Path("checkpoints/semantic_perm_grouped_auc.json")
+        if perm_path.exists():
+            perm_raw = json.loads(perm_path.read_text())
+            groups = perm_raw.get("top_groups", [])
+            if groups:
+                names  = [f"Group {i+1}\n(dims {g['dims'][0]}…)" for i, g in enumerate(groups[:12])]
+                values = [abs(float(g["delta_auc_mean"])) for g in groups[:12]]
+                max_v  = max(values) if max(values) > 0 else 1e-15
+                fig_radar = go.Figure(go.Scatterpolar(
+                    r=values + [values[0]], theta=names + [names[0]],
+                    fill="toself", fillcolor="rgba(41,128,185,0.2)",
+                    line=dict(color="#2980b9"),
+                ))
+                fig_radar.update_layout(
+                    polar=dict(radialaxis=dict(visible=True, range=[0, max_v * 1.2])),
+                    title=f"Top-12 semantic embedding groups — AUC drop on permutation "
+                          f"(baseline AUC={perm_raw.get('baseline_auc', '?')})",
+                    height=420,
+                )
+                st.plotly_chart(fig_radar, use_container_width=True, key="perm_radar")
+                st.caption(
+                    "All delta-AUC values are near zero because the semantic agent achieves "
+                    "perfect separation — no single group of 8 dimensions is uniquely critical."
+                )
+        else:
+            st.info("Semantic permutation importance not computed yet. Run `semantic_permutation_importance_grouped.py`.")
+
+    else:
+        # Behavioural or Knowledge — compute from test_data CSVs
+        is_beh   = perm_agent_tab == "Behavioural"
+        csv_path = Path("test_data/behavioural_test.csv" if is_beh else "test_data/knowledge_test.csv")
+        json_key = "beh_perm_auc" if is_beh else "know_perm_auc"
+        cache_path = Path(f"checkpoints/{json_key}.json")
+        feat_names = BEHAVIOR_COLUMNS if is_beh else _KNOW_COLS
+        agent_color = "#8e44ad" if is_beh else "#16a085"
+        agent_label = "Behavioural" if is_beh else "Knowledge"
+
+        perm_c1, perm_c2 = st.columns([1, 3])
+        with perm_c1:
+            perm_run = st.button("Compute Importance", type="primary", key=f"perm_run_{json_key}")
+            if cache_path.exists():
+                st.caption(f"Cached result available — click to recompute.")
+
+        if perm_run:
+            if not csv_path.exists():
+                st.warning(f"{csv_path} not found. Run `generate_test_batches.py` first.")
+            else:
+                df_test = pd.read_csv(csv_path)
+                drop_cols = KNOW_DROP_COLS if not is_beh else []
+                X_test = (
+                    df_test.drop(columns=drop_cols, errors="ignore")
+                           .select_dtypes(include="number")
+                           .drop(columns=["label"], errors="ignore")
+                           .to_numpy(dtype=np.float32)
+                )
+                y_test = df_test["label"].astype(int).values
+
+                agent_pi = get_beh_agent() if is_beh else get_know_agent()
+
+                from sklearn.metrics import roc_auc_score as _auc
+                with st.spinner(f"Computing {agent_label} permutation importance ({len(feat_names)} features)…"):
+                    base_probs = np.array([agent_pi.score({"features": v}).prob for v in X_test])
+                    baseline_auc = float(_auc(y_test, base_probs))
+                    drops = []
+                    rng_pi = np.random.default_rng(42)
+                    for fi in range(len(feat_names)):
+                        X_p = X_test.copy()
+                        rng_pi.shuffle(X_p[:, fi])
+                        p_p = np.array([agent_pi.score({"features": v}).prob for v in X_p])
+                        drops.append(baseline_auc - float(_auc(y_test, p_p)))
+
+                result = {"baseline_auc": baseline_auc, "feature_names": feat_names,
+                          "auc_drops": drops}
+                cache_path.write_text(json.dumps(result, indent=2))
+                st.session_state[json_key] = result
+
+        # Load from cache if not freshly computed
+        if json_key not in st.session_state and cache_path.exists():
+            st.session_state[json_key] = json.loads(cache_path.read_text())
+
+        if json_key in st.session_state:
+            res_pi  = st.session_state[json_key]
+            names_pi = res_pi["feature_names"]
+            drops_pi = np.array(res_pi["auc_drops"])
+            order_pi = np.argsort(drops_pi)        # ascending for horizontal bar
+            fig_pi = go.Figure(go.Bar(
+                x=drops_pi[order_pi],
+                y=[names_pi[i] for i in order_pi],
+                orientation="h",
+                marker=dict(
+                    color=drops_pi[order_pi],
+                    colorscale="plasma", showscale=True,
+                    colorbar=dict(title="AUC drop"),
+                ),
             ))
-            fig_radar.update_layout(
-                polar=dict(radialaxis=dict(visible=True, range=[0, max_v * 1.2])),
-                title=f"Top-12 semantic embedding groups — AUC drop on permutation "
-                      f"(baseline AUC={perm_raw.get('baseline_auc', '?')})",
-                height=420,
+            fig_pi.update_layout(
+                title=f"{agent_label} — permutation importance "
+                      f"(baseline AUC={res_pi['baseline_auc']:.4f})",
+                xaxis_title="AUC drop on permutation",
+                height=max(350, len(names_pi) * 24 + 80),
+                margin=dict(l=220, t=50),
             )
-            st.plotly_chart(fig_radar, use_container_width=True)
-            st.caption(
-                "All delta-AUC values are near zero because the semantic agent achieves "
-                "perfect separation — no single group of 8 dimensions is uniquely critical."
-            )
+            perm_c2.plotly_chart(fig_pi, use_container_width=True, key="perm_bar")
+        elif not perm_run:
+            perm_c2.info("Click **Compute Importance** to calculate.")
 
 # ════════════════════════════════════════════════════════════════════════════ #
 # TAB 6 — LIVE SIMULATION
@@ -972,9 +1067,9 @@ with tab_sim:
         dec_map_int = {"AUTO_CONTAIN": 2, "ESCALATE": 1, "ALLOW": 0}
 
         for i in range(sim_n):
-            x_s = {"embedding": np.random.rand(384).astype("float32")}
-            x_b = {"features":  np.random.rand(16).astype("float32")}
-            x_k = {"features":  np.random.rand(23).astype("float32")}
+            x_s = {"embedding": make_demo_sem_features()}
+            x_b = {"features":  make_demo_beh_features()}
+            x_k = {"features":  make_demo_know_features()}
             r = orch_s.handle(x_s, x_b, x_k) if pipeline == "3-Agent" else orch_s.handle(x_s, x_b)
 
             scores_s.append(r["score_fused"])
@@ -1029,7 +1124,7 @@ with tab_sim:
                     margin=dict(t=40, b=30, r=90),
                     legend=dict(x=0.01, y=0.99, bgcolor="rgba(0,0,0,0)"),
                 )
-                sim_timeline_ph.plotly_chart(fig_tl, use_container_width=True)
+                sim_timeline_ph.plotly_chart(fig_tl, use_container_width=True, key="sim_timeline")
 
             # Decision heatmap — last 60
             n_show = min(len(decs_s), 60)
@@ -1049,7 +1144,7 @@ with tab_sim:
                 height=170, margin=dict(t=35, b=5, l=5, r=5),
                 xaxis=dict(visible=False), yaxis=dict(visible=False),
             )
-            sim_heatmap_ph.plotly_chart(fig_hm, use_container_width=True)
+            sim_heatmap_ph.plotly_chart(fig_hm, use_container_width=True, key="sim_heatmap")
 
             time.sleep(sim_delay)
 
@@ -1071,7 +1166,7 @@ with tab_sim:
         sc2.metric("AUTO_CONTAIN", (sim_df["decision"] == "AUTO_CONTAIN").sum())
         sc3.metric("ESCALATE",     (sim_df["decision"] == "ESCALATE").sum())
         sc4.metric("ALLOW",        (sim_df["decision"] == "ALLOW").sum())
-        st.plotly_chart(render_triage_scatter(sim_df), use_container_width=True)
+        st.plotly_chart(render_triage_scatter(sim_df), use_container_width=True, key="sim_scatter")
 
 # ════════════════════════════════════════════════════════════════════════════ #
 # TAB 7 — CALIBRATION + UNCERTAINTY
@@ -1209,7 +1304,7 @@ with tab_calib:
             xaxis_title="Mean confidence (p̂)", yaxis_title="Fraction positive",
             xaxis_range=[0, 1], yaxis_range=[0, 1], height=400,
         )
-        cal_c2.plotly_chart(fig_cal, use_container_width=True)
+        cal_c2.plotly_chart(fig_cal, use_container_width=True, key="cal_reliability")
 
         ece = float(np.nansum(np.abs(bt - bm) * (bc / bc.sum())))
         cal_c1.metric("ECE (fused)", f"{ece:.4f}")
@@ -1255,7 +1350,7 @@ with tab_calib:
                 xaxis_range=[0, 1], yaxis_range=[0, 1],
                 height=300, margin=dict(t=60, b=40, l=50, r=20),
             )
-            col.plotly_chart(fig_a, use_container_width=True)
+            col.plotly_chart(fig_a, use_container_width=True, key=f"cal_agent_{aname}")
     else:
         st.info("Click **Compute Calibration** above to populate per-agent diagrams.")
 
@@ -1279,7 +1374,7 @@ with tab_calib:
                 title="MC Dropout σ distribution per agent (last batch run)",
             )
             fig_vio.update_layout(height=380, showlegend=False)
-            st.plotly_chart(fig_vio, use_container_width=True)
+            st.plotly_chart(fig_vio, use_container_width=True, key="cal_violin")
         else:
             st.info("Batch results do not contain per-agent uncertainty data.")
     else:
@@ -1332,7 +1427,7 @@ with tab_calib:
                                      marker_color=bar_colors))
             fig_p.update_layout(title="Mean passes used", yaxis_title="Passes", height=300,
                                  yaxis_range=[0, comp_df["Mean passes"].max() * 1.2])
-            st.plotly_chart(fig_p, use_container_width=True)
+            st.plotly_chart(fig_p, use_container_width=True, key="adapt_passes")
         with comp_c2:
             fig_u = go.Figure(go.Bar(
                 x=comp_df["Strategy"], y=comp_df["Mean σ"],
@@ -1340,7 +1435,7 @@ with tab_calib:
                 marker_color=bar_colors,
             ))
             fig_u.update_layout(title="Mean uncertainty (σ)", yaxis_title="σ", height=300)
-            st.plotly_chart(fig_u, use_container_width=True)
+            st.plotly_chart(fig_u, use_container_width=True, key="adapt_uncerts")
 
         st.dataframe(comp_df[["Strategy", "Mean passes", "Mean σ", "Std σ"]].round(4),
                      use_container_width=True, hide_index=True)
@@ -1365,7 +1460,7 @@ with tab_analysis:
             "Points re-colour live as the escalation threshold moves."
         )
         fig_anim = build_animated_boundary_fig(res_df, tau_high, kappa, kappa_low)
-        st.plotly_chart(fig_anim, use_container_width=True)
+        st.plotly_chart(fig_anim, use_container_width=True, key="analysis_anim")
 
         st.divider()
 
@@ -1395,7 +1490,7 @@ with tab_analysis:
             xaxis_title="Fused risk score (p̂)", yaxis_title="Count",
             height=350, bargap=0.05,
         )
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_hist, use_container_width=True, key="analysis_hist")
 
         hc1, hc2, hc3 = st.columns(3)
         hc1.metric("AUTO-CONTAIN zone", f"{auto_n:,}  ({100*auto_n/len(res_df):.1f}%)")
@@ -1433,7 +1528,7 @@ with tab_analysis:
                         title="Semantic vs Behavioral agent decisions (0.5 threshold)",
                     )
                     fig_agree.update_layout(height=350)
-                    st.plotly_chart(fig_agree, use_container_width=True)
+                    st.plotly_chart(fig_agree, use_container_width=True, key="analysis_agree")
                 with am_c2:
                     st.metric("Agreement rate", f"{100*agree/total:.1f}%")
                     st.metric("Disagreement",   f"{100*(1 - agree/total):.1f}%")
@@ -1473,4 +1568,4 @@ with tab_analysis:
             xaxis_title="p̂ (fused risk)", yaxis_title="σ_max",
             height=420,
         )
-        st.plotly_chart(fig_hex, use_container_width=True)
+        st.plotly_chart(fig_hex, use_container_width=True, key="analysis_hex")
