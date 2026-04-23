@@ -1,0 +1,27 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {section}{\numberline {2}Datasets}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}RDset — Semantic Agent}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}RanSMAP / RanSAP — Behavioural Agent}{2}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}RansKnow — Knowledge Agent}{3}{subsection.2.3}%
+\contentsline {section}{\numberline {3}System Architecture}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Base Detectors}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Score Pool and Decision MLP}{4}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Triage Policy}{4}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Per-Agent Peer Consultation}{4}{section.4}%
+\contentsline {section}{\numberline {5}Expert Feedback Loop}{4}{section.5}%
+\contentsline {section}{\numberline {6}Evaluation}{5}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Per-Agent Results}{5}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Fused System and Triage Policy}{5}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Calibration}{6}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Explainability}{6}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Behavioural Feature Importance}{6}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Knowledge Feature Importance}{7}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Semantic Counterfactuals}{7}{subsection.7.3}%
+\contentsline {section}{\numberline {8}Discussion}{8}{section.8}%
+\contentsline {subsection}{\numberline {8.1}False Positives}{8}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}The Role of StandardScaler}{8}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Behavioural Agent on Balanced Evaluation}{8}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Limitations}{9}{subsection.8.4}%
+\contentsline {section}{\numberline {9}Conclusions and Future Work}{9}{section.9}%
+\contentsline {section}{\numberline {A}Policy Checkpoint Details}{10}{appendix.A}%
+\contentsline {section}{\numberline {B}Behavioural Feature Definitions}{10}{appendix.B}%

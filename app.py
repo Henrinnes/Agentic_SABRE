@@ -600,10 +600,28 @@ with tab_dash:
                                       "Figures/CF_semantic.png", "Figures/Rep_Beh_CFs.png"],
         "Semantic CF Diagnostics": ["Figures/fig_semantic_cf_l2_hist.png", "Figures/fig_semantic_cf_p0_vs_l2.png",
                                      "Figures/fig_semantic_cf_rel_hist.png", "Figures/fig_semantic_cf_steps_hist.png"],
-        "Architecture": ["Figures/Prop_Agentic_Sabre_26_01_2025_3Agents.png",
-                         "Figures/Prop_Agentic_Sabre_30_03_2025.png",
-                         "Figures/Prop_Agentic_Sabre_08_11_2025.png", "Figures/CTGAN model.PNG"],
+        "Architecture — Proposal History": [
+            "Figures/Prop_Agentic_Sabre_26_01_2025_3Agents.png",
+            "Figures/Prop_Agentic_Sabre_30_03_2025.png",
+            "Figures/Prop_Agentic_Sabre_08_11_2025.png",
+            "Figures/CTGAN model.PNG",
+        ],
     }
+
+    # ── Current full-pipeline architecture (shown above the group expanders) ──
+    arch_path = "Figures/Prop_Agentic_Sabre_21_04_2026_3Agents_FullPipeline.png"
+    if Path(arch_path).exists():
+        with st.expander("Architecture — Full Pipeline (current)", expanded=True):
+            st.image(Image.open(arch_path), caption="Agentic SABRE — Full 3-Agent Pipeline (April 2026)",
+                     use_container_width=True)
+            st.caption(
+                "Covers: RDset · RanSMAP · RansKnow  →  SMOTE  →  CNN + MC Dropout  →  "
+                "Peer Consultation (★, if σ > κ_local)  →  6-D Score Pool  →  "
+                "CTGAN augmentation (train only)  →  Decision MLP  →  "
+                "Temperature Calibration  →  Optuna Policy Tuning  →  "
+                "AUTO-CONTAIN / ESCALATE / ALLOW  +  Expert Feedback Loop"
+            )
+
     for group_name, paths in figure_groups.items():
         existing = [p for p in paths if Path(p).exists()]
         if not existing:
