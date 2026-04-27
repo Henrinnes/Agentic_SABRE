@@ -102,13 +102,6 @@
 \citation{kabuye2025sabre_eswa}
 \citation{kabuye2025sabre_eswa}
 \citation{kabuye2025sabre_eswa}
-\citation{fernando2020study}
-\citation{Fernando2024FeSAD}
-\citation{razaulla2023age}
-\citation{MultiAgentAdaptiveDetection2023}
-\citation{ZhangLZYHY25}
-\citation{kabuye2025explainable}
-\citation{kabuye2025sabre_eswa}
 \@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Expert Feedback Loop (one round)\relax }}{6}{}\protected@file@percent }
 \newlabel{alg:feedback_loop}{{1}{6}}
 \@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Per-agent standalone evaluation (balanced test sets).\relax }}{6}{}\protected@file@percent }
@@ -120,25 +113,54 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Per-Agent Standalone Performance}{6}{}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces 3-Agent fusion triage distribution (200 samples, $\lambda =0.5$ low-escalation policy).\relax }}{6}{}\protected@file@percent }
 \newlabel{tab:fusion}{{IV}{6}}
-\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Peer consultation statistics per agent ($\kappa _{\mathrm  {local}} = 0.05$ for all agents).\relax }}{6}{}\protected@file@percent }
-\newlabel{tab:peer_consult}{{V}{6}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}Fusion and Triage}{6}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Peer Consultation Analysis}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Epistemic Uncertainty Analysis}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Calibration}{6}{}\protected@file@percent }
+\citation{kabuye2025sabre_eswa}
+\citation{fernando2020study}
+\citation{Fernando2024FeSAD}
+\citation{razaulla2023age}
+\citation{MultiAgentAdaptiveDetection2023}
+\citation{ZhangLZYHY25}
+\citation{kabuye2025explainable}
 \citation{kabuye2025sabre_eswa}
 \citation{kabuye2025sabre_eswa}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Comparison with Prior Work}{7}{}\protected@file@percent }
+\newlabel{fig:roc_sem}{{2a}{7}}
+\newlabel{sub@fig:roc_sem}{{a}{7}}
+\newlabel{fig:roc_beh}{{2b}{7}}
+\newlabel{sub@fig:roc_beh}{{b}{7}}
+\newlabel{fig:roc_know}{{2c}{7}}
+\newlabel{sub@fig:roc_know}{{c}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces ROC curves for each agent on its native modality dataset. All three agents achieve AUC\nobreakspace  {}$\geq $\nobreakspace  {}0.9958 under balanced evaluation.\relax }}{7}{}\protected@file@percent }
+\newlabel{fig:roc_all}{{2}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Triage policy geometry in the $(\hat  {p}_{\mathrm  {cal}},\,\sigma _{\qopname  \relax m{max}})$ plane. The optimised thresholds $\tau ^*{=}0.233$, $\kappa ^*{=}0.197$, $\tau _{\mathrm  {high}}^*{=}0.855$, $\kappa _{\mathrm  {low}}^*{=}0.197$ partition the plane into AUTO-CONTAIN, ESCALATE, and ALLOW regions. Uncertainty acts as a gating variable preventing overconfident automatic containment.\relax }}{7}{}\protected@file@percent }
+\newlabel{fig:triage_space}{{3}{7}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Peer consultation statistics per agent ($\kappa _{\mathrm  {local}} = 0.05$ for all agents).\relax }}{7}{}\protected@file@percent }
+\newlabel{tab:peer_consult}{{V}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-E}}Peer Consultation Analysis}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-F}}Explainability: Behavioural Feature Importance}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-G}}Comparison with Prior Work}{7}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {VIII}Security Analysis}{7}{}\protected@file@percent }
 \newlabel{sec:security}{{VIII}{7}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-A}}Adversarial Robustness of the Semantic Agent}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}Adversarial Robustness of the Behavioural Agent}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-C}}Robustness via Uncertainty as a Security Property}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-D}}Knowledge Agent Robustness}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {IX}Discussion}{7}{}\protected@file@percent }
-\newlabel{sec:discussion}{{IX}{7}}
-\@writefile{toc}{\contentsline {section}{\numberline {X}Limitations}{7}{}\protected@file@percent }
-\newlabel{sec:limitations}{{X}{7}}
-\@writefile{toc}{\contentsline {section}{\numberline {XI}Conclusion}{7}{}\protected@file@percent }
-\newlabel{sec:conclusion}{{XI}{7}}
+\citation{kabuye2025sabre_eswa}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Epistemic uncertainty ($\sigma $) distributions for benign and ransomware samples across all three agents. The Semantic Agent is near-deterministic ($\bar  {\sigma }\approx 0$); the Behavioural Agent shows low but non-trivial uncertainty ($\bar  {\sigma }\approx 0.013$); the Knowledge Agent exhibits the highest uncertainty ($\bar  {\sigma }\approx 0.055$), consistent with its smaller training set and heuristic label construction.\relax }}{8}{}\protected@file@percent }
+\newlabel{fig:uncert_dist}{{4}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Reliability diagrams after temperature calibration. Each bin plots the fraction of true positives against mean predicted probability. Well-calibrated agents track the diagonal closely.\relax }}{8}{}\protected@file@percent }
+\newlabel{fig:calibration}{{5}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}Adversarial Robustness of the Behavioural Agent}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-C}}Robustness via Uncertainty as a Security Property}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-D}}Knowledge Agent Robustness}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Discussion}{8}{}\protected@file@percent }
+\newlabel{sec:discussion}{{IX}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Peer consultation effect on the Knowledge Agent. \textbf  {Left:} Scatter of probability before vs.\ after consultation for triggered samples (red = ransomware, blue = benign). Points above the diagonal indicate an upward correction by confident peers. \textbf  {Right:} Distribution of probability adjustments ($\Delta p$). The mean positive adjustment ($+0.041$) reflects the Semantic and Behavioural agents' higher confidence pulling the Knowledge Agent's estimates toward the correct class boundary.\relax }}{9}{}\protected@file@percent }
+\newlabel{fig:consultation}{{6}{9}}
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Comparison of Extended Agentic SABRE+ with representative ransomware and intrusion-detection systems. \text  {$\mathsurround \z@ \mathchar "458$}= fully supported; $\circ $ = partially supported; $\times $ = absent.\relax }}{9}{}\protected@file@percent }
+\newlabel{tab:comparison}{{VI}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Permutation feature importance for the Behavioural Agent (RanSMAP). LBA and GPA variance features are the primary drivers of the behavioural classification decision, reflecting the I/O signature of active file encryption.\relax }}{9}{}\protected@file@percent }
+\newlabel{fig:feat_imp}{{7}{9}}
+\@writefile{toc}{\contentsline {section}{\numberline {X}Limitations}{9}{}\protected@file@percent }
+\newlabel{sec:limitations}{{X}{9}}
 \bibstyle{IEEEtran}
 \bibdata{Reference_Sabre}
 \bibcite{razaulla2023age}{1}
@@ -154,15 +176,15 @@
 \bibcite{ZhangLZYHY25}{11}
 \bibcite{guo2017calibration}{12}
 \bibcite{Ispahany2024Survey}{13}
+\@writefile{toc}{\contentsline {section}{\numberline {XI}Conclusion}{10}{}\protected@file@percent }
+\newlabel{sec:conclusion}{{XI}{10}}
+\@writefile{toc}{\contentsline {section}{Appendix}{10}{}\protected@file@percent }
+\newlabel{app:ransknow}{{A}{10}}
+\@writefile{toc}{\contentsline {section}{References}{10}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces RansKnow full feature list.\relax }}{10}{}\protected@file@percent }
+\newlabel{tab:ransknow_full}{{VII}{10}}
 \bibcite{MultiAgentAdaptiveDetection2023}{14}
-\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Comparison of Extended Agentic SABRE+ with representative ransomware and intrusion-detection systems. \text  {$\mathsurround \z@ \mathchar "458$}= fully supported; $\circ $ = partially supported; $\times $ = absent.\relax }}{8}{}\protected@file@percent }
-\newlabel{tab:comparison}{{VI}{8}}
-\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces RansKnow full feature list.\relax }}{8}{}\protected@file@percent }
-\newlabel{tab:ransknow_full}{{VII}{8}}
-\@writefile{toc}{\contentsline {section}{Appendix}{8}{}\protected@file@percent }
-\newlabel{app:ransknow}{{A}{8}}
-\@writefile{toc}{\contentsline {section}{References}{8}{}\protected@file@percent }
 \bibcite{rolnick2019experience}{15}
 \bibcite{xu2019ctgan}{16}
 \bibcite{vitter1985random}{17}
-\gdef \@abspage@last{9}
+\gdef \@abspage@last{11}

@@ -799,6 +799,38 @@ The increasing $\bar{\sigma}$ sequence ($\approx 0 \to 0.0138
 the three modalities, consistent with the semantic $>$ behavioural
 $>$ discourse hierarchy of signal quality documented above.
 
+Fig.~\ref{fig:roc_all} shows the ROC curves for all three agents.
+The Semantic Agent saturates at the top-left corner, the Behavioural
+Agent achieves near-optimal separation under balanced evaluation,
+and the Knowledge Agent achieves AUC~0.9958 from 23 structured features.
+
+\begin{figure*}[t]
+  \centering
+  \begin{subfigure}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/ROC_Curve_RDset.png}
+    \caption{Semantic Agent (RDset, AUC=1.0000)}
+    \label{fig:roc_sem}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Roc_Curve_RanSMAP.png}
+    \caption{Behavioural Agent (RanSMAP, AUC=0.9967)}
+    \label{fig:roc_beh}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/ROC_Knowledge.png}
+    \caption{Knowledge Agent (RansKnow, AUC=0.9958)}
+    \label{fig:roc_know}
+  \end{subfigure}
+  \caption{ROC curves for each agent on its native modality dataset.
+  All three agents achieve AUC~$\geq$~0.9958 under balanced evaluation.}
+  \label{fig:roc_all}
+\end{figure*}
+
 \subsection{Fusion and Triage}
 
 Table~\ref{tab:fusion} reports the three-agent fusion behaviour
@@ -833,6 +865,76 @@ The Knowledge Agent's additional confidence signal lowers
 $\smax$ for samples where discourse features are unambiguous,
 thereby enabling more AUTO-CONTAIN decisions without
 degrading recall.
+
+Fig.~\ref{fig:triage_space} shows the induced triage geometry in the
+$(\phat, \smax)$ plane.
+The four decision regions are clearly separated by the optimised
+thresholds, with benign samples concentrating in the low-risk
+low-uncertainty ALLOW region and high-risk low-uncertainty ransomware
+samples routed to AUTO-CONTAIN.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Figures/Triage_policy_space.png}
+  \caption{Triage policy geometry in the $(\phat_{\mathrm{cal}},\,\smax)$
+  plane. The optimised thresholds
+  $\tau^*{=}0.233$, $\kappa^*{=}0.197$, $\tauh^*{=}0.855$,
+  $\klow^*{=}0.197$ partition the plane into AUTO-CONTAIN, ESCALATE,
+  and ALLOW regions. Uncertainty acts as a gating variable preventing
+  overconfident automatic containment.}
+  \label{fig:triage_space}
+\end{figure}
+
+\subsection{Epistemic Uncertainty Analysis}
+
+Fig.~\ref{fig:uncert_dist} visualises the per-agent, per-class
+epistemic uncertainty distributions collected over the balanced test splits.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Figures/Uncertainty_Distributions.png}
+  \caption{Epistemic uncertainty ($\sigma$) distributions for benign and
+  ransomware samples across all three agents.
+  The Semantic Agent is near-deterministic ($\bar{\sigma}\approx 0$);
+  the Behavioural Agent shows low but non-trivial uncertainty
+  ($\bar{\sigma}\approx 0.013$); the Knowledge Agent exhibits the highest
+  uncertainty ($\bar{\sigma}\approx 0.055$), consistent with its smaller
+  training set and heuristic label construction.}
+  \label{fig:uncert_dist}
+\end{figure*}
+
+\subsection{Calibration}
+
+Fig.~\ref{fig:calibration} shows reliability diagrams for the
+Semantic, Behavioural, and Decision (fused) agents after temperature
+calibration.
+All three agents achieve well-calibrated predictive probabilities,
+with reliability curves tracking the diagonal closely.
+
+\begin{figure*}[t]
+  \centering
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/calibration_semantic.png}
+    \caption{Semantic Agent}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/calibration_behavioral.png}
+    \caption{Behavioural Agent}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/calibration_decision.png}
+    \caption{Decision MLP (fused)}
+  \end{subfigure}
+  \caption{Reliability diagrams after temperature calibration.
+  Each bin plots the fraction of true positives against mean predicted
+  probability.  Well-calibrated agents track the diagonal closely.}
+  \label{fig:calibration}
+\end{figure*}
 
 \subsection{Peer Consultation Analysis}
 
@@ -869,6 +971,49 @@ and Behavioural agents.
 The net accuracy improvement ($+0.005$) confirms that peer
 consultation acts as a soft ensemble with uncertainty-selective
 activation, rather than indiscriminate score averaging.
+
+Fig.~\ref{fig:consultation} illustrates the before-and-after
+probability adjustments for all Knowledge Agent samples for which
+consultation fired ($\kappa_{\mathrm{local}}=0.04$; $n=62/200$, or 31\%).
+The scatter plot confirms that consultation pulls uncertain predictions
+toward more confident peer estimates, with the mean adjustment
+$\Delta p = +0.041$, while the histogram shows the adjustment is
+broadly distributed rather than a constant offset.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Figures/Peer_Consultation_Effect.png}
+  \caption{Peer consultation effect on the Knowledge Agent.
+  \textbf{Left:} Scatter of probability before vs.\ after consultation
+  for triggered samples (red = ransomware, blue = benign).
+  Points above the diagonal indicate an upward correction by confident peers.
+  \textbf{Right:} Distribution of probability adjustments ($\Delta p$).
+  The mean positive adjustment ($+0.041$) reflects the Semantic and
+  Behavioural agents' higher confidence pulling the Knowledge Agent's
+  estimates toward the correct class boundary.}
+  \label{fig:consultation}
+\end{figure*}
+
+\subsection{Explainability: Behavioural Feature Importance}
+
+Fig.~\ref{fig:feat_imp} shows the permutation-based feature importance
+scores for the Behavioural Agent.
+LBA and GPA variance features dominate, confirming that spatial
+dispersion of memory and storage access---the principal I/O signature
+of active encryption---drives the behavioural classification decision.
+This is consistent with the counterfactual analysis reported
+in~\cite{kabuye2025sabre_eswa}, where minimal relative changes
+to LBA and GPA variance were sufficient to flip the agent's prediction.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{Figures/Behaviour_feature_importance.png}
+  \caption{Permutation feature importance for the Behavioural Agent
+  (RanSMAP).  LBA and GPA variance features are the primary drivers of
+  the behavioural classification decision, reflecting the I/O signature
+  of active file encryption.}
+  \label{fig:feat_imp}
+\end{figure}
 
 \subsection{Comparison with Prior Work}
 
