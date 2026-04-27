@@ -1,0 +1,298 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{fernando2020study}
+D.~W. Fernando, N.~Komninos, T.~Chen, A study on the evolution of ransomware
+  detection using machine learning and deep learning techniques, IoT 1~(2)
+  (2020) 551--604.
+
+\bibitem{razaulla2023age}
+S.~Razaulla, C.~Fachkha, C.~Markarian, A.~Gawanmeh, W.~Mansoor, B.~C.~M. Fung,
+  C.~Assi, \href{https://doi.org/10.1109/ACCESS.2023.3268535}{The age of
+  ransomware: {A} survey on the evolution, taxonomy, and research directions},
+  {IEEE} Access 11 (2023) 40698--40723.
+\newblock \href {https://doi.org/10.1109/ACCESS.2023.3268535}
+  {\path{doi:10.1109/ACCESS.2023.3268535}}.
+\newline\urlprefix\url{https://doi.org/10.1109/ACCESS.2023.3268535}
+
+\bibitem{Urooj2024polymorphism}
+U.~Urooj, B.~A.~S. Al{-}Rimy, A.~B. Zainal, F.~Saeed, A.~Abdelmaboud,
+  W.~Nagmeldin, \href{https://doi.org/10.1109/ACCESS.2023.3348451}{Addressing
+  behavioral drift in ransomware early detection through weighted generative
+  adversarial networks}, {IEEE} Access 12 (2024) 3910--3925.
+\newblock \href {https://doi.org/10.1109/ACCESS.2023.3348451}
+  {\path{doi:10.1109/ACCESS.2023.3348451}}.
+\newline\urlprefix\url{https://doi.org/10.1109/ACCESS.2023.3348451}
+
+\bibitem{Ceschin2022ConceptDrift}
+F.~Ceschin, M.~Botacin, H.~M. Gomes, F.~A. Pinage, L.~S. Oliveira,
+  A.~Gr{\'{e}}gio, \href{https://doi.org/10.48550/arXiv.2205.12311}{Fast {\&}
+  furious: Modelling malware detection as evolving data streams}, CoRR
+  abs/2205.12311 (2022).
+\newblock \href {http://arxiv.org/abs/2205.12311} {\path{arXiv:2205.12311}},
+  \href {https://doi.org/10.48550/ARXIV.2205.12311}
+  {\path{doi:10.48550/ARXIV.2205.12311}}.
+\newline\urlprefix\url{https://doi.org/10.48550/arXiv.2205.12311}
+
+\bibitem{Fernando2024FeSAD}
+D.~W. Fernando, N.~Komninos,
+  \href{https://doi.org/10.1016/j.cose.2023.103629}{Fesad ransomware detection
+  framework with machine learning using adaption to concept drift}, Comput.
+  Secur. 137 (2024) 103629.
+\newblock \href {https://doi.org/10.1016/J.COSE.2023.103629}
+  {\path{doi:10.1016/J.COSE.2023.103629}}.
+\newline\urlprefix\url{https://doi.org/10.1016/j.cose.2023.103629}
+
+\bibitem{alraizza2023ransomware}
+A.~Alraizza, A.~Algarni, \href{https://doi.org/10.3390/bdcc7030143}{Ransomware
+  detection using machine learning: {A} survey}, Big Data Cogn. Comput. 7~(3)
+  (2023) 143.
+\newblock \href {https://doi.org/10.3390/BDCC7030143}
+  {\path{doi:10.3390/BDCC7030143}}.
+\newline\urlprefix\url{https://doi.org/10.3390/bdcc7030143}
+
+\bibitem{zahoora2022Deep}
+U.~Zahoora, A.~Khan, M.~Rajarajan, S.~H. Khan, M.~Asam, T.~Jamal, Ransomware
+  detection using deep learning based unsupervised feature extraction and a
+  cost sensitive pareto ensemble classifier, Scientific reports 12~(1) (2022)
+  15647.
+
+\bibitem{Doan2024uncertainBay}
+B.~G. Doan, D.~Q. Nguyen, P.~Montague, T.~Abraham, O.~Y. de~Vel, S.~Camtepe,
+  S.~S. Kanhere, E.~Abbasnejad, D.~C. Ranasinghe,
+  \href{https://doi.org/10.1007/978-3-031-70879-4\_3}{Bayesian learned models
+  can detect adversarial malware for free}, in: J.~Garc{\'{\i}}a{-}Alfaro,
+  R.~Kozik, M.~Choras, S.~K. Katsikas (Eds.), Computer Security - {ESORICS}
+  2024 - 29th European Symposium on Research in Computer Security, Bydgoszcz,
+  Poland, September 16-20, 2024, Proceedings, Part {I}, Vol. 14982 of Lecture
+  Notes in Computer Science, Springer, 2024, pp. 45--65.
+\newblock \href {https://doi.org/10.1007/978-3-031-70879-4\_3}
+  {\path{doi:10.1007/978-3-031-70879-4\_3}}.
+\newline\urlprefix\url{https://doi.org/10.1007/978-3-031-70879-4\_3}
+
+\bibitem{Ispahany2024Survey}
+J.~Ispahany, M.~R. Islam, M.~Z. Islam, M.~A. Khan,
+  \href{https://doi.org/10.1109/ACCESS.2024.3397921}{Ransomware detection using
+  machine learning: {A} review, research limitations and future directions},
+  {IEEE} Access 12 (2024) 68785--68813.
+\newblock \href {https://doi.org/10.1109/ACCESS.2024.3397921}
+  {\path{doi:10.1109/ACCESS.2024.3397921}}.
+\newline\urlprefix\url{https://doi.org/10.1109/ACCESS.2024.3397921}
+
+\bibitem{kabuye2025explainable}
+H.~Kabuye, B.~Issac, R.~Yumlembam, J.~Neera,
+  \href{https://doi.org/10.1109/ACCESS.2025.3581424}{Explainable and
+  uncertainty aware ai-based ransomware detection}, {IEEE} Access 13 (2025)
+  106573--106589.
+\newblock \href {https://doi.org/10.1109/ACCESS.2025.3581424}
+  {\path{doi:10.1109/ACCESS.2025.3581424}}.
+\newline\urlprefix\url{https://doi.org/10.1109/ACCESS.2025.3581424}
+
+\bibitem{Alraizza2025StorageAP}
+A.~Alraizza, A.~Algarni, A.~Alrayzah,
+  \href{https://doi.org/10.1007/978-3-031-96231-8\_5}{Enhancing ransomware
+  detection using storage access pattern}, in: I.~Maglogiannis, L.~S. Iliadis,
+  A.~Andreou, A.~Papaleonidas (Eds.), Artificial Intelligence Applications and
+  Innovations - 21st {IFIP} {WG} 12.5 International Conference, {AIAI} 2025,
+  Limassol, Cyprus, June 26-29, 2025, Proceedings, Part {III}, Vol. 757 of
+  {IFIP} Advances in Information and Communication Technology, Springer, 2025,
+  pp. 57--73.
+\newblock \href {https://doi.org/10.1007/978-3-031-96231-8\_5}
+  {\path{doi:10.1007/978-3-031-96231-8\_5}}.
+\newline\urlprefix\url{https://doi.org/10.1007/978-3-031-96231-8\_5}
+
+\bibitem{chawla2002smote}
+N.~V. Chawla, K.~W. Bowyer, L.~O. Hall, W.~P. Kegelmeyer,
+  \href{https://doi.org/10.1613/jair.953}{{SMOTE:} synthetic minority
+  over-sampling technique}, J. Artif. Intell. Res. 16 (2002) 321--357.
+\newblock \href {https://doi.org/10.1613/JAIR.953}
+  {\path{doi:10.1613/JAIR.953}}.
+\newline\urlprefix\url{https://doi.org/10.1613/jair.953}
+
+\bibitem{xu2019ctgan}
+L.~Xu, M.~Skoularidou, A.~Cuesta{-}Infante, K.~Veeramachaneni,
+  \href{https://proceedings.neurips.cc/paper/2019/hash/254ed7d2de3b23ab10936522dd547b78-Abstract.html}{Modeling
+  tabular data using conditional {GAN}}, in: H.~M. Wallach, H.~Larochelle,
+  A.~Beygelzimer, F.~d'Alch{\'{e}}{-}Buc, E.~B. Fox, R.~Garnett (Eds.),
+  Advances in Neural Information Processing Systems 32: Annual Conference on
+  Neural Information Processing Systems 2019, NeurIPS 2019, December 8-14,
+  2019, Vancouver, BC, Canada, 2019, pp. 7333--7343.
+\newline\urlprefix\url{https://proceedings.neurips.cc/paper/2019/hash/254ed7d2de3b23ab10936522dd547b78-Abstract.html}
+
+\bibitem{gal2016dropout}
+Y.~Gal, Z.~Ghahramani,
+  \href{http://proceedings.mlr.press/v48/gal16.html}{Dropout as a bayesian
+  approximation: Representing model uncertainty in deep learning}, in:
+  M.~Balcan, K.~Q. Weinberger (Eds.), Proceedings of the 33nd International
+  Conference on Machine Learning, {ICML} 2016, New York City, NY, USA, June
+  19-24, 2016, Vol.~48 of {JMLR} Workshop and Conference Proceedings, JMLR.org,
+  2016, pp. 1050--1059.
+\newline\urlprefix\url{http://proceedings.mlr.press/v48/gal16.html}
+
+\bibitem{gawlikowski2023Uncertainity}
+J.~Gawlikowski, C.~R.~N. Tassi, M.~Ali, J.~Lee, M.~Humt, J.~Feng, A.~M. Kruspe,
+  R.~Triebel, P.~Jung, R.~Roscher, M.~Shahzad, W.~Yang, R.~Bamler, X.~Zhu,
+  \href{https://doi.org/10.1007/s10462-023-10562-9}{A survey of uncertainty in
+  deep neural networks}, Artif. Intell. Rev. 56~({S1}) (2023) 1513--1589.
+\newblock \href {https://doi.org/10.1007/S10462-023-10562-9}
+  {\path{doi:10.1007/S10462-023-10562-9}}.
+\newline\urlprefix\url{https://doi.org/10.1007/s10462-023-10562-9}
+
+\bibitem{Besold2021neurosymbolicsurvey}
+T.~R. Besold, A.~S. d'Avila Garcez, S.~Bader, H.~Bowman, P.~M. Domingos,
+  P.~Hitzler, K.~K{\"{u}}hnberger, L.~C. Lamb, P.~M.~V. Lima, L.~de~Penning,
+  G.~Pinkas, H.~Poon, G.~Zaverucha,
+  \href{https://doi.org/10.3233/FAIA210348}{Neural-symbolic learning and
+  reasoning: {A} survey and interpretation}, in: P.~Hitzler, M.~K. Sarker
+  (Eds.), Neuro-Symbolic Artificial Intelligence: The State of the Art, Vol.
+  342 of Frontiers in Artificial Intelligence and Applications, {IOS} Press,
+  2021, pp. 1--51.
+\newblock \href {https://doi.org/10.3233/FAIA210348}
+  {\path{doi:10.3233/FAIA210348}}.
+\newline\urlprefix\url{https://doi.org/10.3233/FAIA210348}
+
+\bibitem{vaswani2017attention}
+A.~Vaswani, N.~Shazeer, N.~Parmar, J.~Uszkoreit, L.~Jones, A.~N. Gomez,
+  L.~Kaiser, I.~Polosukhin,
+  \href{https://proceedings.neurips.cc/paper/2017/hash/
+  3f5ee243547dee91fbd053c1c4a845aa-Abstract.html}{Attention is all you need},
+  in: I.~Guyon, U.~von Luxburg, S.~Bengio, H.~M. Wallach, R.~Fergus, S.~V.~N.
+  Vishwanathan, R.~Garnett (Eds.), Advances in Neural Information Processing
+  Systems 30: Annual Conference on Neural Information Processing Systems 2017,
+  December 4-9, 2017, Long Beach, CA, {USA}, 2017, pp. 5998--6008.
+\newline\urlprefix\url{https://proceedings.neurips.cc/paper/2017/hash/
+  3f5ee243547dee91fbd053c1c4a845aa-Abstract.html}
+
+\bibitem{tian2025llmsurvey}
+S.~Tian, T.~Zhang, J.~Liu, J.~Wang, X.~Wu, X.~Zhu, R.~Zhang, W.~Zhang, Z.~Yuan,
+  S.~Mao, D.~I. Kim, \href{https://arxiv.org/abs/2504.15622}{Exploring the role
+  of large language models in cybersecurity: A systematic survey}, IEEE
+  Transactions on Network Science and EngineeringEarly Access (2025).
+\newline\urlprefix\url{https://arxiv.org/abs/2504.15622}
+
+\bibitem{BenchmarkingLLMsPhishing2024}
+J.~Zhang, P.~Wu, J.~London, D.~Tenney,
+  \href{https://doi.org/10.1109/ACCESS.2025.3540075}{Benchmarking and
+  evaluating large language models in phishing detection for small and midsize
+  enterprises: {A} comprehensive analysis}, {IEEE} Access 13 (2025)
+  28335--28352.
+\newblock \href {https://doi.org/10.1109/ACCESS.2025.3540075}
+  {\path{doi:10.1109/ACCESS.2025.3540075}}.
+\newline\urlprefix\url{https://doi.org/10.1109/ACCESS.2025.3540075}
+
+\bibitem{CANAL_CTILLM2024}
+U.~Patel, F.~Yeh, C.~Gondhalekar,
+  \href{https://doi.org/10.1109/ICAIC60265.2024.10433839}{{CANAL} - cyber
+  activity news alerting language model : Empirical approach vs. expensive
+  llms}, in: 3rd {IEEE} International Conference on {AI} in Cybersecurity,
+  {ICAIC} 2024, Houston, TX, USA, February 7-9, 2024, {IEEE}, 2024, pp. 1--12.
+\newblock \href {https://doi.org/10.1109/ICAIC60265.2024.10433839}
+  {\path{doi:10.1109/ICAIC60265.2024.10433839}}.
+\newline\urlprefix\url{https://doi.org/10.1109/ICAIC60265.2024.10433839}
+
+\bibitem{ashrapov2020tabular}
+I.~Ashrapov, \href{https://arxiv.org/abs/2010.00638}{Tabular gans for uneven
+  distribution}, CoRR abs/2010.00638 (2020).
+\newblock \href {http://arxiv.org/abs/2010.00638} {\path{arXiv:2010.00638}}.
+\newline\urlprefix\url{https://arxiv.org/abs/2010.00638}
+
+\bibitem{HabibiCL23}
+O.~Habibi, M.~Chemmakha, M.~Lazaar,
+  \href{https://doi.org/10.1016/j.engappai.2022.105669}{Imbalanced tabular data
+  modelization using {CTGAN} and machine learning to improve iot botnet attacks
+  detection}, Eng. Appl. Artif. Intell. 118 (2023) 105669.
+\newblock \href {https://doi.org/10.1016/J.ENGAPPAI.2022.105669}
+  {\path{doi:10.1016/J.ENGAPPAI.2022.105669}}.
+\newline\urlprefix\url{https://doi.org/10.1016/j.engappai.2022.105669}
+
+\bibitem{AIenhancedDefense2022}
+B.~N. Chaithanya, S.~H. Brahmananda,
+  \href{https://doi.org/10.13052/jcsm2245-1439.1146}{Ai-enhanced defense
+  against ransomware within the organization's architecture}, J. Cyber Secur.
+  Mobil. 11~(4) (2022) 621--654.
+\newblock \href {https://doi.org/10.13052/JCSM2245-1439.1146}
+  {\path{doi:10.13052/JCSM2245-1439.1146}}.
+\newline\urlprefix\url{https://doi.org/10.13052/jcsm2245-1439.1146}
+
+\bibitem{ZhangLZYHY25}
+Z.~Zhang, S.~Li, L.~Zhang, J.~Ye, C.~Hu, L.~Yan,
+  \href{https://doi.org/10.1016/j.knosys.2025.114064}{{LLM-LADE:} large
+  language model-based log anomaly detection with explanation}, Knowl. Based
+  Syst. 326 (2025) 114064.
+\newblock \href {https://doi.org/10.1016/J.KNOSYS.2025.114064}
+  {\path{doi:10.1016/J.KNOSYS.2025.114064}}.
+\newline\urlprefix\url{https://doi.org/10.1016/j.knosys.2025.114064}
+
+\bibitem{lundberg2017shap}
+S.~M. Lundberg, S.~Lee,
+  \href{https://proceedings.neurips.cc/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html}{A
+  unified approach to interpreting model predictions}, in: I.~Guyon, U.~von
+  Luxburg, S.~Bengio, H.~M. Wallach, R.~Fergus, S.~V.~N. Vishwanathan,
+  R.~Garnett (Eds.), Advances in Neural Information Processing Systems 30:
+  Annual Conference on Neural Information Processing Systems 2017, December
+  4-9, 2017, Long Beach, CA, {USA}, 2017, pp. 4765--4774.
+\newline\urlprefix\url{https://proceedings.neurips.cc/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html}
+
+\bibitem{AdversarialCooperationLLM2024}
+S.~Jia, Z.~Cui, K.~Wang, Y.~Ding, D.~Han, T.~Ma, Adversarial and cooperation
+  tasks in multi-agent system with large language models, in: 2024 IEEE
+  International Conference on Unmanned Systems (ICUS), IEEE, 2024, pp.
+  1840--1847.
+
+\bibitem{MultiAgentAdaptiveDetection2023}
+M.~Soltani, K.~Khajavi, M.~J. Siavoshani, A.~H. Jahangir,
+  \href{https://doi.org/10.48550/arXiv.2303.02622}{A multi-agent adaptive deep
+  learning framework for online intrusion detection}, CoRR abs/2303.02622
+  (2023).
+\newblock \href {http://arxiv.org/abs/2303.02622} {\path{arXiv:2303.02622}},
+  \href {https://doi.org/10.48550/ARXIV.2303.02622}
+  {\path{doi:10.48550/ARXIV.2303.02622}}.
+\newline\urlprefix\url{https://doi.org/10.48550/arXiv.2303.02622}
+
+\bibitem{YangSBK25}
+W.~Yang, L.~Some, M.~Bain, B.~H. Kang,
+  \href{https://doi.org/10.1016/j.knosys.2025.113503}{A comprehensive survey on
+  integrating large language models with knowledge-based methods}, Knowl. Based
+  Syst. 318 (2025) 113503.
+\newblock \href {https://doi.org/10.1016/J.KNOSYS.2025.113503}
+  {\path{doi:10.1016/J.KNOSYS.2025.113503}}.
+\newline\urlprefix\url{https://doi.org/10.1016/j.knosys.2025.113503}
+
+\bibitem{FaresE25}
+I.~A. Fares, M.~A. Elaziz,
+  \href{https://doi.org/10.1016/j.knosys.2025.113351}{Explainable tabnet
+  transformer-based on google vizier optimizer for anomaly intrusion detection
+  system}, Knowl. Based Syst. 316 (2025) 113351.
+\newblock \href {https://doi.org/10.1016/J.KNOSYS.2025.113351}
+  {\path{doi:10.1016/J.KNOSYS.2025.113351}}.
+\newline\urlprefix\url{https://doi.org/10.1016/j.knosys.2025.113351}
+
+\bibitem{hirano2022ransap}
+M.~Hirano, R.~Hodota, R.~Kobayashi,
+  \href{https://doi.org/10.1016/j.fsidi.2021.301314}{Ransap: An open dataset of
+  ransomware storage access patterns for training machine learning models},
+  Digit. Investig. 40~(Supplement) (2022) 301314.
+\newblock \href {https://doi.org/10.1016/J.FSIDI.2021.301314}
+  {\path{doi:10.1016/J.FSIDI.2021.301314}}.
+\newline\urlprefix\url{https://doi.org/10.1016/j.fsidi.2021.301314}
+
+\bibitem{hirano2025ransmap}
+M.~Hirano, R.~Kobayashi,
+  \href{https://doi.org/10.1016/j.cose.2024.104202}{Ransmap: Open dataset of
+  ransomware storage and memory access patterns for creating deep learning
+  based ransomware detectors}, Comput. Secur. 150 (2025) 104202.
+\newblock \href {https://doi.org/10.1016/J.COSE.2024.104202}
+  {\path{doi:10.1016/J.COSE.2024.104202}}.
+\newline\urlprefix\url{https://doi.org/10.1016/j.cose.2024.104202}
+
+\bibitem{mathur2020ransomware}
+M.~Mathur,
+  \href{https://github.com/muditmathur2020/RansomwareDetection/tree/master}{Ransomware
+  (malware) detection using machine learning}, accessed: Nov. 9, 2023 (2020).
+\newline\urlprefix\url{https://github.com/muditmathur2020/RansomwareDetection/tree/master}
+
+\end{thebibliography}

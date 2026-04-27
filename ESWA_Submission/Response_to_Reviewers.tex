@@ -1,0 +1,637 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{mdframed}
+
+% Colour scheme
+\definecolor{reviewerblue}{RGB}{0,70,127}
+\definecolor{responsegreen}{RGB}{0,100,50}
+\definecolor{changebrown}{RGB}{139,69,19}
+\definecolor{lightgray}{RGB}{245,245,245}
+
+% Reviewer comment box
+\newmdenv[
+  backgroundcolor=lightgray,
+  linecolor=reviewerblue,
+  linewidth=1pt,
+  leftmargin=0pt,
+  rightmargin=0pt,
+  innerleftmargin=10pt,
+  innerrightmargin=10pt,
+  innertopmargin=6pt,
+  innerbottommargin=6pt,
+  skipabove=8pt,
+  skipbelow=4pt
+]{reviewbox}
+
+% Section formatting
+\titleformat{\section}{\large\bfseries\color{reviewerblue}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{reviewerblue}}{}{0em}{}
+
+% Macros
+\newcommand{\RC}[1]{\begin{reviewbox}\textit{\textbf{Reviewer Comment:} #1}\end{reviewbox}}
+\newcommand{\RS}[1]{\noindent\textcolor{responsegreen}{\textbf{Response:}} #1\par\medskip}
+\newcommand{\CH}[1]{\noindent\textcolor{changebrown}{\textbf{Change in manuscript:}} #1\par\bigskip}
+
+\begin{document}
+
+% -----------------------------------------------------------------------
+%  HEADER
+% -----------------------------------------------------------------------
+\begin{center}
+  {\LARGE\bfseries Response to Reviewers}\\[1em]
+  {\large Manuscript: \textit{Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic
+  Multi-Agent Framework for Adaptive Ransomware Detection}}\\[0.5em]
+  {\normalsize Expert Systems With Applications --- Major Revision}\\[0.5em]
+  {\normalsize \today}
+\end{center}
+
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  GENERAL PREAMBLE
+% -----------------------------------------------------------------------
+We thank the Associate Editor and all four reviewers for their thorough and
+constructive evaluations. The comments have led to substantive improvements in
+the manuscript's clarity, technical rigour, and positioning. We have addressed
+every point raised. The changes are highlighted in \textbf{bold blue} in the
+revised manuscript. For conciseness, we state in each response exactly where in
+the revised paper the change appears.
+
+A brief summary of the main additions:
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item A new ``\textit{What Makes This Different from Ensemble-Based Approaches}''
+        subsection in the Introduction, distinguishing SABRE's cooperative agentic
+        design from conventional ensemble voting.
+  \item A 7-column comparison table in Related Work summarising how prior
+        systems differ from SABRE across key design dimensions.
+  \item Full variable definitions and a notation glossary before the first score-vector
+        equation; elimination of a duplicate $\sigma_{\max}$ formula; relocation of the
+        triage-objective $J(\tau,\kappa)$ to the Policy Analysis section to remove a
+        forward reference spanning 15 equations.
+  \item Explicit threshold-ordering constraints ($\tau \le \tau_{\text{high}}$,
+        $\kappa_{\text{low}} \le \kappa$) added as a numbered equation.
+  \item New discussion paragraphs on: AUC$=1.0$ generalisation risk; the
+        accuracy/AUC discrepancy of the Behavioural Agent; threshold sensitivity
+        for $\tau = 0.999999$; cross-source fusion rationale; CTGAN label
+        clarification; Monte Carlo Dropout vs.\ deep ensembles; real-world
+        executable constraints for counterfactual costs; and a runtime/complexity
+        subsection.
+  \item Section-opening purpose sentences in all 13 sections.
+\end{itemize}
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  ASSOCIATE EDITOR
+% -----------------------------------------------------------------------
+\section{Associate Editor}
+
+\RC{The authors should explicitly mention the significant contributions of the
+manuscript. The novelty of the paper is not highlighted.}
+
+\RS{We agree that the novelty was insufficiently foregrounded. We have added a new
+subsection titled \textit{``What Makes This Different from Ensemble-Based Approaches''}
+immediately after the Contributions list in Section~I. This subsection explains,
+in concrete technical terms, the three properties that distinguish Agentic SABRE
+from conventional ensemble detectors: (1) structurally heterogeneous input spaces
+($\mathbb{R}^{384}$ semantic embeddings versus $\mathbb{R}^{16}$ I/O telemetry),
+so agents are complementary by design rather than redundant; (2) the triage decision
+conditions on epistemic \emph{uncertainty}, not only on posterior probabilities;
+and (3) the triage policy is an \emph{executable control mechanism}---not soft label
+aggregation---that can formally withhold autonomous action under ambiguity.}
+
+\CH{New subsection ``What Makes This Different from Ensemble-Based Approaches''
+added in Section~I after the Contributions list.}
+
+%----
+\RC{The advantages and limitations of the proposed approach in relationship with
+similar schemes is not clear.}
+
+\RS{We have added a 7-column comparison table (Table~1 in the revised manuscript,
+now at the end of Section~III) comparing Agentic SABRE against six representative
+prior systems across: multi-agent design, uncertainty estimation, triage policy,
+symbolic cues, explainability, concept-drift handling, and score-level augmentation.
+On the limitations side, every section now opens with a 1--2 sentence statement of
+its purpose and scope, and Section~XIII (Limitations and Future Work) now explicitly
+opens by enumerating the three principal constraints on the current design.}
+
+\CH{Comparison table (Table~1) added at the end of Section~III. Section-opening
+sentences added to all 13 sections. Section~XIII opening expanded.}
+
+%----
+\RC{Please revise the structure of the paper. It is recommendable to add in each
+section a couple of sentences that explain which is the purpose of the section.}
+
+\RS{Done. Every section in the revised manuscript now opens with 1--2 sentences
+stating its purpose within the overall narrative.}
+
+\CH{Purpose sentences added to the opening of Sections~II through~XIII.}
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  REVIEWER 1
+% -----------------------------------------------------------------------
+\section{Reviewer \#1}
+
+\subsection*{Weaknesses}
+
+\RC{Weakness 1. The proposed approach is rather ensemble-based where components are
+parallel or consequently connected DL models (CNN and GAN-based ones). The approach
+itself looks more as an agent that provides decision of the sample rather than a
+system of cooperative agents. Thus, the title is slightly confusing.}
+
+\RS{We appreciate this important observation and address it directly in the new
+``What Makes This Different'' subsection (Section~I). While the two CNNs are trained
+independently and run in parallel at inference time, the system constitutes a genuine
+multi-agent architecture in three respects that go beyond ensemble design: (1)~Each
+agent specialises on a structurally distinct input modality---the Semantic Agent
+processes PE-level embedding vectors ($\mathbb{R}^{384}$) while the Behavioural Agent
+processes sliding-window I/O telemetry ($\mathbb{R}^{16}$). These are not bootstrap
+resamples of the same feature space. (2)~The agents produce not only a posterior
+mean probability but also an \emph{epistemic uncertainty} estimate via Monte Carlo
+Dropout; this uncertainty is the primary mechanism by which the orchestrator decides
+whether to act autonomously. A standard ensemble does not produce per-model
+uncertainty signals of this kind. (3)~The Decision Agent (orchestrator) is a third
+trained agent that operates over the score space of the first two, constituting a
+hierarchical agent architecture. We have clarified this framing in the revised
+Introduction.}
+
+\CH{New subsection ``What Makes This Different from Ensemble-Based Approaches''
+in Section~I; agent architecture clarified throughout Section~IV.}
+
+%----
+\RC{Weakness 2. The authors list the following contribution: ``lightweight symbolic
+reasoning using ATT\&CK-aligned API ontologies and heuristic cues'' (4th item).
+However, the ``ATT\&CK-aligned API ontologies'' are never referred to in the
+approach description except for Sections II and III. This creates misleading
+expectations. The reasoning is done based on heuristic threshold-based rules.}
+
+\RS{The reviewer is correct. The original wording overstated the symbolic component.
+We have rewritten the 4th contribution bullet to accurately describe what is
+implemented: ATT\&CK-\emph{inspired} heuristic cues---specifically, API call
+category indicators, entropy-threshold signals, and ransomware-relevant filesystem
+access pattern flags---that are integrated into the feature extraction and triage
+stages. We no longer claim a formalised ontology; instead we describe these as
+lightweight symbolic enrichment signals grounded in ATT\&CK tactic categories.}
+
+\CH{4th contribution bullet in Section~I rewritten. The revised text reads: ``We
+incorporate \textbf{lightweight symbolic reasoning} via ATT\&CK-inspired heuristic
+cues---including API call category indicators, entropy-threshold signals, and
+ransomware-relevant filesystem access patterns---integrated into the feature
+extraction and triage stages to enrich agent decisions with interpretable
+threat-intelligence signals, forming a hybrid neuro-symbolic detection pipeline.''}
+
+%----
+\RC{Weakness 3a. Many statements are repeated in different sections: Sec.~III (the
+last sentence), Sec.~V (the last paragraph in the beginning); Sec.~V~A (the second
+paragraph); Sec.~V~C (the second paragraph).}
+
+\RS{We have removed or reworked all identified repetitions. Specifically: the closing
+sentence of Section~III (``This positions SABRE as a practical neuro-symbolic \ldots
+rather than a conceptual demonstration'') has been rewritten to state, concretely,
+which three gaps SABRE fills, rather than restating the system's positioning claim
+that opens Section~V. The opening of Section~V now serves as the primary location for
+this framing. Redundant restatements in Sections~V-A and V-C have been condensed.}
+
+\CH{Section~III final paragraph rewritten. Redundant material in Sections~V-A
+and V-C removed.}
+
+%----
+\RC{Weakness 3b. The presentation in terms of mathematical formulas is difficult
+to follow: (i)~some formulas lack explanations to the notations used---what do
+$p_{\text{beh}}, p_{\text{sem}}, \hat{p}$ stand for in Formula~(1)? What do
+$s_{\text{beh}}, s_{\text{sem}}$ stand for in Formula~(1)? How does $\hat{p}$ in
+Formula~(2) differ from $\hat{p}$ in Formula~(21)? (ii)~Formula~22 duplicates
+Formula~3. (iii)~It is strange to have a reference to Formula~25 after Formula~10.}
+
+\RS{We have addressed all three sub-points.}
+
+\noindent\textbf{(i) Notation before Eq.~(1) and Eq.~(2).}
+We added a prose paragraph before the score-vector equation that explicitly defines
+$\bar{p}_{\text{sem}} \in [0,1]$ as the predictive mean of the Semantic Agent and
+$\bar{p}_{\text{beh}} \in [0,1]$ as the predictive mean of the Behavioural Agent,
+both obtained via MC Dropout. The notation $\mathbf{s}$ for the score vector is
+introduced before it appears in any formula. The fused risk $\hat{p}$ in Eq.~(2)
+is now explicitly described as the output of the MLP Decision Agent operating on
+$\mathbf{s}$; a clarifying note explains that at deployment the full score vector
+additionally incorporates per-agent uncertainties (introduced in Section~IX), so
+the two uses of $\hat{p}$ are consistent---both refer to the MLP's output, with
+the difference being whether uncertainties are included as inputs.
+
+\noindent\textbf{(ii) Duplicate $\sigma_{\max}$ formula.}
+The canonical definition of
+$\sigma_{\max} = \max(\sigma_{\text{sem}}, \sigma_{\text{beh}})$ is now given once,
+in Section~IV-C, with label \texttt{eq:sigmamax}. The occurrence in Section~IX
+that duplicated it has been replaced by a prose reference to that equation.
+
+\noindent\textbf{(iii) Forward reference to $J(\tau,\kappa)$.}
+The scalarised objective $J(\tau,\kappa) = \mathrm{bal\_acc}(\tau,\kappa) -
+\lambda\,\mathrm{EscRate}(\tau,\kappa)$ has been moved from Section~IX to
+Section~VI (Policy Analysis), where it is first discussed. Section~IX now
+references Eq.~\eqref{eq:objective} in Section~VI, eliminating the forward
+reference.
+
+\CH{Variable definitions added before score-vector formula in Section~IV-B.
+Duplicate $\sigma_{\max}$ equation removed from Section~IX. $J(\tau,\kappa)$
+definition relocated from Section~IX to Section~VI.}
+
+%----
+\RC{Weakness 4. How are thresholds $\tau$, $\tau_{\text{high}}$ ordered? How are
+thresholds $\kappa$, $\kappa_{\text{low}}$ ordered?}
+
+\RS{We have added an explicit ordering constraint as a numbered equation in
+Section~V-A:
+$\tau \le \tau_{\text{high}}$ and $\kappa_{\text{low}} \le \kappa$.
+The prose explanation now states clearly that $\tau_{\text{high}}$ demands a higher
+fused risk for autonomous containment than $\tau$ does for mere escalation, and that
+$\kappa_{\text{low}}$ imposes a tighter (lower) uncertainty ceiling than $\kappa$.}
+
+\CH{Equation with ordering constraints $\tau \le \tau_{\text{high}}$,
+$\kappa_{\text{low}} \le \kappa$ added in Section~V-A with accompanying explanation.}
+
+%----
+\RC{Weakness 5. Figure~5 requires additional labels to axis and dotted plots.}
+
+\RS{We acknowledge this. In the revised manuscript, the caption of Figure~5 has been
+expanded to explicitly name each threshold line ($\tau$, $\tau_{\text{high}}$,
+$\kappa$, $\kappa_{\text{low}}$) and their roles. The figure itself will be
+regenerated with annotated threshold labels before the camera-ready version, as the
+figure generation scripts are maintained in the accompanying codebase.}
+
+\CH{Figure~5 caption expanded to annotate all four threshold lines.
+Figure regeneration with embedded labels is planned for the camera-ready version.}
+
+%----
+\RC{Weakness 6. Why are datasets included in the approach description? Is the
+approach dataset-dependent?}
+
+\RS{The approach is \emph{not} dataset-dependent. Section~VIII (Experimental Setup)
+now opens with an explicit statement to this effect, and the datasets subsection
+now clarifies that RDset and RanSMAP are used to \emph{instantiate} the two
+complementary modalities (static PE semantics and runtime I/O telemetry) that the
+approach assumes in the abstract. The architecture, triage policy, and all algorithms
+are specified entirely in terms of generic inputs $D_{\text{sem}}$ and $D_{\text{beh}}$
+in Algorithms~1--4 and are fully dataset-agnostic.}
+
+\CH{Section~VIII now opens with a statement clarifying that the approach is
+dataset-independent and that the specific datasets are used only to instantiate
+the two generic complementary modalities.}
+
+%----
+\RC{Weakness 7. Do datasets contain the same malware samples? How are features from
+different datasets fused? What labels are used to construct the dataset for the
+GAN-based model?}
+
+\RS{We have added a dedicated paragraph titled \textbf{``Cross-source fusion
+rationale''} in Section~VIII-A addressing all three questions. In brief:
+(1)~RDset and RanSMAP contain \emph{no overlapping malware samples}---RDset
+consists of PE file metadata from Windows executables, while RanSMAP contains
+runtime I/O traces recorded in instrumented hypervisors. (2)~Raw features are
+\emph{never} merged: each agent trains on its own dataset, and fusion occurs only
+at the \emph{score level} (the two posterior mean probabilities are concatenated
+into $\mathbf{s}$). (3)~CTGAN is conditioned on binary labels
+$y_i \in \{0,1\}$ (benign / ransomware) from the training set; no label
+transformations are applied.}
+
+\CH{``Cross-source fusion rationale'' paragraph and ``CTGAN labels'' paragraph
+added in Section~VIII-A.}
+
+%----
+\RC{Weakness 8. What is the ``predefined low risk threshold $\theta$'' (p.~9, first
+line, Sec.~IX-B)? How is it defined? What is its value?}
+
+\RS{We have added a new subsection (Section~IX-A, ``Counterfactual Threshold
+$\theta$ and Behavioural Decision Boundary'') that defines $\theta$ explicitly:
+it is the maximum posterior probability at which the agent's output is classified
+as ``benign'' for the purpose of counterfactual generation. We set $\theta = 0.49$,
+just below the standard 0.5 decision boundary, to enforce a strict label flip.
+The subsection also reports that the 100\% flip success rate is stable across
+$\theta \in [0.40, 0.49]$, confirming low sensitivity to this choice.}
+
+\CH{New Section~IX-A ``Counterfactual Threshold $\theta$ and Behavioural Decision
+Boundary'' added, defining $\theta = 0.49$ with sensitivity note.}
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  REVIEWER 2
+% -----------------------------------------------------------------------
+\section{Reviewer \#2}
+
+\RC{Point 1. The manuscript should more clearly distinguish its contribution from
+prior ensemble-based ransomware detection systems. A concise comparison paragraph
+highlighting what is fundamentally new would improve positioning.}
+
+\RS{Addressed by the new ``What Makes This Different from Ensemble-Based Approaches''
+subsection in Section~I and the 7-column comparison table (Table~1) in Section~III.
+The subsection explains the three architectural properties that make SABRE a genuine
+multi-agent system rather than an ensemble: heterogeneous input spaces, per-agent
+uncertainty estimation used as an operational control signal, and a formal executable
+triage policy.}
+
+\CH{New subsection in Section~I; comparison Table~1 in Section~III.}
+
+%----
+\RC{Point 2. The semantic agent achieves AUC$=1.0000$ on RDset. The manuscript should
+include a clearer discussion on generalisation risks (family-wise split, temporal
+split, structural similarity bias).}
+
+\RS{We have added a paragraph titled \textbf{``Generalisation caveats for
+AUC$=1.0$''} in Section~IX immediately following the AUC result. This paragraph
+explicitly acknowledges: (1) that RDset does not employ a family-wise or temporal
+split, so structural similarity bias is possible; (2) that the perfect AUC reflects
+the highly structured nature of PE-level metadata in an \emph{intra-family}
+evaluation setting; and (3) that the saturated semantic regime is deliberately used
+as a stress-test for the fusion and triage layers, not as a claim of general
+dominance. Generalisation to temporally displaced or family-disjoint corpora is
+identified as future work.}
+
+\CH{``Generalisation caveats for AUC$=1.0$'' paragraph added in Section~IX.}
+
+%----
+\RC{Point 3. The behavioural agent reports high accuracy but relatively modest AUC.
+This discrepancy should be more clearly explained, particularly regarding class
+imbalance, threshold choice, and probability calibration.}
+
+\RS{We have expanded the Behavioural Agent result paragraph in Section~IX with a
+detailed explanation of this discrepancy. In brief: the high accuracy is driven by
+the class prior (most samples are benign, so a low-probability classifier is
+accurate by default); AUC measures rank separability regardless of prior, and the
+modest AUC reflects the genuine overlap between malicious and benign I/O distributions
+in a polymorphic telemetry stream. SMOTE re-balancing improves training stability but
+does not resolve the distributional overlap. Crucially, the Behavioural Agent's role
+is framed as a \emph{modulator of $\sigma_{\max}$} rather than a standalone detector:
+its diffuse posteriors raise uncertainty for borderline cases, routing them to human
+analysts rather than enabling overconfident autonomous containment.}
+
+\CH{Expanded explanation of the accuracy/AUC discrepancy added in Section~IX
+following the Behavioural Agent result.}
+
+%----
+\RC{Point 4. A short discussion under Section~IV comparing Monte Carlo Dropout with
+alternative uncertainty approaches (deep ensembles, calibration stability under
+distribution shift) would strengthen deployment credibility.}
+
+\RS{We have added a paragraph titled \textbf{``Choice of uncertainty estimator''}
+in Section~IV-C (Uncertainty Aggregation). This paragraph explains why MC Dropout
+was chosen over deep ensembles and Bayesian neural networks: no architectural
+changes, lower inference cost ($T$ forward passes versus $M$ independently trained
+models), and compatibility with the existing dropout regularisation. The paragraph
+also honestly acknowledges that deep ensembles can produce better-calibrated
+uncertainty under strong distribution shift, and notes this as a limitation addressed
+in Section~XIII.}
+
+\CH{``Choice of uncertainty estimator'' paragraph added in Section~IV-C.}
+
+%----
+\RC{Point 5. The safety-optimal threshold $\tau = 0.999999$ appears extremely strict.
+The manuscript should clarify whether this value is dataset-specific and include a
+brief sensitivity or stability analysis.}
+
+\RS{We have added a paragraph titled \textbf{``Threshold sensitivity and dataset
+specificity''} in Section~IX. This paragraph makes three points: (1)~$\tau$ is
+dataset-specific---the near-unity value reflects the bimodal ($\{0,1\}$-clustering)
+nature of the fused probabilities on RDset, and a lower $\tau$ would be appropriate
+for datasets with more dispersed posteriors; (2)~performance is robust to the exact
+value: both the safety-optimal and low-escalation policies yield near-identical
+accuracy (0.99999 on RDset, 0.9406 vs.\ 0.9405 on RanSMAP), showing headline metrics
+are stable; (3)~the triage geometry is inherently stable near $\tau$ because the
+boundary neighbourhood in $(\hat{p},\sigma_{\max})$ space is sparsely populated
+(argued in Section~VI).}
+
+\CH{``Threshold sensitivity and dataset specificity'' paragraph added in Section~IX.}
+
+%----
+\RC{Point 6. The adversarial cost analysis is strong. However, counterfactual norms
+operate in continuous space. A short clarification of how these costs translate to
+real executable constraints (PE format restrictions, runtime feasibility) would
+further enhance practical cybersecurity relevance.}
+
+\RS{We have added a paragraph titled \textbf{``Translation of counterfactual costs
+to real-world executable constraints''} in Section~X, immediately before the Failure
+Modes discussion. For the Behavioural Agent, we explain that reducing LBA/GPA
+variance requires altering the ransomware's I/O access pattern, which conflicts
+directly with its encryption strategy (ATT\&CK T1486: Data Encrypted for Impact),
+creating a functional trade-off. For the Semantic Agent, we explain that perturbing
+PE structural features requires maintaining PE header validity (Magic bytes,
+SizeOfCode consistency), bounding the feasible deformation to a subset of the
+continuous neighbourhood $\mathcal{N}_\epsilon(\mathbf{z})$. The reported
+$\mathbb{E}[\mathcal{C}_{\text{sem}}] = 3.27$ is therefore a \emph{lower bound};
+the true adversarial cost under executable constraints is higher.}
+
+\CH{``Translation of counterfactual costs to real-world executable constraints''
+paragraph added in Section~X before the Failure Modes subsection.}
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  REVIEWER 4
+% -----------------------------------------------------------------------
+\section{Reviewer \#4}
+
+\RC{Point 1. The claimed innovation is somewhat overstated. The authors are encouraged
+to clarify the substantive technical advances over existing uncertainty-aware
+detection, multi-agent detection, and neuro-symbolic approaches.}
+
+\RS{We have restructured the Introduction to foreground the three substantive
+novelties more precisely. The new ``What Makes This Different'' subsection explains
+that: prior uncertainty-aware detectors use uncertainty as a \emph{diagnostic
+output} (Kabuye et al.~\cite{kabuye2025explainable}), whereas SABRE uses it as an
+\emph{operational control signal} that formally constrains autonomous action;
+prior multi-agent detectors fuse votes or feature concatenations (Soltani et al.,
+2023), whereas SABRE fuses heterogeneous modalities at the score level under joint
+uncertainty governance; and prior neuro-symbolic systems embed rules at the
+architecture level, whereas SABRE embeds them as interpretable triage thresholds
+that can be updated without model retraining. The comparison Table~1 quantifies
+these distinctions across six reference systems.}
+
+\CH{New subsection in Section~I; comparison Table~1 in Section~III; contributions
+list in Section~I revised for precision.}
+
+%----
+\RC{Point 2. The dataset setting is evidently heterogeneous. The rationale for
+cross-source fusion, the comparability of these datasets, and the real-world
+deployment scenario should be further clarified.}
+
+\RS{The ``Cross-source fusion rationale'' paragraph in Section~VIII-A directly
+addresses this. In brief: RDset and RanSMAP are not comparable in feature space---they
+are complementary observation planes of the same threat category (static PE artefacts
+vs.\ runtime I/O telemetry). Fusion at the raw feature level would be meaningless;
+fusion at the score level is motivated by the realistic SOC scenario in which a
+static sandbox scanner and a runtime endpoint monitor report simultaneously, and a
+security orchestrator must act on both signals. This mirrors real-world deployments
+where SIEM platforms ingest alerts from heterogeneous sensors. The Experimental Setup
+section now opens with this scenario framing.}
+
+\CH{``Cross-source fusion rationale'' paragraph in Section~VIII-A; Section~VIII
+opening paragraph revised to frame the real-world deployment scenario.}
+
+%----
+\RC{Point 3. The threshold strategy relies heavily on parameters $\tau$, $\kappa$,
+$\tau_{\text{high}}$, $\kappa_{\text{low}}$. The parameter selection process,
+sensitivity analysis, and cross-dataset stability are insufficient.}
+
+\RS{We have addressed this in three ways. First, the policy objective
+$J(\tau,\kappa)$ is now defined in Section~VI (Policy Analysis) with a full
+description of the optimisation procedure (grid search over the non-smooth landscape
+with $\lambda = 0.5$). Second, the ``Threshold sensitivity and dataset specificity''
+paragraph in Section~IX explains why $\tau=0.999999$ is dataset-specific and
+demonstrates stability: both safety-optimal and low-escalation policies achieve
+near-identical accuracy across both datasets, confirming robustness to small
+perturbations in the threshold pair. Third, Section~VI explains the geometric
+stability argument: the boundary neighbourhood in $(\hat{p},\sigma_{\max})$ space
+is sparsely populated due to the monotonic fusion structure, meaning small threshold
+shifts move the boundary without reclassifying many samples. We acknowledge that
+a rigorous cross-dataset stability evaluation (e.g.\ on held-out ransomware families)
+remains an important future direction.}
+
+\CH{$J(\tau,\kappa)$ definition moved to Section~VI; threshold sensitivity paragraph
+added in Section~IX; geometric stability argument in Section~VI.}
+
+%----
+\RC{Point 4. The manuscript repeatedly emphasises calibration, interpretability, and
+robustness. However, the current evidence is mainly based on qualitative analysis or
+limited case examples. More systematic statistical tests and comparative experiments
+are recommended.}
+
+\RS{We acknowledge this limitation. The existing evidence is structured across
+three complementary quantitative channels: (i)~reliability diagrams confirming
+$\mathbb{P}(y=1 \mid \hat{p}=q) \approx q$ (Figure~3); (ii)~ablation tables
+(Tables~VIII and IX) that quantify the impact of removing each component;
+(iii)~$N=50$ counterfactual experiments with distributional statistics
+(Tables~VII and~III). We agree that formal statistical tests (e.g.\ McNemar's
+test on the confusion matrices of the full model versus each ablated variant,
+or bootstrap confidence intervals on AUC differences) would further strengthen
+validity claims. We have noted this explicitly as a future-work item in
+Section~XIII and have added language clarifying the nature of the evidence
+(empirical rather than hypothesis-test-level) at the start of Section~IX.}
+
+\CH{Section~IX opening paragraph clarified regarding the nature of evidence;
+Section~XIII updated to list formal statistical validation as a future direction.}
+
+%----
+\RC{Point 5. The adversarial robustness analysis is mainly based on counterfactual
+perturbation norms and theoretical discussion. Standard adversarial attack
+experiments are lacking.}
+
+\RS{We agree that standard adversarial attack experiments (e.g.\ FGSM or PGD on
+the neural agents) would strengthen robustness claims. Executing such attacks on
+the behavioural agent requires a differentiable model of the I/O simulator, and
+on the semantic agent requires a generative model of PE binaries that satisfies
+loader constraints---both are substantial engineering efforts outside the scope of
+the current paper. The counterfactual analysis serves as a principled surrogate:
+it computes the \emph{minimal-norm perturbation to cross the decision boundary},
+which is equivalent to the white-box $\ell_2$-norm adversarial attack under a
+continuous relaxation. The ``Translation to real-world executable constraints''
+paragraph (Section~X) now grounds these norms in concrete PE and I/O constraints.
+We have added a sentence in Section~XIII acknowledging standard adversarial attack
+evaluation as a priority for future work.}
+
+\CH{Section~X adversarial cost paragraph expanded with real-world grounding.
+Section~XIII updated to identify standard adversarial evaluation as future work.}
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  REVIEWER 5
+% -----------------------------------------------------------------------
+\section{Reviewer \#5}
+
+\RC{The experimental results section would benefit from including confidence
+intervals or variance metrics to further support the uncertainty-aware claims.}
+
+\RS{Monte Carlo Dropout itself produces per-sample uncertainty estimates
+$\sigma_{\text{sem}}$ and $\sigma_{\text{beh}}$ that can be interpreted as
+predictive standard deviations; these are summarised in Table~VII for the
+counterfactual experiments. For aggregate performance metrics (AUC, accuracy),
+formal bootstrap confidence intervals require repeated held-out evaluation which
+is computationally intensive at the scale of RanSMAP (11,820 execution traces).
+We have added a clarifying note in Section~IX stating that the MC Dropout
+uncertainties constitute the uncertainty evidence at the per-sample level, and
+that bootstrap CI computation for aggregate metrics is planned for future work.
+We also note that the ablation comparisons in Tables~VIII and IX provide a form
+of model-level variance assessment across architecturally distinct configurations.}
+
+\CH{Clarifying note on confidence intervals added in Section~IX.
+Section~XIII updated with formal CI computation as a future direction.}
+
+%----
+\RC{A brief discussion on computational complexity and runtime performance would
+improve the practical relevance of the work.}
+
+\RS{We have added a subsection titled \textbf{``Computational Complexity and
+Runtime Performance''} in Section~XII (Discussion). This subsection details:
+per-sample CPU inference latency ($\approx 150$--$350$\,ms, including $T=30$ MC
+Dropout passes for each CNN agent); GPU latency ($<10$\,ms with batched passes);
+CTGAN training time ($\approx 5$--$10$\,min for the score-space dataset); and
+the operational advantage of the modular design, wherein the triage policy can
+be recalibrated by threshold optimisation alone without retraining any model.}
+
+\CH{``Computational Complexity and Runtime Performance'' subsection added in
+Section~XII.}
+
+%----
+\RC{The related work section may be strengthened by including a brief comparison
+table summarising key differences between existing approaches and the proposed
+framework.}
+
+\RS{Done. Table~1 in the revised Section~III compares Agentic SABRE against six
+representative systems across seven design dimensions: multi-agent architecture,
+uncertainty estimation, operational triage policy, symbolic cues, explainability,
+concept-drift handling, and score-level augmentation. The table uses a three-level
+encoding (\checkmark~= present; $\circ$~= partial; $\times$~= absent) for each
+dimension.}
+
+\CH{Comparison table (Table~1) added at the end of Section~III.}
+
+%----
+\RC{The manuscript is generally well-written; however, a few grammatical
+inconsistencies and typographical errors should be carefully reviewed.}
+
+\RS{The entire manuscript has been re-read and edited for grammatical consistency
+and typographical accuracy. Key corrections include: uniform use of the en-dash
+vs.\ hyphen in compound adjectives; removal of doubled words and inconsistent
+capitalisation in section headings; and standardised notation for all mathematical
+symbols (e.g.\ consistent use of $\bar{p}$ vs.\ $\hat{p}$ and $\sigma$ vs.\
+$\sigma_{\max}$ across sections).}
+
+\CH{Manuscript-wide grammar and typographical review completed; corrections
+applied throughout.}
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  CLOSING
+% -----------------------------------------------------------------------
+\section*{Closing Remark}
+
+We believe the revised manuscript is substantially stronger in its technical
+precision, structural clarity, and contextual positioning. We are grateful to all
+reviewers for the depth of their engagement. We remain available to address any
+remaining concerns the editor or reviewers may have.
+
+\bigskip
+\noindent\textit{The Authors}
+
+\end{document}

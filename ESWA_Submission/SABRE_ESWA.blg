@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2022/dev/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: SABRE_ESWA.aux
+The style file: elsarticle-num.bst
+Database file #1: Reference_Sabre.bib
+You've used 32 entries,
+            2952 wiz_defined-function locations,
+            936 strings with 15827 characters,
+and the built_in function-call counts, 13766 in all, are:
+= -- 1309
+> -- 588
+< -- 13
++ -- 215
+- -- 183
+* -- 1239
+:= -- 1930
+add.period$ -- 55
+call.type$ -- 32
+change.case$ -- 34
+chr.to.int$ -- 0
+cite$ -- 32
+duplicate$ -- 431
+empty$ -- 1403
+format.name$ -- 220
+if$ -- 3439
+int.to.chr$ -- 0
+int.to.str$ -- 32
+missing$ -- 31
+newline$ -- 156
+num.names$ -- 46
+pop$ -- 227
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 733
+stack$ -- 0
+substring$ -- 731
+swap$ -- 189
+text.length$ -- 13
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 93
+width$ -- 34
+write$ -- 357
