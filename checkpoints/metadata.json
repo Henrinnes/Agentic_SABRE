@@ -26,5 +26,8 @@
     "Platform_Windows",
     "Platform_Linux",
     "Platform_ESXi"
-  ]
+  ],
+  "behavioral_training_data": "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet",
+  "behavioral_configs": 15,
+  "behavioral_train_rows": 35857
 }

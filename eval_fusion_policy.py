@@ -89,9 +89,9 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------ #
     print("Loading datasets...")
     df_sem = pd.read_parquet(
-        r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet")
+        r"/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet")
     df_beh = pd.read_parquet(
-        r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet")
+        r"/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet")
     print(f"  RDset   (semantic) : {len(df_sem):,} rows  "
           f"(ransom={df_sem.label.sum():,}  benign={(df_sem.label==0).sum():,})")
     print(f"  RanSMAP (behavioral): {len(df_beh):,} rows  "
@@ -124,10 +124,13 @@ if __name__ == "__main__":
     )
 
     # Warm-up GPU
+    _zero_know = [{"features": np.zeros(23, dtype=np.float32)} for _ in range(32)]
     orch.handle_batch(
         [{"embedding": X_sem[i]} for i in range(32)],
         [{"features":  X_beh[i]} for i in range(32)],
+        _zero_know,
     )
+
 
     # ================================================================== #
     #  SECTION 1 — Per-agent evaluations (each on its native dataset)
@@ -196,7 +199,8 @@ if __name__ == "__main__":
     fused_probs, fused_uncerts, fused_decisions = [], [], []
     t0 = time.time()
     for start in range(0, N_fuse, BATCH_SIZE):
-        for out in orch.handle_batch(x_sems_f[start:start+BATCH_SIZE], x_behs_f[start:start+BATCH_SIZE]):
+        _knows = [{"features": np.zeros(23, dtype=np.float32)} for _ in range(len(x_sems_f[start:start+BATCH_SIZE]))]
+        for out in orch.handle_batch(x_sems_f[start:start+BATCH_SIZE], x_behs_f[start:start+BATCH_SIZE], _knows):
             fused_probs.append(out["score_fused"])
             fused_uncerts.append(out["uncert_max"])
             fused_decisions.append(out["decision"])
