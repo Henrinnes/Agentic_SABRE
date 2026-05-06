@@ -1,18 +1,18 @@
 \relax 
-\emailauthor{kabuyehenry2017@gmail.com}{Henry Kabuye\corref {cor1}}
+\emailauthor{bissac@ieee.org}{Biju Issac\corref {cor1}}
 \Newlabel{cor1}{1}
 \citation{fernando2020study,razaulla2023age}
 \citation{fernando2020study,Urooj2024polymorphism}
 \citation{Ceschin2022ConceptDrift}
 \citation{Fernando2024FeSAD,razaulla2023age}
-\citation{alraizza2023ransomware,zahoora2022Deep}
-\citation{fernando2020study}
-\citation{Doan2024uncertainBay}
-\citation{Ispahany2024Survey}
 \Newlabel{1}{a}
 \newlabel{sec-abstract}{{}{1}}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}\protected@file@percent }
 \newlabel{sec:introduction}{{1}{1}}
+\citation{alraizza2023ransomware,zahoora2022Deep}
+\citation{fernando2020study}
+\citation{Doan2024uncertainBay}
+\citation{Ispahany2024Survey}
 \citation{kabuye2025explainable}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Contributions}{2}{}\protected@file@percent }
 \citation{fernando2020study,razaulla2023age}
@@ -21,14 +21,15 @@
 \citation{fernando2020study}
 \citation{gal2016dropout,gawlikowski2023Uncertainity}
 \citation{gal2016dropout,gawlikowski2023Uncertainity,kabuye2025explainable}
-\citation{Besold2021neurosymbolicsurvey}
-\citation{Ispahany2024Survey}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Background}{3}{}\protected@file@percent }
 \newlabel{sec:background}{{2}{3}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Related Work}{3}{}\protected@file@percent }
-\newlabel{sec:related}{{3}{3}}
+\citation{Besold2021neurosymbolicsurvey}
+\citation{Ispahany2024Survey}
 \citation{vaswani2017attention}
 \citation{tian2025llmsurvey,BenchmarkingLLMsPhishing2024,CANAL_CTILLM2024}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Related Work}{4}{}\protected@file@percent }
+\newlabel{sec:related}{{3}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Machine Learning for Ransomware Detection}{4}{}\protected@file@percent }
 \citation{chawla2002smote}
 \citation{xu2019ctgan,ashrapov2020tabular}
 \citation{HabibiCL23}
@@ -46,163 +47,182 @@
 \citation{ZhangLZYHY25}
 \citation{kabuye2025explainable}
 \citation{MultiAgentAdaptiveDetection2023}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Machine Learning for Ransomware Detection}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Data Augmentation and Imbalance Handling}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Semantic Modelling and Log Understanding}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Uncertainty Quantification in Cybersecurity}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Multi-Agent and Neuro-Symbolic Approaches}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Agentic SABRE Framework}{4}{}\protected@file@percent }
-\newlabel{sec:method}{{4}{4}}
-\citation{gal2016dropout}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of Agentic SABRE with representative prior ransomware and intrusion detection systems across key design dimensions. \text  {$\mathsurround \z@ \mathchar "458$}\nobreakspace  {}= present; $\circ $\nobreakspace  {}= partial; $\times $\nobreakspace  {}= absent.\relax }}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Data Augmentation and Imbalance Handling}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Semantic Modelling and Log Understanding}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Uncertainty Quantification in Cybersecurity}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Multi-Agent and Neuro-Symbolic Approaches}{5}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of Agentic SABRE with representative prior ransomware and intrusion detection systems across key design dimensions. \text  {$\mathsurround \z@ \mathchar "458$}\nobreakspace  {}= present; $\circ $\nobreakspace  {}= partial; $\times $\nobreakspace  {}= absent.\relax }}{6}{}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:related_comparison}{{1}{5}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}System Overview}{5}{}\protected@file@percent }
-\newlabel{subsec:SysOverview}{{4.1}{5}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Score Fusion and Decision Agent}{5}{}\protected@file@percent }
-\newlabel{eq:scorevec_basic}{{1}{5}}
-\newlabel{eq:scorepool}{{2}{5}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Uncertainty Aggregation}{5}{}\protected@file@percent }
-\newlabel{eq:sigmamax}{{3}{5}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Uncertainty-Aware Triage Policy}{5}{}\protected@file@percent }
-\newlabel{sec:uncert_policy}{{5}{5}}
+\newlabel{tab:related_comparison}{{1}{6}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Operational pipeline with uncertainty-aware, agentic policy. Semantic and behavioural CNNs (with MC Dropout) yield mean scores and per-agent uncertainties. Mean scores are concatenated and CTGAN-augmented for the Decision Agent to produce a fused risk $\hat  {p}$. A policy uses risk threshold $\tau $ and uncertainty threshold $\kappa $ (with optional stricter $\tau _{\text  {high}}$, $\kappa _{\text  {low}}$) to branch to \emph  {AUTO-CONTAIN}, \emph  {ESCALATE}, or \emph  {ALLOW}.\relax }}{6}{}\protected@file@percent }
 \newlabel{fig:agentic-Sabre_policy-pipeline}{{1}{6}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Policy Design and Thresholds}{6}{}\protected@file@percent }
-\newlabel{subsec:policy_thresholds}{{5.1}{6}}
-\newlabel{eq:threshold_order}{{4}{6}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Decision Rules}{6}{}\protected@file@percent }
-\newlabel{subsec:policy_rules}{{5.2}{6}}
-\newlabel{eq:policy_auto}{{5}{6}}
-\newlabel{eq:policy_escalate}{{6}{6}}
-\newlabel{eq:policy_allow}{{7}{6}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Operational Interpretation}{6}{}\protected@file@percent }
-\newlabel{subsec:policy_interpretation}{{5.3}{6}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Policy Analysis}{7}{}\protected@file@percent }
-\newlabel{sec:policydiscussion}{{6}{7}}
-\newlabel{eq:policy_space}{{8}{7}}
-\newlabel{eq:auto_rule}{{9}{7}}
-\newlabel{eq:esc_rule}{{10}{7}}
-\newlabel{eq:corners}{{11}{7}}
-\newlabel{eq:objective}{{12}{7}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Threat Model}{7}{}\protected@file@percent }
-\newlabel{sec:threatmodel}{{7}{7}}
-\newlabel{eq:beh_dists}{{13}{7}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Agentic SABRE Framework}{6}{}\protected@file@percent }
+\newlabel{sec:method}{{4}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}System Overview}{6}{}\protected@file@percent }
+\newlabel{subsec:SysOverview}{{4.1}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Score Fusion and Decision Agent}{6}{}\protected@file@percent }
+\citation{gal2016dropout}
+\newlabel{eq:scorevec_basic}{{1}{7}}
+\newlabel{eq:scorepool}{{2}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Uncertainty Aggregation}{7}{}\protected@file@percent }
+\newlabel{eq:sigmamax}{{3}{7}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Uncertainty-Aware Triage Policy}{7}{}\protected@file@percent }
+\newlabel{sec:uncert_policy}{{5}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Policy Design and Thresholds}{8}{}\protected@file@percent }
+\newlabel{subsec:policy_thresholds}{{5.1}{8}}
+\newlabel{eq:threshold_order}{{4}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Decision Rules}{8}{}\protected@file@percent }
+\newlabel{subsec:policy_rules}{{5.2}{8}}
+\newlabel{eq:policy_auto}{{5}{8}}
+\newlabel{eq:policy_escalate}{{6}{8}}
+\newlabel{eq:policy_allow}{{7}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Operational Interpretation}{8}{}\protected@file@percent }
+\newlabel{subsec:policy_interpretation}{{5.3}{8}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Policy Analysis}{8}{}\protected@file@percent }
+\newlabel{sec:policydiscussion}{{6}{8}}
+\newlabel{eq:policy_space}{{8}{8}}
+\newlabel{eq:auto_rule}{{9}{8}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Agentic SABRE: Training and Deployment Pipeline\relax }}{9}{}\protected@file@percent }
+\newlabel{alg:agentic_sabre_pipeline}{{1}{9}}
+\newlabel{eq:esc_rule}{{10}{9}}
+\newlabel{eq:corners}{{11}{9}}
+\newlabel{eq:objective}{{12}{9}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces MC Dropout Uncertainty Estimation for a Neural Agent\relax }}{10}{}\protected@file@percent }
+\newlabel{alg:mc_dropout}{{2}{10}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Threat Model}{10}{}\protected@file@percent }
+\newlabel{sec:threatmodel}{{7}{10}}
+\newlabel{eq:beh_dists}{{13}{10}}
 \citation{hirano2022ransap}
 \citation{hirano2025ransmap}
 \citation{mathur2020ransomware}
 \citation{kabuye2025explainable}
-\@writefile{toc}{\contentsline {section}{\numberline {8}Experimental Setup}{8}{}\protected@file@percent }
-\newlabel{sec:experimental_setup}{{8}{8}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Datasets}{8}{}\protected@file@percent }
-\newlabel{subsec:datasets}{{8.1}{8}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Feature Construction and Preprocessing}{8}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Semantic Features (RDset).}{8}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Behavioural Features (RanSMAP/RanSAP).}{8}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Model Training and Inference}{9}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Evaluation Metrics and Policy Optimisation}{9}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {9}Results}{9}{}\protected@file@percent }
-\newlabel{sec:results}{{9}{9}}
-\newlabel{eq:psem}{{20}{9}}
-\newlabel{eq:pbeh}{{21}{9}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Fusion and Uncertainty-Aware Triage}{9}{}\protected@file@percent }
-\newlabel{eq:scorevector}{{22}{9}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Performance of the individual agents prior to fusion.\relax }}{10}{}\protected@file@percent }
-\newlabel{tab:agent_performance}{{2}{10}}
-\newlabel{eq:fusedp}{{23}{10}}
-\newlabel{eq:policy_safety}{{25}{10}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Counterfactual Threshold $\theta $ and Behavioural Decision Boundary}{10}{}\protected@file@percent }
-\newlabel{subsec:theta}{{9.2}{10}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Fusion Calibration, Feature Sensitivity, and Policy Geometry}{10}{}\protected@file@percent }
-\newlabel{sec:fusion_analysis}{{9.3}{10}}
-\@writefile{toc}{\contentsline {paragraph}{Behavioural feature sensitivity.}{10}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Calibration of fused risk scores.}{10}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Fusion and triage performance under safety-optimal and low-escalation policies.\relax }}{11}{}\protected@file@percent }
-\newlabel{tab:fusion_policies}{{3}{11}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Permutation-based feature importance for the behavioural agent, measured as the drop in AUC after permuting each feature independently. Variance- and entropy-driven memory access statistics dominate, indicating that behavioural discrimination relies on irregularity patterns rather than raw activity volume.\relax }}{11}{}\protected@file@percent }
-\newlabel{fig:beh_perm}{{2}{11}}
-\@writefile{toc}{\contentsline {paragraph}{ROC characteristics under fusion.}{11}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Policy geometry in risk--uncertainty space.}{11}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Reliability diagram for the fused risk score $\hat  {p}$. The close alignment between predicted probabilities and empirical positive rates indicates strong calibration, validating the use of $\hat  {p}$ as a meaningful risk estimate for downstream triage decisions.\relax }}{11}{}\protected@file@percent }
-\newlabel{fig:fusion_reliability}{{3}{11}}
-\@writefile{toc}{\contentsline {section}{\numberline {10}Explainability and Interpretation}{11}{}\protected@file@percent }
-\newlabel{sec:explainability}{{10}{11}}
-\newlabel{fig:roc_ransmap}{{4a}{12}}
-\newlabel{sub@fig:roc_ransmap}{{a}{12}}
-\newlabel{fig:roc_rdset}{{4b}{12}}
-\newlabel{sub@fig:roc_rdset}{{b}{12}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Receiver operating characteristic (ROC) curves comparing base agents and fusion. \textbf  {Left:} RanSMAP, where behavioural signals are weak and fusion substantially improves separability. \textbf  {Right:} RDset, where the semantic agent already saturates and fusion preserves optimal performance.\relax }}{12}{}\protected@file@percent }
-\newlabel{fig:roc_fusion}{{4}{12}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Explainability via Feature Perturbation and Counterfactual Analysis}{12}{}\protected@file@percent }
-\newlabel{sec:behavioural_explainability}{{10.1}{12}}
-\newlabel{eq:beh_score}{{27}{12}}
-\newlabel{eq:perm_imp}{{28}{12}}
-\newlabel{eq:neighbourhood}{{29}{12}}
-\newlabel{eq:counterfactual_condition}{{30}{12}}
-\newlabel{eq:minimal_cf}{{31}{12}}
-\newlabel{eq:count1}{{32}{12}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Triage policy geometry in the $(\hat  {p}, \sigma _{\qopname  \relax m{max}})$ space. Horizontal and vertical thresholds correspond to the analytical decision rules in Eqs.\nobreakspace  {}\textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 9\hbox {}\unskip \@@italiccorr )}} and \textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 10\hbox {}\unskip \@@italiccorr )}}, partitioning the space into \textsc  {ALLOW}, \textsc  {ESCALATE}, and \textsc  {AUTO-CONTAIN} regions. Uncertainty acts as a stabilising control variable, preventing overconfident automatic containment.\relax }}{13}{}\protected@file@percent }
-\newlabel{fig:triage_space}{{5}{13}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Representative behavioural counterfactuals generated using the minimal-perturbation formulation in Equation\nobreakspace  {}\textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 31\hbox {}\unskip \@@italiccorr )}}. Relative changes are computed using Equation\nobreakspace  {}\textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 32\hbox {}\unskip \@@italiccorr )}}.\relax }}{13}{}\protected@file@percent }
-\newlabel{tab:beh_cf_summary}{{4}{13}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Semantic Explainability via Embedding Sensitivity and Counterfactual Deformation}{13}{}\protected@file@percent }
-\newlabel{sec:semantic_explainability}{{10.2}{13}}
-\newlabel{eq:sem_pred}{{33}{13}}
-\@writefile{toc}{\contentsline {paragraph}{Gradient-based semantic sensitivity.}{13}{}\protected@file@percent }
-\newlabel{eq:sem_grad}{{34}{13}}
-\@writefile{toc}{\contentsline {paragraph}{Permutation importance in embedding space.}{14}{}\protected@file@percent }
-\newlabel{eq:sem_perm}{{35}{14}}
-\@writefile{toc}{\contentsline {paragraph}{Semantic counterfactual deformation.}{14}{}\protected@file@percent }
-\newlabel{eq:sem_cf_condition}{{36}{14}}
-\newlabel{eq:sem_cf_objective}{{37}{14}}
-\newlabel{eq:sem_logit}{{38}{14}}
-\newlabel{eq:sem_delta}{{39}{14}}
-\@writefile{toc}{\contentsline {paragraph}{Geometric consistency across explainability views.}{14}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Representative semantic counterfactual shifts generated via the minimal-deformation objective in Equation\nobreakspace  {}\textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 40\hbox {}\unskip \@@italiccorr )}}. Latent directions with the largest impact correspond to PE structural irregularities and entropy-driven embedding dimensions.\relax }}{14}{}\protected@file@percent }
-\newlabel{tab:sem_cf}{{5}{14}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Semantic counterfactual flips for the Semantic Agent. Each counterfactual embedding $z_{\mathrm  {cf}}$ is optimised to cross a low-risk target boundary while remaining close to the original embedding $z_0$.\relax }}{14}{}\protected@file@percent }
-\newlabel{tab:sem_cf_flips}{{6}{14}}
-\newlabel{eq:sem_cf_min}{{40}{14}}
-\newlabel{eq:sem_cf_norm}{{41}{14}}
-\newlabel{eq:fusion_concat}{{42}{14}}
-\newlabel{eq:fus_pred}{{43}{14}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Semantic counterfactual diagnostics for $N=50$ borderline-malicious samples. (Top-left) Distribution of counterfactual distance $\|\Delta z\|_2$. (Top-right) Distribution of relative distance $\|\Delta z\|_2/\|z\|_2$. (Bottom-left) Relationship between original semantic score $p_{\mathrm  {sem}}$ and $\|\Delta z\|_2$. (Bottom-right) Optimisation steps required to reach the target $\theta =0.49$.\relax }}{15}{}\protected@file@percent }
-\newlabel{fig:sem_cf_diagnostics}{{6}{15}}
-\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Most frequently perturbed embedding dimensions across semantic counterfactuals. ``Count in Top-8'' reports how often the dimension appears among the highest-magnitude normalised changes $\delta _{\mathrm  {sem}}$ per sample.\relax }}{15}{}\protected@file@percent }
-\newlabel{tab:sem_cf_dims}{{7}{15}}
-\@writefile{toc}{\contentsline {paragraph}{Consistency of salient directions across modalities.}{15}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Summary statistics for semantic counterfactual perturbations over $N=50$ borderline-malicious samples.\relax }}{15}{}\protected@file@percent }
-\newlabel{tab:sem_cf_summary}{{8}{15}}
-\@writefile{toc}{\contentsline {paragraph}{Fusion-level counterfactual alignment.}{16}{}\protected@file@percent }
-\newlabel{eq:fus_cf_condition}{{44}{16}}
-\newlabel{eq:fus_cf_decomp}{{45}{16}}
-\@writefile{toc}{\contentsline {paragraph}{Geometric interpretation of fusion robustness.}{16}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Implications for adversarial resistance and interpretability.}{16}{}\protected@file@percent }
-\newlabel{eq:adv_cost_sem}{{46}{16}}
-\newlabel{eq:adv_cost_fusion}{{47}{16}}
-\@writefile{toc}{\contentsline {section}{\numberline {11}Ablation Studies}{17}{}\protected@file@percent }
-\newlabel{sec:ablation}{{11}{17}}
-\newlabel{eq:ctgan_dist}{{48}{17}}
-\newlabel{eq:scorevector_reduced}{{49}{17}}
-\newlabel{eq:mean_fusion}{{50}{17}}
-\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Ablation of fusion strategies.\relax }}{17}{}\protected@file@percent }
-\newlabel{tab:ablation_fusion}{{9}{17}}
-\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Effect of removing uncertainty terms on triage performance.\relax }}{17}{}\protected@file@percent }
-\newlabel{tab:ablation_uncertainty}{{10}{17}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {11.1}Ablation Analysis of Modal Contributions}{17}{}\protected@file@percent }
-\newlabel{eq:ablate_sem}{{51}{17}}
-\newlabel{eq:ablate_beh}{{52}{17}}
-\@writefile{toc}{\contentsline {section}{\numberline {12}Discussion}{17}{}\protected@file@percent }
-\newlabel{sec:discussion}{{12}{17}}
-\newlabel{eq:wass_sem}{{53}{17}}
-\newlabel{eq:wass_beh}{{54}{17}}
-\@writefile{toc}{\contentsline {section}{\numberline {13}Limitations and Future Work}{18}{}\protected@file@percent }
-\newlabel{sec:limitations}{{13}{18}}
-\newlabel{eq:nonlinear_boundary}{{55}{18}}
-\@writefile{toc}{\contentsline {section}{\numberline {14}Conclusion}{18}{}\protected@file@percent }
-\newlabel{sec:conclusion}{{14}{18}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Score-Level CTGAN Augmentation for Decision Agent Training\relax }}{11}{}\protected@file@percent }
+\newlabel{alg:ctgan_scores}{{3}{11}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces Uncertainty-Aware Triage Policy\relax }}{11}{}\protected@file@percent }
+\newlabel{alg:triage_policy}{{4}{11}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Experimental Setup}{11}{}\protected@file@percent }
+\newlabel{sec:experimental_setup}{{8}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Datasets}{11}{}\protected@file@percent }
+\newlabel{subsec:datasets}{{8.1}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Feature Construction and Preprocessing}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Semantic Features (RDset).}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Behavioural Features (RanSMAP/RanSAP).}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Model Training and Inference}{13}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Evaluation Metrics and Policy Optimisation}{13}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Results}{13}{}\protected@file@percent }
+\newlabel{sec:results}{{9}{13}}
+\newlabel{eq:psem}{{20}{13}}
+\newlabel{eq:pbeh}{{21}{14}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Performance of the individual agents prior to fusion.\relax }}{14}{}\protected@file@percent }
+\newlabel{tab:agent_performance}{{2}{14}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Fusion and Uncertainty-Aware Triage}{14}{}\protected@file@percent }
+\newlabel{eq:scorevector}{{22}{14}}
+\newlabel{eq:fusedp}{{23}{14}}
+\newlabel{eq:policy_safety}{{25}{14}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Fusion and triage performance under safety-optimal and low-escalation policies.\relax }}{15}{}\protected@file@percent }
+\newlabel{tab:fusion_policies}{{3}{15}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Counterfactual Threshold $\theta $ and Behavioural Decision Boundary}{15}{}\protected@file@percent }
+\newlabel{subsec:theta}{{9.2}{15}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}Fusion Calibration, Feature Sensitivity, and Policy Geometry}{15}{}\protected@file@percent }
+\newlabel{sec:fusion_analysis}{{9.3}{15}}
+\@writefile{toc}{\contentsline {paragraph}{Behavioural feature sensitivity.}{15}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Permutation-based feature importance for the behavioural agent, measured as the drop in AUC after permuting each feature independently. Variance- and entropy-driven memory access statistics dominate, indicating that behavioural discrimination relies on irregularity patterns rather than raw activity volume.\relax }}{16}{}\protected@file@percent }
+\newlabel{fig:beh_perm}{{2}{16}}
+\@writefile{toc}{\contentsline {paragraph}{Calibration of fused risk scores.}{16}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{ROC characteristics under fusion.}{16}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Policy geometry in risk--uncertainty space.}{16}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Reliability diagram for the fused risk score $\hat  {p}$. The close alignment between predicted probabilities and empirical positive rates indicates strong calibration, validating the use of $\hat  {p}$ as a meaningful risk estimate for downstream triage decisions.\relax }}{17}{}\protected@file@percent }
+\newlabel{fig:fusion_reliability}{{3}{17}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Explainability and Interpretation}{17}{}\protected@file@percent }
+\newlabel{sec:explainability}{{10}{17}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Explainability via Feature Perturbation and Counterfactual Analysis}{17}{}\protected@file@percent }
+\newlabel{sec:behavioural_explainability}{{10.1}{17}}
+\newlabel{eq:beh_score}{{27}{17}}
+\newlabel{fig:roc_ransmap}{{4a}{18}}
+\newlabel{sub@fig:roc_ransmap}{{a}{18}}
+\newlabel{fig:roc_rdset}{{4b}{18}}
+\newlabel{sub@fig:roc_rdset}{{b}{18}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Receiver operating characteristic (ROC) curves comparing base agents and fusion. \textbf  {Left:} RanSMAP, where behavioural signals are weak and fusion substantially improves separability. \textbf  {Right:} RDset, where the semantic agent already saturates and fusion preserves optimal performance.\relax }}{18}{}\protected@file@percent }
+\newlabel{fig:roc_fusion}{{4}{18}}
+\newlabel{eq:perm_imp}{{28}{18}}
+\newlabel{eq:neighbourhood}{{29}{18}}
+\newlabel{eq:counterfactual_condition}{{30}{18}}
+\newlabel{eq:minimal_cf}{{31}{18}}
+\newlabel{eq:count1}{{32}{18}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Triage policy geometry in the $(\hat  {p}, \sigma _{\qopname  \relax m{max}})$ space. Horizontal and vertical thresholds correspond to the analytical decision rules in Eqs.\nobreakspace  {}\textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 9\hbox {}\unskip \@@italiccorr )}} and \textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 10\hbox {}\unskip \@@italiccorr )}}, partitioning the space into \textsc  {ALLOW}, \textsc  {ESCALATE}, and \textsc  {AUTO-CONTAIN} regions. Uncertainty acts as a stabilising control variable, preventing overconfident automatic containment.\relax }}{19}{}\protected@file@percent }
+\newlabel{fig:triage_space}{{5}{19}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Representative behavioural counterfactuals generated using the minimal-perturbation formulation in Equation\nobreakspace  {}\textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 31\hbox {}\unskip \@@italiccorr )}}. Relative changes are computed using Equation\nobreakspace  {}\textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 32\hbox {}\unskip \@@italiccorr )}}.\relax }}{19}{}\protected@file@percent }
+\newlabel{tab:beh_cf_summary}{{4}{19}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Semantic Explainability via Embedding Sensitivity and Counterfactual Deformation}{20}{}\protected@file@percent }
+\newlabel{sec:semantic_explainability}{{10.2}{20}}
+\newlabel{eq:sem_pred}{{33}{20}}
+\@writefile{toc}{\contentsline {paragraph}{Gradient-based semantic sensitivity.}{20}{}\protected@file@percent }
+\newlabel{eq:sem_grad}{{34}{20}}
+\@writefile{toc}{\contentsline {paragraph}{Permutation importance in embedding space.}{20}{}\protected@file@percent }
+\newlabel{eq:sem_perm}{{35}{20}}
+\@writefile{toc}{\contentsline {paragraph}{Semantic counterfactual deformation.}{20}{}\protected@file@percent }
+\newlabel{eq:sem_cf_condition}{{36}{20}}
+\newlabel{eq:sem_cf_objective}{{37}{20}}
+\newlabel{eq:sem_logit}{{38}{20}}
+\newlabel{eq:sem_delta}{{39}{20}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Representative semantic counterfactual shifts generated via the minimal-deformation objective in Equation\nobreakspace  {}\textup  {\hbox {\mathsurround \z@ \normalfont  (\ignorespaces 40\hbox {}\unskip \@@italiccorr )}}. Latent directions with the largest impact correspond to PE structural irregularities and entropy-driven embedding dimensions.\relax }}{21}{}\protected@file@percent }
+\newlabel{tab:sem_cf}{{5}{21}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Semantic counterfactual flips for the Semantic Agent. Each counterfactual embedding $z_{\mathrm  {cf}}$ is optimised to cross a low-risk target boundary while remaining close to the original embedding $z_0$.\relax }}{21}{}\protected@file@percent }
+\newlabel{tab:sem_cf_flips}{{6}{21}}
+\@writefile{toc}{\contentsline {paragraph}{Geometric consistency across explainability views.}{21}{}\protected@file@percent }
+\newlabel{eq:sem_cf_min}{{40}{21}}
+\newlabel{eq:sem_cf_norm}{{41}{21}}
+\newlabel{eq:fusion_concat}{{42}{21}}
+\newlabel{eq:fus_pred}{{43}{21}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Most frequently perturbed embedding dimensions across semantic counterfactuals. ``Count in Top-8'' reports how often the dimension appears among the highest-magnitude normalised changes $\delta _{\mathrm  {sem}}$ per sample.\relax }}{22}{}\protected@file@percent }
+\newlabel{tab:sem_cf_dims}{{7}{22}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Summary statistics for semantic counterfactual perturbations over $N=50$ borderline-malicious samples.\relax }}{22}{}\protected@file@percent }
+\newlabel{tab:sem_cf_summary}{{8}{22}}
+\@writefile{toc}{\contentsline {paragraph}{Consistency of salient directions across modalities.}{22}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Fusion-level counterfactual alignment.}{22}{}\protected@file@percent }
+\newlabel{eq:fus_cf_condition}{{44}{22}}
+\newlabel{eq:fus_cf_decomp}{{45}{22}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Semantic counterfactual diagnostics for $N=50$ borderline-malicious samples. (Top-left) Distribution of counterfactual distance $\|\Delta z\|_2$. (Top-right) Distribution of relative distance $\|\Delta z\|_2/\|z\|_2$. (Bottom-left) Relationship between original semantic score $p_{\mathrm  {sem}}$ and $\|\Delta z\|_2$. (Bottom-right) Optimisation steps required to reach the target $\theta =0.49$.\relax }}{23}{}\protected@file@percent }
+\newlabel{fig:sem_cf_diagnostics}{{6}{23}}
+\@writefile{toc}{\contentsline {paragraph}{Geometric interpretation of fusion robustness.}{23}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Implications for adversarial resistance and interpretability.}{23}{}\protected@file@percent }
+\newlabel{eq:adv_cost_sem}{{46}{24}}
+\newlabel{eq:adv_cost_fusion}{{47}{24}}
+\@writefile{toc}{\contentsline {section}{\numberline {11}Ablation Studies}{25}{}\protected@file@percent }
+\newlabel{sec:ablation}{{11}{25}}
+\newlabel{eq:ctgan_dist}{{48}{25}}
+\newlabel{eq:scorevector_reduced}{{49}{25}}
+\newlabel{eq:mean_fusion}{{50}{25}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Ablation of fusion strategies.\relax }}{25}{}\protected@file@percent }
+\newlabel{tab:ablation_fusion}{{9}{25}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Effect of removing uncertainty terms on triage performance.\relax }}{25}{}\protected@file@percent }
+\newlabel{tab:ablation_uncertainty}{{10}{25}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.1}Ablation Analysis of Modal Contributions}{25}{}\protected@file@percent }
+\newlabel{eq:ablate_sem}{{51}{25}}
+\newlabel{eq:ablate_beh}{{52}{25}}
+\@writefile{toc}{\contentsline {section}{\numberline {12}Discussion}{26}{}\protected@file@percent }
+\newlabel{sec:discussion}{{12}{26}}
+\newlabel{eq:wass_sem}{{53}{26}}
+\newlabel{eq:wass_beh}{{54}{26}}
+\@writefile{toc}{\contentsline {paragraph}{Training complexity of CNN agents.}{26}{}\protected@file@percent }
+\newlabel{eq:cnn_fwd}{{55}{26}}
+\@writefile{toc}{\contentsline {paragraph}{Monte Carlo Dropout score generation.}{26}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{CTGAN augmentation.}{27}{}\protected@file@percent }
+\newlabel{eq:ctgan_complexity}{{56}{27}}
+\@writefile{toc}{\contentsline {paragraph}{Decision Agent MLP training.}{27}{}\protected@file@percent }
+\newlabel{eq:mlp_complexity}{{57}{27}}
+\@writefile{toc}{\contentsline {paragraph}{Bayesian TPE threshold optimisation.}{27}{}\protected@file@percent }
+\newlabel{eq:tpe_complexity}{{58}{27}}
+\@writefile{toc}{\contentsline {paragraph}{Inference latency.}{27}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Total pipeline training complexity.}{27}{}\protected@file@percent }
+\newlabel{eq:total_complexity}{{59}{27}}
 \bibstyle{elsarticle-num}
 \bibdata{Reference_Sabre}
+\@writefile{toc}{\contentsline {section}{\numberline {13}Limitations and Future Work}{28}{}\protected@file@percent }
+\newlabel{sec:limitations}{{13}{28}}
+\newlabel{eq:nonlinear_boundary}{{60}{28}}
+\@writefile{toc}{\contentsline {section}{\numberline {14}Conclusion}{28}{}\protected@file@percent }
+\newlabel{sec:conclusion}{{14}{28}}
 \bibcite{fernando2020study}{{1}{}{{}}{{}}}
 \bibcite{razaulla2023age}{{2}{}{{}}{{}}}
 \bibcite{Urooj2024polymorphism}{{3}{}{{}}{{}}}
@@ -236,12 +256,4 @@
 \bibcite{hirano2025ransmap}{{31}{}{{}}{{}}}
 \bibcite{mathur2020ransomware}{{32}{}{{}}{{}}}
 \providecommand\NAT@force@numbers{}\NAT@force@numbers
-\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Agentic SABRE: Training and Deployment Pipeline\relax }}{20}{}\protected@file@percent }
-\newlabel{alg:agentic_sabre_pipeline}{{1}{20}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces MC Dropout Uncertainty Estimation for a Neural Agent\relax }}{21}{}\protected@file@percent }
-\newlabel{alg:mc_dropout}{{2}{21}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Score-Level CTGAN Augmentation for Decision Agent Training\relax }}{21}{}\protected@file@percent }
-\newlabel{alg:ctgan_scores}{{3}{21}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces Uncertainty-Aware Triage Policy\relax }}{21}{}\protected@file@percent }
-\newlabel{alg:triage_policy}{{4}{21}}
-\gdef \@abspage@last{21}
+\gdef \@abspage@last{30}

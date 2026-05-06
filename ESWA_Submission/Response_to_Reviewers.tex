@@ -241,7 +241,7 @@ that duplicated it has been replaced by a prose reference to that equation.
 The scalarised objective $J(\tau,\kappa) = \mathrm{bal\_acc}(\tau,\kappa) -
 \lambda\,\mathrm{EscRate}(\tau,\kappa)$ has been moved from Section~IX to
 Section~VI (Policy Analysis), where it is first discussed. Section~IX now
-references Eq.~\eqref{eq:objective} in Section~VI, eliminating the forward
+references Eq.~(12) in Section~VI, eliminating the forward
 reference.
 
 \CH{Variable definitions added before score-vector formula in Section~IV-B.
@@ -578,16 +578,46 @@ Section~XIII updated with formal CI computation as a future direction.}
 \RC{A brief discussion on computational complexity and runtime performance would
 improve the practical relevance of the work.}
 
-\RS{We have added a subsection titled \textbf{``Computational Complexity and
-Runtime Performance''} in Section~XII (Discussion). This subsection details:
-per-sample CPU inference latency ($\approx 150$--$350$\,ms, including $T=30$ MC
-Dropout passes for each CNN agent); GPU latency ($<10$\,ms with batched passes);
-CTGAN training time ($\approx 5$--$10$\,min for the score-space dataset); and
-the operational advantage of the modular design, wherein the triage policy can
-be recalibrated by threshold optimisation alone without retraining any model.}
+\RS{We have substantially expanded the subsection titled \textbf{``Computational
+Complexity and Runtime Performance''} in Section~XII (Discussion) to include a
+formal Big-O analysis of every pipeline component, structured in six paragraphs
+and four numbered equations.
+Specifically:
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{CNN agent training} (Eq.~(55)):
+        $\mathcal{O}(E \cdot N \cdot L \cdot K \cdot C^2)$ per agent, linear in
+        both sample count $N$ and epoch count $E$, with explicit constants
+        $L=3$, $K=3$, $C=64$, and modality-specific input dimensions
+        ($C_0=384$ semantic; $C_0=16$ behavioural).
+  \item \textbf{MC Dropout score generation}:
+        $\mathcal{O}(2 T N L K C^2)$ for both agents combined, with $T=30$
+        stochastic passes; empirical wall-clock: $\approx 60$--$150$\,ms per
+        agent on CPU.
+  \item \textbf{CTGAN augmentation} (Eq.~(56)):
+        $\mathcal{O}(E_{\mathrm{CTGAN}} \cdot N_s \cdot
+        [\sum_i g_i g_{i+1} + \sum_j d_j d_{j+1}])$; the score matrix is
+        $N_s \times 2$---orders of magnitude smaller than the raw feature
+        matrices---so 200 epochs fit in $\approx 5$--$10$\,min on CPU.
+  \item \textbf{Decision Agent MLP} (Eq.~(57)):
+        $\mathcal{O}(E_{\mathrm{MLP}} \cdot N_{\mathrm{aug}} \cdot h^2)$,
+        negligible relative to CTGAN given the small input dimension ($d=4$).
+  \item \textbf{Bayesian TPE optimisation} (Eq.~(58)):
+        $\mathcal{O}(T_{\mathrm{TPE}} \cdot (n_{\mathrm{obs}} \log n_{\mathrm{obs}}
+        + N_{\mathrm{val}}))$, converging within minutes.
+  \item \textbf{Per-sample inference}: dominated by MC Dropout at
+        $\mathcal{O}(T \cdot L \cdot K \cdot C^2)$; total wall-clock
+        $\approx 0.15$--$0.35$\,s CPU, $<10$\,ms GPU.
+  \item \textbf{Total training complexity} (Eq.~(59)):
+        a four-term closed-form expression covering all components, revealing
+        that each CNN agent and the triage thresholds can be updated independently
+        without retraining the rest of the pipeline.
+\end{itemize}}
 
-\CH{``Computational Complexity and Runtime Performance'' subsection added in
-Section~XII.}
+\CH{``Computational Complexity and Runtime Performance'' subsection in
+Section~XII substantially expanded with formal Big-O analysis of all pipeline
+components (four new numbered equations: (55),
+(56), (57), (58),
+(59)) and six structured paragraphs.}
 
 %----
 \RC{The related work section may be strengthened by including a brief comparison
