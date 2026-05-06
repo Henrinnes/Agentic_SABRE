@@ -19,10 +19,21 @@
 
 %% ---- Journal header -------------------------------------------------------
 %% ---- Changebar (revision highlighting) -----------------------------------
-\usepackage[xcolor]{changebar}
-\cbcolor{blue}
-\setlength{\changebarwidth}{3pt}
-\setlength{\changebarsep}{6pt}
+\usepackage{soul}
+\usepackage[framemethod=tikz]{mdframed}
+\sethlcolor{yellow}
+%% Yellow box for changed blocks containing equations or multiple paragraphs
+\newmdenv[
+  backgroundcolor=yellow!25,
+  linecolor=yellow!70!black,
+  linewidth=0.6pt,
+  innerleftmargin=4pt,
+  innerrightmargin=4pt,
+  innertopmargin=3pt,
+  innerbottommargin=3pt,
+  skipabove=4pt,
+  skipbelow=4pt
+]{changedblock}
 \newcommand{\rev}[1]{{\color{blue}#1}}
 
 \journal{Expert Systems with Applications}
@@ -34,7 +45,6 @@
 \title{Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent Framework for Adaptive Ransomware Detection}
 
 \author[1]{Henry Kabuye}
-\ead{kabuyehenry2017@gmail.com}
 
 \author[1]{Biju Issac\corref{cor1}}
 \ead{bissac@ieee.org}
@@ -89,14 +99,12 @@ This work makes the following key contributions:
     \(\tau\) and uncertainty threshold \(\kappa\), enabling calibrated decisions
     between autonomous containment, escalation, and benign allowance.
 
-\cbstart
-    \item We incorporate \textbf{lightweight symbolic reasoning} via
+\item \colorbox{yellow!25}{\parbox{0.9\linewidth}{We incorporate \textbf{lightweight symbolic reasoning} via
     ATT\&CK-inspired heuristic cues---including API call category indicators,
     entropy-threshold signals, and ransomware-relevant filesystem access
     patterns---integrated into the feature extraction and triage stages to
     enrich agent decisions with interpretable threat-intelligence signals,
-    forming a hybrid neuro-symbolic detection pipeline.
-\cbend
+    forming a hybrid neuro-symbolic detection pipeline.}}
 
     \item Through extensive experiments across multiple ransomware families and
     benign workloads, we show that SABRE improves robustness under drift, reduces
@@ -104,7 +112,7 @@ This work makes the following key contributions:
     uncertainty.
 \end{itemize}
 
-\cbstart
+\begin{changedblock}
 \subsection*{What Makes This Different from Ensemble-Based Approaches}
 
 A key concern in multi-agent ransomware detection is whether the proposed system is simply
@@ -120,7 +128,7 @@ interpretable---it is a formal control mechanism, not a soft label aggregation--
 the system can unambiguously withhold autonomous action under ambiguity, a property that
 vanilla ensembles do not possess. Together, these properties make Agentic SABRE an agentic
 cyber-defence system rather than a higher-accuracy detector.
-\cbend
+\end{changedblock}
 
 \subsection*{Paper structure}
 The remainder of this paper is organised as follows.
@@ -148,11 +156,9 @@ work. Finally, Section~\ref{sec:conclusion} concludes the paper.
 \section{Background}
 \label{sec:background}
 
-\cbstart
-This section establishes the technical context for Agentic SABRE by reviewing the ransomware
+\hl{This section establishes the technical context for Agentic SABRE by reviewing the ransomware
 threat landscape, summarising the limitations of existing detection approaches, and motivating
-the design requirements addressed by the proposed framework.
-\cbend
+the design requirements addressed by the proposed framework.}
 
 Ransomware has become a dominant form of cybercrime, driven by increasingly
 sophisticated techniques for evasion, polymorphism, and operational stealth.
@@ -174,11 +180,9 @@ While prior surveys comprehensively catalogue ransomware detection techniques, t
 \section{Related Work}
 \label{sec:related}
 
-\cbstart
-This section surveys the four bodies of prior work most relevant to Agentic SABRE---ransomware
+\hl{This section surveys the four bodies of prior work most relevant to Agentic SABRE---ransomware
 detection, data augmentation, uncertainty quantification in cybersecurity, and multi-agent
-neuro-symbolic approaches---and identifies the gaps that motivate our design.
-\cbend
+neuro-symbolic approaches---and identifies the gaps that motivate our design.}
 
 Research on ransomware detection intersects multiple areas including behavioural modelling, semantic reasoning, uncertainty-aware machine learning, and modular multi-agent architectures. We review the most relevant lines of work and highlight the distinctions between existing approaches and the design of Agentic~SABRE. Prior work on uncertainty-aware ransomware and intrusion detection typically treats uncertainty as a diagnostic signal: uncertainty estimates are reported to aid interpretation, calibration analysis, or analyst awareness, but they do not explicitly constrain system behaviour. In such settings, uncertainty remains an auxiliary output rather than a governing variable in the decision process. In contrast, Agentic SABRE treats epistemic uncertainty as an operational decision variable. Uncertainty is explicitly incorporated into the triage policy and directly determines whether the system may autonomously contain a process, escalate to human analysts, or allow execution. This transforms uncertainty from a descriptive property of predictions into a prescriptive control signal that enforces safety and conservatism under ambiguity.
 
@@ -214,10 +218,10 @@ cooperative anomaly detection, and adversarial resilience~\cite{AdversarialCoope
 However, these prior systems typically lack (i) agent-level uncertainty
 estimation, (ii) uncertainty-aware fusion, and (iii) operational triage policies linking uncertainty and risk to automated or human-in-the-loop decisions. Agentic SABRE directly addresses all three gaps: it assigns dedicated uncertainty estimation to each agent, fuses both risk and uncertainty into a calibrated decision signal, and enforces an executable triage policy that determines when the system may act autonomously and when human oversight is required.
 
-\cbstart
+\begin{changedblock}
 Table~\ref{tab:related_comparison} summarises how representative prior systems compare to
 Agentic SABRE across the dimensions that define the design space.
-\cbend
+\end{changedblock}
 
 \begin{table*}[t]
 \centering
@@ -252,12 +256,12 @@ Soltani \emph{et al.}~\cite{MultiAgentAdaptiveDetection2023} & \checkmark & $\ti
 \section{Agentic SABRE Framework}
 \label{sec:method}
 
-\cbstart
+\begin{changedblock}
 This section presents the complete Agentic SABRE architecture. We describe the five-stage
 operational pipeline, the score-fusion mechanism, the uncertainty aggregation strategy, and
 the design of the symbolic reasoning components. The triage policy itself is detailed in
 Section~\ref{sec:uncert_policy}.
-\cbend
+\end{changedblock}
 
 \subsection{System Overview}
 \label{subsec:SysOverview}
@@ -276,13 +280,13 @@ Agentic~SABRE is a neuro-symbolic, uncertainty-aware multi-agent system designed
 
 \subsection{Score Fusion and Decision Agent}
 
-\cbstart
+\begin{changedblock}
 This subsection describes how the two agents' outputs are combined into a single ransomware risk estimate.
 Let $\bar{p}_{\text{sem}} \in [0,1]$ denote the predictive mean probability of the Semantic Agent
 and $\bar{p}_{\text{beh}} \in [0,1]$ that of the Behavioural Agent, each obtained via Monte Carlo
 Dropout (Algorithm~\ref{alg:mc_dropout}).
 The corresponding per-agent epistemic uncertainties are $\sigma_{\text{sem}}$ and $\sigma_{\text{beh}}$.
-\cbend
+\end{changedblock}
 The fused score vector is constructed as:
 
 \begin{equation}
@@ -303,12 +307,12 @@ ransomware risk estimate:
 \label{eq:scorepool}
 \end{equation}
 
-\cbstart
+\begin{changedblock}
 where $\hat{p} \in [0,1]$ is the fused risk probability used by the triage orchestrator.
 Note that at deployment the full score vector additionally incorporates the per-agent uncertainties
 (see Eq.~\ref{eq:scorevector} in Section~\ref{sec:results}), which are used as inputs to the
 trained Decision Agent to produce the calibrated fused risk.
-\cbend
+\end{changedblock}
 
 \subsection{Uncertainty Aggregation}
 
@@ -319,18 +323,18 @@ To ensure conservative behaviour, agent-level uncertainties are aggregated via a
 \label{eq:sigmamax}
 \end{equation}
 
-\cbstart
+\begin{changedblock}
 where $\sigma_{\text{sem}}$ and $\sigma_{\text{beh}}$ are the Monte Carlo Dropout standard
 deviations of the semantic and behavioural agents respectively. Using the maximum rather than
 the mean ensures that elevated uncertainty in \emph{either} modality---not just their
 average---constrains autonomous action, providing a conservative safety guarantee.
 This definition is carried consistently throughout the triage logic and fusion analysis.
-\cbend
+\end{changedblock}
 
-\cbstart
+\begin{changedblock}
 \noindent\textbf{Choice of uncertainty estimator.}
 Monte Carlo (MC) Dropout~\cite{gal2016dropout} was selected over deep ensembles and Bayesian
-\cbend
+\end{changedblock}
 neural networks for three practical reasons. First, MC Dropout requires no architectural
 changes beyond retaining dropout at inference time, making it straightforward to integrate
 into the existing CNN agents. Second, its per-sample inference cost is $T$ stochastic forward
@@ -338,23 +342,23 @@ passes ($T = 30$ in our experiments), which is lower than training and storing $
 ensemble members ($M \ge 5$ is typical). Third, the agents' training pipelines already include
 dropout regularisation, so no additional training overhead is incurred. We acknowledge that
 deep ensembles can produce better-calibrated uncertainty under strong distribution shift,
-\cbstart
+\begin{changedblock}
 as they approximate a wider posterior over model weights. MC Dropout may under-estimate
 epistemic uncertainty in highly non-stationary behavioural regimes---a limitation noted in
 Section~\ref{sec:limitations} and left as a direction for future work with ensemble-based
 SABRE variants.
-\cbend
+\end{changedblock}
 
 
 \section{Uncertainty-Aware Triage Policy}
 \label{sec:uncert_policy}
 
-\cbstart
+\begin{changedblock}
 This section formalises the triage decision mechanism that converts the fused risk score
 $\hat{p}$ and aggregated uncertainty $\sigma_{\max}$ into one of three operational actions:
 \textsc{AUTO-CONTAIN}, \textsc{ESCALATE}, or \textsc{ALLOW}. We present the policy design
 rationale, the decision rules, and an operational interpretation of the threshold geometry.
-\cbend
+\end{changedblock}
 
 Agentic~SABRE can be interpreted as a decision-theoretic control system in which
 epistemic uncertainty constrains autonomous action. Rather than optimising
@@ -380,7 +384,7 @@ The policy uses two pairs of thresholds:
 (i) $(\tau,\kappa)$ defining the general escalation boundary, and
 (ii) $(\tau_{\text{high}},\kappa_{\text{low}})$ defining a stricter region in which
 autonomous containment is permitted.
-\cbstart
+\begin{changedblock}
 These pairs satisfy the ordering constraints
 \begin{equation}
 \tau \le \tau_{\text{high}}, \qquad \kappa_{\text{low}} \le \kappa,
@@ -394,7 +398,7 @@ is required. The stricter pair $(\tau_{\text{high}},\kappa_{\text{low}})$ enforc
 conservative automation contract: autonomous containment is permitted only when the fused
 risk is very high \emph{and} uncertainty is sufficiently low, ruling out overconfident
 automated responses near the decision boundary.
-\cbend
+\end{changedblock}
 
 \subsection{Decision Rules}
 \label{subsec:policy_rules}
@@ -551,18 +555,16 @@ decision logic of Agentic~SABRE.
 \section{Policy Analysis}
 \label{sec:policydiscussion}
 
-\cbstart
-This section analyses the geometry of the triage decision space, characterises the adversarial
+\hl{This section analyses the geometry of the triage decision space, characterises the adversarial
 stability of the policy boundaries, and introduces the threshold-optimisation objective used
-to select operational parameters.
-\cbend
+to select operational parameters.}
 
 The triage mechanism in Agentic~SABRE is governed by the joint behaviour of the fused probability \(\hat{p}\) and the maximal epistemic uncertainty \(\sigma_{\max}\). The policy partitions the space
 \begin{equation}
 \mathcal{X} = \bigl\{ (\hat{p},\,\sigma_{\max}) \in [0,1] \times [0,1] \bigr\}
 \label{eq:policy_space}
 \end{equation}
-\cbend
+
 into three disjoint regions corresponding to the actions \(\mathsf{ALLOW}\), \(\mathsf{ESCALATE}\), and \(\mathsf{AUTO\_CONTAIN}\). The decision boundaries are defined implicitly by the inequalities
 \begin{equation}
 \hat{p} \ge \tau_{\mathrm{high}}, \qquad \sigma_{\max} \le \kappa_{\mathrm{low}},
@@ -582,7 +584,7 @@ The geometry of the decision space is determined by the relative magnitudes of \
 \end{equation}
 exhibit the greatest instability under adversarial perturbation. However, due to the monotonic structure of the fusion classifier, the gradient of \(\hat{p}\) is typically largest where semantic evidence dominates, meaning the neighbourhood of \((\tau_{\mathrm{high}},\kappa_{\mathrm{low}})\) tends to be sparsely populated.
 
-\cbstart
+\begin{changedblock}
 The optimisation of threshold pairs is governed by a scalarised objective that trades off
 classification quality against escalation volume. Specifically, we define
 \begin{equation}
@@ -597,21 +599,18 @@ Eqs.~\eqref{eq:auto_rule}--\eqref{eq:esc_rule}. Increasing \(\tau\) reduces the 
 escalation region but simultaneously risks enlarging the allow region unless offset by a
 simultaneous adjustment to \(\kappa\). The calibrated trade-off therefore emerges from solving
 the non-convex problem of maximising \(J(\tau,\kappa)\) while maintaining robustness to the
-\cbstart
 uncertainty geometry defined in Eq.~\eqref{eq:policy_space}. This interplay between fused risk,
 epistemic uncertainty, and threshold selection constitutes the mathematical core of the Agentic
 SABRE policy framework.
-\cbend
+\end{changedblock}
 
 
 \section{Threat Model}
 \label{sec:threatmodel}
 
-\cbstart
-This section defines the adversarial assumptions under which Agentic SABRE is evaluated,
+\hl{This section defines the adversarial assumptions under which Agentic SABRE is evaluated,
 specifying what the attacker can and cannot manipulate, and explaining how the uncertainty-aware
-triage policy provides robustness against the considered threat classes.
-\cbend
+triage policy provides robustness against the considered threat classes.}
 
 The operational setting assumes an adversary capable of deploying ransomware samples that vary in semantic structure, behavioural dynamics, or both. The defender observes two forms of telemetry: a semantic representation \(\mathbf{z}_i \in \mathbb{R}^{d_s}\) encoded from static artefacts and a behavioural representation \(\mathbf{b}_i \in \mathbb{R}^{d_b}\) extracted from temporal I/O activity. The adversary is assumed to operate under the constraint that behavioural logs and static metadata cannot be forged arbitrarily without compromising the malware’s execution.  
 
@@ -629,13 +628,13 @@ The model assumes that the attacker does not possess knowledge of the triage par
 \section{Experimental Setup}
 \label{sec:experimental_setup}
 
-\cbstart
+\begin{changedblock}
 This section describes the datasets, feature construction procedures, model training
 configurations, and evaluation metrics used to assess Agentic SABRE. Crucially, the two
 datasets cover complementary modalities---static PE semantics and runtime behavioural
 telemetry---and are never mixed at the raw feature level; fusion occurs only at the
 score level, as described in Section~\ref{sec:method}.
-\cbend
+\end{changedblock}
 
 \subsection{Datasets}
 \label{subsec:datasets}
@@ -646,10 +645,10 @@ exhibit complementary characteristics. RDset provides static semantic metadata d
 RanSAP~\cite{hirano2022ransap} is a hypervisor-level behavioural dataset consisting of
 low-level storage access patterns only, comprising approximately 200 million I/O events aggregated into fixed-length temporal windows collected from multiple ransomware and benign executions. RanSMAP~\cite{hirano2025ransmap}, a successor dataset, extends RanSAP by incorporating both storage and memory access patterns, yielding 11,820 execution traces across diverse hardware configurations, ransomware variants, and simultaneous benign--malicious workloads. In contrast, the dataset introduced by Mathur~\cite{mathur2020ransomware}, commonly referred to as \emph{RDset} in subsequent literature~\cite{kabuye2025explainable}, comprises 138,047 PE samples described by 57 structured static attributes. In this work, these attributes are transformed into semantic representations via a lightweight text-based encoding and embedding procedure, enabling comparison with behavioural telemetry at the agent level.
 
-\cbstart
+\begin{changedblock}
 \noindent\textbf{Cross-source fusion rationale.}
 RDset and RanSMAP do \emph{not} contain overlapping malware samples: RDset consists of PE
-\cbend
+\end{changedblock}
 file metadata from Windows executables, while RanSMAP contains runtime I/O traces recorded
 during execution on instrumented hypervisors. The two datasets are therefore drawn from
 complementary observation planes of the same threat category. Raw features are
@@ -661,13 +660,13 @@ This design mirrors realistic deployment scenarios in which a SOC may simultaneo
 static file analysis from a sandbox and runtime telemetry from an endpoint sensor, where
 neither source alone provides complete ransomware characterisation.
 
-\cbstart
+\begin{changedblock}
 \noindent\textbf{CTGAN labels.}
 The CTGAN generator in Algorithm~\ref{alg:ctgan_scores} is conditioned on binary labels
 $y_i \in \{0,1\}$ (benign / ransomware) drawn directly from the training set labels. No
 additional label transformations or soft-label schemes are applied; the generator learns to
 produce realistic score-space samples for each class independently.
-\cbend
+\end{changedblock}
 
 
 \subsection{Feature Construction and Preprocessing}
@@ -748,12 +747,10 @@ The evaluation of Agentic~SABRE is organised around three questions:
 \section{Results}
 \label{sec:results}
 
-\cbstart
-This section reports the empirical performance of Agentic SABRE, covering individual agent
+\hl{This section reports the empirical performance of Agentic SABRE, covering individual agent
 discriminability, fusion quality and calibration, uncertainty-aware triage behaviour, and
 threshold sensitivity. Results are presented across both RDset (semantic, saturated regime)
-and RanSMAP (behavioural, high-uncertainty regime) to characterise the full operational range.
-\cbend
+and RanSMAP (behavioural, high-uncertainty regime) to characterise the full operational range.}
 
 Unlike conventional evaluation metrics, the escalation rate induced by the triage policy represents an operational cost rather than a classification error. Escalated samples require analyst attention, introduce response latency, and increase cognitive workload. Reductions in escalation volume at fixed recall therefore correspond directly to deployability improvements, even when headline accuracy remains unchanged.
 
@@ -764,31 +761,29 @@ p_{\mathrm{sem}} = f_{\mathrm{S}}(\mathbf{z}),
 \end{equation}
 which achieves accuracy and AUC equal to \(1.0000\) on RDset. The separation in the semantic embedding space is therefore nearly perfect. This behaviour reflects the highly structured nature of PE-level metadata in RDset and should not be interpreted as a claim of general semantic dominance. Instead, this high-separability semantic evaluation setting is deliberately used as a stress-test for the uncertainty-aware fusion and triage mechanisms, allowing us to examine how behavioural uncertainty constrains autonomous action even when semantic evidence is maximal.
 
-\cbstart
+\begin{changedblock}
 \noindent\textbf{Generalisation caveats for AUC $= 1.0$.}
 The perfect AUC on RDset is a consequence of the high structural separability of PE-level
-\cbend
+\end{changedblock}
 attributes in the embedding space and should be interpreted with care. RDset does not employ
 a family-wise or temporal split: samples are divided at the binary level, so families present
 in the training set may also appear in the test set under different instances. This creates
 the risk of structural similarity bias, whereby the model learns family-specific artefacts
 rather than generalisable malicious patterns. Accordingly, AUC $= 1.0$ on RDset characterises
 performance in a \emph{saturated} semantic regime and is used here specifically to stress-test
-\cbstart
-the fusion and triage layers under minimal semantic uncertainty. Generalisation to unseen
+\hl{the fusion and triage layers under minimal semantic uncertainty. Generalisation to unseen
 ransomware families or temporally displaced deployments would require temporal or family-wise
-splits, which we leave for future work with appropriately partitioned corpora.
-\cbend
+splits, which we leave for future work with appropriately partitioned corpora.}
 
 The behavioural agent receives handcrafted statistical–temporal features \(\mathbf{b}_i \in \mathbb{R}^{16}\) and computes
 \begin{equation}
 p_{\mathrm{beh}} = f_{\mathrm{B}}(\mathbf{b}),
 \label{eq:pbeh}
 \end{equation}
-\cbstart
+\begin{changedblock}
 resulting in accuracy \(0.9872\) and AUC \(0.6030\). The apparent discrepancy between high
 accuracy and modest AUC warrants explanation. RanSMAP is highly class-imbalanced: the majority
-\cbend
+\end{changedblock}
 of samples are benign, so a classifier that assigns low probabilities to almost all samples
 achieves high accuracy simply by following the prior. AUC, however, measures the ability to
 \emph{rank} malicious samples above benign ones regardless of threshold, and is therefore
@@ -799,11 +794,11 @@ access-count statistics, particularly for polymorphic variants that mimic legiti
 behaviour. Despite applying SMOTE for class re-balancing, the agent's posterior probabilities
 remain diffuse across the malicious class, producing a weak ranking signal. This is precisely
 why the Behavioural Agent is not used as a standalone detector but as a \emph{modulator} of
-\cbstart
+\begin{changedblock}
 epistemic uncertainty within the triage framework: its main role is to raise $\sigma_{\max}$
 for borderline cases, routing them to human analysts rather than permitting overconfident
 autonomous containment.
-\cbend
+\end{changedblock}
 
 Table~\ref{tab:agent_performance} summarises these base-agent results.
 
@@ -852,10 +847,10 @@ The \emph{safety-optimal} triage configuration is obtained by maximising balance
 These values imply that automatic containment requires extremely high fused risk \(\hat{p}\)
 and sufficiently low uncertainty.
 
-\cbstart
+\begin{changedblock}
 \noindent\textbf{Threshold sensitivity and dataset specificity.}
 The value $\tau = 0.999999$ appears extremely strict and naturally raises the question of
-\cbend
+\end{changedblock}
 whether the results are overly sensitive to this particular choice. Several observations
 support the stability of this configuration. First, both the safety-optimal and
 low-escalation policies yield near-identical accuracy (0.99999 vs.\ 0.99999 on RDset;
@@ -870,9 +865,9 @@ $J(\tau,\kappa)$ in Eq.~\eqref{eq:objective} with an operationally appropriate $
 Third, the triage geometry is inherently stable: small perturbations to $\tau$ shift the
 vertical boundary in the $(\hat{p}, \sigma_{\max})$ plane (Figure~\ref{fig:triage_space})
 without qualitatively changing which samples fall into the AUTO-CONTAIN vs.\ ESCALATE
-\cbstart
+\begin{changedblock}
 regions, since the boundary neighbourhood is sparsely populated (see Section~\ref{sec:policydiscussion}).
-\cbend
+\end{changedblock}
 
 A second configuration, the \emph{low-escalation regime}, minimises escalation volume by
 solving the objective $J(\tau,\kappa)$ in Eq.~\eqref{eq:objective} with \(\lambda = 0.5\).
@@ -915,10 +910,9 @@ Low-Escalation & RanSMAP &
 \label{tab:fusion_policies}
 \end{table*}
 
-\cbstart
+\colorbox{yellow!25}{\bfseries [REVISED]}~
 \subsection{Counterfactual Threshold $\theta$ and Behavioural Decision Boundary}
 \label{subsec:theta}
-\cbend
 
 Throughout the explainability analysis, counterfactual perturbations target a
 \emph{low-risk decision threshold} $\theta \in (0, 0.5)$ that defines the malicious-to-benign
@@ -930,10 +924,10 @@ ensure a strict flip rather than a tie. This value is fixed across all counterfa
 experiments and is not optimised; it represents the tightest practically achievable flip
 threshold given the finite precision of the gradient-based optimiser. Sensitivity to $\theta$
 is low: the $100\%$ flip success rate in Table~\ref{tab:sem_cf_summary} holds across
-\cbstart
+\begin{changedblock}
 $\theta \in [0.40, 0.49]$, confirming that the decision boundary is well-separated from the
 borderline-malicious score region.
-\cbend
+\end{changedblock}
 
 \subsection{Fusion Calibration, Feature Sensitivity, and Policy Geometry}
 \label{sec:fusion_analysis}
@@ -1008,12 +1002,10 @@ Collectively, these analyses demonstrate that the fused decision surface is not 
 \section{Explainability and Interpretation}
 \label{sec:explainability}
 
-\cbstart
-This section analyses the internal decision geometry of SABRE's agents through gradient
+\hl{This section analyses the internal decision geometry of SABRE's agents through gradient
 saliency, permutation importance, and counterfactual deformation, establishing that the
 learned representations are anchored to interpretable ransomware-relevant features rather
-than spurious correlations.
-\cbend
+than spurious correlations.}
 
 We adopt counterfactual explanations as a core explainable AI mechanism, as they provide local, actionable explanations by revealing the minimal semantic or behavioural changes required to alter the model’s prediction. While counterfactual norms provide insight into local decision geometry, they do not constitute worst-case adversarial guarantees, a limitation discussed further in Section~\ref{sec:limitations}.
 
@@ -1431,10 +1423,10 @@ $\mathbb{E}[\mathcal{C}_{\mathrm{sem}}] = 3.27$ with low variance
 (Table~\ref{tab:sem_cf_summary}), while behavioural counterfactuals exhibit a comparable non-trivial cost. The fusion agent therefore enforces a compounded adversarial requirement: perturbations that are sufficient to evade one modality are generally insufficient to evade the fused decision.
 This establishes a principled robustness advantage rooted in the geometry of the latent spaces rather than in heuristic thresholding.
 
-\cbstart
+\begin{changedblock}
 \noindent\textbf{Translation of counterfactual costs to real-world executable constraints.}
 The counterfactual norms $\mathcal{C}_{\mathrm{beh}}$ and $\mathcal{C}_{\mathrm{sem}}$
-\cbend
+\end{changedblock}
 operate in the continuous relaxation of the feature space and must be interpreted in light
 of the discrete constraints imposed by real malware executables. For the \emph{behavioural
 agent}, the most perturbed dimensions are LBA and GPA variance statistics
@@ -1451,11 +1443,11 @@ which must remain valid for the OS loader. Standard PE obfuscation tools (e.g., 
 renaming, import hiding via load-time resolution) can shift embedding coordinates, but
 they operate under format constraints (valid Magic bytes, consistent SizeOfCode fields)
 that bound the feasible deformation to a subset of the continuous neighbourhood
-\cbstart
+\begin{changedblock}
 $\mathcal{N}_\epsilon(\mathbf{z})$. The reported $\mathbb{E}[\mathcal{C}_{\mathrm{sem}}] = 3.27$
 therefore represents a lower bound on the real-world adversarial effort; the true cost,
 under PE validity constraints, is higher.
-\cbend
+\end{changedblock}
 
 \subsubsection*{Failure Modes and Practical Limits}
 
@@ -1471,11 +1463,9 @@ Finally, counterfactual norms quantify minimal effort under continuous relaxatio
 \section{Ablation Studies}
 \label{sec:ablation}
 
-\cbstart
-This section isolates the contribution of individual architectural components---CTGAN
+\hl{This section isolates the contribution of individual architectural components---CTGAN
 augmentation, uncertainty inputs, and modality contributions---by systematically removing
-each element and measuring the resulting performance degradation.
-\cbend
+each element and measuring the resulting performance degradation.}
 
 The influence of the CTGAN augmentation is quantified by removing it from the fusion stage. If the empirical score distribution is denoted by \(\mathcal{D}_{\mathbf{s}}\), CTGAN learns a generator such that
 \begin{equation}
@@ -1551,11 +1541,9 @@ This confirms that robustness and interpretability are jointly maximised only wh
 \section{Discussion}
 \label{sec:discussion}
 
-\cbstart
-This section interprets the experimental results in terms of the distributional asymmetry
+\hl{This section interprets the experimental results in terms of the distributional asymmetry
 between the two feature spaces, discusses the role of uncertainty in balancing automation
-and analyst workload, and addresses the computational overhead of the proposed approach.
-\cbend
+and analyst workload, and addresses the computational overhead of the proposed approach.}
 
 The experiments highlight a marked asymmetry between the discriminative structures of the semantic and behavioural feature spaces. Let the class-conditioned distributions in semantic space be \(p(\mathbf{z}\mid y)\). Their separation can be quantified using the Wasserstein-2 distance
 \begin{equation}
@@ -1573,40 +1561,125 @@ The empirical results strongly suggest that \(d_{\mathrm{sem}} \gg d_{\mathrm{be
 
 The fusion model exploits this asymmetry by treating the semantic component as a strong positive signal whenever uncertainty is low and treating the behavioural component primarily as a modulator of \(\sigma_{\max}\). The decision rule therefore becomes highly sensitive to the joint geometry of the fused probability \(\hat{p}\) in Eq.~\eqref{eq:fusedp} and the maximal uncertainty in Eq.~\eqref{eq:sigmamax}. Samples with \(\hat{p} \ge \tau_{\mathrm{high}}\) and \(\sigma_{\max} \le \kappa_{\mathrm{low}}\) fall into the autonomous containment region, whereas samples with \(\hat{p} < \tau\) and \(\sigma_{\max} \le \kappa\) are typically allowed. Intermediate samples reside within the escalation region, which reflects deliberate conservatism in the presence of behavioural ambiguity.
 
-\cbstart
-\subsection*{Computational Complexity and Runtime Performance}
+\begin{changedblock}
+\paragraph{Training complexity of CNN agents.}
+Each CNN agent employs a 1D convolutional architecture of depth $L=3$, kernel size $K=3$,
+and $C=64$ filters per layer.
+For a training set of $N$ samples, a single forward pass through agent
+$a \in \{\mathrm{sem}, \mathrm{beh}\}$ incurs
+\begin{equation}
+  \mathcal{O}\!\left(N \cdot \sum_{\ell=1}^{L} K \cdot C_{\ell-1} \cdot C_{\ell}\right),
+  \label{eq:cnn_fwd}
+\end{equation}
+where $C_0$ is the input dimension ($C_0 = 384$ for the Semantic Agent on positional-embedding
+vectors; $C_0 = 16$ for the Behavioural Agent on telemetry features) and $C_\ell = C = 64$
+for $\ell \ge 1$.
+Over $E$ training epochs, the per-agent cost is
+$\mathcal{O}(E \cdot N \cdot L \cdot K \cdot C^2)$, linear in both $N$ and $E$,
+and the combined cost for both agents is $\mathcal{O}(2 E N L K C^2)$.
 
-Agentic SABRE's inference pipeline comprises three sequential stages: (i) agent inference
-\cbend
-with MC Dropout, (ii) score-level fusion via the Decision Agent MLP, and (iii) threshold
-evaluation. For agent inference, each of the two CNN agents requires $T$ stochastic forward
-passes. With $T = 30$ and 1D CNN architectures of depth 3 (kernel size 3, 64 filters), each
-agent completes a single sample inference in approximately $2$--$5$\,ms on a standard CPU,
-yielding an MC Dropout estimate in $\approx 60$--$150$\,ms per agent. The Decision Agent
-MLP (two hidden layers, 64 units each) adds $< 1$\,ms. Threshold evaluation
-(Eq.~\ref{eq:threshold_order}) is $O(1)$. The total per-sample latency is therefore
-approximately $0.15$--$0.35$\,s on CPU, well within the window of real-time incident triage
-in SOC environments (typical analyst review time: minutes). On GPU, the $T$ forward passes
-can be batched, reducing latency by a factor of $\sim T$, bringing per-sample time to
-$<10$\,ms. Training times are dominated by CTGAN fitting on the score dataset (typically
-$\sim 200$ epochs, $\approx 5$--$10$\,min on CPU for the score-space dataset sizes used
-here). The modular architecture means each agent can be retrained independently, and the
-triage policy can be recalibrated (via threshold optimisation) without any model retraining,
-\cbstart
-making operational updates lightweight.
-\cbend
+\paragraph{Monte Carlo Dropout score generation.}
+Each agent executes $T$ stochastic forward passes (dropout active) to obtain the pair
+$(\bar{p}_a, \sigma_a)$ as defined in Algorithm~\ref{alg:mc_dropout}.
+The per-sample MC Dropout cost is $\mathcal{O}(T \cdot L \cdot K \cdot C^2)$, so generating
+scores across the full training set costs $\mathcal{O}(2 T N L K C^2)$ for both agents
+combined.
+With $T = 30$, each agent requires approximately $2$--$5$\,ms per stochastic pass on CPU,
+yielding an MC estimate in $\approx 60$--$150$\,ms per agent.
+
+\paragraph{CTGAN augmentation.}
+Score-space augmentation via CTGAN (Eq.~\eqref{eq:ctgan_dist}) trains a generator $G$ with
+$n_G$ layers (widths $g_1,\ldots,g_{n_G}$) and a discriminator $D$ with $n_D$ layers
+(widths $d_1,\ldots,d_{n_D}$) over $N_s$ real score vectors $\mathbf{s} \in \mathbb{R}^{2}$.
+The training complexity over $E_{\mathrm{CTGAN}}$ epochs is
+\begin{equation}
+  \mathcal{O}\!\left(E_{\mathrm{CTGAN}} \cdot N_s \cdot
+  \Bigl[\textstyle\sum_{i} g_i g_{i+1} + \sum_{j} d_j d_{j+1}\Bigr]\right).
+  \label{eq:ctgan_complexity}
+\end{equation}
+Because the score matrix is far smaller than the raw feature matrices, CTGAN fitting is
+tractable; empirically, $E_{\mathrm{CTGAN}} = 200$ completes in $\approx 5$--$10$\,min on
+CPU.
+The augmented dataset $\mathcal{D}_{\mathrm{aug}}$ of size $N_{\mathrm{aug}}$ is produced
+with an additional $\mathcal{O}(N_{\mathrm{aug}} \cdot \sum_i g_i g_{i+1})$ generation cost.
+
+\paragraph{Decision Agent MLP training.}
+The Decision Agent (Eq.~\eqref{eq:scorepool}) maps the full score vector
+$\mathbf{v} = [\bar{p}_{\mathrm{sem}}, \bar{p}_{\mathrm{beh}}, \sigma_{\mathrm{sem}},
+\sigma_{\mathrm{beh}}] \in \mathbb{R}^4$ (Eq.~\eqref{eq:scorevector}) through an MLP with
+$H = 2$ hidden layers of width $h = 64$.
+Training over $N_{\mathrm{aug}}$ augmented samples for $E_{\mathrm{MLP}}$ epochs costs
+\begin{align}
+  &\mathcal{O}\!\left(E_{\mathrm{MLP}} \cdot N_{\mathrm{aug}} \cdot
+  \bigl[4h + h^2(H{-}1) + h\bigr]\right) \nonumber\\
+  &= \mathcal{O}\!\left(E_{\mathrm{MLP}} \cdot N_{\mathrm{aug}} \cdot h^2\right),
+  \label{eq:mlp_complexity}
+\end{align}
+which is negligible relative to CTGAN fitting owing to the small input dimension ($d=4$)
+and layer count.
+
+\paragraph{Bayesian TPE threshold optimisation.}
+Triage thresholds $(\tau, \kappa, \tau_{\mathrm{high}}, \kappa_{\mathrm{low}})$ are
+selected by Bayesian optimisation with the Tree-structured Parzen Estimator (TPE),
+maximising the objective in Eq.~\eqref{eq:objective}.
+Each TPE trial fits two kernel-density models over the $n_{\mathrm{obs}}$ previous
+observations at cost $\mathcal{O}(n_{\mathrm{obs}} \log n_{\mathrm{obs}})$, followed
+by a $\mathcal{O}(N_{\mathrm{val}})$ validation-set evaluation.
+Over $T_{\mathrm{TPE}}$ trials the total optimisation cost is
+\begin{equation}
+  \mathcal{O}\!\left(T_{\mathrm{TPE}} \cdot
+  \bigl(n_{\mathrm{obs}} \log n_{\mathrm{obs}} + N_{\mathrm{val}}\bigr)\right),
+  \label{eq:tpe_complexity}
+\end{equation}
+which converges within minutes and is dominated by the CTGAN step that precedes it.
+
+\paragraph{Inference latency.}
+Per-sample inference decomposes into three sequential stages:
+(i)~\emph{agent inference}---two CNN agents each executing $T$ MC Dropout passes at joint
+cost $\mathcal{O}(2 T L K C^2)$;
+(ii)~\emph{Decision Agent forward pass}---one MLP evaluation at $\mathcal{O}(h^2)$; and
+(iii)~\emph{triage policy evaluation} via Eqs.~\eqref{eq:auto_rule}--\eqref{eq:esc_rule},
+which is $\mathcal{O}(1)$.
+The dominant term is agent inference, giving total per-sample complexity
+$\mathcal{O}(T \cdot L \cdot K \cdot C^2)$.
+Empirically, with $T=30$, $L=3$, $K=3$, $C=64$, each agent runs in $\approx 60$--$150$\,ms on
+CPU; the Decision MLP adds $<1$\,ms and triage evaluation is $\mathcal{O}(1)$.
+Total wall-clock latency is $\approx 0.15$--$0.35$\,s on CPU.
+On GPU, the $T$ stochastic passes can be batched, reducing latency by a factor of $\sim T$
+to $<10$\,ms---well within the real-time triage window of SOC environments.
+
+\paragraph{Total pipeline training complexity.}
+Combining all components, the complete training complexity of Agentic~SABRE is
+\begin{align}
+  \mathcal{T} = \mathcal{O}\Bigl(
+    &2(E{+}T)\,N\,L\,K\,C^2 \nonumber\\
+    &+\, E_{\mathrm{CTGAN}}\,N_s\bigl[\textstyle\sum_i g_i g_{i+1}
+      + \sum_j d_j d_{j+1}\bigr] \nonumber\\
+    &+\, E_{\mathrm{MLP}}\,N_{\mathrm{aug}}\,h^2 \nonumber\\
+    &+\, T_{\mathrm{TPE}}\bigl(n_{\mathrm{obs}}\log n_{\mathrm{obs}}
+      + N_{\mathrm{val}}\bigr)
+  \Bigr),
+  \label{eq:total_complexity}
+\end{align}
+where the four terms correspond respectively to CNN agent training and MC score generation,
+CTGAN augmentation, Decision MLP fitting, and TPE threshold optimisation.
+The first term scales linearly in $N$; the CTGAN term is the practical bottleneck but
+remains tractable because the score matrix ($N_s \times 2$) is orders of magnitude smaller
+than the raw feature matrices.
+The modular decomposition in Eq.~\eqref{eq:total_complexity} further implies that each
+CNN agent can be retrained independently and the triage thresholds can be recalibrated
+via TPE without any model retraining, making operational updates lightweight.
+\end{changedblock}
 
 Overall, the mathematical structure of Agentic~SABRE demonstrates that uncertainty-aware evidence fusion is essential for ransomware detection, and that the triage policy cannot be decoupled from the predictive geometry of the agents themselves. The interplay between Eqs.~\eqref{eq:psem}--\eqref{eq:sigmamax} forms the core mechanism through which the system balances automation, accuracy, and operational safety.
 
 \section{Limitations and Future Work}
 \label{sec:limitations}
 
-\cbstart
-This section acknowledges the principal constraints on the current design---including the
+\hl{This section acknowledges the principal constraints on the current design---including the
 conditional independence assumption in the fusion layer, the approximation quality of Monte
 Carlo Dropout under distribution shift, and the axis-aligned nature of the triage
-policy---and outlines concrete directions for future research.
-\cbend
+policy---and outlines concrete directions for future research.}
 
 Although the results demonstrate the effectiveness of Agentic~SABRE, several limitations constrain the system’s broader applicability. The fusion mechanism in Eq.~\eqref{eq:fusedp} assumes that the semantic and behavioural agents generate conditionally independent evidential contributions. In operational settings, semantic metadata and behavioural traces may exhibit dependencies that violate this assumption, potentially altering the joint distribution in Eq.~\eqref{eq:scorevector}. A more expressive fusion function, such as a normalising flow, could model the complete joint likelihood more accurately.
 

@@ -1,4 +1,4 @@
-\documentclass[twocolumn,5p]{elsarticle}
+\documentclass[3p]{elsarticle}
 
 %% ---- Core packages --------------------------------------------------------
 \usepackage{amsmath,amssymb,amsfonts}
@@ -27,7 +27,6 @@
 \title{Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent Framework for Adaptive Ransomware Detection}
 
 \author[1]{Henry Kabuye}
-\ead{kabuyehenry2017@gmail.com}
 
 \author[1]{Biju Issac\corref{cor1}}
 \ead{bissac@ieee.org}
@@ -1500,22 +1499,113 @@ The fusion model exploits this asymmetry by treating the semantic component as a
 
 \subsection*{Computational Complexity and Runtime Performance}
 
-Agentic SABRE's inference pipeline comprises three sequential stages: (i) agent inference
-with MC Dropout, (ii) score-level fusion via the Decision Agent MLP, and (iii) threshold
-evaluation. For agent inference, each of the two CNN agents requires $T$ stochastic forward
-passes. With $T = 30$ and 1D CNN architectures of depth 3 (kernel size 3, 64 filters), each
-agent completes a single sample inference in approximately $2$--$5$\,ms on a standard CPU,
-yielding an MC Dropout estimate in $\approx 60$--$150$\,ms per agent. The Decision Agent
-MLP (two hidden layers, 64 units each) adds $< 1$\,ms. Threshold evaluation
-(Eq.~\ref{eq:threshold_order}) is $O(1)$. The total per-sample latency is therefore
-approximately $0.15$--$0.35$\,s on CPU, well within the window of real-time incident triage
-in SOC environments (typical analyst review time: minutes). On GPU, the $T$ forward passes
-can be batched, reducing latency by a factor of $\sim T$, bringing per-sample time to
-$<10$\,ms. Training times are dominated by CTGAN fitting on the score dataset (typically
-$\sim 200$ epochs, $\approx 5$--$10$\,min on CPU for the score-space dataset sizes used
-here). The modular architecture means each agent can be retrained independently, and the
-triage policy can be recalibrated (via threshold optimisation) without any model retraining,
-making operational updates lightweight.
+\paragraph{Training complexity of CNN agents.}
+Each CNN agent employs a 1D convolutional architecture of depth $L=3$, kernel size $K=3$,
+and $C=64$ filters per layer.
+For a training set of $N$ samples, a single forward pass through agent
+$a \in \{\mathrm{sem}, \mathrm{beh}\}$ incurs
+\begin{equation}
+  \mathcal{O}\!\left(N \cdot \sum_{\ell=1}^{L} K \cdot C_{\ell-1} \cdot C_{\ell}\right),
+  \label{eq:cnn_fwd}
+\end{equation}
+where $C_0$ is the input dimension ($C_0 = 384$ for the Semantic Agent on positional-embedding
+vectors; $C_0 = 16$ for the Behavioural Agent on telemetry features) and $C_\ell = C = 64$
+for $\ell \ge 1$.
+Over $E$ training epochs, the per-agent cost is
+$\mathcal{O}(E \cdot N \cdot L \cdot K \cdot C^2)$, linear in both $N$ and $E$,
+and the combined cost for both agents is $\mathcal{O}(2 E N L K C^2)$.
+
+\paragraph{Monte Carlo Dropout score generation.}
+Each agent executes $T$ stochastic forward passes (dropout active) to obtain the pair
+$(\bar{p}_a, \sigma_a)$ as defined in Algorithm~\ref{alg:mc_dropout}.
+The per-sample MC Dropout cost is $\mathcal{O}(T \cdot L \cdot K \cdot C^2)$, so generating
+scores across the full training set costs $\mathcal{O}(2 T N L K C^2)$ for both agents
+combined.
+With $T = 30$, each agent requires approximately $2$--$5$\,ms per stochastic pass on CPU,
+yielding an MC estimate in $\approx 60$--$150$\,ms per agent.
+
+\paragraph{CTGAN augmentation.}
+Score-space augmentation via CTGAN (Eq.~\eqref{eq:ctgan_dist}) trains a generator $G$ with
+$n_G$ layers (widths $g_1,\ldots,g_{n_G}$) and a discriminator $D$ with $n_D$ layers
+(widths $d_1,\ldots,d_{n_D}$) over $N_s$ real score vectors $\mathbf{s} \in \mathbb{R}^{2}$.
+The training complexity over $E_{\mathrm{CTGAN}}$ epochs is
+\begin{equation}
+  \mathcal{O}\!\left(E_{\mathrm{CTGAN}} \cdot N_s \cdot
+  \Bigl[\textstyle\sum_{i} g_i g_{i+1} + \sum_{j} d_j d_{j+1}\Bigr]\right).
+  \label{eq:ctgan_complexity}
+\end{equation}
+Because the score matrix is far smaller than the raw feature matrices, CTGAN fitting is
+tractable; empirically, $E_{\mathrm{CTGAN}} = 200$ completes in $\approx 5$--$10$\,min on
+CPU.
+The augmented dataset $\mathcal{D}_{\mathrm{aug}}$ of size $N_{\mathrm{aug}}$ is produced
+with an additional $\mathcal{O}(N_{\mathrm{aug}} \cdot \sum_i g_i g_{i+1})$ generation cost.
+
+\paragraph{Decision Agent MLP training.}
+The Decision Agent (Eq.~\eqref{eq:scorepool}) maps the full score vector
+$\mathbf{v} = [\bar{p}_{\mathrm{sem}}, \bar{p}_{\mathrm{beh}}, \sigma_{\mathrm{sem}},
+\sigma_{\mathrm{beh}}] \in \mathbb{R}^4$ (Eq.~\eqref{eq:scorevector}) through an MLP with
+$H = 2$ hidden layers of width $h = 64$.
+Training over $N_{\mathrm{aug}}$ augmented samples for $E_{\mathrm{MLP}}$ epochs costs
+\begin{align}
+  &\mathcal{O}\!\left(E_{\mathrm{MLP}} \cdot N_{\mathrm{aug}} \cdot
+  \bigl[4h + h^2(H{-}1) + h\bigr]\right) \nonumber\\
+  &= \mathcal{O}\!\left(E_{\mathrm{MLP}} \cdot N_{\mathrm{aug}} \cdot h^2\right),
+  \label{eq:mlp_complexity}
+\end{align}
+which is negligible relative to CTGAN fitting owing to the small input dimension ($d=4$)
+and layer count.
+
+\paragraph{Bayesian TPE threshold optimisation.}
+Triage thresholds $(\tau, \kappa, \tau_{\mathrm{high}}, \kappa_{\mathrm{low}})$ are
+selected by Bayesian optimisation with the Tree-structured Parzen Estimator (TPE),
+maximising the objective in Eq.~\eqref{eq:objective}.
+Each TPE trial fits two kernel-density models over the $n_{\mathrm{obs}}$ previous
+observations at cost $\mathcal{O}(n_{\mathrm{obs}} \log n_{\mathrm{obs}})$, followed
+by a $\mathcal{O}(N_{\mathrm{val}})$ validation-set evaluation.
+Over $T_{\mathrm{TPE}}$ trials the total optimisation cost is
+\begin{equation}
+  \mathcal{O}\!\left(T_{\mathrm{TPE}} \cdot
+  \bigl(n_{\mathrm{obs}} \log n_{\mathrm{obs}} + N_{\mathrm{val}}\bigr)\right),
+  \label{eq:tpe_complexity}
+\end{equation}
+which converges within minutes and is dominated by the CTGAN step that precedes it.
+
+\paragraph{Inference latency.}
+Per-sample inference decomposes into three sequential stages:
+(i)~\emph{agent inference}---two CNN agents each executing $T$ MC Dropout passes at joint
+cost $\mathcal{O}(2 T L K C^2)$;
+(ii)~\emph{Decision Agent forward pass}---one MLP evaluation at $\mathcal{O}(h^2)$; and
+(iii)~\emph{triage policy evaluation} via Eqs.~\eqref{eq:auto_rule}--\eqref{eq:esc_rule},
+which is $\mathcal{O}(1)$.
+The dominant term is agent inference, giving total per-sample complexity
+$\mathcal{O}(T \cdot L \cdot K \cdot C^2)$.
+Empirically, with $T=30$, $L=3$, $K=3$, $C=64$, each agent runs in $\approx 60$--$150$\,ms on
+CPU; the Decision MLP adds $<1$\,ms and triage evaluation is $\mathcal{O}(1)$.
+Total wall-clock latency is $\approx 0.15$--$0.35$\,s on CPU.
+On GPU, the $T$ stochastic passes can be batched, reducing latency by a factor of $\sim T$
+to $<10$\,ms---well within the real-time triage window of SOC environments.
+
+\paragraph{Total pipeline training complexity.}
+Combining all components, the complete training complexity of Agentic~SABRE is
+\begin{align}
+  \mathcal{T} = \mathcal{O}\Bigl(
+    &2(E{+}T)\,N\,L\,K\,C^2 \nonumber\\
+    &+\, E_{\mathrm{CTGAN}}\,N_s\bigl[\textstyle\sum_i g_i g_{i+1}
+      + \sum_j d_j d_{j+1}\bigr] \nonumber\\
+    &+\, E_{\mathrm{MLP}}\,N_{\mathrm{aug}}\,h^2 \nonumber\\
+    &+\, T_{\mathrm{TPE}}\bigl(n_{\mathrm{obs}}\log n_{\mathrm{obs}}
+      + N_{\mathrm{val}}\bigr)
+  \Bigr),
+  \label{eq:total_complexity}
+\end{align}
+where the four terms correspond respectively to CNN agent training and MC score generation,
+CTGAN augmentation, Decision MLP fitting, and TPE threshold optimisation.
+The first term scales linearly in $N$; the CTGAN term is the practical bottleneck but
+remains tractable because the score matrix ($N_s \times 2$) is orders of magnitude smaller
+than the raw feature matrices.
+The modular decomposition in Eq.~\eqref{eq:total_complexity} further implies that each
+CNN agent can be retrained independently and the triage thresholds can be recalibrated
+via TPE without any model retraining, making operational updates lightweight.
 
 Overall, the mathematical structure of Agentic~SABRE demonstrates that uncertainty-aware evidence fusion is essential for ransomware detection, and that the triage policy cannot be decoupled from the predictive geometry of the agents themselves. The interplay between Eqs.~\eqref{eq:psem}--\eqref{eq:sigmamax} forms the core mechanism through which the system balances automation, accuracy, and operational safety.
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.2.16)  27 APR 2026 19:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.2.16)  28 APR 2026 11:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -471,18 +471,26 @@ Package translations Info: loading dictionary `translations-basic-dictionary' f
 or `english'. on input line 34.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 69.
+LaTeX Font Info:    Trying to load font information for OMS+ptm on input line 5
+5.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsptm.fd
+File: omsptm.fd 
+)
+LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <8> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 55.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 75.
 
- (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 69.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 75.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Underfull \hbox (badness 1867) in paragraph at lines 101--116
+Underfull \hbox (badness 1867) in paragraph at lines 107--122
 \OT1/ptm/m/n/10 tec-tion sys-tems. Mod-ern fam-i-lies such as Lock-Bit 3.0,
  []
 
@@ -490,25 +498,25 @@ Underfull \hbox (badness 1867) in paragraph at lines 101--116
 
 
 ]
-Underfull \hbox (badness 2401) in paragraph at lines 255--262
+Underfull \hbox (badness 2401) in paragraph at lines 261--268
 \OT1/ptm/m/n/10 Ex-pert Feed-back Loop com-bines both tech-niques in a
  []
 
 [2]
-<Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png, id=19, 1124.2p
+<Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png, id=20, 1124.2p
 t x 451.6875pt>
 File: Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png Graphic fi
 le (type png)
 <use Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png>
 Package pdftex.def Info: Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipe
-line.png  used on input line 327.
+line.png  used on input line 333.
 (pdftex.def)             Requested size: 516.0pt x 207.31699pt.
 LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 4
-06.
+12.
  (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 ) [3] [4 <./Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png>]
-Overfull \hbox (46.1991pt too wide) detected at line 585
+Overfull \hbox (46.1991pt too wide) detected at line 591
 []\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^\[]; ^^T[]; ^^\[]; ^^T[]\OT1/cmr/m/n/10 )
  = [] [][][](\OML/cmm/m/it/10 ^^\; ^^T\OT1/cmr/m/n/10 ) \OMS/cmsy/m/n/10 ^^@ \O
 ML/cmm/m/it/10 ^^U  []\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^\; ^^T\OT1/cmr/m/n/10
@@ -516,7 +524,7 @@ ML/cmm/m/it/10 ^^U  []\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^\; ^^T\OT1/cmr/m/n/10
  []
 
 
-Overfull \hbox (48.40999pt too wide) detected at line 666
+Overfull \hbox (48.40999pt too wide) detected at line 672
 []\OMS/cmsy/m/n/10 L[] \OT1/cmr/m/n/10 = [] + \OML/cmm/m/it/10 ^^M \OMS/cmsy/m/
 n/10 ^^A []\OML/cmm/m/it/10 ;
  []
@@ -525,180 +533,216 @@ n/10 ^^A []\OML/cmm/m/it/10 ;
 <Figures/ROC_Curve_RDset.png, id=45, 433.62pt x 361.35pt>
 File: Figures/ROC_Curve_RDset.png Graphic file (type png)
 <use Figures/ROC_Curve_RDset.png>
-Package pdftex.def Info: Figures/ROC_Curve_RDset.png  used on input line 811.
+Package pdftex.def Info: Figures/ROC_Curve_RDset.png  used on input line 817.
 (pdftex.def)             Requested size: 159.95874pt x 133.30042pt.
 <Figures/Roc_Curve_RanSMAP.png, id=46, 433.62pt x 361.35pt>
 File: Figures/Roc_Curve_RanSMAP.png Graphic file (type png)
 <use Figures/Roc_Curve_RanSMAP.png>
-Package pdftex.def Info: Figures/Roc_Curve_RanSMAP.png  used on input line 818.
+Package pdftex.def Info: Figures/Roc_Curve_RanSMAP.png  used on input line 824.
 
 (pdftex.def)             Requested size: 159.95874pt x 133.30042pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 819--819
+Underfull \hbox (badness 10000) in paragraph at lines 825--825
 []\OT1/ptm/m/n/9 (b) |Be-havioural Agent (RanSMAP,
  []
 
 <Figures/ROC_Knowledge.png, id=47, 317.988pt x 281.853pt>
 File: Figures/ROC_Knowledge.png Graphic file (type png)
 <use Figures/ROC_Knowledge.png>
-Package pdftex.def Info: Figures/ROC_Knowledge.png  used on input line 825.
+Package pdftex.def Info: Figures/ROC_Knowledge.png  used on input line 831.
 (pdftex.def)             Requested size: 159.95874pt x 141.782pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 826--826
+Underfull \hbox (badness 10000) in paragraph at lines 832--832
 []\OT1/ptm/m/n/9 (c) |Knowl-edge Agent (Ran-sKnow,
  []
 
 <Figures/Triage_policy_space.png, id=48, 578.16pt x 433.62pt>
 File: Figures/Triage_policy_space.png Graphic file (type png)
 <use Figures/Triage_policy_space.png>
-Package pdftex.def Info: Figures/Triage_policy_space.png  used on input line 87
-8.
+Package pdftex.def Info: Figures/Triage_policy_space.png  used on input line 88
+4.
 (pdftex.def)             Requested size: 252.0pt x 189.00032pt.
 <Figures/Uncertainty_Distributions.png, id=49, 931.48pt x 334.851pt>
 File: Figures/Uncertainty_Distributions.png Graphic file (type png)
 <use Figures/Uncertainty_Distributions.png>
 Package pdftex.def Info: Figures/Uncertainty_Distributions.png  used on input l
-ine 895.
+ine 901.
 (pdftex.def)             Requested size: 516.0pt x 185.49706pt.
 <Figures/calibration_semantic.png, id=50, 433.62pt x 361.35pt>
 File: Figures/calibration_semantic.png Graphic file (type png)
 <use Figures/calibration_semantic.png>
 Package pdftex.def Info: Figures/calibration_semantic.png  used on input line 9
-18.
+24.
 (pdftex.def)             Requested size: 165.12378pt x 137.60114pt.
 <Figures/calibration_behavioral.png, id=51, 433.62pt x 361.35pt>
 File: Figures/calibration_behavioral.png Graphic file (type png)
 <use Figures/calibration_behavioral.png>
 Package pdftex.def Info: Figures/calibration_behavioral.png  used on input line
- 924.
+ 930.
 (pdftex.def)             Requested size: 165.12378pt x 137.60114pt.
 <Figures/calibration_decision.png, id=52, 433.62pt x 361.35pt>
 File: Figures/calibration_decision.png Graphic file (type png)
 <use Figures/calibration_decision.png>
 Package pdftex.def Info: Figures/calibration_decision.png  used on input line 9
-30.
+36.
 (pdftex.def)             Requested size: 165.12378pt x 137.60114pt.
 [6]
 <Figures/Peer_Consultation_Effect.png, id=56, 786.5385pt x 316.7835pt>
 File: Figures/Peer_Consultation_Effect.png Graphic file (type png)
 <use Figures/Peer_Consultation_Effect.png>
 Package pdftex.def Info: Figures/Peer_Consultation_Effect.png  used on input li
-ne 985.
+ne 991.
 (pdftex.def)             Requested size: 516.0pt x 207.83064pt.
 <Figures/Behaviour_feature_importance.png, id=57, 722.7pt x 361.35pt>
 File: Figures/Behaviour_feature_importance.png Graphic file (type png)
 <use Figures/Behaviour_feature_importance.png>
 Package pdftex.def Info: Figures/Behaviour_feature_importance.png  used on inpu
-t line 1010.
+t line 1016.
 (pdftex.def)             Requested size: 252.0pt x 126.00021pt.
  [7 <./Figures/ROC_Curve_RDset.png> <./Figures/Roc_Curve_RanSMAP.png> <./Figure
 s/ROC_Knowledge.png> <./Figures/Triage_policy_space.png>] [8 <./Figures/Uncerta
 inty_Distributions.png> <./Figures/calibration_semantic.png> <./Figures/calibra
 tion_behavioral.png> <./Figures/calibration_decision.png>]
-Underfull \hbox (badness 1622) in paragraph at lines 1148--1151
+Underfull \hbox (badness 1622) in paragraph at lines 1154--1157
 \OT1/ptm/m/n/10 sKnow cover dis-tinct sam-ples; a uni-fied tri-modal
  []
 
 [9 <./Figures/Peer_Consultation_Effect.png> <./Figures/Behaviour_feature_import
 ance.png>]
-Underfull \hbox (badness 7151) in paragraph at lines 1162--1168
+Underfull \hbox (badness 7151) in paragraph at lines 1168--1174
 []\OT1/ptm/b/n/10 Consultation thresh-old tun-ing. \OT1/ptm/m/n/10 Per-agent $\
 OML/cmm/m/it/10 ^^T[]$
  []
 
 
-Underfull \hbox (badness 2486) in paragraph at lines 1162--1168
+Underfull \hbox (badness 2486) in paragraph at lines 1168--1174
 \OT1/ptm/m/n/10 thresh-olds are cur-rently fixed; joint Bayesian op-
  []
 
 
-Underfull \hbox (badness 5696) in paragraph at lines 1162--1168
+Underfull \hbox (badness 5696) in paragraph at lines 1168--1174
 \OT1/ptm/m/n/10 ti-mi-sa-tion over all seven pol-icy hy-per-pa-ram-e-ters
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1179--1202
+Underfull \hbox (badness 10000) in paragraph at lines 1185--1208
 []\OT1/ptm/m/n/10 This pa-per pre-sented \OT1/ptm/b/n/10 Ex-tended Agen-tic SAB
 RE
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 1179--1202
+Underfull \hbox (badness 7151) in paragraph at lines 1185--1208
 \OT1/ptm/b/n/10 (SABRE+)\OT1/ptm/m/n/10 , a three-agent uncertainty-aware frame
 -work
  []
 
 
-Underfull \hbox (badness 5696) in paragraph at lines 1179--1202
+Underfull \hbox (badness 5696) in paragraph at lines 1185--1208
 \OT1/ptm/m/n/10 dataset of 307 YouTube-sourced prac-ti-tioner dis-course
  []
 
 
-Underfull \hbox (badness 2368) in paragraph at lines 1179--1202
+Underfull \hbox (badness 2368) in paragraph at lines 1185--1208
 \OT1/ptm/m/n/10 23 struc-tured ATT&CK and tool fea-tures, pro-vid-ing a
  []
 
 
-Underfull \hbox (badness 2245) in paragraph at lines 1179--1202
+Underfull \hbox (badness 2245) in paragraph at lines 1185--1208
 \OT1/ptm/m/n/10 modality-orthogonal sig-nal that com-ple-ments both static
  []
 
 
-Underfull \hbox (badness 2990) in paragraph at lines 1179--1202
+Underfull \hbox (badness 2990) in paragraph at lines 1185--1208
 \OT1/ptm/m/n/10 correction-driven in-cre-men-tal re-train-ing of the De-ci-sion
 
  []
 
-** WARNING: Ignoring useless \section in Appendix (line 1205).
+** WARNING: Ignoring useless \section in Appendix (line 1211).
 
-Underfull \hbox (badness 1748) in paragraph at lines 1222--1223
+Underfull \hbox (badness 1748) in paragraph at lines 1228--1229
 []|\OT1/ptm/m/n/8 T1XXX initial-access tac-tic men-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1239--1240
+Underfull \hbox (badness 10000) in paragraph at lines 1245--1246
 []|\OT1/ptm/m/n/8 BloodHound (AD enu-mer-a-tion)
  []
 
-(./SABRE_TIFS.bbl [10]) [11
-
-] (./SABRE_TIFS.aux) ) 
+(./SABRE_TIFS.bbl [10])
+<Figures/Henry PPphoto1.jpg, id=82, 950.55125pt x 1195.46625pt>
+File: Figures/Henry PPphoto1.jpg Graphic file (type jpg)
+<use Figures/Henry PPphoto1.jpg>
+Package pdftex.def Info: Figures/Henry PPphoto1.jpg  used on input line 1261.
+(pdftex.def)             Requested size: 71.82492pt x 90.33102pt.
+File: Figures/Henry PPphoto1.jpg Graphic file (type jpg)
+<use Figures/Henry PPphoto1.jpg>
+Package pdftex.def Info: Figures/Henry PPphoto1.jpg  used on input line 1261.
+(pdftex.def)             Requested size: 71.82492pt x 90.33102pt.
+<Figures/Biju.jpg, id=85, 599.66893pt x 682.26321pt>
+File: Figures/Biju.jpg Graphic file (type jpg)
+<use Figures/Biju.jpg>
+Package pdftex.def Info: Figures/Biju.jpg  used on input line 1276.
+(pdftex.def)             Requested size: 72.26826pt x 82.222pt.
+File: Figures/Biju.jpg Graphic file (type jpg)
+<use Figures/Biju.jpg>
+Package pdftex.def Info: Figures/Biju.jpg  used on input line 1276.
+(pdftex.def)             Requested size: 72.26826pt x 82.222pt.
+<Figures/rahul.jpg, id=88, 99.4917pt x 127.9179pt>
+File: Figures/rahul.jpg Graphic file (type jpg)
+<use Figures/rahul.jpg>
+Package pdftex.def Info: Figures/rahul.jpg  used on input line 1289.
+(pdftex.def)             Requested size: 70.26309pt x 90.33826pt.
+File: Figures/rahul.jpg Graphic file (type jpg)
+<use Figures/rahul.jpg>
+Package pdftex.def Info: Figures/rahul.jpg  used on input line 1289.
+(pdftex.def)             Requested size: 70.26309pt x 90.33826pt.
+<Figures/Neera.JPG, id=91, 177.0615pt x 197.538pt>
+File: Figures/Neera.JPG Graphic file (type jpg)
+<use Figures/Neera.JPG>
+Package pdftex.def Info: Figures/Neera.JPG  used on input line 1301.
+(pdftex.def)             Requested size: 72.27145pt x 80.6294pt.
+File: Figures/Neera.JPG Graphic file (type jpg)
+<use Figures/Neera.JPG>
+Package pdftex.def Info: Figures/Neera.JPG  used on input line 1301.
+(pdftex.def)             Requested size: 72.27145pt x 80.6294pt.
+ [11 <./Figures/Henry PPphoto1.jpg> <./Figures/Biju.jpg> <./Figures/rahul.jpg> 
+<./Figures/Neera.JPG>] (./SABRE_TIFS.aux) ) 
 Here is how much of TeX's memory you used:
- 10529 strings out of 478287
- 221913 string characters out of 5849289
+ 10580 strings out of 478287
+ 222896 string characters out of 5849289
  507985 words of memory out of 5000000
- 28588 multiletter control sequences out of 15000+600000
- 515729 words of font info for 121 fonts, out of 8000000 for 9000
+ 28629 multiletter control sequences out of 15000+600000
+ 516865 words of font info for 122 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  71i,11n,79p,797b,513s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.en
-c}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf
--dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
-lic/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
-ic/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/c
-ourier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.p
-fb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on SABRE_TIFS.pdf (11 pages, 945084 bytes).
+{/usr/share/texlive/texmf-dist/fonts
+/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmbx7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/sha
+re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pf
+b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share
+/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/ut
+mbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr
+/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on SABRE_TIFS.pdf (11 pages, 1890197 bytes).
 PDF statistics:
- 190 PDF objects out of 1000 (max. 8388607)
- 103 compressed objects within 2 object streams
+ 206 PDF objects out of 1000 (max. 8388607)
+ 107 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 56 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 124 words of extra memory for PDF output out of 10000 (max. 10000000)
 

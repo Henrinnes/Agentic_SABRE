@@ -1,0 +1,38 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1}{\ignorespaces The Research Onion (adapted from \cite {saunders2019research}), illustrating the nested layers of philosophical and methodological choice. This thesis occupies a post-positivist realist position, adopts a deductive approach, employs an experimental mono-method quantitative strategy, and applies a cross-sectional time horizon with a simulated longitudinal component in Chapter\nobreakspace {}5.}}{22}{figure.3.1}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2}{\ignorespaces \emph {Global Monthly Ransomware report} \cite {NCCGroup_CTIR}}}{36}{figure.4.2}%
+\contentsline {figure}{\numberline {3}{\ignorespaces \emph {Proposed Detection Framework}}}{41}{figure.4.3}%
+\contentsline {figure}{\numberline {4}{\ignorespaces \emph {CTGAN model} \cite {ashrapov2020tabular}}}{42}{figure.4.4}%
+\contentsline {figure}{\numberline {5}{\ignorespaces \emph {2-Class distribution of 30-second time window for RanSAP}}}{52}{figure.4.5}%
+\contentsline {figure}{\numberline {6}{\ignorespaces \emph {12-Class distribution of 30-second time window for RanSAP}}}{53}{figure.4.6}%
+\contentsline {figure}{\numberline {7}{\ignorespaces \emph {Distribution of Labelled Data for RDset}}}{54}{figure.4.7}%
+\contentsline {figure}{\numberline {8}{\ignorespaces \emph {Visual comparison metrics with and without PSO/SMOTE for RanSAP}}}{58}{figure.4.8}%
+\contentsline {figure}{\numberline {9}{\ignorespaces \emph {Precision Enhancement by Uncertainty Estimation (Monte Carlo) for RanSAP.}}}{59}{figure.4.9}%
+\contentsline {figure}{\numberline {10}{\ignorespaces \emph {Feature Importance on Random Forest Model for RDset}}}{61}{figure.4.10}%
+\contentsline {figure}{\numberline {11}{\ignorespaces \emph {SHAP Feature value and mean for RanSAP}}}{62}{figure.4.11}%
+\contentsline {figure}{\numberline {12}{\ignorespaces LIME explanation for a legitimate file, showing the top contributing features for RDset.}}{62}{figure.4.12}%
+\contentsline {figure}{\numberline {13}{\ignorespaces LIME explanation for a ransomware file, showing the top contributing features for RDset.}}{63}{figure.4.13}%
+\contentsline {figure}{\numberline {14}{\ignorespaces \emph {12 Classes Confusion Matrix of 30-second time window for RanSAP}}}{64}{figure.4.14}%
+\contentsline {figure}{\numberline {15}{\ignorespaces \emph {2 Classes Confusion Matrix of 30-second time window for RanSAP}}}{65}{figure.4.15}%
+\contentsline {figure}{\numberline {16}{\ignorespaces \emph {Negative Predictive Value (NPV) - Multi-Class Classification for RanSAP}}}{65}{figure.4.16}%
+\contentsline {figure}{\numberline {17}{\ignorespaces \emph {CNN Comparison of Training Loss over Epochs for RanSAP}}}{66}{figure.4.17}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {18}{\ignorespaces Agentic SABRE operational pipeline. Semantic and Behavioural CNNs (with Monte Carlo Dropout) produce mean probability and epistemic uncertainty per agent. Scores are CTGAN-augmented and passed to the Decision Agent MLP. The triage orchestrator applies thresholds $(\tau , \kappa , \tau _\text {high}, \kappa _\text {low})$ to route each sample to AUTO-CONTAIN, ESCALATE, or ALLOW.}}{78}{figure.5.18}%
+\contentsline {figure}{\numberline {19}{\ignorespaces Reliability diagram for the fused risk score $\hat {p}$. Close alignment between predicted probabilities and empirical positive rates confirms that $\hat {p}$ is well-calibrated and can be used as a meaningful risk estimate for triage decisions.}}{86}{figure.5.19}%
+\contentsline {figure}{\numberline {20}{\ignorespaces Triage policy geometry in the $(\hat {p}, \sigma _\text {max})$ space. Axis-aligned thresholds partition the plane into \textsc {Allow}, \textsc {Escalate}, and \textsc {Auto-Contain} regions. Uncertainty prevents overconfident automatic containment for borderline or distributional-shift samples.}}{87}{figure.5.20}%
+\contentsline {figure}{\numberline {21}{\ignorespaces ROC curves comparing individual agents and the fused classifier on RanSMAP (left) and RDset (right). Fusion substantially improves separability over the behavioural agent alone on RanSMAP while preserving the perfect discrimination of the semantic agent on RDset.}}{88}{figure.5.21}%
+\contentsline {figure}{\numberline {22}{\ignorespaces Permutation-based feature importance for the Behavioural Agent. Variance- and entropy-driven memory access statistics dominate, indicating that ransomware detection relies on spatial irregularity patterns rather than raw activity volume.}}{89}{figure.5.22}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {23}{\ignorespaces Extended Agentic SABRE+ pipeline. Three modality-specific agents (Semantic, Behavioural, Knowledge CNNs) produce mean-uncertainty pairs via Monte Carlo Dropout. The Peer Consultation module adjusts uncertain agents' probabilities before score fusion. The Decision MLP, calibrated by temperature scaling, produces the fused risk $\hat {p}$. The Triage Policy routes each sample to AUTO-CONTAIN, ESCALATE, or ALLOW. The Expert Feedback Loop closes the human-in-the-loop cycle.}}{99}{figure.6.23}%
+\contentsline {figure}{\numberline {24}{\ignorespaces ROC curve for the Knowledge Agent on the RansKnow dataset (AUC = 0.9958). Despite operating on only 23 structured ATT\&CK/tool features and 307 training samples, the Knowledge Agent provides strongly discriminative threat-intelligence signals complementary to both the Semantic and Behavioural agents.}}{106}{figure.6.24}%
+\contentsline {figure}{\numberline {25}{\ignorespaces Epistemic uncertainty ($\sigma $) distributions for benign and ransomware samples across all three agents. The Semantic Agent is near-deterministic ($\bar {\sigma } \approx 0$); the Behavioural Agent shows low but non-trivial uncertainty ($\bar {\sigma } \approx 0.013$); the Knowledge Agent exhibits the highest uncertainty ($\bar {\sigma } \approx 0.055$), consistent with its smaller training set and heuristic labels.}}{107}{figure.6.25}%
+\contentsline {figure}{\numberline {26}{\ignorespaces Peer consultation effect on the Knowledge Agent. \textbf {Left:} Probability before versus after consultation for triggered samples (red = ransomware, blue = benign). Points above the diagonal indicate upward corrections by confident peers. \textbf {Right:} Distribution of probability adjustments ($\Delta p$). The mean positive adjustment ($+0.041$) reflects the Semantic and Behavioural agents pulling Knowledge Agent estimates toward the correct class boundary.}}{108}{figure.6.26}%
+\contentsline {figure}{\numberline {27}{\ignorespaces Reliability diagrams after temperature calibration for the Semantic Agent (left), Behavioural Agent (centre), and fused Decision MLP (right). All three agents track the diagonal closely, confirming well-calibrated predictive probabilities suitable for downstream threshold-based triage.}}{109}{figure.6.27}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }

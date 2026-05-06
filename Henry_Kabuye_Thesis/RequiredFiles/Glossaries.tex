@@ -1,0 +1,173 @@
+\makeglossaries
+
+% ============================================================
+%  Institutional
+% ============================================================
+\newacronym{unn}{UNN}{University of Northumbria, Newcastle}
+\newacronym{phd}{PhD}{Doctor of Philosophy}
+
+% ============================================================
+%  Artificial Intelligence and Machine Learning
+% ============================================================
+\newacronym{ai}{AI}{Artificial Intelligence}
+\newacronym{ml}{ML}{Machine Learning}
+\newacronym{dl}{DL}{Deep Learning}
+\newacronym{nn}{NN}{Neural Network}
+\newacronym{cnn}{CNN}{Convolutional Neural Network}
+\newacronym{lstm}{LSTM}{Long Short-Term Memory}
+\newacronym{mlp}{MLP}{Multi-Layer Perceptron}
+\newacronym{rnn}{RNN}{Recurrent Neural Network}
+\newacronym{llm}{LLM}{Large Language Model}
+\newacronym{bert}{BERT}{Bidirectional Encoder Representations from Transformers}
+\newacronym{rf}{RF}{Random Forest}
+\newacronym{svm}{SVM}{Support Vector Machine}
+\newacronym{xgb}{XGB}{eXtreme Gradient Boosting}
+
+% ============================================================
+%  Uncertainty and Probabilistic Methods
+% ============================================================
+\newacronym{mcd}{MCD}{Monte Carlo Dropout}
+\newacronym{mc}{MC}{Monte Carlo}
+\newacronym{uq}{UQ}{Uncertainty Quantification}
+\newacronym{ece}{ECE}{Expected Calibration Error}
+\newacronym{tpe}{TPE}{Tree-structured Parzen Estimator}
+\newacronym{map}{MAP}{Maximum A Posteriori}
+
+% ============================================================
+%  Explainable AI
+% ============================================================
+\newacronym{xai}{XAI}{Explainable Artificial Intelligence}
+\newacronym{shap}{SHAP}{SHapley Additive exPlanations}
+\newacronym{lime}{LIME}{Local Interpretable Model-agnostic Explanations}
+\newacronym{cf}{CF}{Counterfactual Explanation}
+
+% ============================================================
+%  Generative Models and Data Augmentation
+% ============================================================
+\newacronym{gan}{GAN}{Generative Adversarial Network}
+\newacronym{ctgan}{CTGAN}{Conditional Tabular Generative Adversarial Network}
+\newacronym{smote}{SMOTE}{Synthetic Minority Over-sampling Technique}
+\newacronym{vae}{VAE}{Variational Autoencoder}
+
+% ============================================================
+%  Multi-Agent Systems
+% ============================================================
+\newacronym{mas}{MAS}{Multi-Agent System}
+\newacronym{sabre}{SABRE}{Semantic-Behavioural Arbitration for Ransomware Evaluation}
+\newacronym{pcp}{PCP}{Peer Consultation Protocol}
+\newacronym{efl}{EFL}{Expert Feedback Loop}
+
+% ============================================================
+%  Evaluation Metrics
+% ============================================================
+\newacronym{auc}{AUC}{Area Under the Curve}
+\newacronym{roc}{ROC}{Receiver Operating Characteristic}
+\newacronym{tpr}{TPR}{True Positive Rate}
+\newacronym{fpr}{FPR}{False Positive Rate}
+\newacronym{tnr}{TNR}{True Negative Rate}
+\newacronym{fnr}{FNR}{False Negative Rate}
+\newacronym{f1}{F1}{F1-Score}
+\newacronym{balAcc}{BalAcc}{Balanced Accuracy}
+
+% ============================================================
+%  Cybersecurity and Malware
+% ============================================================
+\newacronym{soc}{SOC}{Security Operations Centre}
+\newacronym{dfir}{DFIR}{Digital Forensics and Incident Response}
+\newacronym{ioc}{IOC}{Indicator of Compromise}
+\newacronym{ttp}{TTP}{Tactics, Techniques, and Procedures}
+\newacronym{apt}{APT}{Advanced Persistent Threat}
+\newacronym{raas}{RaaS}{Ransomware-as-a-Service}
+\newacronym{cve}{CVE}{Common Vulnerabilities and Exposures}
+\newacronym{rdp}{RDP}{Remote Desktop Protocol}
+\newacronym{c2}{C2}{Command and Control}
+\newacronym{c2c}{C2C}{Command-and-Control}
+\newacronym{av}{AV}{Antivirus}
+\newacronym{edr}{EDR}{Endpoint Detection and Response}
+
+% ============================================================
+%  MITRE and Threat Intelligence
+% ============================================================
+\newacronym{attck}{ATT\&CK}{Adversarial Tactics, Techniques, and Common Knowledge}
+\newacronym{ti}{TI}{Threat Intelligence}
+
+% ============================================================
+%  File Formats and System Concepts
+% ============================================================
+\newacronym{pe}{PE}{Portable Executable}
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{iat}{IAT}{Import Address Table}
+\newacronym{os}{OS}{Operating System}
+\newacronym{gpu}{GPU}{Graphics Processing Unit}
+\newacronym{cpu}{CPU}{Central Processing Unit}
+
+% ============================================================
+%  Datasets
+% ============================================================
+\newacronym{ransap}{RanSAP}{Ransomware System API behaviour dataset}
+\newacronym{ransknow}{RansKnow}{Ransomware Knowledge dataset}
+
+% ============================================================
+%  Glossary Entries
+% ============================================================
+\newglossaryentry{latex}{
+    name=\LaTeX,
+    description={A typesetting language used as a document preparation system,
+    widely adopted for academic and scientific publications.}
+}
+
+\newglossaryentry{epistemic}{
+    name={epistemic uncertainty},
+    description={Uncertainty arising from a model's lack of knowledge, typically
+    caused by sparse training data or out-of-distribution inputs. Unlike aleatoric
+    uncertainty, epistemic uncertainty is reducible by collecting more data.}
+}
+
+\newglossaryentry{aleatoric}{
+    name={aleatoric uncertainty},
+    description={Irreducible uncertainty inherent in the data itself, arising from
+    noise, measurement limitations, or genuine ambiguity at the decision boundary.
+    Cannot be reduced by collecting more training data.}
+}
+
+\newglossaryentry{calibration}{
+    name={probability calibration},
+    description={The process of adjusting a classifier's posterior probability
+    estimates so that a predicted probability of $p$ corresponds to an empirical
+    correctness frequency of $p$ across a population of predictions.}
+}
+
+\newglossaryentry{triage}{
+    name={triage policy},
+    description={A decision rule that routes model predictions to different response
+    pathways — autonomous action, human escalation, or allow-through — based on
+    predicted probability and uncertainty thresholds.}
+}
+
+\newglossaryentry{conceptdrift}{
+    name={concept drift},
+    description={A change over time in the statistical relationship between input
+    features and class labels, causing a classifier trained on historical data to
+    degrade in performance on more recently collected samples.}
+}
+
+\newglossaryentry{experiencereplay}{
+    name={experience replay},
+    description={A continual learning technique in which a buffer of previously
+    observed labelled examples is maintained and sampled alongside new examples
+    during training, mitigating catastrophic forgetting.}
+}
+
+\newglossaryentry{counterfactual}{
+    name={counterfactual explanation},
+    description={An explanation for a model prediction that identifies the minimal
+    perturbation of the input feature vector that would reverse the predicted class,
+    providing actionable guidance to analysts on which features drove the decision.}
+}
+
+\newglossaryentry{neurosymbolic}{
+    name={neuro-symbolic AI},
+    description={A class of AI architectures that integrate neural learning components,
+    capable of acquiring representations from data, with symbolic reasoning components
+    that encode structured knowledge, logical constraints, or semantic relationships.}
+}

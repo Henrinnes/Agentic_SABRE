@@ -1,0 +1,767 @@
+% ============================================================
+%  Chapter 2: Literature Review
+%  Henry Kabuye PhD Thesis — Northumbria University
+%  AI-Based Intelligent Multi-Stage and User-Centric
+%  Ransomware Attack Detection
+% ============================================================
+
+\chapter{Literature Review}
+\label{chap:litreview}
+
+\lettrine{R}{ansomware} has emerged as one of the most operationally disruptive and economically
+damaging categories of malicious software confronting organisations, governments, and critical
+infrastructure operators worldwide.
+Unlike earlier forms of financial malware that sought to exfiltrate credentials or conduct
+fraudulent transactions silently, ransomware explicitly attacks data availability: it encrypts
+or exfiltrates victim files and demands a ransom payment in exchange for the decryption key or
+the promise of non-publication \cite{beaman2021ransomware, greenberg2018untold}.
+The detection challenge it poses is correspondingly severe: the encryption payload must be
+identified and contained within a narrow window before irrecoverable damage is done, yet the
+early-stage behavioural and structural signals that precede encryption overlap substantially
+with those of legitimate software, making high-precision early detection technically demanding.
+
+This chapter surveys the body of knowledge on which the empirical investigations in this
+thesis are built.
+Section~\ref{sec:lit_threat} characterises the ransomware threat landscape — its taxonomy,
+attack lifecycle, and documented impact.
+Section~\ref{sec:lit_ml} reviews machine learning approaches to malware and ransomware
+detection from classical methods through to contemporary deep learning architectures.
+Section~\ref{sec:lit_uq} covers the theory and practice of uncertainty quantification in
+deep neural networks, with particular attention to Monte Carlo Dropout and probability
+calibration.
+Section~\ref{sec:lit_xai} addresses explainable artificial intelligence for cybersecurity,
+covering feature attribution, counterfactual methods, and their application to malware
+analysis.
+Section~\ref{sec:lit_mas} reviews multi-agent architectures and modality fusion strategies
+relevant to multi-signal detection.
+Section~\ref{sec:lit_kbs} surveys neuro-symbolic AI and the operationalisation of
+threat-intelligence knowledge as a detection signal.
+Section~\ref{sec:lit_cd} reviews concept drift and continual learning in the context of
+evolving malware populations.
+Section~\ref{sec:lit_gaps} synthesises the identified gaps and maps them to the three
+empirical contributions of this thesis.
+
+% ============================================================
+\section{The Ransomware Threat Landscape}
+\label{sec:lit_threat}
+% ============================================================
+
+% ------------------------------------------------------------
+\subsection{Taxonomy and Attack Lifecycle}
+\label{sec:lit_taxonomy}
+% ------------------------------------------------------------
+
+The term \emph{ransomware} encompasses a heterogeneous family of malicious programs united by
+the common goal of extorting payment from victims in exchange for restoring access to their
+own data or systems \cite{razaulla2023age}.
+Early academic taxonomies distinguished two primary categories: \emph{locker ransomware}, which
+denies access to the system interface or desktop without modifying file contents, and
+\emph{crypto-ransomware}, which selectively or exhaustively encrypts user files using
+asymmetric or hybrid cryptographic schemes \cite{moussaileb2021survey, sikorski2012practical}.
+Contemporary ransomware campaigns have largely converged on the crypto variant, augmented by
+\emph{double-extortion} tactics in which data is exfiltrated prior to encryption so that
+public release of sensitive materials constitutes a second leverage mechanism independent of
+the decryption key \cite{beaman2021ransomware, meland2020ransomware}.
+
+The attack lifecycle of a ransomware campaign maps closely to the MITRE ATT\&CK Enterprise
+framework \cite{razaulla2023age}.
+An attack typically begins with initial access via phishing, remote desktop protocol
+exploitation, or compromised credentials, followed by execution of a dropper or loader
+component.
+The ransomware then performs reconnaissance — enumerating network shares, user directories,
+and backup locations — before moving laterally to maximise the encrypted surface area.
+Privilege escalation and defence evasion tactics are employed to disable endpoint protection
+and shadow copy services.
+Finally, the encryption payload is deployed and a ransom note delivered.
+The window between initial execution and the completion of encryption can be as short as
+minutes for opportunistic campaigns, making real-time or near-real-time detection
+essential \cite{SgandurraMML16, hirano2022ransap}.
+
+A number of taxonomies have been proposed specifically to characterise the technical
+diversity of ransomware families.
+Sgandurra et al.\ \cite{SgandurraMML16} distinguish families by the cryptographic scheme
+employed (symmetric, asymmetric, or hybrid), the file targeting strategy (by extension, by
+directory, or exhaustive), and the command-and-control communication protocol.
+More recent surveys \cite{yumlembam2024comprehensive, Ozkan-Okay2024Survey} extend these
+taxonomies to cover ransomware-as-a-service (RaaS) distribution models, which have
+substantially lowered the technical barrier to launching campaigns and accelerated the
+proliferation of novel variants.
+Polymorphic and metamorphic ransomware families that mutate their code at each deployment to
+evade signature-based detection represent a particularly acute challenge for static analysis
+systems \cite{Urooj2024polymorphism}.
+
+% ------------------------------------------------------------
+\subsection{Economic and Operational Impact}
+\label{sec:lit_impact}
+% ------------------------------------------------------------
+
+The economic cost of ransomware is substantial and escalating.
+Europol's Internet Organised Crime Threat Assessment documents ransomware as the dominant
+cyber-extortion threat facing European organisations, with critical infrastructure sectors
+including healthcare, energy, and transportation identified as priority targets
+\cite{europol2020iocta}.
+The 2017 WannaCry campaign — estimated to have infected over 300,000 systems across 150
+countries in a single day — caused disruption to the United Kingdom's National Health Service
+that resulted in the cancellation of nearly 20,000 outpatient appointments and cost an
+estimated \pounds 92 million in remediation and lost output \cite{greenberg2018untold}.
+The 2021 Colonial Pipeline attack demonstrated that ransomware could directly impact physical
+infrastructure, forcing a major fuel supply pipeline operator to halt operations for nearly a
+week and triggering regional fuel shortages across the eastern United States \cite{cdk_global_attack}.
+
+Beyond direct financial losses, ransomware imposes substantial indirect costs through
+reputational damage, regulatory fines for inadequate data protection, increased insurance
+premiums, and the allocation of significant analyst time to incident response and forensic
+investigation \cite{beaman2021ransomware, europol2020iocta}.
+The operational asymmetry is stark: a successful ransomware campaign may be executed with
+modest technical resources by a RaaS affiliate, yet its remediation may require weeks of
+specialist effort and expenditure far exceeding the initial ransom demand.
+This asymmetry directly motivates the development of automated, high-throughput detection
+frameworks capable of operating with minimal analyst involvement under normal conditions
+while directing human attention precisely toward the cases in which it is most needed.
+
+% ============================================================
+\section{Machine Learning for Malware and Ransomware Detection}
+\label{sec:lit_ml}
+% ============================================================
+
+% ------------------------------------------------------------
+\subsection{Classical Machine Learning Approaches}
+\label{sec:lit_classical}
+% ------------------------------------------------------------
+
+The application of machine learning to malware detection predates the deep learning era by
+over a decade.
+Early systems employed classical discriminative models — decision trees, na\"{i}ve Bayes
+classifiers, support vector machines, and random forests — trained on handcrafted feature
+vectors derived from static program analysis \cite{sarker2020cybersecurity}.
+Static features commonly used in this period included import address table n-gram profiles,
+section entropy values, printable string statistics, and PE header field values; dynamic
+features derived from sandbox execution logs included system call sequences, registry
+modification patterns, and network traffic summaries \cite{sikorski2012practical}.
+
+Random forests proved particularly effective for static malware classification due to their
+robustness to high-dimensional sparse feature spaces and their natural support for feature
+importance estimation \cite{fernando2020study}.
+Gradient-boosted ensembles such as XGBoost \cite{chen2016xgboost} extended this performance
+further on structured tabular data by capturing non-linear interactions between features
+through sequential tree residual fitting.
+Studies specifically targeting ransomware classification demonstrated that dynamic behavioural
+features — in particular, file system access patterns and entropy measurements on written
+data — are strongly discriminative of ransomware activity when evaluated against legitimate
+software \cite{SgandurraMML16, krishna2020comparative}.
+
+However, classical machine learning approaches exhibit two well-documented limitations in the
+ransomware context.
+First, they require extensive feature engineering expertise to achieve competitive performance:
+effective feature selection depends on domain knowledge about which program behaviours are
+indicative, and this knowledge must be continuously updated as adversaries adapt their
+tactics \cite{razaulla2023age, gibert2020rise}.
+Second, classical models are particularly susceptible to concept drift: as ransomware families
+evolve and novel variants are deployed, the feature distribution of the malicious class shifts
+away from the distribution seen during training, and model accuracy degrades
+measurably \cite{Ceschin2022ConceptDrift, Fernando2024FeSAD}.
+These limitations motivate the transition to representation-learning approaches that can
+acquire task-relevant features automatically and be updated as the threat landscape evolves.
+
+% ------------------------------------------------------------
+\subsection{Deep Learning Approaches}
+\label{sec:lit_deep}
+% ------------------------------------------------------------
+
+Deep neural networks offer two principal advantages over classical models for malware
+detection.
+First, they can learn hierarchical feature representations directly from raw or minimally
+preprocessed inputs, reducing dependence on expert feature engineering \cite{gibert2020rise}.
+Second, architectures such as convolutional neural networks (CNNs) and recurrent networks
+can exploit spatial and temporal structure in the input data that is ignored by conventional
+flat feature vectors.
+
+CNNs have been applied to malware classification by treating the byte stream of an executable
+file as a one-dimensional or two-dimensional signal and learning local pattern detectors via
+convolutional filters \cite{kolosnjaji2016deep}.
+This approach achieves state-of-the-art accuracy on family classification benchmarks without
+any hand-specified features, and has been extended to ransomware-specific tasks with strong
+results \cite{zahoora2022Deep}.
+Recurrent architectures, and particularly Long Short-Term Memory (LSTM) networks, have been
+applied to system call sequence data to exploit the temporal ordering of API calls during
+execution — capturing the characteristic enumeration-then-encryption sequence that precedes
+ransomware payload delivery \cite{hirano2022ransap, HiranoK22}.
+
+More recently, attention mechanisms and transformer-based architectures \cite{vaswani2017attention}
+have been explored for security log analysis and network intrusion detection, leveraging
+self-attention to model long-range dependencies in event sequences that may span hours of
+activity before an attack payload executes \cite{tian2025llmsurvey, ZhangLZYHY25}.
+LLM-derived embeddings of log data have also been investigated as input representations for
+downstream classifiers \cite{tian2025llmsurvey}, though these systems are predominantly
+evaluated as standalone classifiers without uncertainty-aware fusion or structured triage
+logic.
+
+Despite strong discriminative performance, deep learning classifiers for ransomware detection
+share a critical limitation: they produce overconfident, poorly calibrated posterior
+probability estimates, particularly for inputs near or between the training class
+distributions \cite{gawlikowski2023Uncertainity, guo2017calibration}.
+A model that assigns 99\% confidence to a borderline prediction provides the same output
+format as one making a prediction on a clear-cut case, giving the analyst no signal about
+when autonomous decisions are reliable and when human review should be sought.
+This limitation is the primary motivation for the uncertainty quantification methods reviewed
+in Section~\ref{sec:lit_uq}.
+
+% ------------------------------------------------------------
+\subsection{Feature Representations for Ransomware}
+\label{sec:lit_features}
+% ------------------------------------------------------------
+
+A consistent finding across both classical and deep learning ransomware detection studies is
+that no single feature modality captures all discriminative signal, and that different
+modalities are most informative at different stages of the attack lifecycle.
+
+\emph{Static} or \emph{semantic} features, derived from analysis of the executable without
+running it, provide rapid pre-execution screening but are susceptible to obfuscation: packing,
+encryption, and code mutation can substantially alter the static feature profile of a
+ransomware binary without changing its runtime behaviour \cite{Urooj2024polymorphism,
+sikorski2012practical}.
+Studies using PE-format features — section entropy, import table statistics, and PE header
+fields — report high detection rates on known families but degraded performance on novel or
+obfuscated samples \cite{GogineniDV22ForeseerRanSAP}.
+
+\emph{Dynamic} or \emph{behavioural} features, derived from monitoring the execution of the
+binary in a controlled environment, are considerably more robust to static obfuscation but
+introduce a detection latency: the sample must be executed, at least partially, before
+behavioural features can be collected \cite{hirano2022ransap}.
+System API call traces, file access patterns, network connection sequences, and registry
+modification logs all carry strong ransomware-indicative signal, with file I/O entropy
+elevation being particularly reliable as an indicator of encryption activity
+\cite{SgandurraMML16, hirano2022ransap}.
+
+A substantial literature demonstrates that \emph{hybrid} approaches that combine static and
+dynamic features outperform either modality
+alone \cite{Ferdous2024Comp, yumlembam2024comprehensive}.
+However, most hybrid approaches in the literature combine features from both modalities into
+a single flat vector fed to a single unified model, losing the modality-specific
+distributional characteristics and preventing the system from reasoning separately about
+confidence in the static and dynamic signals.
+The multi-agent architecture introduced in this thesis addresses this limitation by training
+independent agents on each modality and fusing their outputs at the score level, preserving
+modality-specific uncertainty estimates that are used to govern triage decisions.
+
+% ============================================================
+\section{Uncertainty Quantification in Deep Neural Networks}
+\label{sec:lit_uq}
+% ============================================================
+
+% ------------------------------------------------------------
+\subsection{Sources and Types of Uncertainty}
+\label{sec:lit_uq_types}
+% ------------------------------------------------------------
+
+The uncertainty in the predictions of a deep neural network arises from two conceptually
+distinct sources \cite{gawlikowski2023Uncertainity, malinin2018predictive}.
+\emph{Aleatoric} uncertainty, also called data or irreducible uncertainty, reflects genuine
+ambiguity in the input: when a sample lies near or on the decision boundary between classes,
+the labelling itself is inherently uncertain and no model can resolve it without additional
+information.
+\emph{Epistemic} uncertainty, also called model or reducible uncertainty, reflects the
+model's lack of knowledge: it arises when a sample falls outside or at the periphery of the
+training distribution, so the model has insufficient evidence to form a reliable
+estimate \cite{gawlikowski2023Uncertainity}.
+
+In the ransomware detection context, both types of uncertainty carry operational significance.
+Aleatoric uncertainty indicates borderline samples that may require additional dynamic
+analysis or analyst review regardless of how much training data is available.
+Epistemic uncertainty indicates novel or out-of-distribution samples — potentially
+representing a new ransomware family or a benign program that has not previously been
+seen — where the model's prediction should be treated with
+scepticism \cite{Doan2024uncertainBay}.
+A detection framework that can distinguish between these two types of uncertainty provides
+more actionable intelligence than one that reports only a single scalar confidence score.
+
+% ------------------------------------------------------------
+\subsection{Monte Carlo Dropout}
+\label{sec:lit_mcd}
+% ------------------------------------------------------------
+
+Gal and Ghahramani \cite{gal2016dropout} demonstrated that a neural network trained with
+dropout regularisation can be interpreted as an approximate Bayesian neural network: if
+dropout masks are sampled stochastically at inference time rather than fixed or averaged as
+in standard practice, the resulting distribution over predictions approximates the posterior
+predictive distribution of a Bayesian model over network weights.
+This insight, known as Monte Carlo (MC) Dropout, enables epistemic uncertainty estimation
+from any standard dropout-regularised network without modification to the training procedure
+and with minimal computational overhead.
+
+At inference time, $T$ forward passes are performed through the network with independently
+sampled dropout masks, yielding $T$ class probability estimates $\hat{p}_1, \ldots, \hat{p}_T$.
+The predictive mean $\bar{p} = \frac{1}{T}\sum_{t=1}^{T}\hat{p}_t$ serves as the point
+prediction, while the predictive standard deviation
+$\sigma = \sqrt{\frac{1}{T}\sum_{t=1}^{T}(\hat{p}_t - \bar{p})^2}$ quantifies the
+epistemic uncertainty of that prediction.
+High values of $\sigma$ on a given input indicate that the dropout ensemble disagrees
+substantially about the correct prediction, which is characteristic of out-of-distribution
+or borderline inputs \cite{gal2016dropout, gawlikowski2023Uncertainity}.
+
+MC Dropout has been applied to a range of security tasks including anomaly detection,
+network intrusion classification, and, more recently, malware
+family identification \cite{Doan2024uncertainBay}.
+The number of Monte Carlo samples $T$ governs the trade-off between uncertainty estimation
+quality and inference latency: empirical studies suggest that $T = 20$--$50$ passes are
+sufficient for stable uncertainty estimates in most classification settings, with diminishing
+returns beyond this range \cite{gal2016dropout}.
+The method is particularly well suited to the multi-agent framework developed in this thesis,
+where uncertainty estimates produced by individual agents are used both for triage decisions
+and for inter-agent communication through the Peer Consultation Protocol.
+
+% ------------------------------------------------------------
+\subsection{Probability Calibration}
+\label{sec:lit_calibration}
+% ------------------------------------------------------------
+
+A well-calibrated classifier is one whose posterior probability estimates are consistent with
+empirical frequencies: a batch of inputs to which the model assigns probability 0.8 should,
+on average, contain approximately 80\% positives \cite{guo2017calibration}.
+The majority of deep neural networks trained with maximum likelihood objectives are
+poorly calibrated, exhibiting a systematic tendency toward overconfidence: the model assigns
+posterior probabilities close to 0 or 1 far more frequently than the actual frequency of
+correct predictions in those ranges would
+justify \cite{guo2017calibration, malinin2018predictive}.
+This overconfidence is exacerbated in the presence of class imbalance — a common condition
+in ransomware datasets — because the model is incentivised to minimise the cross-entropy loss
+on the dominant class at the expense of calibration on the minority class.
+
+Guo et al.\ \cite{guo2017calibration} demonstrated that \emph{temperature scaling}, a
+post-hoc calibration method that divides the model's logit output by a scalar temperature
+parameter $T_{\mathrm{cal}}$ fitted on a held-out validation set, substantially reduces
+calibration error across a range of deep learning architectures with negligible impact on
+discriminative accuracy.
+The method is particularly attractive for multi-agent systems in which the probability
+outputs of independently trained agents must be combined, because it ensures that the fusion
+layer receives probability estimates that are comparable in their interpretive meaning across
+agents rather than reflecting idiosyncratic calibration errors specific to each agent's
+training regime.
+
+% ============================================================
+\section{Explainable Artificial Intelligence for Cybersecurity}
+\label{sec:lit_xai}
+% ============================================================
+
+% ------------------------------------------------------------
+\subsection{Feature Attribution Methods}
+\label{sec:lit_shap}
+% ------------------------------------------------------------
+
+The opacity of deep neural network predictions — the so-called ``black-box'' property — is a
+significant practical barrier to the deployment of neural network-based malware detectors in
+operational security environments.
+Security analysts making containment or escalation decisions require not only a prediction
+but an explanation of the evidence underlying it: which features drove the ransomware
+classification, and how much would their values need to change before the classification
+reversed \cite{lundberg2017shap, ribeiro2016lime}?
+Explainable AI (XAI) methods address this requirement by associating a predicted label with
+an interpretable description of its drivers.
+
+SHAP (SHapley Additive exPlanations) \cite{lundberg2017shap} grounds attribution in
+cooperative game theory: each feature's contribution to a prediction is defined as the
+Shapley value — the weighted average marginal contribution of that feature across all
+possible feature subsets.
+This attribution is guaranteed to satisfy a set of desirable axiomatic properties (efficiency,
+symmetry, dummy, and linearity) that make the resulting explanations consistent and
+non-arbitrary.
+TreeSHAP, DeepSHAP, and KernelSHAP variants provide efficient computation for tree ensembles,
+deep networks, and model-agnostic settings respectively.
+For ransomware detection, SHAP feature importance plots can identify which PE-header fields or
+API call patterns are driving a detection, providing actionable intelligence for signature
+refinement and analyst triage.
+
+LIME (Local Interpretable Model-agnostic Explanations) \cite{ribeiro2016lime} takes a
+complementary approach: for a specific input, LIME perturbs the input in the neighbourhood
+of its feature values, queries the black-box model on the perturbed samples, and fits a
+locally linear interpretable model to the resulting predictions.
+The coefficients of this local linear model constitute the explanation for that specific
+prediction.
+LIME is more computationally expensive than SHAP for repeated predictions but offers the
+advantage of being fully model-agnostic and producing explanations that are directly
+readable as weighted feature lists.
+
+Both SHAP and LIME explanations have been applied to malware and ransomware detection tasks
+to validate model behaviour, identify spurious correlations in training data, and generate
+feature-level intelligence for analyst use \cite{gulmez2024xran, Ispahany2024Survey}.
+
+% ------------------------------------------------------------
+\subsection{Counterfactual Explanations}
+\label{sec:lit_cf}
+% ------------------------------------------------------------
+
+While feature attribution methods identify \emph{which} features drove a prediction, they do
+not directly answer the analyst's operational question: \emph{what would need to be different
+about this sample for it to be classified as benign?}
+Counterfactual explanations address this question by finding the minimal perturbation of the
+input feature vector that would reverse the model's prediction, subject to the constraint that
+the perturbed input remains plausible given the known distribution of benign
+samples \cite{Farzadpour2024Thresholding}.
+
+Counterfactual explanations are particularly valuable in the ransomware context because they
+translate model behaviour into analyst-actionable intelligence.
+A counterfactual that identifies two specific PE-header flag values as the minimal change
+needed to reclassify a suspicious executable as benign gives an analyst a targeted hypothesis
+to investigate; a counterfactual that requires altering 40 features by large amounts suggests
+that the sample is confidently ransomware and can be contained with high precision.
+The distance from an input to its nearest counterfactual (typically measured in $L_2$ or
+$L_0$ norm) also provides an interpretable confidence proxy: inputs with close counterfactuals
+lie near the decision boundary and warrant greater analyst scrutiny.
+
+% ------------------------------------------------------------
+\subsection{Explainability in Malware Analysis}
+\label{sec:lit_xai_malware}
+% ------------------------------------------------------------
+
+The application of XAI methods to malware analysis has grown substantially since 2020,
+driven by regulatory expectations around AI transparency and the practical demand for
+analyst-comprehensible outputs from automated security systems.
+Recent surveys \cite{Ispahany2024Survey, yumlembam2024comprehensive} identify feature
+attribution-based explanation as the most widely adopted approach in the malware detection
+literature, followed by rule extraction, attention visualisation, and counterfactual generation.
+XRan \cite{gulmez2024xran} specifically applies SHAP to explain ransomware classifications
+derived from API call profiles, demonstrating that attribution values correlate with known
+ransomware-indicative API families and can be used to cluster samples by behavioural similarity.
+
+A consistent finding in this literature is that explanations produced by attribution methods
+are most useful when they are grounded in the analyst's existing knowledge framework: SHAP
+values over raw byte offsets are less actionable than SHAP values over named PE-format fields,
+even if both represent the same underlying model behaviour \cite{lundberg2017shap, gulmez2024xran}.
+This observation motivates the feature-level explanation design choices in Chapter~3 of this
+thesis, where explanations are presented over named API call groups and PE-format categories
+rather than raw feature indices.
+
+% ============================================================
+\section{Multi-Agent Systems and Modality Fusion}
+\label{sec:lit_mas}
+% ============================================================
+
+% ------------------------------------------------------------
+\subsection{Multi-Agent Architectures for Detection}
+\label{sec:lit_mas_arch}
+% ------------------------------------------------------------
+
+Multi-agent systems distribute a complex detection or classification task across a collection
+of autonomous agents, each responsible for a subset of the problem, with coordination
+mechanisms determining how individual agent outputs are combined into a system-level
+decision \cite{MultiAgentAdaptiveDetection2023}.
+In the cybersecurity domain, multi-agent approaches have been proposed for network intrusion
+detection, where individual agents monitor distinct network segments or protocol layers; for
+threat intelligence aggregation, where agents process feeds from different sources; and for
+adaptive response systems, where specialised agents handle different stages of the
+detection-containment-remediation pipeline \cite{MultiAgentAdaptiveDetection2023,
+AIenhancedDefense2022}.
+
+The case for decomposing ransomware detection into modality-specialised agents rests on a
+fundamental observation: the statistical properties of static PE-format features and dynamic
+runtime API traces are sufficiently different that a single unified model trained on a
+concatenation of both modalities is unlikely to learn optimally adapted representations for
+each \cite{Ferdous2024Comp}.
+Static features are high-dimensional and sparse, with strong category-level interactions;
+dynamic features are sequential and exhibit temporal autocorrelation within a single execution
+trace.
+Modality-specialised agents trained independently on each signal type can develop
+representations matched to the distributional properties of their respective inputs, with a
+fusion layer responsible for combining the resulting predictions \cite{MultiAgentAdaptiveDetection2023}.
+
+% ------------------------------------------------------------
+\subsection{Agent Fusion, Triage, and Escalation}
+\label{sec:lit_fusion}
+% ------------------------------------------------------------
+
+The problem of combining the predictions of multiple specialised classifiers — \emph{ensemble
+fusion} — has a substantial literature in pattern recognition and machine
+learning \cite{Ferdous2024Comp}.
+Simple fusion strategies include majority voting, averaging of posterior probabilities, and
+weighted averaging with weights proportional to individual agent accuracy.
+Learned fusion, in which a meta-learner (often a small neural network or logistic regression
+model) is trained on the outputs of the individual classifiers, generally outperforms fixed
+heuristic fusion by adapting the combination weights to the joint distribution of agent
+predictions on the training data \cite{MultiAgentAdaptiveDetection2023}.
+
+An important dimension not adequately addressed in the existing fusion literature is the role
+of \emph{prediction uncertainty} in the fusion process.
+Conventional fusion methods combine agent probability estimates as if they were equally
+reliable across all inputs; in practice, individual agents may be highly confident on inputs
+within their training distribution and substantially uncertain on novel or out-of-distribution
+inputs.
+A fusion scheme that ignores this variation treats a confident prediction and an uncertain
+prediction with equal weight, potentially allowing a highly uncertain agent to dominate the
+fused output in exactly those cases where its prediction is least reliable.
+The inverse-uncertainty-weighted Peer Consultation Protocol developed in Chapter~5 of this
+thesis addresses this gap directly, adjusting inter-agent fusion weights at inference time as
+a function of each agent's current epistemic uncertainty.
+
+The concept of \emph{triage} — routing detection outputs to different response pathways based
+on the system's confidence — is well established in clinical decision support literature but
+has received limited systematic treatment in the cybersecurity machine learning context.
+Farzadpour et al.\ \cite{Farzadpour2024Thresholding} discuss threshold selection for
+security classifiers but focus exclusively on discriminative accuracy rather than on the
+operational trade-off between autonomous action and human escalation.
+Jointly optimising triage thresholds to maximise detection sensitivity while minimising
+unnecessary escalation — particularly using Bayesian optimisation over the combined
+objective — represents a methodological gap directly addressed in Chapter~4.
+
+% ============================================================
+\section{Knowledge-Augmented and Neuro-Symbolic Detection}
+\label{sec:lit_kbs}
+% ============================================================
+
+% ------------------------------------------------------------
+\subsection{Neuro-Symbolic Artificial Intelligence}
+\label{sec:lit_neurosym}
+% ------------------------------------------------------------
+
+Neuro-symbolic AI refers to architectures and frameworks that integrate neural learning
+components — capable of acquiring representations from raw data — with symbolic reasoning
+components that encode structured knowledge, logical constraints, or semantic
+relationships \cite{Besold2021neurosymbolicsurvey}.
+The motivation for such integration is well-established: neural networks generalise poorly
+to novel combinations of concepts not seen during training (the compositional generalisation
+problem), and they cannot readily incorporate domain knowledge expressed in symbolic form,
+such as logical rules, ontologies, or expert-curated decision criteria.
+Conversely, symbolic systems struggle with the uncertainty and noise inherent in real-world
+sensor data but can reason reliably over cleanly structured symbolic representations.
+
+In the context of malware detection, the neuro-symbolic paradigm suggests augmenting
+purely data-driven detectors with structured representations of threat-intelligence knowledge:
+documented attack patterns, tool associations, MITRE ATT\&CK tactic sequences, and
+platform-specific vulnerability profiles \cite{Besold2021neurosymbolicsurvey, tian2025llmsurvey}.
+Such knowledge is already documented in practitioner-curated repositories — CVE databases,
+MITRE ATT\&CK, threat actor profiles, DFIR investigation reports — but has not previously
+been operationalised as an independent agent-level signal within a multi-agent detection
+framework.
+Chapter~5 of this thesis introduces the Knowledge Agent as the component that bridges this
+gap, training a neural classifier on practitioner-sourced threat-intelligence features and
+integrating its output alongside the data-driven Semantic and Behavioural Agents.
+
+% ------------------------------------------------------------
+\subsection{Threat Intelligence as a Detection Signal}
+\label{sec:lit_ti}
+% ------------------------------------------------------------
+
+Threat intelligence — structured information about adversary capabilities, intentions, and
+tactics derived from observed incidents, practitioner analysis, and automated
+collection — constitutes a rich source of detection signal that is systematically under-exploited
+in the machine learning-based ransomware detection literature.
+The MITRE ATT\&CK framework provides a standardised taxonomy of adversary techniques
+documented across hundreds of ransomware and advanced persistent threat campaigns, enabling
+quantitative characterisation of attack breadth and complexity \cite{razaulla2023age}.
+Studies that have incorporated ATT\&CK-derived features into detection pipelines report that
+tactic prevalence and tool association profiles are highly discriminative of ransomware
+deployments compared to benign or low-sophistication malicious software \cite{Alraizza2025StorageAP}.
+
+However, the integration of threat intelligence into automated detection systems faces two
+significant challenges.
+First, threat-intelligence data is typically expressed at a higher level of abstraction than
+the raw feature vectors used in ML pipelines: bridging the gap between practitioner
+narratives and machine-readable feature representations requires structured annotation
+effort \cite{Ispahany2024Survey}.
+Second, threat-intelligence sources are heterogeneous in quality and recency, and the mapping
+from observed tactic indicators to ground-truth maliciousness labels is inherently
+probabilistic.
+The RansKnow dataset constructed for Chapter~5 addresses these challenges by grounding
+features directly in the MITRE ATT\&CK taxonomy and using practitioner-validated thresholds
+for label assignment, providing a principled knowledge-grounded training signal for the
+Knowledge Agent.
+
+% ============================================================
+\section{Concept Drift and Continual Learning}
+\label{sec:lit_cd}
+% ============================================================
+
+% ------------------------------------------------------------
+\subsection{Concept Drift in Malware Detection}
+\label{sec:lit_drift}
+% ------------------------------------------------------------
+
+Concept drift occurs when the statistical relationship between input features and class labels
+changes over time, causing a classifier trained on a historical data distribution to degrade
+in performance on more recently collected
+samples \cite{Ceschin2022ConceptDrift, Fernando2024FeSAD}.
+In the malware detection domain, concept drift is not a rare or exceptional event but an
+endemic and deliberate phenomenon: adversaries actively modify their malware to evade detection
+systems, introducing distributional shift into both the feature distributions of malicious
+samples and, through false positive reduction pressure, into the distribution of borderline
+benign software.
+
+Ceschin et al.\ \cite{Ceschin2022ConceptDrift} provide a systematic empirical analysis of
+concept drift in malware classifiers, demonstrating that accuracy degradation is measurable
+within months of model deployment and that models trained on older data distributions
+generalise poorly to current threats even when evaluated on samples from the same broad family
+taxonomy.
+Fernando et al.\ \cite{Fernando2024FeSAD} propose semi-supervised adaptation mechanisms that
+update model representations continuously as new unlabelled samples arrive, reducing the
+frequency of model retraining.
+Both studies, however, focus on single-model classifiers without explicit uncertainty
+quantification or the ability to route uncertain samples to human analysts for labelling.
+
+% ------------------------------------------------------------
+\subsection{Continual Learning and Experience Replay}
+\label{sec:lit_cl}
+% ============================================================
+
+Continual learning addresses the problem of updating a model's knowledge over time as new
+labelled examples become available, without access to the full historical training set and
+without catastrophically forgetting previously learned
+representations \cite{rolnick2019experience}.
+The \emph{catastrophic forgetting} problem — the tendency of a neural network updated on new
+data to overwrite parameters encoding earlier knowledge — is the central challenge of
+continual learning: gradient updates that minimise loss on the current batch can simultaneously
+maximise loss on previously learned patterns if the two distributions are
+dissimilar \cite{rolnick2019experience}.
+
+Experience replay addresses this problem by maintaining a buffer of previously observed
+examples and including a random sample from this buffer in each gradient update batch alongside
+the new examples.
+The mixed gradient update adjusts model parameters to simultaneously reduce loss on current
+and historical samples, mitigating forgetting without requiring access to the full historical
+dataset \cite{rolnick2019experience}.
+Reservoir sampling \cite{vitter1985random} provides a space-efficient buffer maintenance
+strategy: the buffer maintains a fixed-size uniform random sample of all examples seen to
+date, with each new example replacing a randomly selected buffer entry with probability equal
+to the ratio of buffer size to examples seen.
+This ensures that the buffer is an unbiased representative sample of the entire historical
+distribution regardless of its temporal structure.
+
+In the ransomware detection context, the Expert Feedback Loop in Chapter~5 operationalises
+experience replay in a specific and practically motivated way: human analyst labels on
+escalated cases are fed back into the system as the source of new labelled examples, and the
+Decision MLP (the only component updated) is trained on the mixed current-plus-replayed
+batch.
+This design ensures that analyst corrections to systematic model errors are incorporated
+incrementally without destabilising the learned representations of the upstream CNN agents.
+
+% ============================================================
+\section{Synthesis: Research Gaps and Thesis Positioning}
+\label{sec:lit_gaps}
+% ============================================================
+
+The preceding review reveals several persistent limitations in the existing ransomware
+detection literature that collectively motivate the three empirical investigations in this
+thesis.
+These gaps are summarised individually before being tabulated in Table~\ref{tab:gaps}.
+
+\textbf{Gap~1: Absence of operational uncertainty quantification.}
+The overwhelming majority of deep learning ransomware detectors produce scalar probability
+outputs without any characterisation of the reliability of those estimates on individual
+inputs \cite{gawlikowski2023Uncertainity, zahoora2022Deep}.
+The resulting systems are poorly calibrated and cannot distinguish between high-confidence
+predictions on clear-cut cases and low-confidence predictions on borderline or
+out-of-distribution samples.
+This prevents the construction of principled triage policies that balance autonomous action
+against human escalation based on model confidence.
+
+\textbf{Gap~2: Class-imbalance degradation without score-space augmentation.}
+Public ransomware datasets are substantially imbalanced, with benign samples outnumbering
+ransomware samples in many collections.
+Standard augmentation methods such as SMOTE \cite{chawla2002smote} operate in the raw feature
+space and may generate implausible synthetic samples in high-dimensional spaces.
+No prior work has applied score-space augmentation to the fused prediction vectors of a
+multi-agent system, where the dimensionality is low and the conditional distributions of
+agent scores are well-suited to generative modelling.
+
+\textbf{Gap~3: Single-modality or na\"{i}vely fused hybrid detection.}
+Studies that combine static and dynamic features typically do so by concatenating feature
+vectors into a single input to a single unified model \cite{Ferdous2024Comp}, sacrificing
+modality-specific representation learning and producing a single aggregate confidence score
+that carries no information about which modality was driving the prediction.
+No prior work constructs modality-specialised agents with independent uncertainty estimates
+that are fused through a learned decision component with uncertainty-aware weighting.
+
+\textbf{Gap~4: No uncertainty-driven triage with Bayesian threshold optimisation.}
+While threshold selection for security classifiers is discussed in the
+literature \cite{Farzadpour2024Thresholding}, no prior work jointly optimises the
+detection threshold and the uncertainty threshold governing autonomous versus escalated
+decisions using Bayesian optimisation over a combined discriminative-operational objective
+function.
+
+\textbf{Gap~5: Exclusion of structured threat-intelligence from agent-level detection.}
+The MITRE ATT\&CK framework and practitioner-curated threat-intelligence sources encode
+substantial knowledge about ransomware deployment patterns that is not captured in
+measurement-derived static or dynamic features \cite{razaulla2023age, Alraizza2025StorageAP}.
+No prior work operationalises this knowledge as an independent neural agent whose uncertainty
+output participates in a multi-agent triage framework alongside data-driven agents.
+
+\textbf{Gap~6: Static agent cooperation without uncertainty communication.}
+In existing multi-agent detection systems, agents contribute their outputs to a fusion layer
+without any mechanism for communicating their current predictive reliability to one
+another \cite{MultiAgentAdaptiveDetection2023}.
+A high-uncertainty agent contributes the same weight to the fused prediction as a confident
+agent, regardless of distributional shift or feature availability.
+
+\textbf{Gap~7: No continual learning under analyst feedback in multi-agent ransomware detection.}
+Continual learning methods have been applied to single-model malware classifiers
+\cite{Ceschin2022ConceptDrift, Fernando2024FeSAD}, but no prior work incorporates an
+analyst-in-the-loop feedback mechanism into a multi-agent detection framework that updates
+the system's decision logic incrementally from escalated cases while preserving the learned
+representations of the upstream agent backbone networks.
+
+\begin{table}[ht]
+\centering
+\caption{Identified research gaps and their correspondence to the empirical contributions of
+this thesis. Representative prior works that partially address each gap are listed in
+column~2; column~3 identifies the chapter that resolves it.}
+\label{tab:gaps}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{5.5cm} p{4.5cm} l@{}}
+\toprule
+\textbf{Research Gap} & \textbf{Representative Prior Work} & \textbf{Addressed In} \\
+\midrule
+G1: No operational uncertainty quantification in ransomware detection
+    & \cite{zahoora2022Deep, gal2016dropout}
+    & Chapter~3 \\[4pt]
+G2: Class-imbalance augmentation without score-space GAN methods
+    & \cite{chawla2002smote, xu2019ctgan}
+    & Chapter~3, 4 \\[4pt]
+G3: Single-modality or na\"{i}vely fused hybrid detection
+    & \cite{Ferdous2024Comp, yumlembam2024comprehensive}
+    & Chapter~4 \\[4pt]
+G4: No Bayesian uncertainty-threshold triage optimisation
+    & \cite{Farzadpour2024Thresholding, optuna2019}
+    & Chapter~4, 5 \\[4pt]
+G5: Threat-intelligence excluded from agent-level detection
+    & \cite{razaulla2023age, Alraizza2025StorageAP}
+    & Chapter~5 \\[4pt]
+G6: Static agent cooperation without uncertainty communication
+    & \cite{MultiAgentAdaptiveDetection2023, gawlikowski2023Uncertainity}
+    & Chapter~5 \\[4pt]
+G7: No analyst feedback loop in multi-agent ransomware detection
+    & \cite{Ceschin2022ConceptDrift, rolnick2019experience}
+    & Chapter~5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Taken together, these gaps define a coherent research programme: the limitations of
+single-agent detection (G1, G2) motivate the single-agent uncertainty-aware baseline in
+Chapter~3; the limitations of single-modality and unfused hybrid detection (G3, G4) motivate
+the two-agent multi-modal framework in Chapter~4; and the absence of knowledge integration,
+uncertainty communication, and continual learning (G5, G6, G7) motivate the three-agent
+extended architecture in Chapter~5.
+Each empirical chapter is therefore not an independent contribution but a principled step in
+a cumulative research programme, with each chapter's design directly addressing the
+limitations identified in the previous.
+
+% ============================================================
+\section{Summary}
+\label{sec:lit_summary}
+% ============================================================
+
+This chapter has reviewed the body of knowledge underpinning the three empirical investigations
+in this thesis.
+The ransomware threat landscape is characterised by growing operational and economic impact,
+rapid adversarial adaptation, and the deployment of multi-stage attack chains that span
+reconnaissance, lateral movement, and encryption payload delivery.
+Machine learning-based detection has progressed from classical handcrafted-feature methods
+through CNN and recurrent deep learning architectures, achieving strong in-distribution
+performance but exhibiting systematic overconfidence and limited multi-modal reasoning.
+Uncertainty quantification via Monte Carlo Dropout, calibration via temperature scaling, and
+explainability via SHAP and LIME attribution provide the technical foundations for
+analyst-interpretable, confidence-aware detection.
+Multi-agent architectures and neuro-symbolic knowledge integration offer principled pathways
+beyond single-model detection, and continual learning via experience replay addresses the
+endemic problem of concept drift in evolving malware populations.
+Seven specific research gaps have been identified and mapped to the empirical contributions
+of Chapters~3, 4, and~5, establishing the logical necessity and coherent progression of the
+investigations that follow.

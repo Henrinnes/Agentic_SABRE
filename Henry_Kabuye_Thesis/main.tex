@@ -1,0 +1,71 @@
+\documentclass[twoside, openright]{RequiredFiles/NorthumbriaPhdThesis}
+\usepackage{lettrine}
+
+% \usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{bm}
+\usepackage{dblfloatfix}
+% \usepackage{soul}     % For highlighting
+% \usepackage{xcolor}   % For color definitions
+% \sethlcolor{yellow}   % Set highlight color to yellow
+\usepackage{multirow}
+
+\usepackage{booktabs}
+\newcommand{\cmark}{\checkmark}
+\newcommand{\xmark}{\(\times\)}
+
+%%%
+% Header fix — fancyhdr requires headheight >= 14pt (book class default is 12pt)
+% Compensate topmargin so the text area does not shift downward
+%%%
+\setlength{\headheight}{15pt}
+\addtolength{\topmargin}{-3pt}
+
+%%%
+% Header content — use small font and chapter-only marks to prevent
+% long chapter titles overflowing the header rule into body text
+%%%
+\usepackage{truncate}
+\fancyhf{}
+\fancyhead[LE,RO]{\small\thepage}
+\fancyhead[RE]{\small\truncate{0.7\textwidth}{\leftmark}}
+\fancyhead[LO]{\small\truncate{0.7\textwidth}{\rightmark}}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter\quad #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\quad #1}}
+
+%%%
+% Meta Data (Used on Title Pages)
+%%%
+\title{AI-Based Intelligent Multi-Stage and User-Centric Ransomware Attack Detection}
+\author{Henry Kabuye}
+\faculty{Faculty of Environment and Engineering}
+\wordcount{83,564}
+\degreetype{Doctor of Philosophy}
+\degreetitle{PhD}
+
+\begin{document}
+
+%%%
+% Begin Front Matter
+%%%
+\frontmatter
+\maketitle
+\input{FrontMatter/FrontMatter.tex}
+
+%%%
+% Begin Main Matter
+%%%
+\mainmatter
+\pagestyle{fancy}
+\input{MainMatter/Chapters.tex}
+
+%%%
+% Begin Back Matter
+%%%
+\input{BackMatter/BackMatter.tex}
+
+\end{document}

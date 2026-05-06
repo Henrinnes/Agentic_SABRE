@@ -1,0 +1,156 @@
+% ============================================================
+%  Appendix B: Dataset Statistics
+% ============================================================
+
+\chapter{Dataset Statistics and Characteristics}
+\label{app:datasets}
+
+This appendix provides detailed statistical characteristics for the three datasets used
+across the empirical studies in this thesis: RanSAP, RDset, and RansKnow.
+
+% ------------------------------------------------------------
+\section*{B.1\quad RanSAP — Runtime Behavioural Dataset}
+% ------------------------------------------------------------
+
+The RanSAP dataset \cite{hirano2022ransap} captures system API call behaviour recorded
+during controlled sandbox execution of ransomware and benign software samples.
+Samples are represented as 30-second time-window API trace feature vectors capturing
+I/O access patterns, file enumeration sequences, and encryption-indicative operations.
+Table~\ref{tab:app_ransap} summarises the class and split distribution used in this thesis.
+
+\begin{table}[ht]
+\centering
+\caption{RanSAP dataset class distribution and train/test split.}
+\label{tab:app_ransap}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Class} & \textbf{Training} & \textbf{Test} & \textbf{Total} \\
+\midrule
+Ransomware      & ---  & ---  & --- \\
+Benign          & ---  & ---  & --- \\
+\midrule
+\textbf{Total}  & ---  & ---  & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textit{Note:} Exact split figures are reported within each empirical chapter.
+The split ratio used throughout is 80\% training, 10\% validation, 10\% test, with
+stratified sampling to preserve class proportions.
+
+\begin{table}[ht]
+\centering
+\caption{RanSAP feature group summary.}
+\label{tab:app_ransap_features}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Feature Group} & \textbf{Count} & \textbf{Description} \\
+\midrule
+File I/O API calls        & ---  & Read, write, create, delete, rename operations \\
+Registry operations       & ---  & Key creation, modification, deletion events \\
+Network API calls         & ---  & Socket creation, DNS resolution, HTTP requests \\
+Process API calls         & ---  & Process and thread creation, injection events \\
+Cryptographic API calls   & ---  & Encryption/decryption routine invocations \\
+\midrule
+\textbf{Total features}   & 16   & Per 30-second time window \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section*{B.2\quad RDset — Static Semantic Feature Dataset}
+% ------------------------------------------------------------
+
+The RDset provides PE-format static analysis features extracted from portable executable
+file headers without dynamic execution, enabling rapid pre-execution screening
+\cite{GogineniDV22ForeseerRanSAP}.
+Features encode the structural and semantic properties of executable files through entropy
+profiles, import address table statistics, and PE header field values.
+
+\begin{table}[ht]
+\centering
+\caption{RDset class distribution and train/test split.}
+\label{tab:app_rdset}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Class} & \textbf{Training} & \textbf{Test} & \textbf{Total} \\
+\midrule
+Ransomware      & ---  & ---  & --- \\
+Benign          & ---  & ---  & --- \\
+\midrule
+\textbf{Total}  & ---  & ---  & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{RDset feature group summary.}
+\label{tab:app_rdset_features}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Feature Group} & \textbf{Count} & \textbf{Description} \\
+\midrule
+Section entropy values   & ---  & Per-section byte entropy (Shannon entropy) \\
+Import address table     & ---  & DLL names and imported function counts \\
+PE header fields         & ---  & Machine type, subsystem, characteristics flags \\
+Positional embeddings    & 384  & Final input representation after embedding \\
+\midrule
+\textbf{Total (raw)}     & ---  & Before positional embedding \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section*{B.3\quad RansKnow — Threat-Intelligence Dataset}
+% ------------------------------------------------------------
+
+RansKnow is a researcher-constructed dataset sourced from 307 publicly available YouTube
+security briefings, conference presentations, and practitioner DFIR walkthroughs.
+Each sample encodes the observed MITRE ATT\&CK tactic profile and associated tooling of
+a documented ransomware incident or benign activity report.
+Binary labels are assigned by the threshold rule:
+\textit{Tactic\_Total} $>$ 10 \textbf{OR} \textit{Tool\_Total} $>$ 2.
+
+\begin{table}[ht]
+\centering
+\caption{RansKnow class distribution.}
+\label{tab:app_ransknow_dist}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Class} & \textbf{Samples} & \textbf{Percentage} \\
+\midrule
+Ransomware (positive)  & ---  & --- \\
+Benign (negative)      & ---  & --- \\
+\midrule
+\textbf{Total}         & 307  & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{RansKnow full feature specification (23 features).}
+\label{tab:app_ransknow_features}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}llp{7.5cm}@{}}
+\toprule
+\textbf{Feature Group} & \textbf{No.} & \textbf{Description} \\
+\midrule
+MITRE ATT\&CK Tactics & 10 & Binary/count indicators for Initial Access, Execution, Persistence, Privilege Escalation, Defence Evasion, Credential Access, Discovery, Lateral Movement, Collection, and Exfiltration \\
+\addlinespace
+Tool Counts & 8 & Occurrence counts for tools commonly observed in ransomware chains: Cobalt Strike, Mimikatz, PsExec, PowerShell Empire, Rclone, MEGAsync, WinSCP, AnyDesk \\
+\addlinespace
+Platform Signals & 3 & Indicators for Windows, Linux, and ESXi/VMware as primary target platform \\
+\addlinespace
+Aggregate Totals & 2 & \textit{Tactic\_Total} (sum of tactic indicators) and \textit{Tool\_Total} (sum of tool counts) \\
+\midrule
+\textbf{Total} & 23 & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The labelling threshold (\textit{Tactic\_Total} $>$ 10 OR \textit{Tool\_Total}
+$>$ 2) was established through examination of practitioner-documented incident reports
+and reflects operational consensus on the minimum tactical breadth and tooling complexity
+distinguishing a ransomware deployment from benign or low-sophistication activity.

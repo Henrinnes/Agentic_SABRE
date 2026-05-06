@@ -1,0 +1,2020 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.2.16)  30 APR 2026 17:07
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**main.tex
+(./main.tex
+LaTeX2e <2021-11-15> patch level 1
+L3 programming layer <2022-01-21> (./RequiredFiles/NorthumbriaPhdThesis.cls
+
+LaTeX Warning: You have requested document class `RequiredFiles/NorthumbriaPhdT
+hesis',
+               but the document class provides `NorthumbriaPhdThesis'.
+
+Document Class: NorthumbriaPhdThesis 2019/02/05 v0.4.1 Northumbria University T
+hesis Document Class. Created by Graham Coulby http://grahamcoulby.uk/
+(/usr/share/texlive/texmf-dist/tex/latex/base/book.cls
+Document Class: book 2021/10/04 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/bk11.clo
+File: bk11.clo 2021/10/04 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count185
+\c@chapter=\count186
+\c@section=\count187
+\c@subsection=\count188
+\c@subsubsection=\count189
+\c@paragraph=\count190
+\c@subparagraph=\count191
+\c@figure=\count192
+\c@table=\count193
+\abovecaptionskip=\skip47
+\belowcaptionskip=\skip48
+\bibindent=\dimen138
+)
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks16
+)
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2020/03/06 v1.0d TeX engine tests
+))
+\Gm@cnth=\count194
+\Gm@cntv=\count195
+\c@Gm@tempcnt=\count196
+\Gm@bindingoffset=\dimen139
+\Gm@wd@mp=\dimen140
+\Gm@odd@mp=\dimen141
+\Gm@even@mp=\dimen142
+\Gm@layoutwidth=\dimen143
+\Gm@layoutheight=\dimen144
+\Gm@layouthoffset=\dimen145
+\Gm@layoutvoffset=\dimen146
+\Gm@dimlist=\toks17
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
+Package: fancyhdr 2021/01/28 v4.0.1 Extensive control of page headers and foote
+rs
+\f@nch@headwidth=\skip49
+\f@nch@O@elh=\skip50
+\f@nch@O@erh=\skip51
+\f@nch@O@olh=\skip52
+\f@nch@O@orh=\skip53
+\f@nch@O@elf=\skip54
+\f@nch@O@erf=\skip55
+\f@nch@O@olf=\skip56
+\f@nch@O@orf=\skip57
+)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/times.sty
+Package: times 2020/03/25 PSNFSS-v9.3 (SPQR) 
+)
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty
+Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
+package with kernel methods
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2021/03/04 v1.4d Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2021/08/11 v1.11 sin cos tan (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 107.
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2020/10/05 v1.2a Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen147
+\Gin@req@width=\dimen148
+)
+(/usr/share/texlive/texmf-dist/tex/latex/natbib/natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip58
+\bibsep=\skip59
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count197
+)
+(/usr/share/texlive/texmf-dist/tex/latex/appendix/appendix.sty
+Package: appendix 2020/02/08 v1.2c extra appendix facilities
+\c@@pps=\count198
+\c@@ppsavesec=\count199
+\c@@ppsaveapp=\count266
+)
+(/usr/share/texlive/texmf-dist/tex/latex/datetime/datetime.sty
+Package: datetime 2015/03/20 v2.60 Date Time Package
+
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count267
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fmtcount/fmtcount.sty
+Package: fmtcount 2020/01/30 v3.07
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2020/11/24 v1.1c Standard LaTeX ifthen package (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2020/11/20 v2.8 package option processing (HA)
+
+(/usr/share/texlive/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/usr/share/texlive/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+\XKV@toks=\toks18
+\XKV@tempa@toks=\toks19
+)
+\XKV@depth=\count268
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+))
+(/usr/share/texlive/texmf-dist/tex/latex/fmtcount/fcprefix.sty
+Package: fcprefix 2012/09/28
+
+(/usr/share/texlive/texmf-dist/tex/latex/fmtcount/fcnumparser.sty
+Package: fcnumparser 2017/06/15
+\fc@digit@counter=\count269
+))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks20
+\ex@=\dimen149
+)
+\c@padzeroesN=\count270
+\fc@tmpcatcode=\count271
+\@DT@modctr=\count272
+\@ordinalctr=\count273
+\@orgargctr=\count274
+\@strctr=\count275
+\@tmpstrctr=\count276
+\@DT@loopN=\count277
+\@DT@X=\count278
+)
+(/usr/share/texlive/texmf-dist/tex/latex/datetime/datetime-defaults.sty
+Package: datetime-defaults 2013/09/10
+)
+\@day=\count279
+\@month=\count280
+\@year=\count281
+\c@HOUR=\count282
+\c@HOURXII=\count283
+\c@MINUTE=\count284
+\c@TOHOUR=\count285
+\c@TOMINUTE=\count286
+\c@SECOND=\count287
+\currenthour=\count288
+\currentminute=\count289
+\currentsecond=\count290
+Package datetime Info: No datetime.cfg file found, using default settings on in
+put line 308.
+
+(/usr/share/texlive/texmf-dist/tex/latex/datetime/dt-UKenglish.def
+File: dt-UKenglish.def 2013/09/10
+)
+\@dtctr=\count291
+\dayofyear=\count292
+\dayofweek=\count293
+LaTeX Info: Redefining \today on input line 736.
+\dt@a=\toks21
+\dt@b=\toks22
+)
+(/usr/share/texlive/texmf-dist/tex/latex/lipsum/lipsum.sty
+(/usr/share/texlive/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2e.sty
+(/usr/share/texlive/texmf-dist/tex/latex/l3kernel/expl3.sty
+Package: expl3 2022-01-21 L3 programming layer (loader) 
+
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
+File: l3backend-pdftex.def 2022-01-12 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count294
+\l__pdf_internal_box=\box50
+))
+Package: l3keys2e 2022-01-12 LaTeX2e option processing using LaTeX3 keys
+)
+Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
+\g__lipsum_par_int=\count295
+\l__lipsum_a_int=\count296
+\l__lipsum_b_int=\count297
+
+(/usr/share/texlive/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex))
+(/usr/share/texlive/texmf-dist/tex/latex/emptypage/emptypage.sty
+Package: emptypage 2010/05/30 v1.2 Suppress page numbers and headings on empty 
+pages
+)
+(/usr/share/texlive/texmf-dist/tex/latex/ragged2e/ragged2e.sty
+Package: ragged2e 2021/12/15 v3.1 ragged2e Package
+\CenteringLeftskip=\skip60
+\RaggedLeftLeftskip=\skip61
+\RaggedRightLeftskip=\skip62
+\CenteringRightskip=\skip63
+\RaggedLeftRightskip=\skip64
+\RaggedRightRightskip=\skip65
+\CenteringParfillskip=\skip66
+\RaggedLeftParfillskip=\skip67
+\RaggedRightParfillskip=\skip68
+\JustifyingParfillskip=\skip69
+\CenteringParindent=\skip70
+\RaggedLeftParindent=\skip71
+\RaggedRightParindent=\skip72
+\JustifyingParindent=\skip73
+)
+(/usr/share/texlive/texmf-dist/tex/latex/parskip/parskip.sty
+Package: parskip 2021-03-14 v2.0h non-zero parskip adjustments
+
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+Package: kvoptions 2020-10-07 v3.14 Key value format for package options (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+Package: ltxcmds 2020-05-10 v1.25 LaTeX kernel commands for general use (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2019/12/15 v1.18 Key value parser (HO)
+)))
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2021/02/14 v1.3d Input encoding file
+\inpenc@prehook=\toks23
+\inpenc@posthook=\toks24
+)
+(/usr/share/texlive/texmf-dist/tex/latex/chngcntr/chngcntr.sty
+Package: chngcntr 2018/04/09 v1.1a change counter resetting
+Package chngcntr Info: \counterwithout already defined.
+(chngcntr)             Quitting chngcntr on input line 21.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/imakeidx/imakeidx.sty
+Package: imakeidx 2016/10/15 v1.3e Package for typesetting indices in a synchro
+nous mode
+
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifxetex.sty
+Package: ifxetex 2019/10/25 v0.7 ifxetex legacy package. Use iftex instead.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifluatex.sty
+Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/multicol.sty
+Package: multicol 2021/10/28 v1.9b multicolumn formatting (FMi)
+\c@tracingmulticols=\count298
+\mult@box=\box51
+\multicol@leftmargin=\dimen150
+\c@unbalance=\count299
+\c@collectmore=\count300
+\doublecol@number=\count301
+\multicoltolerance=\count302
+\multicolpretolerance=\count303
+\full@width=\dimen151
+\page@free=\dimen152
+\premulticols=\dimen153
+\postmulticols=\dimen154
+\multicolsep=\skip74
+\multicolbaselineskip=\skip75
+\partial@page=\box52
+\last@line=\box53
+\maxbalancingoverflow=\dimen155
+\mult@rightbox=\box54
+\mult@grightbox=\box55
+\mult@firstbox=\box56
+\mult@gfirstbox=\box57
+\@tempa=\box58
+\@tempa=\box59
+\@tempa=\box60
+\@tempa=\box61
+\@tempa=\box62
+\@tempa=\box63
+\@tempa=\box64
+\@tempa=\box65
+\@tempa=\box66
+\@tempa=\box67
+\@tempa=\box68
+\@tempa=\box69
+\@tempa=\box70
+\@tempa=\box71
+\@tempa=\box72
+\@tempa=\box73
+\@tempa=\box74
+\@tempa=\box75
+\@tempa=\box76
+\@tempa=\box77
+\@tempa=\box78
+\@tempa=\box79
+\@tempa=\box80
+\@tempa=\box81
+\@tempa=\box82
+\@tempa=\box83
+\@tempa=\box84
+\@tempa=\box85
+\@tempa=\box86
+\@tempa=\box87
+\@tempa=\box88
+\@tempa=\box89
+\@tempa=\box90
+\@tempa=\box91
+\@tempa=\box92
+\@tempa=\box93
+\c@minrows=\count304
+\c@columnbadness=\count305
+\c@finalcolumnbadness=\count306
+\last@try=\dimen156
+\multicolovershoot=\dimen157
+\multicolundershoot=\dimen158
+\mult@nat@firstbox=\box94
+\colbreak@box=\box95
+\mc@col@check@num=\count307
+))
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip16
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2021-06-07 v7.00m Hypertext links for LaTeX
+
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
+)
+
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty
+Package: letltxmacro 2019/12/03 v1.6 Let assignment for LaTeX macros (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty
+Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
+)
+\@linkdim=\dimen159
+\Hy@linkcounter=\count308
+\Hy@pagecounter=\count309
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2021-06-07 v7.00m Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref-langpatches.def
+File: hyperref-langpatches.def 2021-06-07 v7.00m Hyperref: patches for babel la
+nguages
+)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/etexcmds/etexcmds.sty
+Package: etexcmds 2019/12/15 v1.7 Avoid name clashes with e-TeX commands (HO)
+)
+\Hy@SavedSpaceFactor=\count310
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def
+File: puenc.def 2021-06-07 v7.00m Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Option `breaklinks' set `true' on input line 4073.
+Package hyperref Info: Hyper figures OFF on input line 4192.
+Package hyperref Info: Link nesting OFF on input line 4197.
+Package hyperref Info: Hyper index ON on input line 4200.
+Package hyperref Info: Plain pages OFF on input line 4207.
+Package hyperref Info: Backreferencing OFF on input line 4212.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4445.
+\c@Hy@tempcnt=\count311
+LaTeX Info: Redefining \url on input line 4804.
+\XeTeXLinkMargin=\dimen160
+
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
+)
+))
+\Fld@menulength=\count312
+\Field@Width=\dimen161
+\Fld@charsize=\dimen162
+Package hyperref Info: Hyper figures OFF on input line 6076.
+Package hyperref Info: Link nesting OFF on input line 6081.
+Package hyperref Info: Hyper index ON on input line 6084.
+Package hyperref Info: backreferencing OFF on input line 6091.
+Package hyperref Info: Link coloring OFF on input line 6096.
+Package hyperref Info: Link coloring with OCG OFF on input line 6101.
+Package hyperref Info: PDF/A mode OFF on input line 6106.
+LaTeX Info: Redefining \ref on input line 6146.
+LaTeX Info: Redefining \pageref on input line 6150.
+\Hy@abspage=\count313
+\c@Item=\count314
+\c@Hfootnote=\count315
+)
+Package hyperref Info: Driver (autodetected): hpdftex.
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2021-06-07 v7.00m Hyperref driver for pdfTeX
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty
+Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend pac
+kage
+with kernel methods
+)
+\Fld@listcount=\count316
+\c@bookmark@seq@number=\count317
+
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+Package: rerunfilecheck 2019/12/05 v1.9 Rerun checks for auxiliary files (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
+86.
+)
+\Hy@SectionHShift=\skip76
+)
+(/usr/share/texlive/texmf-dist/tex/latex/glossaries-extra/glossaries-extra.sty
+Package: glossaries-extra 2021/11/22 v1.48 (NLCT)
+
+(/usr/share/texlive/texmf-dist/tex/latex/glossaries/base/glossaries.sty
+Package: glossaries 2021/11/01 v4.49 (NLCT)
+
+(/usr/share/texlive/texmf-dist/tex/latex/mfirstuc/mfirstuc.sty
+Package: mfirstuc 2021/10/15 v2.07 (NLCT)
+\@glsmfirst=\toks25
+\@glsmrest=\toks26
+)
+(/usr/share/texlive/texmf-dist/tex/latex/textcase/textcase.sty
+Package: textcase 2019/09/14 v1.00 Text only upper/lower case changing (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/xfor/xfor.sty
+Package: xfor 2009/02/05 v1.05 (NLCT)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/datatool/datatool-base.sty
+Package: datatool-base 2019/09/27 v2.32 (NLCT)
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2021/10/15 v2.17l AMS math features
+\@mathmargin=\skip77
+
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2021/08/26 v2.01 AMS text
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen163
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2021/08/26 v2.02 operator names
+)
+\inf@bad=\count318
+LaTeX Info: Redefining \frac on input line 234.
+\uproot@=\count319
+\leftroot@=\count320
+LaTeX Info: Redefining \overline on input line 399.
+\classnum@=\count321
+\DOTSCASE@=\count322
+LaTeX Info: Redefining \ldots on input line 496.
+LaTeX Info: Redefining \dots on input line 499.
+LaTeX Info: Redefining \cdots on input line 620.
+\Mathstrutbox@=\box96
+\strutbox@=\box97
+\big@size=\dimen164
+LaTeX Font Info:    Redeclaring font encoding OML on input line 743.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 744.
+\macc@depth=\count323
+\c@MaxMatrixCols=\count324
+\dotsspace@=\muskip17
+\c@parentequation=\count325
+\dspbrk@lvl=\count326
+\tag@help=\toks27
+\row@=\count327
+\column@=\count328
+\maxfields@=\count329
+\andhelp@=\toks28
+\eqnshift@=\dimen165
+\alignsep@=\dimen166
+\tagshift@=\dimen167
+\tagwidth@=\dimen168
+\totwidth@=\dimen169
+\lineht@=\dimen170
+\@envbody=\toks29
+\multlinegap=\skip78
+\multlinetaggap=\skip79
+\mathdisplay@stack=\toks30
+LaTeX Info: Redefining \[ on input line 2938.
+LaTeX Info: Redefining \] on input line 2939.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/substr/substr.sty
+Package: substr 2009/10/20 v1.2 Handle substrings
+\c@su@anzahl=\count330
+)
+(/usr/share/texlive/texmf-dist/tex/latex/datatool/datatool-fp.sty
+Package: datatool-fp 2019/09/27 v2.32 (NLCT)
+
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp.sty
+Package: fp 1995/04/02
+
+`Fixed Point Package', Version 0.8, April 2, 1995 (C) Michael Mehlich
+(/usr/share/texlive/texmf-dist/tex/latex/fp/defpattern.sty
+Package: defpattern 1994/10/12
+\actioncount=\count331
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-basic.sty
+Package: fp-basic 1996/05/13
+\FP@xs=\count332
+\FP@xia=\count333
+\FP@xib=\count334
+\FP@xfa=\count335
+\FP@xfb=\count336
+\FP@rega=\count337
+\FP@regb=\count338
+\FP@regs=\count339
+\FP@times=\count340
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-addons.sty
+Package: fp-addons 1995/03/15
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-snap.sty
+Package: fp-snap 1995/04/05
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-exp.sty
+Package: fp-exp 1995/04/03
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-trigo.sty
+Package: fp-trigo 1995/04/14
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-pas.sty
+Package: fp-pas 1994/08/29
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-random.sty
+Package: fp-random 1995/02/23
+\FPseed=\count341
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-eqn.sty
+Package: fp-eqn 1995/04/03
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-upn.sty
+Package: fp-upn 1996/10/21
+)
+(/usr/share/texlive/texmf-dist/tex/latex/fp/fp-eval.sty
+Package: fp-eval 1995/04/03
+)))
+\@dtl@toks=\toks31
+\@dtl@tmpcount=\count342
+\dtl@tmplength=\skip80
+\dtl@sortresult=\count343
+\@dtl@numgrpsepcount=\count344
+\@dtl@datatype=\count345
+\dtl@codeA=\count346
+\dtl@codeB=\count347
+\@dtl@foreach@level=\count348
+)
+(/usr/share/texlive/texmf-dist/tex/latex/glossaries/base/glossaries-compatible-
+307.sty
+Package: glossaries-compatible-307 2021/11/01 v4.49 (NLCT)
+)
+\gls@level=\count349
+\@gls@tmpb=\toks32
+\gls@tmplen=\skip81
+\glskeylisttok=\toks33
+\glslabeltok=\toks34
+\glsshorttok=\toks35
+\glslongtok=\toks36
+
+(/usr/share/texlive/texmf-dist/tex/latex/glossaries/styles/glossary-hypernav.st
+y
+Package: glossary-hypernav 2021/11/01 v4.49 (NLCT)
+) (/usr/share/texlive/texmf-dist/tex/latex/glossaries/styles/glossary-list.sty
+Package: glossary-list 2021/11/01 v4.49 (NLCT)
+\glslistdottedwidth=\skip82
+) (/usr/share/texlive/texmf-dist/tex/latex/glossaries/styles/glossary-long.sty
+Package: glossary-long 2021/11/01 v4.49 (NLCT)
+
+(/usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty
+Package: longtable 2021-09-01 v4.17 Multi-page Table package (DPC)
+\LTleft=\skip83
+\LTright=\skip84
+\LTpre=\skip85
+\LTpost=\skip86
+\LTchunksize=\count350
+\LTcapwidth=\dimen171
+\LT@head=\box98
+\LT@firsthead=\box99
+\LT@foot=\box100
+\LT@lastfoot=\box101
+\LT@gbox=\box102
+\LT@cols=\count351
+\LT@rows=\count352
+\c@LT@tables=\count353
+\c@LT@chunks=\count354
+\LT@p@ftn=\toks37
+)
+\glsdescwidth=\skip87
+\glspagelistwidth=\skip88
+)
+(/usr/share/texlive/texmf-dist/tex/latex/glossaries/styles/glossary-super.sty
+Package: glossary-super 2021/11/01 v4.49 (NLCT)
+
+(/usr/share/texlive/texmf-dist/tex/latex/supertabular/supertabular.sty
+Package: supertabular 2020/02/02 v4.1g the supertabular environment
+\c@tracingst=\count355
+\ST@wd=\dimen172
+\ST@rightskip=\skip89
+\ST@leftskip=\skip90
+\ST@parfillskip=\skip91
+\ST@pageleft=\dimen173
+\ST@headht=\dimen174
+\ST@tailht=\dimen175
+\ST@pagesofar=\dimen176
+\ST@pboxht=\dimen177
+\ST@lineht=\dimen178
+\ST@prevht=\dimen179
+\ST@toadd=\dimen180
+\ST@dimen=\dimen181
+\ST@pbox=\box103
+))
+(/usr/share/texlive/texmf-dist/tex/latex/glossaries/styles/glossary-tree.sty
+Package: glossary-tree 2021/11/01 v4.49 (NLCT)
+\glstreeindent=\skip92
+))
+\@glsxtr@leveloffset=\count356
+\glsxtrresourcecount=\count357
+\@glsxtrnewgls@inner=\count358
+\glsshortpltok=\toks38
+\glslongpltok=\toks39
+\mglselementindex=\count359
+) (./RequiredFiles/Glossaries.tex
+\glswrite=\write3
+\glo@main@file=\write4
+\openout4 = `main.glo'.
+
+Package glossaries Info: Writing glossary file main.glo on input line 2.
+\glo@acronym@file=\write5
+\openout5 = `main.acn'.
+
+Package glossaries Info: Writing glossary file main.acn on input line 2.
+)
+\main@idxfile=\write6
+\openout6 = `main.idx'.
+
+
+Writing index file main.idx
+(/usr/share/texlive/texmf-dist/tex/latex/setspace/setspace.sty
+Package: setspace 2011/12/19 v6.7a set line spacing
+))
+(/usr/share/texlive/texmf-dist/tex/latex/lettrine/lettrine.sty
+File: lettrine.sty 2020-03-14 v2.23 (Daniel Flipo)
+
+(/usr/share/texlive/texmf-dist/tex/generic/minifp/minifp.sty
+Package: minifp 2013/12/30 v0.96. Macros for real number operations and a stack
+-based programing language.
+\MFP@loopctr=\count360
+)
+\c@DefaultLines=\count361
+\c@DefaultDepth=\count362
+\DefaultFindent=\dimen182
+\DefaultNindent=\dimen183
+\DefaultSlope=\dimen184
+\DiscardVskip=\dimen185
+\L@lbox=\box104
+\L@tbox=\box105
+\c@L@lines=\count363
+\c@L@depth=\count364
+\L@Pindent=\dimen186
+\L@Findent=\dimen187
+\L@Nindent=\dimen188
+\L@lraise=\dimen189
+\L@first=\dimen190
+\L@next=\dimen191
+\L@slope=\dimen192
+\L@height=\dimen193
+\L@novskip=\dimen194
+\L@target@ht=\dimen195
+\L@target@dp=\dimen196
+\L@target@tht=\dimen197
+\LettrineWidth=\dimen198
+\LettrineHeight=\dimen199
+\LettrineDepth=\dimen256
+\Llist@everypar=\toks40
+
+Loading lettrine.cfg
+(/usr/share/texlive/texmf-dist/tex/latex/lettrine/lettrine.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+))
+(/usr/share/texlive/texmf-dist/tex/latex/base/textcomp.sty
+Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
+)
+(/usr/share/texlive/texmf-dist/tex/latex/algorithms/algorithm.sty
+Package: algorithm 2009/08/24 v0.1 Document Style `algorithm' - floating enviro
+nment
+
+(/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count365
+\float@exts=\toks41
+\float@box=\box106
+\@float@everytoks=\toks42
+\@floatcapt=\box107
+)
+\@float@every@algorithm=\toks43
+\c@algorithm=\count366
+)
+(/usr/share/texlive/texmf-dist/tex/latex/algorithmicx/algpseudocode.sty
+Package: algpseudocode 
+
+(/usr/share/texlive/texmf-dist/tex/latex/algorithmicx/algorithmicx.sty
+Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
+
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+\c@ALG@line=\count367
+\c@ALG@rem=\count368
+\c@ALG@nested=\count369
+\ALG@tlm=\skip93
+\ALG@thistlm=\skip94
+\c@ALG@Lnr=\count370
+\c@ALG@blocknr=\count371
+\c@ALG@storecount=\count372
+\c@ALG@tmpcounter=\count373
+\ALG@tmplength=\skip95
+)
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (/usr/share/texlive/texmf-dist/tex/latex/tools/bm.sty
+Package: bm 2021/04/25 v1.2e Bold Symbol Support (DPC/FMi)
+\symboldoperators=\mathgroup6
+\symboldletters=\mathgroup7
+\symboldsymbols=\mathgroup8
+Package bm Info: No bold for \OMX/cmex/m/n, using \pmb.
+Package bm Info: No bold for \U/msa/m/n, using \pmb.
+Package bm Info: No bold for \U/msb/m/n, using \pmb.
+LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 149.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/dblfloatfix/dblfloatfix.sty
+Package: dblfloatfix 2012/12/31 v1.0a (JAW)
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/fixltx2e.sty
+Package: fixltx2e 2016/12/29 v2.1a fixes to LaTeX (obsolete)
+Applying: [2015/01/01] Old fixltx2e package on input line 46.
+
+
+Package fixltx2e Warning: fixltx2e is not required with releases after 2015
+(fixltx2e)                All fixes are now in the LaTeX kernel.
+(fixltx2e)                See the latexrelease package for details.
+
+Already applied: [0000/00/00] Old fixltx2e package on input line 53.
+)
+\@dblbotnum=\count374
+\c@dblbotnumber=\count375
+) (/usr/share/texlive/texmf-dist/tex/latex/multirow/multirow.sty
+Package: multirow 2021/03/15 v2.8 Span multiple rows of a table
+\multirow@colwidth=\skip96
+\multirow@cntb=\count376
+\multirow@dima=\skip97
+\bigstrutjot=\dimen257
+)
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen258
+\lightrulewidth=\dimen259
+\cmidrulewidth=\dimen260
+\belowrulesep=\dimen261
+\belowbottomsep=\dimen262
+\aboverulesep=\dimen263
+\abovetopsep=\dimen264
+\cmidrulesep=\dimen265
+\cmidrulekern=\dimen266
+\defaultaddspace=\dimen267
+\@cmidla=\count377
+\@cmidlb=\count378
+\@aboverulesep=\dimen268
+\@belowrulesep=\dimen269
+\@thisruleclass=\count379
+\@lastruleclass=\count380
+\@thisrulewidth=\dimen270
+)
+(/usr/share/texlive/texmf-dist/tex/latex/truncate/truncate.sty
+Package: truncate 2001/08/20  ver 3.6
+\@Trunc@RestHyph=\toks44
+)
+LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 5
+0.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
+File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
+)
+
+LaTeX Warning: Unused global option(s):
+    [twoside,openright].
+
+(./main.aux)
+\openout1 = `main.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 50.
+LaTeX Font Info:    ... okay on input line 50.
+
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: <default>
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: twoside 
+* h-part:(L,W,R)=(113.81102pt, 426.79135pt, 56.9055pt)
+* v-part:(T,H,B)=(85.35826pt, 674.33032pt, 85.35826pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=426.79135pt
+* \textheight=674.33032pt
+* \oddsidemargin=41.54103pt
+* \evensidemargin=-15.36449pt
+* \topmargin=-21.78552pt
+* \headheight=15.0pt
+* \headsep=19.8738pt
+* \topskip=11.0pt
+* \footskip=27.46295pt
+* \marginparwidth=53.0pt
+* \marginparsep=7.0pt
+* \columnsep=10.0pt
+* \skip\footins=10.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidetrue
+* \@mparswitchtrue
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count381
+\scratchdimen=\dimen271
+\scratchbox=\box108
+\nofMPsegments=\count382
+\nofMParguments=\count383
+\everyMPshowfont=\toks45
+\MPscratchCnt=\count384
+\MPscratchDim=\dimen272
+\MPnumerator=\count385
+\makeMPintoPDFobject=\count386
+\everyMPtoPDFconversion=\toks46
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+(/usr/share/texlive/texmf-dist/tex/latex/fmtcount/fc-english.def
+File: fc-english.def 2016/01/12
+)
+Package hyperref Info: Link coloring OFF on input line 50.
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
+
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+)
+\c@section@level=\count387
+)
+LaTeX Info: Redefining \ref on input line 50.
+LaTeX Info: Redefining \pageref on input line 50.
+LaTeX Info: Redefining \nameref on input line 50.
+
+(./main.out) (./main.out)
+\@outlinefile=\write7
+\openout7 = `main.out'.
+
+<Images/NorthumbriaLogo.jpg, id=687, 733.0587pt x 321.6015pt>
+File: Images/NorthumbriaLogo.jpg Graphic file (type jpg)
+<use Images/NorthumbriaLogo.jpg>
+Package pdftex.def Info: Images/NorthumbriaLogo.jpg  used on input line 56.
+(pdftex.def)             Requested size: 213.39568pt x 93.62027pt.
+ [1
+
+\openout3 = `main.ist'.
+
+
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./Images/NorthumbriaLogo.j
+pg>] [2
+
+]pdfTeX warning (ext4): destination with the same identifier (name{page.i}) has
+ been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.56 \maketitle
+                [1] (./FrontMatter/FrontMatter.tex
+(./FrontMatter/Sections/abstract.texpdfTeX warning (ext4): destination with the
+ same identifier (name{page.ii}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1 \begin{frontmattersection}[Abstract]
+                                         [2
+
+])
+(./FrontMatter/Sections/contents.tex [3] [4
+
+] (./main.toc
+LaTeX Font Info:    Trying to load font information for U+msa on input line 7.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 7.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+) [5] [6] [7] [8]
+[9])
+\tf@toc=\write8
+\openout8 = `main.toc'.
+
+ (./main.lof [10] [11]
+Overfull \hbox (1.13017pt too wide) in paragraph at lines 30--30
+ \OT1/ptm/m/n/10.95 sam-ples, the Knowl-edge Agent pro-vides strongly dis-crim-
+i-na-tive threat-intelligence 
+ []
+
+[12])
+\tf@lof=\write9
+\openout9 = `main.lof'.
+
+ (./main.lot
+Overfull \hbox (3.53947pt too wide) in paragraph at lines 15--15
+ [][] [][]\OT1/ptm/m/n/10.95 Performance Met-rics for Ran-somware De-tec-tion M
+od-els Us-ing Com-bined RanSAP 
+ []
+
+[13])
+\tf@lot=\write10
+\openout10 = `main.lot'.
+
+) (./FrontMatter/Sections/preface.tex [14])
+(./FrontMatter/Sections/acknowledgements.tex [15
+
+] [16
+
+])
+(./FrontMatter/Sections/declaration.tex [17] [18
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 4--5
+
+ []
+
+)) [19] [20
+
+] (./MainMatter/Chapters.tex (./MainMatter/Chapters/Introduction.tex
+Chapter 1.
+
+Package natbib Warning: Citation `latex1' on page 1 undefined on input line 3.
+
+) [1
+
+] (./MainMatter/Chapters/LiteratureReview/LiteratureReview.tex [2]
+Chapter 2.
+Package lettrine.sty Info: Targeted height = 27.8574pt
+(lettrine.sty)             (for loversize=0, accent excluded),
+(lettrine.sty)             Lettrine height = 27.85742pt (R);
+(lettrine.sty)             reported on input line 11.
+[3
+
+] [4]
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
+06.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+) [5] [6]
+[7] [8] [9] [10] [11]
+Overfull \hbox (9.49515pt too wide) in paragraph at lines 416--425
+\OT1/ptm/m/n/10.95 reg-u-la-tory ex-pec-ta-tions around AI trans-parency and th
+e prac-ti-cal de-mand for analyst-comprehensible
+ []
+
+[12] [13] [14]
+Overfull \hbox (2.47614pt too wide) in paragraph at lines 526--537
+\OT1/ptm/m/n/10.95 data-driven de-tec-tors with struc-tured rep-re-sen-ta-tions
+ of threat-intelligence knowl-edge: doc-u-mented
+ []
+
+[15] [16] [17] [18]
+Overfull \hbox (4.35904pt too wide) in paragraph at lines 679--685
+\OT1/ptm/m/n/10.95 ATT&CK frame-work and practitioner-curated threat-intelligen
+ce sources en-code sub-stan-tial knowl-
+ []
+
+
+Underfull \hbox (badness 2521) in paragraph at lines 711--712
+[]\OT1/ptm/m/n/10.95 G1: No op-er-a-tional un-cer-tainty
+ []
+
+
+Underfull \hbox (badness 2662) in paragraph at lines 715--716
+[][]\OT1/ptm/m/n/10.95 Chawla et al.[] ([]2002[]); []Xu
+ []
+
+
+Underfull \hbox (badness 2582) in paragraph at lines 717--718
+[]\OT1/ptm/m/n/10.95 G3: Single-modality or na[]^^Pvely
+ []
+
+
+Underfull \hbox (badness 5345) in paragraph at lines 720--721
+[]\OT1/ptm/m/n/10.95 G4: No Bayesian uncertainty-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 721--722
+[][]\OT1/ptm/m/n/10.95 Farzadpour and Azghani[]
+ []
+
+
+Underfull \hbox (badness 1189) in paragraph at lines 723--724
+[]\OT1/ptm/m/n/10.95 G5: Threat-intelligence ex-cluded
+ []
+
+) [19] (./MainMatter/Chapters/ResearchDesign/ResearchDesign.tex [20pdfTeX warni
+ng (ext4): destination with the same identifier (name{table.2.1}) has been alre
+ady used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Research Design}]
+Chapter 3.
+(./MainMatter/Chapters/ResearchDesign/Sections/ResearchPosition.tex
+Package lettrine.sty Info: Targeted height = 27.8574pt
+(lettrine.sty)             (for loversize=0, accent excluded),
+(lettrine.sty)             Lettrine height = 27.85742pt (E);
+(lettrine.sty)             reported on input line 7.
+ [21
+
+]
+<Images//ResearchOnion.png, id=1573, 614.295pt x 439.6425pt>
+File: Images//ResearchOnion.png Graphic file (type png)
+<use Images//ResearchOnion.png>
+Package pdftex.def Info: Images//ResearchOnion.png  used on input line 41.
+(pdftex.def)             Requested size: 332.89673pt x 238.24866pt.
+
+[22pdfTeX warning (ext4): destination with the same identifier (name{figure.3.1
+}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.76 
+      <./Images//ResearchOnion.png>] [23] [24] [25] [26] [27] [28] [29pdfTeX wa
+rning (ext4): destination with the same identifier (name{table.3.2}) has been a
+lready used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.371 
+      ]
+Overfull \hbox (8.66324pt too wide) in paragraph at lines 372--377
+\OT1/ptm/m/n/10.95 be-fore fu-sion, en-sur-ing that each agent's con-fi-dence s
+core re-flects a re-li-able frequency-of-correctness
+ []
+
+[30] [31] [32]) [33] [34]
+Chapter 4.
+
+(./MainMatter/Chapters/ResearchDesign/Sections/Explainable and Uncertainty Awar
+e AI-based Ransomware Detection.tex
+Package lettrine.sty Info: Targeted height = 27.8574pt
+(lettrine.sty)             (for loversize=0, accent excluded),
+(lettrine.sty)             Lettrine height = 27.85742pt (R);
+(lettrine.sty)             reported on input line 19.
+<Images//ExAI_Paper_Figures/GMonthlyReport.PNG, id=1725, 393.8715pt x 234.27525
+pt>
+File: Images//ExAI_Paper_Figures/GMonthlyReport.PNG Graphic file (type png)
+<use Images//ExAI_Paper_Figures/GMonthlyReport.PNG>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/GMonthlyReport.PNG  used on
+ input line 23.
+(pdftex.def)             Requested size: 341.43437pt x 203.09929pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[35
+
+] [36pdfTeX warning (ext4): destination with the same identifier (name{figure.4
+.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.35 
+      <./Images//ExAI_Paper_Figures/GMonthlyReport.PNG>] [37] [38] [39]
+Overfull \hbox (0.73486pt too wide) in paragraph at lines 74--75
+\OT1/ptm/m/n/10.95 data that cap-tures dis-tri-bu-tion shifts, en-abling re-tra
+in-ing for sus-tained ef-fec-tive-ness. In ran-somware
+ []
+
+
+Overfull \hbox (9.45154pt too wide) in paragraph at lines 83--84
+\OT1/ptm/m/n/10.95 based ran-somware de-tec-tion, in-clud-ing pre-dic-tive un-c
+er-tainty, in-ter-pretabil-ity, and ro-bust-ness against
+ []
+
+<Images//ExAI_Paper_Figures/ProUnExp4.png, id=1867, 564.60938pt x 721.94719pt>
+File: Images//ExAI_Paper_Figures/ProUnExp4.png Graphic file (type png)
+<use Images//ExAI_Paper_Figures/ProUnExp4.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/ProUnExp4.png  used on inpu
+t line 87.
+(pdftex.def)             Requested size: 341.43437pt x 436.58661pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[40] [41pdfTeX warning (ext4): destination with the same identifier (name{figur
+e.4.3}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.95 
+      <./Images//ExAI_Paper_Figures/ProUnExp4.png>]
+<Images//ExAI_Paper_Figures/CTGAN model.PNG, id=1880, 325.215pt x 137.313pt>
+File: Images//ExAI_Paper_Figures/CTGAN model.PNG Graphic file (type png)
+<use Images//ExAI_Paper_Figures/CTGAN model.PNG>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/CTGAN model.PNG  used on in
+put line 98.
+(pdftex.def)             Requested size: 341.43437pt x 144.17241pt.
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
+put line 110.
+ [42pdfTeX warning (ext4): destination with the same identifier (name{figure.4.
+4}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.140 \end{algorithm}
+                      <./Images//ExAI_Paper_Figures/CTGAN model.PNG>] [43]
+[44] [45] [46]
+Underfull \hbox (badness 10000) in paragraph at lines 227--228
+[] $\OML/cmm/m/it/10.95 avg[]normalized[]entropy \OMS/cmsy/m/n/10.95   []\OT1/c
+mr/m/n/10.95 (\OML/cmm/m/it/10.95 window\OT1/cmr/m/n/10.95 [\OML/cmm/m/it/10.95
+ window\OT1/cmr/m/n/10.95 [[]\OML/cmm/m/it/10.95 Type[]\OT1/cmr/m/n/10.95 ] ==[
+]
+ []
+
+[47]
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 2
+46.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1pcr.fd
+File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+) [48] [49]
+[50]
+<Images//ExAI_Paper_Figures/RanSAP 30s Time Window (Benign vs Ransomware.png, i
+d=1962, 722.7pt x 578.16pt>
+File: Images//ExAI_Paper_Figures/RanSAP 30s Time Window (Benign vs Ransomware.p
+ng Graphic file (type png)
+<use Images//ExAI_Paper_Figures/RanSAP 30s Time Window (Benign vs Ransomware.pn
+g>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/RanSAP 30s Time Window (Ben
+ign vs Ransomware.png  used on input line 366.
+(pdftex.def)             Requested size: 341.43437pt x 273.14676pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<Images//ExAI_Paper_Figures/12 Classes of 30s Time Window.png, id=1963, 722.7pt
+ x 578.16pt>
+File: Images//ExAI_Paper_Figures/12 Classes of 30s Time Window.png Graphic file
+ (type png)
+<use Images//ExAI_Paper_Figures/12 Classes of 30s Time Window.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/12 Classes of 30s Time Wind
+ow.png  used on input line 373.
+(pdftex.def)             Requested size: 341.43437pt x 273.14676pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[51]
+<Images//ExAI_Paper_Figures/Distribution_Labelled.png, id=1973, 462.528pt x 346
+.896pt>
+File: Images//ExAI_Paper_Figures/Distribution_Labelled.png Graphic file (type p
+ng)
+<use Images//ExAI_Paper_Figures/Distribution_Labelled.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Distribution_Labelled.png  
+used on input line 387.
+(pdftex.def)             Requested size: 341.43437pt x 256.09029pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[52pdfTeX warning (ext4): destination with the same identifier (name{figure.4.5
+}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.393 
+       <./Images//ExAI_Paper_Figures/RanSAP 30s Time Window (Benign vs Ransomwa
+re.png>] [53pdfTeX warning (ext4): destination with the same identifier (name{f
+igure.4.6}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.397 
+       <./Images//ExAI_Paper_Figures/12 Classes of 30s Time Window.png>]
+[54pdfTeX warning (ext4): destination with the same identifier (name{figure.4.7
+}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.401 
+       <./Images//ExAI_Paper_Figures/Distribution_Labelled.png>] [55pdfTeX warn
+ing (ext4): destination with the same identifier (name{table.4.3}) has been alr
+eady used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.453 T
+       hrough augmentation, the model is exposed to a wider variety of scena...
+pdfTeX warning (ext4): destination with the same identifier (name{table.4.4}) h
+as been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.453 T
+       hrough augmentation, the model is exposed to a wider variety of scena...
+pdfTeX warning (ext4): destination with the same identifier (name{table.4.5}) h
+as been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.453 T
+       hrough augmentation, the model is exposed to a wider variety of scena...
+] [56]
+<Images//ExAI_Paper_Figures/comparison_metrics_pso_smote.png, id=2006, 867.24pt
+ x 578.16pt>
+File: Images//ExAI_Paper_Figures/comparison_metrics_pso_smote.png Graphic file 
+(type png)
+<use Images//ExAI_Paper_Figures/comparison_metrics_pso_smote.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/comparison_metrics_pso_smot
+e.png  used on input line 487.
+(pdftex.def)             Requested size: 213.39568pt x 142.26357pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[57pdfTeX warning (ext4): destination with the same identifier (name{table.4.6}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.526 
+      ]
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<Images//ExAI_Paper_Figures/precision_uncertainty_comparison.png, id=2016, 462.
+528pt x 346.896pt>
+File: Images//ExAI_Paper_Figures/precision_uncertainty_comparison.png Graphic f
+ile (type png)
+<use Images//ExAI_Paper_Figures/precision_uncertainty_comparison.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/precision_uncertainty_compa
+rison.png  used on input line 547.
+(pdftex.def)             Requested size: 170.71393pt x 128.0372pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[58pdfTeX warning (ext4): destination with the same identifier (name{figure.4.8
+}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.594 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.4
+.7}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.594 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.4
+.8}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.594 
+       <./Images//ExAI_Paper_Figures/comparison_metrics_pso_smote.png>]
+[59pdfTeX warning (ext4): destination with the same identifier (name{table.4.9}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.594 
+      pdfTeX warning (ext4): destination with the same identifier (name{figure.
+4.9}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.594 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.4
+.10}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.594 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.4
+.11}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.594 
+       <./Images//ExAI_Paper_Figures/precision_uncertainty_comparison.png>]
+<Images//ExAI_Paper_Figures/Feature_Importance_RF_Model.png, id=2035, 722.7pt x
+ 578.16pt>
+File: Images//ExAI_Paper_Figures/Feature_Importance_RF_Model.png Graphic file (
+type png)
+<use Images//ExAI_Paper_Figures/Feature_Importance_RF_Model.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Feature_Importance_RF_Model
+.png  used on input line 599.
+(pdftex.def)             Requested size: 341.43437pt x 273.14676pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<Images//ExAI_Paper_Figures/Feature value_Ransap.PNG, id=2036, 637.63219pt x 52
+6.21594pt>
+File: Images//ExAI_Paper_Figures/Feature value_Ransap.PNG Graphic file (type pn
+g)
+<use Images//ExAI_Paper_Figures/Feature value_Ransap.PNG>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Feature value_Ransap.PNG  u
+sed on input line 606.
+(pdftex.def)             Requested size: 341.43437pt x 281.77568pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[60pdfTeX warning (ext4): destination with the same identifier (name{table.4.12
+}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.654 
+      ]
+<Images//ExAI_Paper_Figures/lime_explanation_legitimate.png, id=2043, 625.8582p
+t x 313.6518pt>
+File: Images//ExAI_Paper_Figures/lime_explanation_legitimate.png Graphic file (
+type png)
+<use Images//ExAI_Paper_Figures/lime_explanation_legitimate.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/lime_explanation_legitimate
+.png  used on input line 657.
+(pdftex.def)             Requested size: 341.43437pt x 171.11151pt.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[61pdfTeX warning (ext4): destination with the same identifier (name{figure.4.1
+0}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.663 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.4
+.13}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.663 
+       <./Images//ExAI_Paper_Figures/Feature_Importance_RF_Model.png>]
+<Images//ExAI_Paper_Figures/lime_explanation_ransomware.png, id=2049, 590.6868p
+t x 313.6518pt>
+File: Images//ExAI_Paper_Figures/lime_explanation_ransomware.png Graphic file (
+type png)
+<use Images//ExAI_Paper_Figures/lime_explanation_ransomware.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/lime_explanation_ransomware
+.png  used on input line 666.
+(pdftex.def)             Requested size: 341.43437pt x 181.30556pt.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[62pdfTeX warning (ext4): destination with the same identifier (name{figure.4.1
+1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.673 
+      pdfTeX warning (ext4): destination with the same identifier (name{figure.
+4.12}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.673 
+       <./Images//ExAI_Paper_Figures/Feature value_Ransap.PNG> <./Images//ExAI_
+Paper_Figures/lime_explanation_legitimate.png>]
+<Images//ExAI_Paper_Figures/rf_confusion_matrix_multi.png, id=2058, 867.24pt x 
+722.7pt>
+File: Images//ExAI_Paper_Figures/rf_confusion_matrix_multi.png Graphic file (ty
+pe png)
+<use Images//ExAI_Paper_Figures/rf_confusion_matrix_multi.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/rf_confusion_matrix_multi.p
+ng  used on input line 676.
+(pdftex.def)             Requested size: 341.43437pt x 284.53154pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<Images//ExAI_Paper_Figures/rf_confusion_matrix_binary.png, id=2059, 722.7pt x 
+578.16pt>
+File: Images//ExAI_Paper_Figures/rf_confusion_matrix_binary.png Graphic file (t
+ype png)
+<use Images//ExAI_Paper_Figures/rf_confusion_matrix_binary.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/rf_confusion_matrix_binary.
+png  used on input line 685.
+(pdftex.def)             Requested size: 341.43437pt x 273.14676pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[63pdfTeX warning (ext4): destination with the same identifier (name{figure.4.1
+3}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.691 
+       <./Images//ExAI_Paper_Figures/lime_explanation_ransomware.png>]
+<Images//ExAI_Paper_Figures/npv_multi.png, id=2067, 1011.78pt x 578.16pt>
+File: Images//ExAI_Paper_Figures/npv_multi.png Graphic file (type png)
+<use Images//ExAI_Paper_Figures/npv_multi.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/npv_multi.png  used on inpu
+t line 694.
+(pdftex.def)             Requested size: 192.0548pt x 109.74567pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<Images//ExAI_Paper_Figures/Comparison of Training Loss over Epochs.png, id=207
+0, 722.7pt x 433.62pt>
+File: Images//ExAI_Paper_Figures/Comparison of Training Loss over Epochs.png Gr
+aphic file (type png)
+<use Images//ExAI_Paper_Figures/Comparison of Training Loss over Epochs.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Comparison of Training Loss
+ over Epochs.png  used on input line 704.
+(pdftex.def)             Requested size: 213.39568pt x 128.03589pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[64pdfTeX warning (ext4): destination with the same identifier (name{figure.4.1
+4}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.711 
+       <./Images//ExAI_Paper_Figures/rf_confusion_matrix_multi.png>] [65pdfTeX 
+warning (ext4): destination with the same identifier (name{figure.4.15}) has be
+en already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.711 
+      pdfTeX warning (ext4): destination with the same identifier (name{figure.
+4.16}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.711 
+       <./Images//ExAI_Paper_Figures/rf_confusion_matrix_binary.png> <./Images/
+/ExAI_Paper_Figures/npv_multi.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 737--737
+[]\OT1/ptm/m/n/10.95 Explainable AI
+ []
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[66pdfTeX warning (ext4): destination with the same identifier (name{figure.4.1
+7}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.775 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.4
+.14}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.775 
+       <./Images//ExAI_Paper_Figures/Comparison of Training Loss over Epochs.pn
+g>] [67pdfTeX warning (ext4): destination with the same identifier (name{table.
+4.15}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.784 
+      ] [68] [69]
+Overfull \hbox (3.61487pt too wide) in paragraph at lines 816--817
+\OT1/ptm/m/n/10.95 vanced op-ti-mi-sa-tion tech-niques such as Bayesian Op-ti-m
+i-sa-tion, Ge-netic Al-go-rithms, or Grid Search
+ []
+
+[70] [71]) [72]
+Chapter 5.
+(./MainMatter/Chapters/ResearchDesign/Sections/Agentic_SABRE_ESWA.tex
+Package lettrine.sty Info: Targeted height = 27.8574pt
+(lettrine.sty)             (for loversize=0, accent excluded),
+(lettrine.sty)             Lettrine height = 27.85742pt (T);
+(lettrine.sty)             reported on input line 11.
+
+Overfull \hbox (11.84998pt too wide) in paragraph at lines 13--14
+\OT1/ptm/m/n/10.95 and ap-plies an uncertainty-aware triage pol-icy that gov-er
+ns whether the sys-tem may act au-tonomously
+ []
+
+[73
+
+] [74] [75] [76] [77]
+<Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_08_11_2025.png, id=2202, 1128.21
+5pt x 312.16624pt>
+File: Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_08_11_2025.png Graphic file
+ (type png)
+<use Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_08_11_2025.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_08_11_20
+25.png  used on input line 72.
+(pdftex.def)             Requested size: 405.45047pt x 112.18446pt.
+ [78pdfTeX warning (ext4): destination with the same identifier (name{figure.5.
+18}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.80 
+      <./Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_08_11_2025.png>]
+[79]
+Overfull \hbox (37.15254pt too wide) in paragraph at lines 122--123
+\OT1/ptm/m/n/10.95 To en-sure con-ser-va-tive triage be-haviour, agent-level un
+-cer-tain-ties are ag-gre-gated via a max-operator: 
+ []
+
+[80]
+Overfull \hbox (2.95102pt too wide) in paragraph at lines 154--155
+\OT1/ptm/m/n/10.95 Thresholds $\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 ^^\; ^^T
+; ^^\[]; ^^T[]\OT1/cmr/m/n/10.95 )$ \OT1/ptm/m/n/10.95 are jointly se-lected by
+ Bayesian op-ti-mi-sa-tion us-ing the Tree-structured
+ []
+
+[81]
+Overfull \hbox (73.15102pt too wide) in paragraph at lines 171--173
+\OT1/ptm/m/n/10.95 For the Be-havioural Agent, the high-est $\OML/cmm/m/it/10.9
+5 I[]$ \OT1/ptm/m/n/10.95 val-ues cor-re-spond to dispersion-based statis-tics:
+ \OT1/pcr/m/n/10.95 read[]LBA[]variance\OT1/ptm/m/n/10.95 ,
+ []
+
+
+Overfull \hbox (5.15254pt too wide) in paragraph at lines 171--173
+\OT1/pcr/m/n/10.95 write[]LBA[]variance\OT1/ptm/m/n/10.95 , \OT1/pcr/m/n/10.95 
+mem[]read[]GPA[]variance\OT1/ptm/m/n/10.95 , and \OT1/pcr/m/n/10.95 mem[]write[
+]GPA[]variance\OT1/ptm/m/n/10.95 , con-
+ []
+
+[82] [83]
+Overfull \hbox (6.03534pt too wide) in paragraph at lines 209--210
+\OT1/ptm/m/n/10.95 sentence-transformer []Reimers and Gurevych[] ([]2019[]). Be
+-havioural fea-tures are com-puted via sliding-
+ []
+
+[84]
+Overfull \hbox (9.37572pt too wide) in paragraph at lines 223--224
+[]\OT1/ptm/m/n/10.95 The Be-havioural Agent achieves 0.9872 ac-cu-racy and 0.60
+30 AUC on the full im-bal-anced RanSMAP
+ []
+
+[85pdfTeX warning (ext4): destination with the same identifier (name{table.5.16
+}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.261 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.5
+.17}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.261 
+      ]
+<Images//ExAI_Paper_Figures/Reliability_Diagram_Fusion.png, id=2289, 505.89pt x
+ 433.62pt>
+File: Images//ExAI_Paper_Figures/Reliability_Diagram_Fusion.png Graphic file (t
+ype png)
+<use Images//ExAI_Paper_Figures/Reliability_Diagram_Fusion.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Reliability_Diagram_Fusion.
+png  used on input line 272.
+(pdftex.def)             Requested size: 298.75264pt x 256.07838pt.
+ [86pdfTeX warning (ext4): destination with the same identifier (name{figure.5.
+19}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.278 
+       <./Images//ExAI_Paper_Figures/Reliability_Diagram_Fusion.png>]
+<Images//ExAI_Paper_Figures/Triage_policy_space.png, id=2297, 578.16pt x 433.62
+pt>
+File: Images//ExAI_Paper_Figures/Triage_policy_space.png Graphic file (type png
+)
+<use Images//ExAI_Paper_Figures/Triage_policy_space.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Triage_policy_space.png  us
+ed on input line 281.
+(pdftex.def)             Requested size: 362.77525pt x 272.07709pt.
+<Images//ExAI_Paper_Figures/ROC_all_agents.png, id=2299, 505.89pt x 433.62pt>
+File: Images//ExAI_Paper_Figures/ROC_all_agents.png Graphic file (type png)
+<use Images//ExAI_Paper_Figures/ROC_all_agents.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/ROC_all_agents.png  used on
+ input line 292.
+(pdftex.def)             Requested size: 384.1096pt x 329.24365pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<Images//ExAI_Paper_Figures/Behaviour_feature_importance.png, id=2301, 722.7pt 
+x 361.35pt>
+File: Images//ExAI_Paper_Figures/Behaviour_feature_importance.png Graphic file 
+(type png)
+<use Images//ExAI_Paper_Figures/Behaviour_feature_importance.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Behaviour_feature_importanc
+e.png  used on input line 303.
+(pdftex.def)             Requested size: 362.77525pt x 181.38583pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[87pdfTeX warning (ext4): destination with the same identifier (name{figure.5.2
+0}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.309 
+       <./Images//ExAI_Paper_Figures/Triage_policy_space.png>]
+Overfull \hbox (36.37111pt too wide) in paragraph at lines 314--323
+ [][] 
+ []
+
+[88pdfTeX warning (ext4): destination with the same identifier (name{figure.5.2
+1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.334 \begin{equation}
+                      pdfTeX warning (ext4): destination with the same identifi
+er (name{table.5.18}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.334 \begin{equation}
+                       <./Images//ExAI_Paper_Figures/ROC_all_agents.png>]
+[89pdfTeX warning (ext4): destination with the same identifier (name{figure.5.2
+2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.361 \begin{equation}
+                       <./Images//ExAI_Paper_Figures/Behaviour_feature_importan
+ce.png>]
+Overfull \hbox (32.043pt too wide) in paragraph at lines 390--397
+\OT1/ptm/m/n/10.95 Each TPE trial fits two kernel-density mod-els over the $\OM
+L/cmm/m/it/10.95 n[]$ \OT1/ptm/m/n/10.95 pre-vi-ous ob-ser-va-tions at cost $\O
+MS/cmsy/m/n/10.95 O\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 n[] [] n[]\OT1/cmr/m
+/n/10.95 )$\OT1/ptm/m/n/10.95 ,
+ []
+
+[90] [91] [92]) [93] [94
+
+]
+Chapter 6.
+(./MainMatter/Chapters/ResearchDesign/Sections/Extended_SABRE_TIFS.tex
+Package lettrine.sty Info: Targeted height = 27.8574pt
+(lettrine.sty)             (for loversize=0, accent excluded),
+(lettrine.sty)             Lettrine height = 27.85742pt (T);
+(lettrine.sty)             reported on input line 11.
+ [95]
+[96] [97]
+Overfull \hbox (7.46977pt too wide) in paragraph at lines 51--52
+\OT1/ptm/m/n/10.95 driven peer queries. The Peer Con-sul-ta-tion Pro-to-col dif
+-fers by be-ing ex-plic-itly uncertainty-triggered,
+ []
+
+[98]
+<Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.
+png, id=2405, 1124.2pt x 451.6875pt>
+File: Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipe
+line.png Graphic file (type png)
+<use Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipel
+ine.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_27_04_20
+26_3Agents_Fullpipeline.png  used on input line 71.
+(pdftex.def)             Requested size: 405.45047pt x 162.90373pt.
+ [99pdfTeX warning (ext4): destination with the same identifier (name{figure.6.
+23}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.79 
+      <./Images//ExAI_Paper_Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullp
+ipeline.png>]
+Overfull \hbox (10.98051pt too wide) in paragraph at lines 105--106
+[]\OT1/ptm/m/n/10.95 Labels are de-rived heuris-ti-cally: a sam-ple is ransomwa
+re-relevant if $[] \OML/cmm/m/it/10.95 >
+ []
+
+[100pdfTeX warning (ext4): destination with the same identifier (name{table.6.1
+9}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.110 
+      ] [101] [102] [103] [104]
+Overfull \hbox (8.72626pt too wide) in paragraph at lines 250--251
+\OT1/ptm/m/n/10.95 pro-vides a strongly dis-crim-i-na-tive sig-nal when struc-t
+ured as ATT&CK-aligned fea-ture counts. 
+ []
+
+[105pdfTeX warning (ext4): destination with the same identifier (name{table.6.2
+0}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.251 
+      ]
+<Images//ExAI_Paper_Figures/ROC_Knowledge.png, id=2482, 317.988pt x 281.853pt>
+File: Images//ExAI_Paper_Figures/ROC_Knowledge.png Graphic file (type png)
+<use Images//ExAI_Paper_Figures/ROC_Knowledge.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/ROC_Knowledge.png  used on 
+input line 254.
+(pdftex.def)             Requested size: 384.1096pt x 340.47978pt.
+ [106pdfTeX warning (ext4): destination with the same identifier (name{figure.6
+.24}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.262 
+       <./Images//ExAI_Paper_Figures/ROC_Knowledge.png>]
+<Images//ExAI_Paper_Figures/Uncertainty_Distributions.png, id=2492, 931.48pt x 
+334.851pt>
+File: Images//ExAI_Paper_Figures/Uncertainty_Distributions.png Graphic file (ty
+pe png)
+<use Images//ExAI_Paper_Figures/Uncertainty_Distributions.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Uncertainty_Distributions.p
+ng  used on input line 288.
+(pdftex.def)             Requested size: 405.45047pt x 145.75098pt.
+ [107pdfTeX warning (ext4): destination with the same identifier (name{table.6.
+21}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.296 
+      pdfTeX warning (ext4): destination with the same identifier (name{figure.
+6.25}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.296 
+       <./Images//ExAI_Paper_Figures/Uncertainty_Distributions.png>]
+<Images//ExAI_Paper_Figures/Peer_Consultation_Effect.png, id=2500, 786.5385pt x
+ 316.7835pt>
+File: Images//ExAI_Paper_Figures/Peer_Consultation_Effect.png Graphic file (typ
+e png)
+<use Images//ExAI_Paper_Figures/Peer_Consultation_Effect.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/Peer_Consultation_Effect.pn
+g  used on input line 316.
+(pdftex.def)             Requested size: 405.45047pt x 163.29758pt.
+ [108pdfTeX warning (ext4): destination with the same identifier (name{table.6.
+22}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.324 
+      pdfTeX warning (ext4): destination with the same identifier (name{figure.
+6.26}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.324 
+       <./Images//ExAI_Paper_Figures/Peer_Consultation_Effect.png>]
+<Images//ExAI_Paper_Figures/calibration_semantic.png, id=2507, 433.62pt x 361.3
+5pt>
+File: Images//ExAI_Paper_Figures/calibration_semantic.png Graphic file (type pn
+g)
+<use Images//ExAI_Paper_Figures/calibration_semantic.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/calibration_semantic.png  u
+sed on input line 329.
+(pdftex.def)             Requested size: 136.57635pt x 113.81482pt.
+<Images//ExAI_Paper_Figures/calibration_behavioral.png, id=2508, 433.62pt x 361
+.35pt>
+File: Images//ExAI_Paper_Figures/calibration_behavioral.png Graphic file (type 
+png)
+<use Images//ExAI_Paper_Figures/calibration_behavioral.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/calibration_behavioral.png 
+ used on input line 333.
+(pdftex.def)             Requested size: 136.57635pt x 113.81482pt.
+<Images//ExAI_Paper_Figures/calibration_decision.png, id=2509, 433.62pt x 361.3
+5pt>
+File: Images//ExAI_Paper_Figures/calibration_decision.png Graphic file (type pn
+g)
+<use Images//ExAI_Paper_Figures/calibration_decision.png>
+Package pdftex.def Info: Images//ExAI_Paper_Figures/calibration_decision.png  u
+sed on input line 337.
+(pdftex.def)             Requested size: 136.57635pt x 113.81482pt.
+ [109pdfTeX warning (ext4): destination with the same identifier (name{figure.6
+.27}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.368 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.6
+.23}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.368 
+       <./Images//ExAI_Paper_Figures/calibration_semantic.png> <./Images//ExAI_
+Paper_Figures/calibration_behavioral.png> <./Images//ExAI_Paper_Figures/calibra
+tion_decision.png>] [110] [111]))
+(./MainMatter/Chapters/Discussion/Discussion.tex [112]
+Chapter 7.
+Package lettrine.sty Info: Targeted height = 27.8574pt
+(lettrine.sty)             (for loversize=0, accent excluded),
+(lettrine.sty)             Lettrine height = 27.85742pt (T);
+(lettrine.sty)             reported on input line 9.
+) (./MainMatter/Chapters/Conclusions/Conclusions.tex [113
+
+] [114]
+Chapter 8.
+Package lettrine.sty Info: Targeted height = 27.8574pt
+(lettrine.sty)             (for loversize=0, accent excluded),
+(lettrine.sty)             Lettrine height = 27.85742pt (T);
+(lettrine.sty)             reported on input line 9.
+)) (./BackMatter/BackMatter.tex (./BackMatter/Appendices.tex
+(./BackMatter/Appendices/AppendixA_Hyperparameters.tex [115
+
+] [116
+
+]
+Appendix A.
+
+Overfull \hbox (4.68674pt too wide) in paragraph at lines 26--46
+ [][] 
+ []
+
+
+Overfull \hbox (13.14072pt too wide) in paragraph at lines 132--145
+ [][] 
+ []
+
+[117] [118pdfTeX warning (ext4): destination with the same identifier (name{tab
+le.a.A.24}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.156 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.a
+.A.25}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.156 
+      ]) (./BackMatter/Appendices/AppendixB_Datasets.tex [119pdfTeX warning (ex
+t4): destination with the same identifier (name{table.a.A.26}) has been already
+ used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.5 \chapter
+            {Dataset Statistics and Characteristics}pdfTeX warning (ext4): dest
+ination with the same identifier (name{table.a.A.27}) has been already used, du
+plicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.5 \chapter
+            {Dataset Statistics and Characteristics}] [120pdfTeX warning (ext4)
+: destination with the same identifier (name{table.a.A.28}) has been already us
+ed, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.5 \chapter
+            {Dataset Statistics and Characteristics}pdfTeX warning (ext4): dest
+ination with the same identifier (name{table.a.A.29}) has been already used, du
+plicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.5 \chapter
+            {Dataset Statistics and Characteristics}]
+Appendix B.
+[121
+
+pdfTeX warning (ext4): destination with the same identifier (name{table.a.B.30}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.69 
+     ]
+Underfull \hbox (badness 2865) in paragraph at lines 142--143
+[]\OT1/ptm/m/n/10.95 Occurrence counts for tools com-monly ob-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 144--145
+[]\OT1/ptm/m/n/10.95 Indicators for Win-dows, Linux, and
+ []
+
+
+Underfull \hbox (badness 4805) in paragraph at lines 146--147
+[]\OT1/ptm/m/it/10.95 Tactic[]Total \OT1/ptm/m/n/10.95 (sum of tac-tic in-di-ca
+-tors) and
+ []
+
+) (./BackMatter/Appendices/AppendixC_Publications.tex [122pdfTeX warning (ext4)
+: destination with the same identifier (name{table.a.B.31}) has been already us
+ed, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.4 
+    pdfTeX warning (ext4): destination with the same identifier (name{table.a.B
+.32}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.4 
+    pdfTeX warning (ext4): destination with the same identifier (name{table.a.B
+.33}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.4 
+    ] [123pdfTeX warning (ext4): destination with the same identifier (name{tab
+le.a.B.34}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.5 \chapter
+            {Publications Arising from This Thesis}pdfTeX warning (ext4): desti
+nation with the same identifier (name{table.a.B.35}) has been already used, dup
+licate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.5 \chapter
+            {Publications Arising from This Thesis}] [124
+
+]
+Appendix C.
+[125]))
+Overfull \hbox (0.79123pt too wide) in paragraph at lines 62--8
+\OT1/ptm/m/n/10.95 sion; and the Ex-pert Feed-back Loop pro-vid-ing analyst-gui
+ded con-tin-ual learn-ing through reservoir-
+ []
+
+(./main.gls) (./main.acr [126]
+Overfull \hbox (196.92842pt too wide) in alignment at lines 2--6
+[] []
+ []
+
+) [127
+
+
+] [128
+
+] (./main.bbl [129
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 106--111
+\OT1/ptm/m/n/10.95 URL: []$https : / / www . europol . europa . eu / publicatio
+ns -[] events / main -[] reports / internet -[] organised -[]
+ []
+
+[130] [131] [132] [133]
+Underfull \hbox (badness 10000) in paragraph at lines 339--344
+\OT1/ptm/m/n/10.95 URL: []$https : / / www . spiceworks . com / it -[] security
+ / data -[] security / news / cdk -[] global -[] outage -[] ended -[]
+ []
+
+[134] [135] [136])) [137] [138
+
+]
+runsystem(makeindex main.idx)...executed safely (allowed).
+
+ (./main.ind)
+
+Package natbib Warning: There were undefined citations.
+
+(./main.aux)
+Package rerunfilecheck Info: File `main.out' has not changed.
+(rerunfilecheck)             Checksum: 351F1CFFD2F2EDE1BEE3B181047BE3C9;34904.
+ ) 
+Here is how much of TeX's memory you used:
+ 24332 strings out of 478287
+ 419640 string characters out of 5849289
+ 903349 words of memory out of 5000000
+ 41448 multiletter control sequences out of 15000+600000
+ 506964 words of font info for 98 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 121i,16n,119p,2109b,604s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/sh
+are/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts
+/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/time
+s/utmri8a.pfb>
+Output written on main.pdf (160 pages, 2601474 bytes).
+PDF statistics:
+ 2877 PDF objects out of 2984 (max. 8388607)
+ 2597 compressed objects within 26 object streams
+ 544 named destinations out of 1000 (max. 500000)
+ 1511 words of extra memory for PDF output out of 10000 (max. 10000000)
+

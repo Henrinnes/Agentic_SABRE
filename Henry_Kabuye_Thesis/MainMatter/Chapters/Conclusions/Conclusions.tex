@@ -1,0 +1,102 @@
+% ============================================================
+%  Chapter 8: Conclusions
+%  Henry Kabuye PhD Thesis — Northumbria University
+% ============================================================
+
+\chapter{Conclusions}
+\label{chap:conclusions}
+
+\lettrine{T}{his} thesis has investigated the design, implementation, and evaluation of
+a multi-stage, uncertainty-aware, and user-centric framework for automated ransomware
+attack detection.
+Beginning from the limitations of existing single-modality, overconfident, and opaque
+detection systems, the research has progressed through three empirical studies — each
+building on the verified contributions of its predecessor — to produce the Extended
+Agentic SABRE framework: a three-agent neuro-symbolic architecture that integrates
+statistical detection, behavioural analysis, and threat-intelligence reasoning with
+calibrated uncertainty quantification, analyst-interpretable explanations, and
+continual learning from expert feedback.
+
+% ============================================================
+\section{Summary of Contributions}
+\label{sec:conc_contributions}
+% ============================================================
+
+% TODO: List the principal contributions, one per paragraph, tied to the
+% specific results that evidence them. Recommended structure:
+%
+% Contribution 1 (Chapter 3): Single-agent uncertainty-aware detection baseline.
+%  - MC Dropout uncertainty for ransomware CNN
+%  - CTGAN-augmented class-imbalance handling
+%  - SHAP/LIME analyst-interpretable explanations
+%  - Results: F1/AUC figures on RanSAP and RDset
+%
+% Contribution 2 (Chapter 4): Two-agent Agentic SABRE with triage policy.
+%  - Modality-specialised Semantic and Behavioural Agents
+%  - Learned Decision MLP with score-space CTGAN augmentation
+%  - Temperature-calibrated agent posteriors
+%  - Bayesian TPE triage threshold optimisation
+%  - Counterfactual explanation protocol
+%  - Results: Semantic acc/AUC, Behavioural acc/AUC, triage escalation rate
+%
+% Contribution 3 (Chapter 5): Extended Agentic SABRE — three agents, peer
+%  consultation, continual learning.
+%  - RansKnow threat-intelligence dataset (307 samples, 23 features)
+%  - Knowledge Agent with adaptive MC Dropout
+%  - Peer Consultation Protocol (inverse-uncertainty-weighted fusion)
+%  - Expert Feedback Loop with reservoir-sampled experience replay
+%  - Results: 3-agent fusion performance, 9% escalation rate, continual
+%    learning accuracy retention figures
+
+% ============================================================
+\section{Research Questions Answered}
+\label{sec:conc_rqs}
+% ============================================================
+
+% TODO: Return to each numbered research question stated in Chapter 1 and
+% provide a direct, evidenced answer drawn from the empirical results.
+% Format: RQ → Answer (2--3 sentences) → Key supporting result.
+
+% ============================================================
+\section{Future Research Directions}
+\label{sec:conc_future}
+% ============================================================
+
+% TODO: Identify the most important open problems that follow from this work.
+% Suggested directions:
+%
+% 1. Live deployment evaluation: Deploy the framework on an institutional
+%    endpoint monitoring system and evaluate real-world escalation rates,
+%    analyst acceptance, and detection latency under production conditions.
+%
+% 2. Adversarial robustness: Evaluate the framework against evasion attacks
+%    (feature-space adversarial examples) and investigate adversarially robust
+%    training for the CNN backbone agents.
+%
+% 3. Richer knowledge representation: Replace the tabular RansKnow features
+%    with a knowledge-graph representation of ATT&CK technique relationships,
+%    enabling the Knowledge Agent to reason over tactic co-occurrence structure.
+%
+% 4. LLM-augmented threat intelligence: Explore the use of large language model
+%    embeddings of practitioner threat reports as additional Knowledge Agent
+%    input features.
+%
+% 5. Formal analyst user study: Conduct a user study with security analysts
+%    to evaluate the utility of counterfactual and SHAP explanations in
+%    supporting triage decisions, and to measure the quality of labels fed
+%    back through the Expert Feedback Loop.
+%
+% 6. Extension to adjacent threats: Apply the multi-agent triage framework
+%    to adjacent threat categories (banking trojans, APT lateral movement)
+%    where the same multi-modal signal decomposition is applicable.
+
+% ============================================================
+\section{Closing Statement}
+\label{sec:conc_closing}
+% ============================================================
+
+% TODO: A short closing paragraph (5--8 sentences) that restates the core
+% thesis in plain language — what was the problem, what was built, and what
+% does it demonstrate about the feasibility and design principles of
+% uncertainty-aware multi-agent detection.
+% End on a forward-looking note about what the framework enables.

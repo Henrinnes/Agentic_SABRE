@@ -1,0 +1,526 @@
+\begin{thebibliography}{xx}
+
+\harvarditem[Akiba et~al.]{Akiba, Sano, Yanase, Ohta \harvardand\
+  Koyama}{2019}{optuna2019}
+Akiba, T., Sano, S., Yanase, T., Ohta, T. \harvardand\ Koyama, M.
+  \harvardyearleft 2019\harvardyearright , Optuna: {A} next-generation
+  hyperparameter optimization framework, {\em in} A.~Teredesai, V.~Kumar,
+  Y.~Li, R.~Rosales, E.~Terzi \harvardand\ G.~Karypis, eds, `Proceedings of the
+  25th {ACM} {SIGKDD} International Conference on Knowledge Discovery {\&} Data
+  Mining, {KDD} 2019, Anchorage, AK, USA, August 4-8, 2019', {ACM},
+  pp.~2623--2631.
+
+\harvarditem{Alraizza \harvardand\ Algarni}{2023}{alraizza2023ransomware}
+Alraizza, A. \harvardand\ Algarni, A.  \harvardyearleft 2023\harvardyearright ,
+  `Ransomware detection using machine learning: {A} survey', {\em Big Data
+  Cogn. Comput.} {\bf 7}(3),~143.
+
+\harvarditem[Alraizza et~al.]{Alraizza, Algarni \harvardand\
+  Alrayzah}{2025}{Alraizza2025StorageAP}
+Alraizza, A., Algarni, A. \harvardand\ Alrayzah, A.  \harvardyearleft
+  2025\harvardyearright , Enhancing ransomware detection using storage access
+  pattern, {\em in} `IFIP International Conference on Artificial Intelligence
+  Applications and Innovations', pp.~283--296.
+
+\harvarditem[Amiri et~al.]{Amiri, Heidari, Navimipour, Unal \harvardand\
+  Mousavi}{2024}{amiri2024adventures}
+Amiri, Z., Heidari, A., Navimipour, N.~J., Unal, M. \harvardand\ Mousavi, A.
+  \harvardyearleft 2024\harvardyearright , `Adventures in data analysis: a
+  systematic review of deep learning techniques for pattern recognition in
+  cyber-physical-social systems', {\em Multim. Tools Appl.} {\bf
+  83}(8),~22909--22973.
+
+\harvarditem{Ashrapov}{2020}{ashrapov2020tabular}
+Ashrapov, I.  \harvardyearleft 2020\harvardyearright , `Tabular gans for uneven
+  distribution', {\em CoRR} {\bf abs/2010.00638}.
+
+\harvarditem[Beaman et~al.]{Beaman, Barkworth, Akande, Hakak \harvardand\
+  Khan}{2021}{beaman2021ransomware}
+Beaman, C., Barkworth, A., Akande, T.~D., Hakak, S. \harvardand\ Khan, M.~K.
+  \harvardyearleft 2021\harvardyearright , `Ransomware: Recent advances,
+  analysis, challenges and future research directions', {\em Comput. Secur.}
+  {\bf 111},~102490.
+
+\harvarditem{Besold et~al.}{2021}{Besold2021neurosymbolicsurvey}
+Besold, T.~R. et~al.  \harvardyearleft 2021\harvardyearright , Neural-symbolic
+  learning and reasoning: A survey and interpretation, {\em in} `Neuro-Symbolic
+  Artificial Intelligence: The State of the Art', IOS Press, pp.~1--51.
+
+\harvarditem[Ceschin et~al.]{Ceschin, Botacin, Gomes, Pinage, Oliveira
+  \harvardand\ Gr{\'{e}}gio}{2023}{Ceschin2022ConceptDrift}
+Ceschin, F., Botacin, M., Gomes, H.~M., Pinage, F.~A., Oliveira, L.~S.
+  \harvardand\ Gr{\'{e}}gio, A.  \harvardyearleft 2023\harvardyearright , `Fast
+  \& furious: Modelling malware detection as evolving data streams', {\em
+  Expert Systems with Applications} {\bf 212},~118261.
+
+\harvarditem{Chaithanya \harvardand\ Brahmananda}{2022}{AIenhancedDefense2022}
+Chaithanya, B.~N. \harvardand\ Brahmananda, S.~H.  \harvardyearleft
+  2022\harvardyearright , `Ai-enhanced defense against ransomware within the
+  organization's architecture', {\em J. Cyber Secur. Mobil.} {\bf
+  11}(4),~621--654.
+
+\harvarditem[Chawla et~al.]{Chawla, Bowyer, Hall \harvardand\
+  Kegelmeyer}{2002}{chawla2002smote}
+Chawla, N.~V., Bowyer, K.~W., Hall, L.~O. \harvardand\ Kegelmeyer, W.~P.
+  \harvardyearleft 2002\harvardyearright , `{SMOTE}: Synthetic minority
+  over-sampling technique', {\em Journal of Artificial Intelligence Research}
+  {\bf 16},~321--357.
+
+\harvarditem{Chen \harvardand\ Guestrin}{2016}{chen2016xgboost}
+Chen, T. \harvardand\ Guestrin, C.  \harvardyearleft 2016\harvardyearright ,
+  `{XGBoost}: A scalable tree boosting system',  pp.~785--794.
+
+\harvarditem[Conti et~al.]{Conti, Dehghantanha, Franke \harvardand\
+  Watson}{2018}{conti2018internet}
+Conti, M., Dehghantanha, A., Franke, K. \harvardand\ Watson, S.
+  \harvardyearleft 2018\harvardyearright , `Internet of things security and
+  forensics: Challenges and opportunities', {\em Future Gener. Comput. Syst.}
+  {\bf 78},~544--546.
+
+\harvarditem[Devlin et~al.]{Devlin, Chang, Lee \harvardand\
+  Toutanova}{2019}{devlin2019bert}
+Devlin, J., Chang, M., Lee, K. \harvardand\ Toutanova, K.  \harvardyearleft
+  2019\harvardyearright , {BERT:} pre-training of deep bidirectional
+  transformers for language understanding, {\em in} J.~Burstein, C.~Doran
+  \harvardand\ T.~Solorio, eds, `Proceedings of the 2019 Conference of the
+  North American Chapter of the Association for Computational Linguistics:
+  Human Language Technologies, {NAACL-HLT} 2019, Minneapolis, MN, USA, June
+  2-7, 2019, Volume 1 (Long and Short Papers)', Association for Computational
+  Linguistics, pp.~4171--4186.
+
+\harvarditem[Doan et~al.]{Doan, Nguyen, Montague, Camtepe \harvardand\
+  Kanhere}{2024}{Doan2024uncertainBay}
+Doan, B.~G., Nguyen, D.~Q., Montague, P., Camtepe, S. \harvardand\ Kanhere,
+  S.~S.  \harvardyearleft 2024\harvardyearright , Bayesian uncertainty for
+  trustworthy {AI} in malware detection, {\em in} `Proceedings of the AAAI
+  Conference on Artificial Intelligence', Vol.~38, pp.~21375--21383.
+
+\harvarditem{{European Commission}}{2020}{europeancommission2020dataprotection}
+{European Commission}  \harvardyearleft 2020\harvardyearright , `Data
+  protection in the eu'.
+\newblock [Accessed 17 June 2024].
+\newline URL:
+  \url{https://ec.europa.eu/info/law/law-topic/data-protection/data-protection-eu\_en}
+
+\harvarditem{Europol}{2020}{europol2020iocta}
+Europol, E.  \harvardyearleft 2020\harvardyearright , `Internet organised crime
+  threat assessment {(IOCTA)} 2020'.
+\newblock [Accessed 17 June 2024].
+\newline URL:
+  \url{https://www.europol.europa.eu/publications-events/main-reports/internet-organised-crime-threat-assessment-iocta-2020}
+
+\harvarditem{Fares \harvardand\ Elaziz}{2025}{FaresE25}
+Fares, I.~A. \harvardand\ Elaziz, M.~A.  \harvardyearleft 2025\harvardyearright
+  , `Explainable tabnet transformer-based on google vizier optimizer for
+  anomaly intrusion detection system', {\em Knowl. Based Syst.} {\bf
+  316},~113351.
+
+\harvarditem{Farzadpour \harvardand\ Azghani}{2024}{Farzadpour2024Thresholding}
+Farzadpour, Z. \harvardand\ Azghani, M.  \harvardyearleft 2024\harvardyearright
+  , `Adaptive thresholding pattern for fingerprint forgery detection', {\em
+  Multim. Tools Appl.} {\bf 83}(34),~81665--81683.
+
+\harvarditem[Ferdous et~al.]{Ferdous, Islam, Mahboubi \harvardand\
+  Islam}{2024}{Ferdous2024Comp}
+Ferdous, J., Islam, M.~R., Mahboubi, A. \harvardand\ Islam, M.~Z.
+  \harvardyearleft 2024\harvardyearright , `Ai-based ransomware detection: {A}
+  comprehensive review', {\em {IEEE} Access} {\bf 12},~136666--136695.
+
+\harvarditem{Fernando \harvardand\ Komninos}{2024}{Fernando2024FeSAD}
+Fernando, D.~W. \harvardand\ Komninos, N.  \harvardyearleft
+  2024\harvardyearright , `{FeSAD} ransomware detection framework with machine
+  learning using adaption to concept drift', {\em Computers \& Security} {\bf
+  137},~103629.
+
+\harvarditem[Fernando et~al.]{Fernando, Komninos \harvardand\
+  Chen}{2020}{fernando2020study}
+Fernando, D.~W., Komninos, N. \harvardand\ Chen, T.  \harvardyearleft
+  2020\harvardyearright , `A study on the evolution of ransomware detection
+  using machine learning and deep learning techniques', {\em IoT} {\bf
+  1}(2),~551--604.
+
+\harvarditem{Gal \harvardand\ Ghahramani}{2016}{gal2016dropout}
+Gal, Y. \harvardand\ Ghahramani, Z.  \harvardyearleft 2016\harvardyearright ,
+  Dropout as a bayesian approximation: Representing model uncertainty in deep
+  learning, {\em in} M.~Balcan \harvardand\ K.~Q. Weinberger, eds, `Proceedings
+  of the 33nd International Conference on Machine Learning, {ICML} 2016, New
+  York City, NY, USA, June 19-24, 2016', Vol.~48 of {\em {JMLR} Workshop and
+  Conference Proceedings}, JMLR.org, pp.~1050--1059.
+
+\harvarditem[Gawlikowski et~al.]{Gawlikowski, Tassi, Ali, Lee, Humt, Feng,
+  Kruspe, Triebel, Jung, Roscher, Shahzad, Yang, Bamler \harvardand\
+  Zhu}{2023}{gawlikowski2023Uncertainity}
+Gawlikowski, J., Tassi, C. R.~N., Ali, M., Lee, J., Humt, M., Feng, J., Kruspe,
+  A.~M., Triebel, R., Jung, P., Roscher, R., Shahzad, M., Yang, W., Bamler, R.
+  \harvardand\ Zhu, X.  \harvardyearleft 2023\harvardyearright , `A survey of
+  uncertainty in deep neural networks', {\em Artif. Intell. Rev.} {\bf
+  56}({S1}),~1513--1589.
+
+\harvarditem[Gibert et~al.]{Gibert, Mateu \harvardand\
+  Planes}{2020}{gibert2020rise}
+Gibert, D., Mateu, C. \harvardand\ Planes, J.  \harvardyearleft
+  2020\harvardyearright , `The rise of machine learning for detection and
+  classification of malware: Research developments, trends and challenges',
+  {\em J. Netw. Comput. Appl.} {\bf 153},~102526.
+
+\harvarditem[Gogineni et~al.]{Gogineni, Derasari \harvardand\
+  Venkataramani}{2022}{GogineniDV22ForeseerRanSAP}
+Gogineni, K., Derasari, P. \harvardand\ Venkataramani, G.  \harvardyearleft
+  2022\harvardyearright , Foreseer: Efficiently forecasting malware event
+  series with long short-term memory, {\em in} `2022 {IEEE} International
+  Symposium on Secure and Private Execution Environment Design (SEED), Storrs,
+  CT, USA, September 26-27, 2022', {IEEE}, pp.~97--108.
+
+\harvarditem[Goodfellow et~al.]{Goodfellow, Pouget-Abadie, Mirza, Xu,
+  Warde-Farley, Ozair, Courville \harvardand\
+  Bengio}{2014}{goodfellow2014generative}
+Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair,
+  S., Courville, A. \harvardand\ Bengio, Y.  \harvardyearleft
+  2014\harvardyearright , Generative adversarial nets, {\em in} `Advances in
+  Neural Information Processing Systems', Vol.~27, pp.~2672--2680.
+
+\harvarditem{Greenberg}{2018}{greenberg2018untold}
+Greenberg, A.  \harvardyearleft 2018\harvardyearright , `The untold story of
+  notpetya, the most devastating cyberattack in history', {\em Wired, August}
+  {\bf 22}.
+\newblock [Accessed 17 June 2024].
+
+\harvarditem[G{\"{u}}lmez et~al.]{G{\"{u}}lmez, Kakisim \harvardand\
+  Sogukpinar}{2024}{gulmez2024xran}
+G{\"{u}}lmez, S., Kakisim, A.~G. \harvardand\ Sogukpinar, I.  \harvardyearleft
+  2024\harvardyearright , `Xran: Explainable deep learning-based ransomware
+  detection using dynamic analysis', {\em Comput. Secur.} {\bf 139},~103703.
+
+\harvarditem[Guo et~al.]{Guo, Pleiss, Sun \harvardand\
+  Weinberger}{2017}{guo2017calibration}
+Guo, C., Pleiss, G., Sun, Y. \harvardand\ Weinberger, K.~Q.  \harvardyearleft
+  2017\harvardyearright , On calibration of modern neural networks, {\em in}
+  `Proceedings of the 34th International Conference on Machine Learning
+  (ICML)', pp.~1321--1330.
+
+\harvarditem[Habibi et~al.]{Habibi, Chemmakha \harvardand\
+  Lazaar}{2023}{HabibiCL23}
+Habibi, O., Chemmakha, M. \harvardand\ Lazaar, M.  \harvardyearleft
+  2023\harvardyearright , `Imbalanced tabular data modelization using {CTGAN}
+  and machine learning to improve iot botnet attacks detection', {\em Eng.
+  Appl. Artif. Intell.} {\bf 118},~105669.
+
+\harvarditem{Hasarat}{2024}{Hasarat2024}
+Hasarat, D.  \harvardyearleft 2024\harvardyearright , `Dispelling the myth: Is
+  f1-score actually better than classification accuracy?',
+  \url{https://community.ibm.com/community/user/ai-datascience/blogs/danish-hasarat/2024/03/28/dispelling-the-myth-is-f1-score-actually-better-th}.
+\newblock Accessed: 2024-04-20.
+
+\harvarditem[Hirano et~al.]{Hirano, Hodota \harvardand\
+  Kobayashi}{2022}{hirano2022ransap}
+Hirano, M., Hodota, R. \harvardand\ Kobayashi, R.  \harvardyearleft
+  2022\harvardyearright , `Ransap: An open dataset of ransomware storage access
+  patterns for training machine learning models', {\em Digit. Investig.} {\bf
+  40}(Supplement),~301314.
+
+\harvarditem{Hirano \harvardand\ Kobayashi}{2022}{HiranoK22}
+Hirano, M. \harvardand\ Kobayashi, R.  \harvardyearleft 2022\harvardyearright ,
+  Machine learning-based ransomware detection using low-level memory access
+  patterns obtained from live-forensic hypervisor, {\em in} `{IEEE}
+  International Conference on Cyber Security and Resilience, {CSR} 2022,
+  Rhodes, Greece, July 27-29, 2022', {IEEE}, pp.~323--330.
+
+\harvarditem{Hirano \harvardand\ Kobayashi}{2025}{hirano2025ransmap}
+Hirano, M. \harvardand\ Kobayashi, R.  \harvardyearleft 2025\harvardyearright ,
+  `Ransmap: Open dataset of ransomware storage and memory access patterns for
+  creating deep learning based ransomware detectors', {\em Comput. Secur.} {\bf
+  150},~104202.
+
+\harvarditem[Huang et~al.]{Huang, Siegel \harvardand\
+  Madnick}{2018}{huang2018systematically}
+Huang, K., Siegel, M.~D. \harvardand\ Madnick, S.~E.  \harvardyearleft
+  2018\harvardyearright , `Systematically understanding the cyber attack
+  business: {A} survey', {\em {ACM} Comput. Surv.} {\bf 51}(4),~70:1--70:36.
+
+\harvarditem[Ispahany et~al.]{Ispahany, Islam, Islam \harvardand\
+  Khan}{2024}{Ispahany2024Survey}
+Ispahany, J., Islam, M.~R., Islam, M.~Z. \harvardand\ Khan, M.~A.
+  \harvardyearleft 2024\harvardyearright , `Ransomware detection using machine
+  learning: A review, research limitations and future directions', {\em IEEE
+  Access} {\bf 12},~37393--37416.
+
+\harvarditem[Jia et~al.]{Jia, Cui, Wang, Ding, Han \harvardand\
+  Ma}{2024}{AdversarialCooperationLLM2024}
+Jia, S., Cui, Z., Wang, K., Ding, Y., Han, D. \harvardand\ Ma, T.
+  \harvardyearleft 2024\harvardyearright , Adversarial and cooperation tasks in
+  multi-agent system with large language models, {\em in} `2024 IEEE
+  International Conference on Unmanned Systems (ICUS)', IEEE, pp.~1840--1847.
+
+\harvarditem[Kabuye et~al.]{Kabuye, Issac \harvardand\
+  Neera}{2026}{kabuye2025sabre_eswa}
+Kabuye, H., Issac, B. \harvardand\ Neera, J.  \harvardyearleft
+  2026\harvardyearright , `Agentic {SABRE}: An uncertainty-aware neuro-symbolic
+  multi-agent framework for adaptive ransomware detection', {\em Expert Systems
+  with Applications} .
+\newblock Under review.
+
+\harvarditem[Kabuye et~al.]{Kabuye, Issac, Yumlembam \harvardand\
+  Neera}{2025}{kabuye2025explainable}
+Kabuye, H., Issac, B., Yumlembam, R. \harvardand\ Neera, J.  \harvardyearleft
+  2025\harvardyearright , `Explainable and uncertainty aware ai-based
+  ransomware detection', {\em {IEEE} Access} {\bf 13},~106573--106589.
+
+\harvarditem[Kolosnjaji et~al.]{Kolosnjaji, Zarras, Webster \harvardand\
+  Eckert}{2016}{kolosnjaji2016deep}
+Kolosnjaji, B., Zarras, A., Webster, G.~D. \harvardand\ Eckert, C.
+  \harvardyearleft 2016\harvardyearright , Deep learning for classification of
+  malware system call sequences, {\em in} B.~H. Kang \harvardand\ Q.~Bai, eds,
+  `{AI} 2016: Advances in Artificial Intelligence - 29th Australasian Joint
+  Conference, Hobart, TAS, Australia, December 5-8, 2016, Proceedings', Vol.
+  9992 of {\em Lecture Notes in Computer Science}, Springer, pp.~137--149.
+
+\harvarditem{Krishna}{2020}{krishna2020comparative}
+Krishna, B.  \harvardyearleft 2020\harvardyearright , `Comparative study of
+  fileless ransomware', {\em Int. J. Trend Sci. Res. Develop} {\bf
+  4},~608--616.
+
+\harvarditem[Lee et~al.]{Lee, Lee, Park, Kim \harvardand\
+  Lee}{2023}{lee2023hiding}
+Lee, S., Lee, S., Park, J., Kim, K. \harvardand\ Lee, K.  \harvardyearleft
+  2023\harvardyearright , `Hiding in the crowd: Ransomware protection by
+  adopting camouflage and hiding strategy with the link file', {\em {IEEE}
+  Access} {\bf 11},~92693--92704.
+
+\harvarditem{Lundberg \harvardand\ Lee}{2017}{lundberg2017shap}
+Lundberg, S.~M. \harvardand\ Lee, S.-I.  \harvardyearleft 2017\harvardyearright
+  , A unified approach to interpreting model predictions, {\em in} `Advances in
+  Neural Information Processing Systems (NeurIPS)', pp.~4765--4774.
+
+\harvarditem{Malinin \harvardand\ Gales}{2018}{malinin2018predictive}
+Malinin, A. \harvardand\ Gales, M. J.~F.  \harvardyearleft
+  2018\harvardyearright , Predictive uncertainty estimation via prior networks,
+  {\em in} S.~Bengio, H.~M. Wallach, H.~Larochelle, K.~Grauman,
+  N.~Cesa{-}Bianchi \harvardand\ R.~Garnett, eds, `Advances in Neural
+  Information Processing Systems 31: Annual Conference on Neural Information
+  Processing Systems 2018, NeurIPS 2018, December 3-8, 2018, Montr{\'{e}}al,
+  Canada', pp.~7047--7058.
+
+\harvarditem[Masum et~al.]{Masum, Faruk, Shahriar, Qian, Lo \harvardand\
+  Adnan}{2022}{masum2022ransomware}
+Masum, M., Faruk, M. J.~H., Shahriar, H., Qian, K., Lo, D. \harvardand\ Adnan,
+  M.~I.  \harvardyearleft 2022\harvardyearright , Ransomware classification and
+  detection with machine learning algorithms, {\em in} `12th {IEEE} Annual
+  Computing and Communication Workshop and Conference, {CCWC} 2022, Las Vegas,
+  NV, USA, January 26-29, 2022', {IEEE}, pp.~316--322.
+
+\harvarditem{Mathur}{2020}{mathur2020ransomware}
+Mathur, M.  \harvardyearleft 2020\harvardyearright , `Ransomware (malware)
+  detection using machine learning'.
+\newblock Accessed: Nov. 9, 2023.
+\newline URL:
+  \url{https://github.com/muditmathur2020/RansomwareDetection/tree/master}
+
+\harvarditem[Meland et~al.]{Meland, Bayoumy \harvardand\
+  Sindre}{2020}{meland2020ransomware}
+Meland, P.~H., Bayoumy, Y. F.~F. \harvardand\ Sindre, G.  \harvardyearleft
+  2020\harvardyearright , `The ransomware-as-a-service economy within the
+  darknet', {\em Comput. Secur.} {\bf 92},~101762.
+
+\harvarditem[Mott et~al.]{Mott, Turner, Nurse, MacColl, Sullivan, Cartwright
+  \harvardand\ Cartwright}{2023}{mott2023between}
+Mott, G., Turner, S., Nurse, J. R.~C., MacColl, J., Sullivan, J., Cartwright,
+  A. \harvardand\ Cartwright, E.~J.  \harvardyearleft 2023\harvardyearright ,
+  `Between a rock and a hard(ening) place: Cyber insurance in the ransomware
+  era', {\em Comput. Secur.} {\bf 128},~103162.
+
+\harvarditem[Moussaileb et~al.]{Moussaileb, Cuppens, Lanet \harvardand\
+  Bouder}{2022}{moussaileb2021survey}
+Moussaileb, R., Cuppens, N., Lanet, J. \harvardand\ Bouder, H.~L.
+  \harvardyearleft 2022\harvardyearright , `A survey on windows-based
+  ransomware taxonomy and detection mechanisms', {\em {ACM} Comput. Surv.} {\bf
+  54}(6),~117:1--117:36.
+
+\harvarditem{Mudaliar}{2024}{cdk_global_attack}
+Mudaliar, A.  \harvardyearleft 2024\harvardyearright , `Cdk global outage ended
+  after reportedly paying \$25 million ransom'.
+\newblock Accessed: 2024-07-25.
+\newline URL:
+  \url{https://www.spiceworks.com/it-security/data-security/news/cdk-global-outage-ended-after-paying-ransom/}
+
+\harvarditem{{NCC Group}}{n.d.}{NCCGroup_CTIR}
+{NCC Group}  \harvardyearleft n.d.\harvardyearright , `Cyber threat
+  intelligence reports'.
+\newblock Accessed: 2024-10-24.
+\newline URL:
+  \url{https://www.nccgroup.com/uk/resource-hub/cyber-threat-intelligence-reports/}
+
+\harvarditem[Ozkan{-}Okay et~al.]{Ozkan{-}Okay, Akin, Aslan, Kosunalp, Iliev,
+  Stoyanov \harvardand\ Beloev}{2024}{Ozkan-Okay2024Survey}
+Ozkan{-}Okay, M., Akin, E., Aslan, {\"{O}}., Kosunalp, S., Iliev, T.~B.,
+  Stoyanov, I.~S. \harvardand\ Beloev, I.~H.  \harvardyearleft
+  2024\harvardyearright , `A comprehensive survey: Evaluating the efficiency of
+  artificial intelligence and machine learning techniques on cyber security
+  solutions', {\em {IEEE} Access} {\bf 12},~12229--12256.
+
+\harvarditem[Patel et~al.]{Patel, Yeh \harvardand\
+  Gondhalekar}{2024}{CANAL_CTILLM2024}
+Patel, U., Yeh, F. \harvardand\ Gondhalekar, C.  \harvardyearleft
+  2024\harvardyearright , {CANAL} - cyber activity news alerting language model
+  : Empirical approach vs. expensive llms, {\em in} `3rd {IEEE} International
+  Conference on {AI} in Cybersecurity, {ICAIC} 2024, Houston, TX, USA, February
+  7-9, 2024', {IEEE}, pp.~1--12.
+
+\harvarditem[Pye et~al.]{Pye, Issac, Aslam \harvardand\
+  Rafiq}{2020}{pye2020ClassBioInspired}
+Pye, J., Issac, B., Aslam, N. \harvardand\ Rafiq, H.  \harvardyearleft
+  2020\harvardyearright , Android malware classification using machine learning
+  and bio-inspired optimisation algorithms, {\em in} G.~Wang, R.~K.~L. Ko,
+  M.~Z.~A. Bhuiyan \harvardand\ Y.~Pan, eds, `19th {IEEE} International
+  Conference on Trust, Security and Privacy in Computing and Communications,
+  TrustCom 2020, Guangzhou, China, December 29, 2020 - January 1, 2021',
+  {IEEE}, pp.~1777--1782.
+
+\harvarditem[Razaulla et~al.]{Razaulla, Fachkha, Markarian, Gawanmeh, Mansoor,
+  Fung \harvardand\ Assi}{2023}{razaulla2023age}
+Razaulla, S., Fachkha, C., Markarian, C., Gawanmeh, A., Mansoor, W., Fung, B.
+  C.~M. \harvardand\ Assi, C.  \harvardyearleft 2023\harvardyearright , `The
+  age of ransomware: {A} survey on the evolution, taxonomy, and research
+  directions', {\em {IEEE} Access} {\bf 11},~40698--40723.
+
+\harvarditem{Reimers \harvardand\ Gurevych}{2019}{ReimersG19}
+Reimers, N. \harvardand\ Gurevych, I.  \harvardyearleft 2019\harvardyearright ,
+  Sentence-bert: Sentence embeddings using siamese bert-networks, {\em in}
+  K.~Inui, J.~Jiang, V.~Ng \harvardand\ X.~Wan, eds, `Proceedings of the 2019
+  Conference on Empirical Methods in Natural Language Processing and the 9th
+  International Joint Conference on Natural Language Processing, {EMNLP-IJCNLP}
+  2019, Hong Kong, China, November 3-7, 2019', Association for Computational
+  Linguistics, pp.~3980--3990.
+
+\harvarditem[Ribeiro et~al.]{Ribeiro, Singh \harvardand\
+  Guestrin}{2016}{ribeiro2016lime}
+Ribeiro, M.~T., Singh, S. \harvardand\ Guestrin, C.  \harvardyearleft
+  2016\harvardyearright , ``why should {I} trust you?'': Explaining the
+  predictions of any classifier, {\em in} `Proceedings of the 22nd ACM SIGKDD
+  International Conference on Knowledge Discovery and Data Mining', ACM,
+  pp.~1135--1144.
+
+\harvarditem[Rolnick et~al.]{Rolnick, Ahuja, Schwartz, Lillicrap \harvardand\
+  Wayne}{2019}{rolnick2019experience}
+Rolnick, D., Ahuja, A., Schwartz, J., Lillicrap, T. \harvardand\ Wayne, G.
+  \harvardyearleft 2019\harvardyearright , Experience replay for continual
+  learning, {\em in} `Advances in Neural Information Processing Systems
+  (NeurIPS)', pp.~350--360.
+
+\harvarditem[Sarker et~al.]{Sarker, Kayes, Badsha, AlQahtani, Watters
+  \harvardand\ Ng}{2020}{sarker2020cybersecurity}
+Sarker, I.~H., Kayes, A. S.~M., Badsha, S., AlQahtani, H., Watters, P.~A.
+  \harvardand\ Ng, A.  \harvardyearleft 2020\harvardyearright , `Cybersecurity
+  data science: an overview from machine learning perspective', {\em J. Big
+  Data} {\bf 7}(1),~41.
+
+\harvarditem[Saunders et~al.]{Saunders, Lewis \harvardand\
+  Thornhill}{2019}{saunders2019research}
+Saunders, M. N.~K., Lewis, P. \harvardand\ Thornhill, A.  \harvardyearleft
+  2019\harvardyearright , {\em Research Methods for Business Students}, 8th
+  edn, Pearson Education, Harlow, UK.
+
+\harvarditem[Sgandurra et~al.]{Sgandurra, Mu{\~{n}}oz{-}Gonz{\'{a}}lez, Mohsen
+  \harvardand\ Lupu}{2016}{SgandurraMML16}
+Sgandurra, D., Mu{\~{n}}oz{-}Gonz{\'{a}}lez, L., Mohsen, R. \harvardand\ Lupu,
+  E.~C.  \harvardyearleft 2016\harvardyearright , `Automated dynamic analysis
+  of ransomware: Benefits, limitations and use for detection', {\em CoRR} {\bf
+  abs/1609.03020}.
+
+\harvarditem{Shannon}{1948}{shannon1948mathematical}
+Shannon, C.~E.  \harvardyearleft 1948\harvardyearright , `A mathematical theory
+  of communication', {\em Bell Syst. Tech. J.} {\bf 27}(3),~379--423.
+
+\harvarditem{Sikorski \harvardand\ Honig}{2012}{sikorski2012practical}
+Sikorski, M. \harvardand\ Honig, A.  \harvardyearleft 2012\harvardyearright ,
+  {\em Practical malware analysis: the hands-on guide to dissecting malicious
+  software}, no starch press.
+
+\harvarditem{Soltani, Khajavi, Siavoshani \harvardand\
+  Jahangir}{2023}{MultiAgentAdaptiveDetection2023}
+Soltani, M., Khajavi, K., Siavoshani, M.~J. \harvardand\ Jahangir, A.~H.
+  \harvardyearleft 2023\harvardyearright , `A multi-agent adaptive deep
+  learning framework for online intrusion detection', {\em CoRR} {\bf
+  abs/2303.02622}.
+
+\harvarditem{Soltani et~al.}{2023}{soltani2023docpp}
+Soltani, M. et~al.  \harvardyearleft 2023\harvardyearright , `Doc++: A deep
+  novelty-based classifier for adaptive intrusion detection', {\em
+  Cybersecurity} {\bf 6}(1),~1--20.
+
+\harvarditem[Tian et~al.]{Tian, Zhang, Liu, Wang, Wu, Zhu, Zhang, Zhang, Yuan,
+  Mao \harvardand\ Kim}{2025}{tian2025llmsurvey}
+Tian, S., Zhang, T., Liu, J., Wang, J., Wu, X., Zhu, X., Zhang, R., Zhang, W.,
+  Yuan, Z., Mao, S. \harvardand\ Kim, D.~I.  \harvardyearleft
+  2025\harvardyearright , `Exploring the role of large language models in
+  cybersecurity: A systematic survey', {\em IEEE Transactions on Network
+  Science and Engineering} .
+\newblock Early Access.
+
+\harvarditem[Urooj et~al.]{Urooj, Al-Rimy, Zainal \harvardand\
+  Saeed}{2024}{Urooj2024polymorphism}
+Urooj, U., Al-Rimy, B. A.~S., Zainal, A.~B. \harvardand\ Saeed, F.
+  \harvardyearleft 2024\harvardyearright , `Addressing behavioral drift in
+  ransomware early detection through weighted generative adversarial networks',
+  {\em IEEE Access} {\bf 12},~1--14.
+
+\harvarditem[Vaswani et~al.]{Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez,
+  Kaiser \harvardand\ Polosukhin}{2017}{vaswani2017attention}
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.~N.,
+  Kaiser, L. \harvardand\ Polosukhin, I.  \harvardyearleft
+  2017\harvardyearright , Attention is all you need, {\em in} I.~Guyon, U.~von
+  Luxburg, S.~Bengio, H.~M. Wallach, R.~Fergus, S.~V.~N. Vishwanathan
+  \harvardand\ R.~Garnett, eds, `Advances in Neural Information Processing
+  Systems 30: Annual Conference on Neural Information Processing Systems 2017,
+  December 4-9, 2017, Long Beach, CA, {USA}', pp.~5998--6008.
+
+\harvarditem{Vitter}{1985}{vitter1985random}
+Vitter, J.~S.  \harvardyearleft 1985\harvardyearright , `Random sampling with a
+  reservoir', {\em ACM Transactions on Mathematical Software} {\bf
+  11}(1),~37--57.
+
+\harvarditem[Xu et~al.]{Xu, Skoularidou, Cuesta-Infante \harvardand\
+  Veeramachaneni}{2019}{xu2019ctgan}
+Xu, L., Skoularidou, M., Cuesta-Infante, A. \harvardand\ Veeramachaneni, K.
+  \harvardyearleft 2019\harvardyearright , Modeling tabular data using
+  conditional {GAN}, {\em in} `Advances in Neural Information Processing
+  Systems (NeurIPS)', pp.~7335--7345.
+
+\harvarditem{Yadron}{2014}{yadron2014symantec}
+Yadron, D.  \harvardyearleft 2014\harvardyearright , `Symantec develops new
+  attack on cyberhacking', {\em Wall Street Journal} .
+
+\harvarditem[Yang et~al.]{Yang, Some, Bain \harvardand\ Kang}{2025}{YangSBK25}
+Yang, W., Some, L., Bain, M. \harvardand\ Kang, B.~H.  \harvardyearleft
+  2025\harvardyearright , `A comprehensive survey on integrating large language
+  models with knowledge-based methods', {\em Knowl. Based Syst.} {\bf
+  318},~113503.
+
+\harvarditem[Yumlembam et~al.]{Yumlembam, Issac, Jacob \harvardand\
+  Yang}{2024}{yumlembam2024comprehensive}
+Yumlembam, R., Issac, B., Jacob, S.~M. \harvardand\ Yang, L.  \harvardyearleft
+  2024\harvardyearright , `Comprehensive botnet detection by mitigating
+  adversarial attacks, navigating the subtleties of perturbation distances and
+  fortifying predictions with conformal layers', {\em Inf. Fusion} {\bf
+  111},~102529.
+
+\harvarditem[Zahoora et~al.]{Zahoora, Khan, Rajarajan, Khan, Asam \harvardand\
+  Jamal}{2022}{zahoora2022Deep}
+Zahoora, U., Khan, A., Rajarajan, M., Khan, S.~H., Asam, M. \harvardand\ Jamal,
+  T.  \harvardyearleft 2022\harvardyearright , `Ransomware detection using deep
+  learning based unsupervised feature extraction and a cost sensitive pareto
+  ensemble classifier', {\em Scientific Reports} {\bf 12}(1),~15647.
+
+\harvarditem{Zhang, Wu, London \harvardand\
+  Tenney}{2025}{BenchmarkingLLMsPhishing2024}
+Zhang, J., Wu, P., London, J. \harvardand\ Tenney, D.  \harvardyearleft
+  2025\harvardyearright , `Benchmarking and evaluating large language models in
+  phishing detection for small and midsize enterprises: {A} comprehensive
+  analysis', {\em {IEEE} Access} {\bf 13},~28335--28352.
+
+\harvarditem{Zhang, Li, Zhang, Ye, Hu \harvardand\ Yan}{2025}{ZhangLZYHY25}
+Zhang, Z., Li, S., Zhang, L., Ye, J., Hu, C. \harvardand\ Yan, L.
+  \harvardyearleft 2025\harvardyearright , `{LLM-LADE:} large language
+  model-based log anomaly detection with explanation', {\em Knowl. Based Syst.}
+  {\bf 326},~114064.
+
+\end{thebibliography}

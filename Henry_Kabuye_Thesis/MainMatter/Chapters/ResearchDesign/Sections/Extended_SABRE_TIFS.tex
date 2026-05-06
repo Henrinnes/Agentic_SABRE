@@ -1,0 +1,399 @@
+
+% ============================================================
+%  Chapter: Extended Agentic SABRE — Knowledge-Augmented
+%           Three-Agent Ransomware Detection
+%  Based on the TIFS submission
+% ============================================================
+
+\section{Introduction}
+\label{sec:tifs_intro}
+
+\lettrine{T}{he} previous chapter demonstrated that decomposing ransomware detection into a Semantic Agent and a Behavioural Agent, fused through a Decision Agent with uncertainty-aware triage, substantially improves operational control over automated containment decisions. However, two fundamental gaps remain in that two-agent design. First, both agents reason exclusively from statistical regularities in measurement data — PE-header bytes and runtime I/O traces — without access to the accumulated operational knowledge of the security community. Security practitioners have documented which MITRE ATT\&CK tactics are most consistently associated with ransomware deployment, which tools appear in attack chains, and which platforms are primary targets; this knowledge is embedded in threat-intelligence briefings, DFIR walkthroughs, and analyst-authored publications, yet it has not previously been operationalised as an agent-level signal in a multi-agent detection framework.
+
+Second, the two agents in Agentic SABRE operate in isolation: each produces a prediction that is fused passively through the learned Decision MLP, with no mechanism for agents to communicate their reliability to one another before fusion. An agent experiencing high epistemic uncertainty contributes noise to the fusion layer with the same weight as a highly confident peer. Under distributional shift — for example, a novel ransomware family that appears semantically unusual but follows a canonical ATT\&CK deployment chain — the most reliable agent cannot assist the uncertain one, causing the fused prediction to degrade.
+
+This chapter addresses both gaps with three principled extensions that collectively define the \textbf{Extended Agentic SABRE} framework (\textbf{SABRE+}):
+
+\begin{enumerate}
+    \item \textbf{Knowledge Agent and RansKnow Dataset.} A third agent — the Knowledge CNN — is introduced, operating on a novel 23-feature threat-intelligence dataset (RansKnow) derived from 307 YouTube security-practitioner transcripts. Features encode MITRE ATT\&CK tactic frequencies, ransomware-ecosystem tool mentions, and platform indicators. The Knowledge Agent achieves 0.9550 accuracy and 0.9950 AUC on balanced evaluation, providing a modality-orthogonal signal independent of both PE structure and runtime telemetry.
+
+    \item \textbf{Peer Consultation Protocol.} A formal inter-agent consultation mechanism is introduced: when an agent's Monte Carlo Dropout uncertainty $\sigma_i$ exceeds a per-agent threshold $\kappa_\text{local}$, its probability estimate is adjusted via an inverse-uncertainty-weighted mean over all agents including itself. Crucially, uncertainty is never modified — only the probability propagated to the fusion layer is updated — preserving the downstream triage policy's ability to measure true epistemic spread.
+
+    \item \textbf{Expert Feedback Loop.} A continual-adaptation mechanism is designed in which analyst corrections to AUTO-CONTAIN and ESCALATE decisions are fed back to incrementally fine-tune the Decision MLP through a combined new-sample and experience-replay loss, with reservoir-sampled memory to prevent catastrophic forgetting.
+\end{enumerate}
+
+The remainder of this chapter is organised as follows. Section~\ref{sec:tifs_background} provides background and motivation. Section~\ref{sec:tifs_related} surveys relevant literature. Section~\ref{sec:tifs_arch} presents the Extended SABRE+ architecture. Section~\ref{sec:tifs_feedback} details the Expert Feedback Loop. Section~\ref{sec:tifs_setup} describes the experimental setup. Section~\ref{sec:tifs_results} reports and analyses results. Section~\ref{sec:tifs_discussion} discusses implications and limitations. Section~\ref{sec:tifs_summary} summarises the chapter.
+
+
+\section{Background and Motivation}
+\label{sec:tifs_background}
+
+\subsection{Knowledge Blindness in Statistical Detectors}
+
+The Semantic and Behavioural Agents in Agentic SABRE both learn purely from statistical patterns in measurement data. While this is effective for known ransomware families with distinctive PE structures or runtime signatures, it is inherently limited for emerging variants that have been documented by the security community but whose measurement-level signatures have not yet been observed in training data. The MITRE ATT\&CK framework provides a structured vocabulary for ransomware tactics and tools — Initial Access, Execution, Persistence, Lateral Movement, Exfiltration, Impact (T1486), and associated tools such as Cobalt Strike, Rclone, Mimikatz, and BloodHound — that appear consistently across diverse ransomware campaigns regardless of their specific implementation details. Operationalising this structured knowledge as a learned signal introduces a detection modality that is complementary to both static PE analysis and dynamic runtime monitoring.
+
+\subsection{Agent Isolation and Uncertainty Propagation}
+
+In the two-agent SABRE design, fusion is performed by a learned MLP that operates on the four-dimensional score vector $\mathbf{v} = (\bar{p}_\text{sem}, \bar{p}_\text{beh}, \sigma_\text{sem}, \sigma_\text{beh})$. While the MLP can in principle learn to discount uncertain agents, this is an implicit and unstructured mechanism: the MLP must infer from the uncertainty values alone how much to trust each agent's probability, without any explicit coordination between agents. This limitation is particularly acute under distributional shift, where one agent may be highly uncertain while another remains confident — exactly the situation where direct inter-agent communication would be most valuable.
+
+The Peer Consultation Protocol addresses this by introducing explicit, formalised pre-fusion coordination: uncertain agents query their peers and adjust their probabilities before the scores reach the Decision MLP, providing the MLP with better-calibrated inputs in high-uncertainty conditions.
+
+
+\section{Related Work}
+\label{sec:tifs_related}
+
+\subsection{Knowledge-Augmented Detection}
+
+The integration of structured threat intelligence with machine learning models has been explored in the context of rule-based pre-filtering using ATT\&CK-aligned features \cite{razaulla2023age} and neuro-symbolic frameworks that embed structured knowledge into neural architectures \cite{Besold2021neurosymbolicsurvey}. However, these approaches typically use structured knowledge as a static filter rather than as a learned agent signal with associated uncertainty estimation. RansKnow is, to the best of our knowledge, the first threat-intelligence dataset derived from structured analysis of security-practitioner video content, and the Knowledge Agent is the first agent in a multi-agent ransomware framework to operate on discourse-derived structured features.
+
+\subsection{Multi-Agent Coordination and Uncertainty Communication}
+
+Multi-agent approaches to intrusion detection \cite{MultiAgentAdaptiveDetection2023} and cooperative anomaly detection have been explored without equipping agents with inter-agent uncertainty communication. The closest related concept in the literature is mixture-of-experts (MoE) gating \cite{vaswani2017attention}, where a learned router selects among expert models; however, MoE routing is learned globally and does not implement per-sample, threshold-gated, uncertainty-driven peer queries. The Peer Consultation Protocol differs by being explicitly uncertainty-triggered, operationally transparent, and preserving uncertainty invariance for downstream triage.
+
+\subsection{Continual Learning for Threat Detection}
+
+Concept drift under evolving adversarial strategies is a fundamental challenge for deployed ransomware detectors \cite{Ceschin2022ConceptDrift}. Experience replay \cite{rolnick2019experience} and elastic weight consolidation prevent catastrophic forgetting during incremental updates. SABRE+'s Expert Feedback Loop combines both techniques in a lightweight online adaptation layer targeting only the Decision MLP — the shallowest and fastest-to-retrain component — while leaving the agent backbones frozen to prevent degradation of the learned per-modality representations.
+
+\subsection{Temperature Calibration}
+
+Temperature scaling \cite{guo2017calibration} is a post-hoc calibration technique that divides the logit of a trained classifier by a scalar temperature $T_\text{cal} > 0$ fitted on a validation set. It preserves the ordering of predictions while reducing overconfidence, improving the alignment between predicted probabilities and empirical positive rates. SABRE+ applies temperature calibration to the fused risk estimate $\hat{p}$ after Decision MLP training.
+
+
+\section{Extended SABRE+ Architecture}
+\label{sec:tifs_arch}
+
+\subsection{System Overview}
+
+Figure~\ref{fig:tifs_pipeline} illustrates the complete Extended SABRE+ pipeline. Three modality-specific base detectors — the Semantic CNN, Behavioural CNN, and Knowledge CNN — independently produce mean-uncertainty pairs via Monte Carlo Dropout. The Peer Consultation module conditionally adjusts agent probabilities under high local uncertainty before scores enter the Score Pool. CTGAN augments the Score Pool during training. A Decision MLP, tuned by Bayesian threshold optimisation and calibrated by temperature scaling, produces the fused risk estimate $\hat{p}$. The Triage Policy maps $(\hat{p}_\text{cal}, \sigma_\text{max})$ to one of three decisions. Analyst corrections from the Expert Feedback Loop incrementally retrain the Decision MLP.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{ExAI_Paper_Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png}
+\caption{Extended Agentic SABRE+ pipeline. Three modality-specific agents (Semantic, Behavioural, Knowledge CNNs) produce mean-uncertainty pairs via Monte Carlo Dropout. The Peer Consultation module adjusts uncertain agents' probabilities before score fusion. The Decision MLP, calibrated by temperature scaling, produces the fused risk $\hat{p}$. The Triage Policy routes each sample to AUTO-CONTAIN, ESCALATE, or ALLOW. The Expert Feedback Loop closes the human-in-the-loop cycle.}
+\label{fig:tifs_pipeline}
+\end{figure}
+
+\subsection{Semantic and Behavioural Agents}
+
+The Semantic and Behavioural Agents are inherited from Agentic SABRE (Chapter~\ref{sec:eswa_summary}) without modification. The Semantic Agent operates on 384-dimensional PE-header embeddings from RDset, achieving $\bar{\sigma}_\text{sem} \approx 2.75 \times 10^{-8}$ (near-deterministic confidence). The Behavioural Agent operates on 16-dimensional runtime telemetry features from RanSMAP, with $\bar{\sigma}_\text{beh} \approx 0.0138$. In SABRE+, both agents use $T = 10$ MC Dropout passes (reduced from 30 in the ESWA baseline) since the Semantic Agent's near-deterministic outputs make additional passes redundant, and the Knowledge Agent uses adaptive MC sampling (described below).
+
+\subsection{Knowledge Agent and RansKnow Dataset}
+\label{sec:tifs_knowledge}
+
+\subsubsection{RansKnow Dataset}
+
+RansKnow is a novel dataset of 307 samples (140 ransomware-relevant; 167 benign) derived from structured analysis of YouTube security practitioner content, including threat-intelligence briefings, DFIR (digital forensics and incident response) walkthroughs, and ransomware family deep-dives published by analyst channels. Each sample corresponds to one video and is represented by 23 structured features organised into four groups (Table~\ref{tab:tifs_ransknow}):
+
+\begin{table}[h]
+\centering
+\caption{RansKnow dataset feature groups (23 features, 307 samples).}
+\label{tab:tifs_ransknow}
+\begin{tabular}{lll}
+\toprule
+\textbf{Feature Group} & \textbf{Count} & \textbf{Examples} \\
+\midrule
+MITRE ATT\&CK tactic counts & 10 & Initial Access, Exfiltration, Impact \\
+Ransomware tool mention counts & 8  & Cobalt Strike, Rclone, Mimikatz \\
+Platform signal indicators & 3  & Windows, Linux, ESXi \\
+Aggregate mention totals & 2  & Tactic\_Total, Tool\_Total \\
+\midrule
+\textbf{Total} & \textbf{23} & 307 samples \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Labels are derived heuristically: a sample is ransomware-relevant if $\texttt{Tactic\_Total\_Mentions} > 10$ \textbf{or} $\texttt{Tool\_Total\_Mentions} > 2$, reflecting the empirical observation that legitimate ransomware analyses consistently reference both high-tactic-frequency deployment chains and specific attacker tooling.
+
+\subsubsection{Knowledge CNN Architecture}
+
+The Knowledge CNN operates on the 23-dimensional RansKnow feature vector with the following architecture: a 1D convolutional layer (16 filters, kernel size 3, same padding), ReLU activation, max-pooling (stride 2), Dropout ($p_\text{drop} = 0.3$), a flatten layer, and two fully connected layers (64 hidden units, sigmoid output). Adaptive Monte Carlo Dropout is applied: passes continue from a minimum of $T_\text{min} = 5$ until the running standard deviation of $\sigma_\text{know}$ converges within tolerance $\delta = 10^{-3}$, capped at $T_\text{max} = 50$. This adaptivity trades additional computation for reduced uncertainty estimation variance in the knowledge modality, where the smaller dataset size makes $\sigma_\text{know}$ inherently noisier.
+
+\subsubsection{Complementarity of the Three Agents}
+
+The three agents provide overlapping but non-identical detection coverage. The Semantic Agent is strong on known-family PE variants but blind to novel polymorphic samples with unfamiliar byte patterns. The Behavioural Agent captures runtime encryption dynamics but may be confused by living-off-the-land techniques that generate benign-looking telemetry. The Knowledge Agent is strong precisely when practitioners have documented a deployment chain — i.e., for well-known campaigns with ATT\&CK-mapped tooling — regardless of PE structure or runtime behaviour. Together, the three agents provide complementary coverage across the ransomware detection surface.
+
+\subsection{Peer Consultation Protocol}
+\label{sec:tifs_consultation}
+
+\subsubsection{Motivation and Design}
+
+An agent operating under high epistemic uncertainty should not contribute to fusion with the same weight as a confident peer. The standard MLP fusion layer cannot distinguish this case at the feature level; it receives probabilities $\bar{p}_i$ but does not explicitly reason about their reliability before computing the fused output. Peer consultation resolves this by adjusting $\bar{p}_i$ before fusion whenever $\sigma_i > \kappa_\text{local}$, using peer scores weighted by peer confidence.
+
+\subsubsection{Formal Definition}
+
+Let $\mathcal{A} = \{\text{sem}, \text{beh}, \text{know}\}$ denote the agent set and $\mathcal{P}_i = \mathcal{A} \setminus \{i\}$ the peers of agent $i$. For each agent, define the inverse-uncertainty weight:
+\begin{equation}
+w_j = \frac{1}{\sigma_j + \epsilon}, \quad j \in \mathcal{A}, \quad \epsilon = 10^{-8}.
+\label{eq:tifs_weights}
+\end{equation}
+Consultation fires for agent $i$ if $\sigma_i > \kappa_{\text{local},i}$. The adjusted probability is:
+\begin{equation}
+\bar{p}_i^* = \frac{w_i \bar{p}_i + \sum_{j \in \mathcal{P}_i} w_j \bar{p}_j}{w_i + \sum_{j \in \mathcal{P}_i} w_j}.
+\label{eq:tifs_consultation}
+\end{equation}
+If $\sigma_i \leq \kappa_{\text{local},i}$, then $\bar{p}_i^* = \bar{p}_i$. Critically, $\sigma_i$ is never modified by consultation; the original MC Dropout standard deviation is always propagated to the score vector, preserving the semantics of $\sigma_\text{max}$ in the triage policy.
+
+The protocol has three important properties: (1)~\emph{Confidence-preserving}: a highly confident peer ($\sigma_j \approx 0$) dominates the weighted average; (2)~\emph{Self-inclusive}: agent $i$ retains weight $w_i$ in the weighted mean, so consultation cannot invert a strongly confident uncertain agent; (3)~\emph{Threshold-gated}: consultation is a no-op when all agents are confident, incurring no computational overhead beyond a threshold comparison.
+
+\subsection{Score Vector and CTGAN Augmentation}
+
+After peer consultation, the six-dimensional score vector is assembled:
+\begin{equation}
+\mathbf{v} = \bigl(\bar{p}_\text{sem}^*, \bar{p}_\text{beh}^*, \bar{p}_\text{know}^*, \sigma_\text{sem}, \sigma_\text{beh}, \sigma_\text{know}\bigr)^\top \in \mathbb{R}^6,
+\label{eq:tifs_scorevec}
+\end{equation}
+where $\bar{p}_i^*$ denotes the post-consultation probability and all $\sigma_i$ are the original MC Dropout standard deviations. During training, CTGAN \cite{xu2019ctgan} is applied to the Score Pool to synthesise additional six-dimensional score vectors, preserving inter-agent correlations and preventing the Decision MLP from training exclusively on well-separated score configurations.
+
+\subsection{Decision MLP and Temperature Calibration}
+
+The Decision MLP $f: \mathbb{R}^6 \to [0,1]$ takes $\mathbf{v}$ as input and produces the fused risk estimate:
+\begin{equation}
+\hat{p} = f(\bar{p}_\text{sem}^*, \bar{p}_\text{beh}^*, \bar{p}_\text{know}^*, \sigma_\text{sem}, \sigma_\text{beh}, \sigma_\text{know}).
+\label{eq:tifs_fused}
+\end{equation}
+The network uses two hidden layers (64 and 32 units), ReLU activations, and a sigmoid output. Post-hoc temperature scaling \cite{guo2017calibration} calibrates $\hat{p}$:
+\begin{equation}
+\hat{p}_\text{cal} = \sigma\!\left(\frac{\ln\frac{\hat{p}}{1-\hat{p}}}{T_\text{cal}}\right),
+\label{eq:tifs_temperature}
+\end{equation}
+where $T_\text{cal} > 0$ is fitted on the validation set by minimising negative log-likelihood. Temperature scaling preserves the threshold-relative ordering of $\hat{p}$ while reducing overconfidence.
+
+\subsection{Triage Policy}
+
+The global uncertainty aggregate is:
+\begin{equation}
+\sigma_\text{max} = \max(\sigma_\text{sem}, \sigma_\text{beh}, \sigma_\text{know}).
+\label{eq:tifs_sigmamax}
+\end{equation}
+The Triage Policy maps $(\hat{p}_\text{cal}, \sigma_\text{max})$ to a decision:
+\begin{align}
+\text{AUTO-CONTAIN} &\quad \text{if} \quad \hat{p}_\text{cal} \geq \tau_\text{high} \;\wedge\; \sigma_\text{max} \leq \kappa_\text{low}, \label{eq:tifs_auto} \\
+\text{ESCALATE}     &\quad \text{if} \quad \hat{p}_\text{cal} \geq \tau \;\vee\; \sigma_\text{max} > \kappa, \label{eq:tifs_esc} \\
+\text{ALLOW}        &\quad \text{otherwise.} \label{eq:tifs_allow}
+\end{align}
+Thresholds are jointly optimised by Bayesian TPE search \cite{optuna2019}:
+\begin{equation}
+(\tau^*, \kappa^*, \tau_\text{high}^*, \kappa_\text{low}^*) = \arg\max_{\tau, \kappa, \tau_\text{high}, \kappa_\text{low}} \bigl[\text{BalAcc}(\tau, \kappa) - \lambda\,\text{EscRate}(\tau, \kappa)\bigr],
+\label{eq:tifs_objective}
+\end{equation}
+with $\lambda = 0.5$, yielding the optimised low-escalation policy: $\tau^* = 0.2330$, $\kappa^* = 0.1969$, $\tau_\text{high}^* = 0.8545$, $\kappa_\text{low}^* = 0.1969$.
+
+
+\section{Expert Feedback Loop}
+\label{sec:tifs_feedback}
+
+\subsection{Architecture and Motivation}
+
+Concept drift under evolving ransomware tactics causes the Decision MLP's decision boundaries to become misaligned with the current threat distribution over time. The Expert Feedback Loop closes the human-in-the-loop cycle: whenever a sample receives an ESCALATE or AUTO-CONTAIN decision, the analyst reviews it and provides a correction label $\tilde{y} \in \{0, 1\}$ (0 = benign, 1 = ransomware). Correction labels are accumulated in a correction queue $\mathcal{Q}_\text{new}$.
+
+\subsection{Incremental Retraining with Experience Replay}
+
+The Decision MLP is fine-tuned on a mixed loss that combines the new-sample loss with a replay loss from a maintained memory buffer:
+\begin{equation}
+\mathcal{L}_\text{total} =
+\underbrace{\frac{1}{|\mathcal{Q}_\text{new}|} \sum_{(\mathbf{v},\tilde{y}) \in \mathcal{Q}_\text{new}} \text{BCE}(f(\mathbf{v}), \tilde{y})}_{\text{new-sample loss}}
++\;\gamma \cdot
+\underbrace{\frac{1}{|\mathcal{B}|} \sum_{(\mathbf{v},y) \in \mathcal{B}} \text{BCE}(f(\mathbf{v}), y)}_{\text{replay loss}},
+\label{eq:tifs_feedbackloss}
+\end{equation}
+where $\mathcal{B}$ is a replay buffer of size $N_\text{replay}$ updated by reservoir sampling \cite{vitter1985random}, and $\gamma \geq 0$ controls the forgetting-adaptation trade-off. Agent backbone weights are frozen: only the Decision MLP is updated. This limits parameter exposure, reduces catastrophic forgetting risk to the shallowest component, and keeps update latency low (the Decision MLP has $\leq 4{,}000$ parameters).
+
+\subsection{Reservoir Sampling}
+
+Each round, the replay buffer $\mathcal{B}$ is updated by reservoir sampling \cite{vitter1985random}: for each new sample at position $n$, it replaces a uniformly random element of $\mathcal{B}$ with probability $N_\text{replay}/n$. This provides an unbiased uniform sample over all historical correction labels, preventing recent-class bias and maintaining representativeness of the full history.
+
+
+\section{Datasets and Experimental Setup}
+\label{sec:tifs_setup}
+
+\subsection{Datasets}
+
+All three agents are evaluated on independent modality-specific datasets. RDset and RanSMAP are described in the previous chapter. RansKnow is described in Section~\ref{sec:tifs_knowledge} above.
+
+\textbf{Independence guarantee.} All three datasets are entirely independent: no executable, execution trace, or video appears in more than one. Because no single dataset contains all three modalities simultaneously, three-agent fusion evaluation uses the semantic-agent-dominated label source (RDset) with cross-modality inputs noted explicitly.
+
+\subsection{Baselines}
+
+Results are compared against: (i) the original two-agent SABRE \cite{kabuye2025sabre_eswa}; (ii) the single-agent uncertainty-aware detector \cite{kabuye2025explainable}; (iii) LLM-LADE \cite{ZhangLZYHY25}; (iv) FeSAD \cite{Fernando2024FeSAD}; and (v) the multi-agent adaptive detection system of \cite{MultiAgentAdaptiveDetection2023}.
+
+\subsection{Evaluation Metrics}
+
+In addition to accuracy, balanced accuracy, AUC, precision, recall, and F1-score, the triage-specific metrics of escalation rate and AUTO-CONTAIN rate are reported. Expected Calibration Error (ECE) is computed for uncertainty quality assessment. The consultation rate and mean probability adjustment $\Delta\bar{p}$ per agent are reported to assess the Peer Consultation Protocol's behaviour.
+
+
+\section{Results and Analysis}
+\label{sec:tifs_results}
+
+\subsection{Per-Agent Standalone Performance}
+
+Table~\ref{tab:tifs_agents} reports the per-agent standalone performance on balanced held-out evaluation sets.
+
+\begin{table}[h]
+\centering
+\caption{Per-agent standalone evaluation on balanced test sets.}
+\label{tab:tifs_agents}
+\begin{tabular}{llccccc}
+\toprule
+\textbf{Agent} & \textbf{Dataset} & $n$ & \textbf{Acc} & \textbf{AUC} & \textbf{F1} & $\bar{\sigma}$ \\
+\midrule
+Semantic CNN   & RDset    & 4000 & 1.0000 & 1.0000 & 1.0000 & $\approx 0$ \\
+Behavioural CNN & RanSMAP & 2000 & 0.9945 & 0.9967 & 0.9945 & 0.0138 \\
+Knowledge CNN  & RansKnow & 200  & 0.9550 & 0.9950 & 0.9550 & 0.0499 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The Semantic CNN achieves perfect discrimination, consistent with prior findings \cite{kabuye2025sabre_eswa} that PE-header embeddings form near-disjoint class clusters. The Behavioural CNN attains 0.9967 AUC on balanced evaluation; the 0.6030 AUC on the full imbalanced distribution reflects the difficulty of ranking under a 598:1 class ratio. The Knowledge CNN achieves 0.9550 accuracy and 0.9950 AUC despite operating on only 23 features and 307 total training samples, confirming the discriminative power of structured ATT\&CK/tool features. The increasing $\bar{\sigma}$ sequence ($\approx 0 \to 0.0138 \to 0.0499$) reflects decreasing distributional separation across modalities, consistent with the semantic $>$ behavioural $>$ discourse hierarchy of signal quality.
+
+\subsection{ROC Curves for All Three Agents}
+
+Figure~\ref{fig:tifs_roc} shows the ROC curves for all three agents on their respective native-modality evaluation sets. The Semantic Agent saturates at the top-left corner. The Behavioural Agent achieves near-optimal separation under balanced evaluation (AUC = 0.9967). The Knowledge Agent achieves AUC = 0.9958 from 23 structured features alone, demonstrating that threat-intelligence discourse provides a strongly discriminative signal when structured as ATT\&CK-aligned feature counts.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{ExAI_Paper_Figures/ROC_Knowledge.png}
+\caption{ROC curve for the Knowledge Agent on the RansKnow dataset (AUC = 0.9958). Despite operating on only 23 structured ATT\&CK/tool features and 307 training samples, the Knowledge Agent provides strongly discriminative threat-intelligence signals complementary to both the Semantic and Behavioural agents.}
+\label{fig:tifs_roc}
+\end{figure}
+
+\subsection{Three-Agent Fusion and Triage}
+
+Table~\ref{tab:tifs_fusion} reports the three-agent fusion behaviour on a 200-sample cross-modality evaluation. The fused classifier achieves perfect accuracy and AUC (1.0000), driven by the Semantic Agent's dominance on this split. More importantly, the 9.0\% escalation rate is substantially lower than the two-agent SABRE baseline, which reported escalation rates up to 22\% under the same $\lambda = 0.5$ objective \cite{kabuye2025sabre_eswa}. The Knowledge Agent's additional confidence signal lowers $\sigma_\text{max}$ for samples where discourse features are unambiguous, enabling more AUTO-CONTAIN decisions without degrading recall.
+
+\begin{table}[h]
+\centering
+\caption{Three-agent fusion triage distribution (200 samples, low-escalation policy, $\lambda=0.5$).}
+\label{tab:tifs_fusion}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Fused accuracy         & 1.0000 \\
+Fused AUC              & 1.0000 \\
+Mean fused probability & 0.490  \\
+Mean $\sigma_\text{max}$ & 0.066 \\
+AUTO-CONTAIN rate      & 43.5\% (87/200) \\
+ESCALATE rate          & 9.0\%  (18/200) \\
+ALLOW rate             & 47.5\% (95/200) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Epistemic Uncertainty Analysis}
+
+Figure~\ref{fig:tifs_uncertainty} visualises the per-agent, per-class epistemic uncertainty distributions collected over the balanced test splits. The Semantic Agent is near-deterministic ($\bar{\sigma} \approx 0$), the Behavioural Agent shows low but non-trivial uncertainty ($\bar{\sigma} \approx 0.013$), and the Knowledge Agent exhibits the highest uncertainty ($\bar{\sigma} \approx 0.055$), consistent with its smaller training set and heuristic label construction. The increasing uncertainty sequence across modalities is the expected direction: better-separated class distributions produce lower MC Dropout variance.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{ExAI_Paper_Figures/Uncertainty_Distributions.png}
+\caption{Epistemic uncertainty ($\sigma$) distributions for benign and ransomware samples across all three agents. The Semantic Agent is near-deterministic ($\bar{\sigma} \approx 0$); the Behavioural Agent shows low but non-trivial uncertainty ($\bar{\sigma} \approx 0.013$); the Knowledge Agent exhibits the highest uncertainty ($\bar{\sigma} \approx 0.055$), consistent with its smaller training set and heuristic labels.}
+\label{fig:tifs_uncertainty}
+\end{figure}
+
+\subsection{Peer Consultation Analysis}
+
+Table~\ref{tab:tifs_consultation} summarises the per-agent consultation behaviour at $\kappa_\text{local} = 0.05$ for all agents. Consultation fires most frequently for the Knowledge Agent (38\%) and rarely for the Semantic Agent ($<$0.1\%). The Knowledge Agent receives upward probability corrections from the more-confident Semantic and Behavioural agents, achieving a net accuracy improvement of $+0.005$, confirming that peer consultation acts as a selective soft ensemble activated under uncertainty rather than indiscriminate score averaging.
+
+\begin{table}[h]
+\centering
+\caption{Peer consultation statistics per agent ($\kappa_\text{local} = 0.05$).}
+\label{tab:tifs_consultation}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Agent} & $\bar{\sigma}$ & \textbf{Consult.\ rate} & $\Delta\bar{p}$ & $\Delta$Acc \\
+\midrule
+Semantic    & $\approx 0$  & $< 0.1\%$   & $\approx 0$ & $0.00$ \\
+Behavioural & 0.0138  & $\approx 12\%$  & $+0.023$  & $+0.0010$ \\
+Knowledge   & 0.0499  & $\approx 38\%$  & $+0.041$  & $+0.0050$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:tifs_consultation} shows the before-and-after probability adjustments for Knowledge Agent samples for which consultation fired ($\kappa_\text{local} = 0.04$; $n = 62/200$, or 31\%). The scatter plot confirms that consultation pulls uncertain predictions toward more-confident peer estimates, while the histogram shows the adjustment is broadly distributed with mean $\Delta p = +0.041$ rather than being a constant offset.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{ExAI_Paper_Figures/Peer_Consultation_Effect.png}
+\caption{Peer consultation effect on the Knowledge Agent. \textbf{Left:} Probability before versus after consultation for triggered samples (red = ransomware, blue = benign). Points above the diagonal indicate upward corrections by confident peers. \textbf{Right:} Distribution of probability adjustments ($\Delta p$). The mean positive adjustment ($+0.041$) reflects the Semantic and Behavioural agents pulling Knowledge Agent estimates toward the correct class boundary.}
+\label{fig:tifs_consultation}
+\end{figure}
+
+\subsection{Calibration After Temperature Scaling}
+
+Reliability diagrams for all three agents and the fused Decision MLP confirm well-calibrated predictive probabilities after temperature scaling, with reliability curves tracking the diagonal closely (Figure~\ref{fig:tifs_calibration}). The Semantic Agent's near-perfect reliability reflects its high-confidence, near-deterministic outputs. The Behavioural and Knowledge Agents show broader calibration intervals due to higher uncertainty, but remain close to the diagonal, validating the use of $\hat{p}_\text{cal}$ as a reliable risk estimate for threshold-based triage.
+
+\begin{figure}[h]
+\centering
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{ExAI_Paper_Figures/calibration_semantic.png}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{ExAI_Paper_Figures/calibration_behavioral.png}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{ExAI_Paper_Figures/calibration_decision.png}
+\end{minipage}
+\caption{Reliability diagrams after temperature calibration for the Semantic Agent (left), Behavioural Agent (centre), and fused Decision MLP (right). All three agents track the diagonal closely, confirming well-calibrated predictive probabilities suitable for downstream threshold-based triage.}
+\label{fig:tifs_calibration}
+\end{figure}
+
+\subsection{Score Vector Statistics}
+
+Table~\ref{tab:tifs_scaler} reports the scaler statistics fitted on the training Score Pool. The near-zero $\bar{\sigma}_\text{sem}$ confirms the semantic agent's deterministic outputs. The high variance in $\bar{p}_\text{know}$ (std $\approx 0.44$) reflects the wide range of discourse-based signals: some security videos discuss ransomware in depth (high $\bar{p}_\text{know}$), others cover unrelated topics (low $\bar{p}_\text{know}$).
+
+\begin{table}[h]
+\centering
+\caption{Score vector scaler statistics (fitted on training pool).}
+\label{tab:tifs_scaler}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Feature} & \textbf{Mean} & \textbf{Std} & \textbf{Interpretation} \\
+\midrule
+$\bar{p}_\text{sem}$  & 0.9520 & 0.2138 & High mean, moderate spread \\
+$\bar{p}_\text{beh}$  & 0.9339 & 0.2154 & High mean, moderate spread \\
+$\bar{p}_\text{know}$ & 0.4527 & 0.4411 & Centred; high variance \\
+$\sigma_\text{sem}$   & $2.8\!\times\!10^{-8}$ & $3.1\!\times\!10^{-6}$ & Near-zero (deterministic) \\
+$\sigma_\text{beh}$   & 0.0138 & 0.0258 & Low uncertainty \\
+$\sigma_\text{know}$  & 0.0499 & 0.0734 & Moderate uncertainty \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Computational Complexity}
+
+The three-agent inference pipeline scales linearly in the number of agents. Per-sample cost decomposes as: (i)~Semantic and Behavioural CNN inference at $T = 10$ MC Dropout passes each: $\approx 20$--$50$\,ms per agent on CPU; (ii)~Knowledge CNN inference with adaptive MC passes ($T_\text{min} = 5$, $T_\text{max} = 50$): $\approx 10$--$100$\,ms; (iii)~Peer consultation: $\mathcal{O}(|\mathcal{A}|^2) = \mathcal{O}(9)$ comparisons and weight computations; (iv)~Decision MLP forward pass: $<1$\,ms; (v)~Triage policy evaluation: $\mathcal{O}(1)$. Total wall-clock latency is approximately 0.05--0.20\,s on CPU, substantially lower than the two-agent baseline at $T = 30$ due to the reduced pass count. Expert Feedback Loop retraining (one round) completes in seconds given the small Decision MLP size ($\leq 4{,}000$ parameters).
+
+
+\section{Discussion}
+\label{sec:tifs_discussion}
+
+\subsection{The Value of the Knowledge Modality}
+
+The Knowledge Agent's AUC of 0.9950 on 307 samples with 23 features demonstrates that structured ATT\&CK/tool discourse features provide a strongly discriminative signal that is orthogonal to both static PE analysis and dynamic runtime monitoring. Critically, this signal is available for any ransomware campaign that has been documented by the security community — which includes virtually all major ransomware families currently in active operation. The Knowledge Agent is therefore most valuable precisely in the scenarios where the Semantic and Behavioural Agents are most challenged: novel variants with unfamiliar PE structures or behavioural profiles that have been publicly documented through ATT\&CK-aligned tooling.
+
+\subsection{Peer Consultation as Selective Soft Ensemble}
+
+The Peer Consultation Protocol achieves a net accuracy improvement of $+0.005$ for the Knowledge Agent without modifying any agent's uncertainty estimate. This improvement is small in absolute terms but operationally meaningful: it corresponds to correctly classifying an additional 5 samples per 1,000 in the Knowledge Agent's high-uncertainty operating regime. More importantly, the protocol prevents the Decision MLP from receiving miscalibrated probability inputs under high-uncertainty conditions, improving the overall reliability of the fused risk estimate.
+
+The key design choice — uncertainty invariance — ensures that peer consultation does not inadvertently suppress the triage policy's ability to detect genuinely uncertain situations. An agent that consults its peers and receives a corrected probability still contributes its original $\sigma_i$ to $\sigma_\text{max}$, preserving the conservative escalation guarantee.
+
+\subsection{Expert Feedback Loop and Continual Adaptation}
+
+The Expert Feedback Loop targets the most critical failure mode of deployed ransomware detectors: concept drift in the fusion layer's decision boundaries as new ransomware tactics emerge. By freezing the agent backbones and updating only the Decision MLP, SABRE+ achieves adaptation without risking degradation of the learned per-modality representations. The experience replay component prevents the MLP from catastrophically forgetting historical correction patterns, maintaining detection of previously-addressed threat variants even as it adapts to new ones.
+
+\subsection{Limitations}
+
+Three principal limitations remain. First, the RansKnow dataset is small (307 samples) and derived from a single source type (YouTube videos); larger and more diverse threat-intelligence corpora would improve Knowledge Agent robustness. Second, the Peer Consultation Protocol does not account for potential correlations between agent errors: if all three agents are simultaneously uncertain about the same type of sample (e.g., a novel variant that confuses all modalities), consultation provides no benefit and may reinforce errors. Third, the Expert Feedback Loop has no empirical evaluation across multi-round concept drift scenarios in the current study; future work should assess its long-term stability under sustained distributional shift.
+
+
+\section{Chapter Summary}
+\label{sec:tifs_summary}
+
+This chapter presented Extended Agentic SABRE (SABRE+), a three-agent uncertainty-aware framework that addresses two fundamental gaps in the two-agent baseline: knowledge blindness and agent isolation. The Knowledge Agent, trained on the novel RansKnow dataset of ATT\&CK-structured practitioner discourse features, achieves 0.9550 accuracy and 0.9950 AUC on balanced evaluation, providing a modality-orthogonal detection signal that is strongest for well-documented ransomware campaigns. The Peer Consultation Protocol enables uncertain agents to adjust their probability estimates using inverse-uncertainty-weighted peer scores before fusion, achieving a net accuracy improvement of $+0.005$ for the Knowledge Agent while preserving uncertainty invariance for downstream triage. The Expert Feedback Loop provides continual adaptation of the Decision MLP through analyst corrections combined with experience replay and reservoir sampling, preventing catastrophic forgetting under concept drift.
+
+The three-agent system achieves a 9\% escalation rate on the cross-modality evaluation — substantially below the two-agent baseline's 22\% — while maintaining perfect fused accuracy and AUC. Temperature calibration and Bayesian TPE threshold optimisation complete the pipeline, ensuring that the fused risk estimate is well-calibrated and that the triage thresholds are operationally optimal under a balanced accuracy-escalation trade-off.
+
+Together, the two chapters in this section of the thesis trace a coherent research arc from single-agent explainable uncertainty-aware detection (IEEE Access baseline), through two-agent score-fusion with formal triage policy (Agentic SABRE, ESWA), to three-agent knowledge-augmented peer consultation with continual adaptation (Extended Agentic SABRE, TIFS). Each step addresses a specific, empirically grounded limitation of its predecessor, advancing the state of the art in uncertainty-aware, interpretable, and adaptive ransomware detection.

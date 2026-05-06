@@ -1,0 +1,839 @@
+
+
+% \begin{abstract}
+
+% Ransomware poses a serious and evolving threat, demanding detection methods that can adapt to new attack vectors while maintaining transparency and reliability. This study proposes a comprehensive framework that integrates data augmentation, explainable artificial intelligence, and uncertainty quantification to address key challenges in ransomware detection. By leveraging synthetic data generation techniques, the approach mitigates class imbalance and captures varied ransomware behaviours. Simultaneously, explainable AI methods shed light on model decisions, enhancing interpretability and building trust among cybersecurity professionals. An uncertainty-aware component flags ambiguous predictions, allowing for targeted manual reviews and minimising incorrect classifications. Experiments on multiple ransomware datasets show the framework’s ability to maintain high detection rates, even under adversarial conditions. By combining RanSAP and RDset datasets, the framework achieves marked performance improvements. When SMOTE was applied, Random Forest reached an F1-score of 0.9963, while a CNN with Monte Carlo Dropout attained 0.9906. Further incorporating CT-GAN boosted the CNN’s F1-score to 0.9978, underscoring the robustness of our approach. The results suggest that combining robust data augmentation, interpretability, and uncertainty handling offers a practical avenue for deploying reliable ransomware detection systems in real-world environments.
+% \end{abstract}
+
+% \begin{keywords}
+% Data Augmentation, Explainable AI, Machine Learning, Ransomware, Uncertainty
+% \end{keywords}
+
+% \titlepgskip=-21pt
+
+% \maketitle
+
+\section{Introduction}
+\label{sec:introduction}
+
+\lettrine{R}{ansomware} attacks have emerged as one of the most serious cybersecurity threats, leading to major operational, financial, and reputational damage to organisations and individuals worldwide \cite{razaulla2023age}. Over the past few years, these attacks have grown in complexity and scale, with predicted damages projected to exceed \$265 billion by 2031 due to the lucrative nature of ransom payments \cite{razaulla2023age}. According to the NCC (National Computing Centre) Group Cyber Threat Intelligence Monthly Reports~\cite{NCCGroup_CTIR}, there has been a steady increase in ransomware incidents, as illustrated in Figure~\ref{fig29}. Unlike traditional malware such as viruses, backdoors, and trojan horses, ransomware encrypts critical data or locks systems, demanding ransom payments (often in cryptocurrency) to restore access~\cite{razaulla2023age}. Its growing sophistication and financial impact call for adaptive detection methods that go beyond conventional approaches. Figure 1 presents a time series plot that shows the global monthly trends in ransomware attacks. The data comes from NCC Group’s Cyber Threat Intelligence reports. The graph highlights the steady increase in ransomware incidents over time, demonstrating that ransomware remains a growing global threat. This visual serves as motivation for why advanced detection methods are necessary, especially ones that can adapt to evolving ransomware behaviours.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/GMonthlyReport.PNG}
+\caption{\emph{Global Monthly Ransomware report} \cite{NCCGroup_CTIR}}
+\label{fig29}
+\end{figure}
+
+The financial implications of ransomware can be substantial. Ransom payments vary from a few hundred to millions of dollars. However, recovery expenses, such as data restoration, system rebuilding, and incident response, often exceed the ransom \cite{razaulla2023age}. Operational disruptions, including downtime and productivity losses, frequently result in significant financial losses for affected organisations \cite{conti2018internet}. For instance, on June 19, 2024, a cyberattack on CDK Global triggered widespread software outages in car dealerships nationwide \cite{cdk_global_attack}. The company reportedly paid \$25 million to restore operations, highlighting the magnitude of the financial consequences posed by ransomware.
+
+Existing detection systems  largely rely on signature-based methodologies, 
+which match malware samples to predefined patterns. However,  such systems  struggle against rapidly evolving ransomware and zero-day attacks~\cite{yadron2014symantec, beaman2021ransomware, razaulla2023age}. They also demand continuous updates and specialised expertise~\cite{yadron2014symantec, razaulla2023age}, underscoring the need for  methods that can adapt to unknown ransomware threats in real time~\cite{yumlembam2024comprehensive}.
+
+Artificial Intelligence (AI), particularly machine learning (ML) and deep learning (DL), offers dynamic and adaptive capabilities for detecting and classifying emerging ransomware variants~\cite{sikorski2012practical, beaman2021ransomware}. However, AI-based detection systems often lack clarity in how decisions are made, and they may struggle to manage predictive uncertainties~\cite{gawlikowski2023Uncertainity}. These limitations can  erode confidence in AI-driven models, particularly in high-stakes environments where understanding the rationale behind  classifications is essential. Recent studies~\cite{gal2016dropout, gawlikowski2023Uncertainity} 
+emphasise the importance of reliable uncertainty estimation in cybersecurity, where overconfident predictions can lead to high risks.
+
+This paper addresses these  issues by introducing a holistic framework that combines advanced data augmentation, explainable AI (XAI), and uncertainty quantification. Specifically, the approach integrates SMOTE and a conditional TabGAN (CTGAN), Monte Carlo dropout for uncertainty, and SHAP (SHapley Additive exPlanations) to enhance model interpretability. Using both the RanSAP \cite{hirano2022ransap} dataset and Mathur's \cite{mathur2020ransomware} dataset (named “RDset” in this study), the framework achieves high F1-scores of up to 0.9978 and maintains a low false positive rate (0.0024), underscoring the effectiveness of combining diverse datasets and modern AI techniques for robust ransomware detection.
+
+In summary, this paper makes the following contributions:
+\begin{itemize}
+    \item Comprehensive Detection Framework: Proposes a unified approach integrating data augmentation, uncertainty quantification, and explainability to enhance ransomware detection.
+    \item Improved Generalization: Demonstrates how blending RanSAP and RDset datasets improves adaptability across diverse ransomware families.
+    \item Uncertainty Aware: Utilizes Monte Carlo dropout to quantify prediction uncertainties, improving management of false positives and false negatives  in production settings.
+    \item Explainable AI for Transparency: Employs SHAP to make model decisions more understandable and instil greater trust among cybersecurity professionals.
+    \item Empirical Evaluation and Analysis: Provides comprehensive evaluations  of Random Forest, Support Vector Machine (SVM), KNN, and CNN, illustrating the framework's robustness.
+\end{itemize}
+
+The rest of this paper is structured as follows: Section~\ref{sec:related_work}  examines prior work in ransomware detection and explainable AI, Section~\ref{sec:Methodology}  describes the proposed framework, Section~\ref{sec:Results}  details our experimental setup and findings, and Section~\ref{sec:Discussion} discusses key insights, implications, and future research directions. Finally, Section~\ref{sec:Conclusion} concludes the paper.
+
+
+\section{Literature Review}
+\label{sec:related_work}
+
+Ransomware is classified into various types, each exhibiting distinct attack vectors and features \cite{beaman2021ransomware, razaulla2023age}. 
+Scareware deceives users through fake malware infection notifications, prompting them to pay for unnecessary services. Doxware, or leakware, threatens to  publicly expose stolen data unless a ransom is paid. Lockers restrict device access entirely, rendering the system unusable until payment is made. Encryptors, the most prevalent type, encrypt data and then demand a ransom for the decryption key \cite{beaman2021ransomware}. Over time, these variants have evolved from simple  to highly sophisticated encryption techniques, such as double extortion, where attackers  both encrypt and exfiltrate data, threatening to release it publicly if unpaid \cite{europol2020iocta}, and fileless ransomware, which leverages legitimate applications and processes like PowerShell to encrypt data in memory \cite{krishna2020comparative}. This evolution has led to the Ransomware-as-a-Service (RaaS) model, where  criminals lease ransomware tools and services to  affiliates for shared profits \cite{meland2020ransomware}.
+
+High-profile attacks on critical infrastructure and healthcare institutions underscore the seriousness of the threat. For instance, in 2017, WannaCry affected  roughly 200,000 systems in 150 countries, exploiting a Windows OS vulnerability \cite{huang2018systematically}. Similarly, NotPetya, initially disguised as ransomware, caused widespread damage among multinational firms \cite{greenberg2018untold}. In response, Lee et al.~\cite{lee2023hiding} proposed hiding files with certain extensions and creating link files  to raise the attackers’ operational costs. This camouflage approach aims to protect critical files by complicating efforts to classify and locate valuable data.
+
+Due to the rising frequency of ransomware, organisations have adopted stronger defensive measures. Regular data backups, staff awareness programs for phishing and social engineering, and  advanced detection techniques are all necessary strategies \cite{razaulla2023age}. Static and dynamic analyses remain widely used methods for detecting malware \cite{beaman2021ransomware}. 
+Static analysis evaluates features in the binary file before execution, whereas dynamic analysis executes suspicious files in a controlled environment, capturing behavioural patterns for detection. Hybrid analysis merges both static and dynamic approaches to expand malware detection coverage \cite{kolosnjaji2016deep}.
+
+Governments and regulatory bodies have enacted stringent data protection legislation and reporting requirements  to curb the impact of ransomware. For example, under the General Data Protection Regulation (GDPR), organisations must report data breaches within 72 hours \cite{europeancommission2020dataprotection}. 
+Additionally,  more businesses now seek cyber insurance to offset potential ransomware costs \cite{mott2023between}. However, the rising cyber insurance premiums reflect the increasing frequency of attacks \cite{mott2023between}.
+
+Similarly, AI-based techniques have become integral to ransomware detection and classification \cite{razaulla2023age, beaman2021ransomware}. Such systems rely heavily on machine learning algorithms that analyse large volumes of data for malicious  patterns, often more efficiently than manual rule creation \cite{fernando2020study, gibert2020rise, Ferdous2024Comp}. Yet, AI models still face challenges including optimisation issues, data drift, classification issues, data imbalances, and model uncertainty.
+
+Farzadpour and Azghani~\cite{Farzadpour2024Thresholding} proposed an adaptive thresholding  technique for fingerprint forgery detection,  demonstrating that advanced feature extraction and classification methods can boost system robustness. Though focused on biometrics, this approach  holds potential for ransomware detection, particularly where data might be incomplete or noisy.
+
+ Building on adversarial resilience, Yumlembam et al.~\cite{yumlembam2024comprehensive} investigated Genetic Algorithms (GA) and Particle Swarm Optimisation (PSO) to fine-tune hyperparameters, thereby enhancing detection against adversarial samples. They also integrated conformal prediction layers to reduce incorrect predictions, reinforcing the model’s defense against adversarial perturbations.
+
+Dynamic analysis, supported by AI, observes ransomware behaviours in a controlled environment, detecting unauthorised file encryption or suspicious network activity in real time \cite{beaman2021ransomware, amiri2024adventures}. This approach can improve detection accuracy and  shorten the time needed to identify threats. However, adversarial attacks  remain a concern, as they alter specific features to evade detection \cite{yumlembam2024comprehensive}. Integrating AI into hybrid analysis fuses static and dynamic methods, yielding a more holistic view of ransomware operations \cite{razaulla2023age}. Deep learning, for example, enhances feature extraction and classification, enabling the detection of ransomware throughout multiple attack stages.
+
+Uncertainty estimation in deep learning has  recently gained traction in mission-critical scenarios, such as autonomous systems and medical diagnostics. Gawlikowski et al.~\cite{gawlikowski2023Uncertainity} surveyed  various techniques, including ensemble models and Bayesian Neural Networks, which can help minimise overconfident false positives in model development. Similarly, conformal prediction, as highlighted by Yumlembam et al.~\cite{yumlembam2024comprehensive}, offers a more reliable and trustworthy prediction framework, allowing models to reject uncertain instances.
+
+Data drift (where underlying distributions shift over time), poses another key challenge. ~\cite{ashrapov2020tabular} demonstrated the use of Generative Adversarial Networks (GANs) to generate synthetic data that captures distribution shifts, enabling retraining for sustained effectiveness. In ransomware detection, this approach adapts to evolving attack patterns by continuously updating  model parameters. Such continuous learning is crucial as new ransomware strains emerge, ensuring detection capabilities remain aligned with the threat landscape \cite{sarker2020cybersecurity}.
+
+\section{Proposed Framework}
+\label{sec:Methodology}
+
+The proposed holistic framework,  shown in Figure \ref{fig24} and  described in
+Algorithms \ref{alg:data_augmentation} and \ref{alg:model_training}, addresses limitations in the existing ransomware detection approaches. It merges four essential components: data augmentation, uncertainty awareness, explainable AI, and adversarial resilience. This section provides a comprehensive overview of the framework’s architecture and its underlying methodologies.
+
+\subsection{Overview of the Framework}
+ The framework employed combines multiple techniques to address common challenges in AI-based ransomware detection, including predictive uncertainty, interpretability, and robustness against adversarial attacks.  Specifically, it employs Monte Carlo Dropout and Bayesian Neural Networks (BNNs) to quantify uncertainty, drawing on established best practices~\cite{gal2016dropout, gawlikowski2023Uncertainity}. These tools produce reliable uncertainty metrics, enabling the system to flag or discard ambiguous predictions  before they become false positives (benign software misclassified as ransomware) or false negatives (missed ransomware). 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/ProUnExp4.png}
+\caption{\emph{Proposed Detection Framework}}
+\label{fig24}
+\end{figure}
+
+Figure~\ref{fig24} illustrates the entire proposed detection framework. This framework integrates multiple advanced techniques to enhance ransomware detection. The components include data augmentation methods such as SMOTE and CTGAN for balancing the dataset and simulating adversarial data, uncertainty quantification using Monte Carlo Dropout and Bayesian Neural Networks to capture prediction uncertainties, explainability modules using SHAP and LIME to interpret the model’s decisions, supervised learning algorithms such as Random Forest, SVM, KNN, and CNN for classification, and optimization strategies using Particle Swarm Optimization to fine-tune hyperparameters and improve performance. This integrated pipeline enables the system to handle class imbalance, improve model robustness, and provide interpretable and trustworthy outputs.
+
+To address both data imbalance and adversarial threats, the framework incorporates SMOTE and CTGAN. SMOTE balances the dataset by generating synthetic samples for under-represented classes, while CTGAN (Figure~\ref{fig27}) generates adversarial examples to adapt models to data drift and potential evasion tactics. Integrating these synthetic datasets into the training pipeline enhances robustness across diverse settings. Figure 3 presents the internal working of the CTGAN model. CTGAN, or Conditional Tabular GAN, generates synthetic data for tabular datasets. Unlike traditional GANs that work well for image data, CTGAN handles mixed data types, such as categorical and continuous features common in ransomware datasets. This synthetic data generation helps augment underrepresented classes and simulate potential adversarial ransomware behaviours that the model may encounter in real-world scenarios.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/CTGAN model.PNG}
+\caption{\emph{CTGAN model} \cite{ashrapov2020tabular}}
+\label{fig27}
+\end{figure}
+
+Model interpretability is  achieved through XAI techniques, including SHAP values, LIME, and feature importance analysis. These tools clarify the model’s decision-making process, enabling cybersecurity professionals to understand and trust its outputs. SHAP and LIME explain individual predictions, while feature importance outlines the top contributing features.
+
+An optimisation-and-retraining loop forms a critical  pillar of this framework. Through supervised learning methods and  CTGAN-generated adversarial samples, the model continuously adapts to new threat vectors. Particle Swarm Optimisation (PSO) refines feature selection and hyperparameters, boosting model performance over successive iterations.
+
+Uncertainty estimation  via Monte Carlo Dropout and BNNs  yields predictive distributions  that highlight cases of high uncertainty. By integrating uncertainty quantification, data augmentation, and explainability, the framework delivers robust,  interpretable, and flexible ransomware detection.
+
+\begin{algorithm}[H]
+\caption{: Data Augmentation with SMOTE and CTGAN}
+\label{alg:data_augmentation}
+\begin{algorithmic}[1]
+
+\State \textbf{Input:} Raw dataset \( D \) containing system behaviors and process activities.
+
+\State \textbf{Data Preparation:}
+    \State Extract representative features \( X = \{x_1, \dots, x_n\} \) from \( D \).
+    \State Preprocess features (normalization, encoding) as required.
+
+\State \textbf{Handle Imbalance with SMOTE:}
+    \State Identify minority classes and generate synthetic samples:
+    \[
+    x_{\text{new}} = x_i + \lambda (x_j - x_i), \quad \lambda \in [0,1]
+    \]
+    \State Form an intermediate balanced dataset \( D_{\text{SMOTE}} \).
+
+\State \textbf{Adversarial Data Generation with CTGAN:}
+    \State Use CTGAN to produce adversarial and drift-mitigated samples:
+    \[
+    \{X_{\text{adv}}, y_{\text{adv}}\} = \text{GANGenerator}(X_{\text{train}}, y_{\text{train}}, X_{\text{test}}, \text{ad params})
+    \]
+    \State Combine these samples with \( D_{\text{SMOTE}} \) to form:
+    \[
+    D_{\text{aug}} = D_{\text{SMOTE}} \cup \{X_{\text{adv}}, y_{\text{adv}}\}
+    \]
+
+\State \textbf{Output:} Augmented dataset \( D_{\text{aug}} \).
+
+\end{algorithmic}
+\end{algorithm}
+
+The framework also leverages supervised learning models, such as Random Forest, SVM, CNNs, and RNNs, which excel at learning  intricate data patterns. Trained on \( D_{\text{aug}} \), these models classify ransomware vs. benign files with high accuracy. Clustering methods (e.g., K-means, hierarchical clustering) assist in detecting zero-day threats by revealing anomalies in unlabelled samples.
+
+Adversarial training further fortifies the system by leveraging CTGAN to simulate adversarial scenarios and data drifts, ensuring resilience against evolving ransomware strains.
+
+Algorithms 1 and 2 are as follows. Algorithm 1 outlines the process of data augmentation using a combination of SMOTE and CTGAN to address class imbalance and generate adversarial examples. The procedure begins with a raw dataset denoted as D, which contains samples extracted from system behaviors such as file I/O patterns, entropy levels, and storage access metrics. Feature extraction and preprocessing are applied first, involving normalization or encoding of features depending on their type. SMOTE is then used to synthetically generate new samples for the minority classes by interpolating between existing samples, ensuring the new points lie within the same feature space. This results in a balanced intermediate dataset referred to as DSMOTE. Following this, CTGAN is employed to generate synthetic samples that capture more complex patterns and adversarial characteristics. CTGAN is particularly suited for handling both categorical and continuous features and generates synthetic data by learning the conditional distributions in the original data. The outputs from SMOTE and CTGAN are merged to produce the final augmented dataset, Daug, which contains both balanced and adversarially enriched samples and is used in the subsequent stages of training. 
+
+Algorithm 2 describes the model training pipeline, incorporating advanced optimisation, uncertainty quantification, and explainability mechanisms. The process begins with Daug, the augmented dataset from Algorithm 1. Particle Swarm Optimisation (PSO) is applied to identify optimal feature subsets and hyperparameters for the chosen classifier. PSO simulates a swarm of particles searching the solution space, updating their velocities and positions based on their own best-known positions and the global best. Once optimised, the selected machine learning model—be it Random Forest, CNN, SVM, or KNN—is trained by minimising a loss function over all samples in the dataset. During training, uncertainty is estimated using Monte Carlo Dropout or Bayesian Neural Networks. This involves running the model multiple times with stochastic dropout layers activated and averaging the predictions to obtain an uncertainty score for each sample. Samples with high uncertainty are flagged for review. Explainability is introduced via SHAP, which computes feature attribution values using a game-theoretic framework to determine the contribution of each feature to a given prediction. These values are critical in interpreting model decisions, especially in security-sensitive contexts. The model may be retrained or fine-tuned on uncertain or misclassified samples to further enhance performance. The algorithm outputs trained predictions, uncertainty metrics, and interpretability scores.
+
+\section{Experimental Setup and Results}
+\label{sec:Results}
+
+This section details the experimental setup and presents the results of various machine-learning approaches tested on the RanSAP and RDset datasets. We evaluate the models by prioritizing F1-score, precision, and recall over accuracy. These metrics provide a balanced  view of performance in imbalanced scenarios, such as ransomware detection. Hasarat~\cite{Hasarat2024} supports this focus by noting that accuracy can be misleading in imbalanced datasets, whereas the F1-score captures the trade-off between recall and precision, placing emphasis on minimising false positives and negatives.
+
+\subsection{Datasets and Preprocessing}
+We use two main datasets, RanSAP~\cite{hirano2022ransap} and Mathur's RDset~\cite{mathur2020ransomware}, each offering a substantial collection of ransomware and benign samples. To prepare  for both traditional and deep learning models, we apply data cleaning, normalisation, and feature engineering.
+
+The RanSAP dataset contains approximately 200 million storage access patterns from ransomware families (TeslaCrypt, WannaCry, Cerber, Sodinokibi, GandCrab-v4, Darkside and Ryuk) and benign  applications (Microsoft Excel, Firefox, AESCrypt, SDelete and Zip). It includes both read and write operations, covering timestamps (seconds and milliseconds), logical block addresses (LBA), block sizes, and normalised Shannon entropy~\cite{shannon1948mathematical} of written sectors. Meanwhile, the RDset dataset consists of 138,047 samples with 57 features,  comprising 70\% ransomware families and 30\% legitimate software (see Figure~\ref{fig8}). Both datasets are labelled for supervised learning, and each adheres to domain-specific feature extraction approaches.
+
+ \begin{algorithm}[H]
+\caption{: Model Training, Explainability, and Uncertainty Estimation}
+\label{alg:model_training}
+\begin{algorithmic}[1]
+
+\State \textbf{Input:} Augmented dataset \( D_{\text{aug}} \).
+
+\State \textbf{Feature and Hyperparameter Optimisation (PSO):}
+    \State Use PSO to select optimal features and hyperparameters:
+    \[
+    v_{i}(t+1) = w \, v_{i}(t) + c_1 r_1 (p_{best} - x_i) + c_2 r_2 (g_{best} - x_i)
+    \]
+    \[
+    x_{i}(t+1) = x_i(t) + v_i(t+1)
+    \]
+
+\State \textbf{Model Training:}
+    \State Train the classifier \( f_{\theta} \) on \( D_{\text{aug}} \):
+    \[
+    \theta = \arg\min_{\theta} \sum_{(x,y) \in D_{\text{aug}}} J(\theta, x, y)
+    \]
+
+\State \textbf{Uncertainty Estimation:}
+    \State Apply Monte Carlo Dropout (or BNN) to obtain predictive distributions:
+    \[
+    \hat{y} = \frac{1}{T} \sum_{t=1}^{T} f_{\theta}^{(t)}(x)
+    \]
+    \State Flag predictions with uncertainty above a specified threshold.
+
+\State \textbf{Explainable AI (XAI) with SHAP:}
+    \State Compute SHAP values:
+    \[
+    \phi_i = \sum_{S \subseteq N \setminus \{i\}}
+    \frac{|S|!(|N|-|S|-1)!}{|N|!}
+    \bigl[ f(S \cup \{i\}) - f(S) \bigr]
+    \]
+    \State Identify key features and refine the model if necessary.
+
+\State \textbf{Retraining:}
+    \State Incorporate updated data \( D_{\text{new}} \), addressing flagged uncertainties:
+    \[
+    \theta_{\text{new}} = \arg\min_{\theta} \sum_{(x, y) \in D_{\text{new}}} J(\theta, x, y)
+    \]
+
+\State \textbf{Output:} Final model predictions, uncertainty metrics, and SHAP-based explanations.
+
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Criteria for Feature Extraction and Engineering}
+ We identified key features distinguishing ransomware from benign software based on previous studies and domain expertise. Algorithms~\ref{alg1} and~\ref{alg2} illustrate how features are extracted from the RanSAP and RDset datasets, respectively.  These features inform the detection framework (Algorithms~\ref{alg:data_augmentation} and \ref{alg:model_training}) by proactively separating ransomware from benign behaviour.
+
+ \begin{algorithm}
+\caption{RanSAP Feature Extraction}\label{alg1}
+\begin{algorithmic} 
+\Require DataFrame $df$ with columns ['Timestamp\_s', 'Timestamp\_ms', 'LBA', 'Size', 'Entropy', 'Normalize', 'Type']
+\Ensure Array of extracted features
+
+\State \textbf{Initialise} $features \gets []$
+\State $time\_window \gets 10$ \Comment{Time window set to 10 seconds}
+
+\For{$i \gets 0$ \textbf{to} $len(df) - time\_window$ \textbf{step} $time\_window$}
+    \State $window \gets df.iloc[i:i + time\_window]$
+    \State $avg\_write\_throughput \gets \text{mean}(window[window['Type'] == 'write']['Size'])$
+    \State $avg\_read\_throughput \gets \text{mean}(window[window['Type'] == 'read']['Size'])$
+    \State $var\_lba\_write \gets \text{var}(window[window['Type'] == 'write']['LBA'])$
+    \State $var\_lba\_read \gets \text{var}(window[window['Type'] == 'read']['LBA'])$
+    \State $avg\_normalized\_entropy \gets \text{mean}(window[window['Type'] == 'write']['Normalize'])$
+    \State $features.\text{append}([$ 
+    \State \hspace{2em} $avg\_write\_throughput,$ 
+    \State \hspace{2em} $avg\_read\_throughput,$ 
+    \State \hspace{2em} $var\_lba\_write,$ 
+    \State \hspace{2em} $var\_lba\_read,$ 
+    \State \hspace{2em} $avg\_normalized\_entropy$ $])$
+    
+\EndFor
+
+\State \Return $\text{np.array}(features)$
+
+\end{algorithmic}
+\end{algorithm}
+
+Algorithm~\ref{alg1}  outlines RanSAP feature extraction, capturing the sequence and type of operations (creation, modification, deletion)  that often differ from benign software. Ransomware  often employs  distinct encryption algorithms, observable through their type and parameters. Network-related features, such as unusual connections or data transfers patterns, also help  pinpoint ransomware’s communication channels. The frequency and types of system calls further differentiate ransomware from benign applications. As mentioned, Algorithm 3 focuses on extracting meaningful statistical features from the RanSAP dataset, which records disk-level behaviour over time. The input is a log file containing timestamped entries of read and write operations along with associated metadata like Logical Block Addresses (LBA), operation type, and entropy. The log is segmented into fixed 10-second time windows to facilitate temporal analysis. Within each time window, the algorithm computes several statistical features: average write throughput, average read throughput, variance in write LBAs, variance in read LBAs, and average normalised entropy. These features provide a compact yet expressive summary of storage activity and are highly indicative of ransomware behaviour, which often involves high-entropy writes and irregular access patterns. The result is a structured feature array for each time window that can be directly used as input to machine learning models.
+
+Algorithm 4 deals with feature extraction and dimensionality reduction for the RDset dataset, which contains static attributes from Windows Portable Executable (PE) headers and related metadata. The process begins by dropping identifier columns such as file names and hashes, which do not contribute to classification. The dataset is split into input features X and target labels y, and all feature columns are standardised using Z-score normalisation to ensure consistency in scale. Features with low variance are removed using a predefined threshold, as they are unlikely to contribute meaningfully to classification decisions. To further refine the feature set, the Variance Inflation Factor (VIF) is calculated for each remaining feature to identify and remove multicollinearity. Features with a VIF score exceeding a certain threshold, typically 10, are eliminated to reduce redundancy and improve model interpretability. The resulting set of features, Xfinal, is a reduced and optimised representation of the original RDset, containing only the most relevant and independent features for effective ransomware detection.
+
+ For RanSAP, we follow Hirano et al.~\cite{hirano2022ransap}, while for RDset,  we adopt Masum et al.~\cite{masum2022ransomware} feature  calculation techniques. Only a subset of RanSAP focusing on \texttt{Win2008r2\_250GB\_SSD} access patterns is used (Figures~\ref{fig10} and~\ref{fig9}). Figure 4 shows the binary class distribution in the RanSAP dataset after applying a 30-second time window during feature extraction. The chart demonstrates that there is an imbalance between benign samples and ransomware samples. This imbalance justifies the need for data augmentation methods like SMOTE and CTGAN to ensure that models are not biased towards the majority class. Figure 5 shows the multi-class distribution for RanSAP after feature extraction with the same 30-second window. It displays data across 12 classes, representing multiple ransomware families and benign applications. The class imbalance is even more significant here, making it more challenging to train models that can generalise well across all ransomware families.
+
+ 
+ We apply Equations~\ref{eq:throughput}--\ref{eq:NShanonEntropy} to obtain metrics like average write/read throughput, variance of write/read LBAs, and normalised Shannon entropy.
+
+ \begin{algorithm}
+\caption{RDset Feature Extraction using Variance Threshold and VIF}\label{alg2}
+\begin{algorithmic}
+    \Require DataFrame $D$ with columns $['Name', 'md5', 'legitimate', \ldots]$
+    \Ensure Array of extracted features $X_{final}$
+    
+    \State \textbf{Load and preprocess data}
+    \State Load dataset $D$
+    \State Drop identity variables: $D \gets D \setminus \{Name, md5\}$
+    \State Separate features and target variable:
+    \State $X \gets D \setminus \{legitimate\}$
+    \State $y \gets D[legitimate]$
+
+    \State \textbf{Standardize the features}
+    \State $X_{standardized} \gets \text{StandardScaler().fit\_transform}(X)$
+    \State $X_{standardized\_df} \gets \text{DataFrame}(X_{standardized}, \text{columns}=X.\text{columns})$
+
+    \State \textbf{Apply variance threshold}
+    \State $\text{selector} \gets \text{VarianceThreshold}(1)$
+    \State $X_{high\_variance} \gets \text{selector.fit\_transform}(X_{standardized\_df})$
+    \State $\text{selected\_features} \gets$\newline
+            $X_{standardized\_df}.\text{columns}$[\text{selector.get\_support(indices=True)}]
+    \State $X_{high\_variance\_df} \gets \text{DataFrame}(X_{high\_variance}, \text{columns}=\text{selected\_features})$
+
+    \State \textbf{Calculate Variance Inflation Factor (VIF)}
+    \State $\text{vif\_data} \gets \text{DataFrame}()$
+    \State $\text{vif\_data}["Feature"] \gets X_{high\_variance\_df}.\text{columns}$
+    \State $\text{vif\_data}["VIF"] \gets$ \newline
+           $[\text{variance\_inflation\_factor}(X_{high\_variance\_df}.\text{values}, i)$ \newline
+           $\ \forall i \in 0 \ldots (X_{high\_variance\_df}.\text{shape}[1]-1)]$
+
+    \State \textbf{Filter out features with high VIF}
+    \State $\text{final\_features} \gets \text{vif\_data}[\text{vif\_data}["VIF"] \leq 10]["Feature"]$
+    \State $X_{final} \gets X_{high\_variance\_df}[\text{final\_features}]$
+
+    \State \textbf{Output the final set of selected features}
+    \State Print "Selected features after applying variance threshold and VIF:"
+    \State Print $X_{final}.\text{columns}$
+
+    \State \Return $X_{final}$
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Average Write Throughput}, $T_{write}(t)$, is calculated as:
+    \begin{equation}
+    \label{eq:throughput}
+    T_{write}(t) = \frac{\sum_{i=1}^{n_{write}} \text{Size}_i}{\text{time\_window}}
+    \end{equation}
+    where $n_{write}$ is the number of write operations in the time window, and $\text{Size}_i$ is the size of the $i$-th write operation.
+    
+\textbf{Average Read Throughput}, $T_{read}(t)$, is calculated as:
+        \begin{equation}
+        \label{eq:Avthroughput}
+        T_{read}(t) = \frac{\sum_{i=1}^{n_{read}} \text{Size}_i}{\text{time\_window}}
+        \end{equation}
+        where $n_{read}$ is the number of read operations in the time window, and $\text{Size}_i$ is the size of the $i$-th read operation.
+        
+\textbf{Variance of Write LBAs}, $V_{write}(t)$, is calculated as:
+    \begin{equation}
+    \label{eq:VwriteLBA}
+    V_{write}(t) = \text{Var}(\{\text{LBA}_i\}_{i=1}^{n_{write}})
+    \end{equation}
+    where $\text{LBA}_i$ is the logical block address of the $i$-th write operation.
+    
+\textbf{Variance of Read LBAs}, $V_{read}(t)$, is calculated as:
+    \begin{equation}
+    \label{eq:VreadLBA}
+    V_{read}(t) = \text{Var}(\{\text{LBA}_i\}_{i=1}^{n_{read}})
+    \end{equation}
+    where $\text{LBA}_i$ is the logical block address of the $i$-th read operation.
+    
+\textbf{Average Normalised Shannon Entropy} of written sectors, $H_{write}(t)$, is calculated as:
+    \begin{equation}
+    \label{eq:NShanonEntropy}
+    H_{write}(t) = \frac{\sum_{i=1}^{n_{write}} \text{Normalise}_i}{n_{write}}
+    \end{equation}
+    where $n_{write}$ is the number of write operations in the time window, and $\text{Normalise}_i$ is the normalised entropy of the $i$-th written sector.
+
+
+ For RDset, variables ``Md5'' and ``Name'' are dropped  to avoid confounding model development. The target variable ``legitimate'' equals 1 for safe software and 0 for ransomware (Figure~\ref{fig8}). We use Equations~\ref{eq:Zscore}--\ref{eq:VIF} to apply Z-score standardisation, variance thresholding, and variance inflation factor (VIF). Features failing these criteria are excluded to reduce noise and multicollinearity. Figure 6 displays the class distribution for the RDset dataset, which consists of about 70\% ransomware samples and 30\% benign samples. This figure again confirms that class imbalance is a significant issue in both datasets used in this study.
+
+
+\textbf{Z-score Standardisation} is used to standardise the RDset features by removing the mean and scaling to unit variance.
+    
+    \begin{equation}
+    \label{eq:Zscore}
+    z_i = \frac{x_i - \mu_i}{\sigma_i}
+    \end{equation}
+    
+    where \(z_i\) is the standardised value of feature \(i\), \(x_i\) is the original value of feature \(i\), \(\mu_i\) is the mean of feature \(i\) and \(\sigma_i\) is the standard deviation of feature \(i\).
+    
+\textbf{Variance Threshold} is applied to remove RDset features with low variance. This ensures that only features with variability are retained. The threshold value is set to 1 in this context.
+    
+    \begin{equation}
+    \label{eq:VThreshold}
+    \sigma^2_i \geq \tau
+    \end{equation}
+    
+    where \(\sigma^2_i\) is the variance of feature \(i\) and \(\tau\) is the variance threshold, set to 1.
+    
+\textbf{Variance Inflation Factor (VIF)} is used to detect multicollinearity among the features. Features with VIF greater than 10 are considered to have high multicollinearity and are removed.
+    
+    \begin{equation}
+    \label{eq:VIF}
+    \text{VIF}_i = \frac{1}{1 - R_i^2}
+    \end{equation}
+    
+    where \(\text{VIF}_i\) is the Variance Inflation Factor for feature \(i\) and \(R_i^2\) is the coefficient of determination of the regression of feature \(i\) on all other features.
+    
+    \texttt{Input:} $D$: Original dataset, $\tau$: Variance threshold (default is 1) and $VIF_{threshold}$: Variance Inflation Factor threshold (default is 10)
+    
+    \texttt{Output:}$X_{final}$: Final set of selected features
+
+\begin{figure}[h]
+%\centering
+    \includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/RanSAP 30s Time Window (Benign vs Ransomware.png}
+    \caption{\emph{2-Class distribution of 30-second time window for RanSAP}}
+\label{fig10}
+\end{figure}
+
+\begin{figure}[h]
+%\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/12 Classes of 30s Time Window.png}
+\caption{\emph{12-Class distribution of 30-second time window for RanSAP}}
+\label{fig9}
+\end{figure}
+
+
+
+\subsection{Initial Experimental Results}
+We initially conducted a comprehensive evaluation of several machine learning models to establish baseline performance on the RanSAP and RDset datasets. Specifically, we assessed Random Forest, k-Nearest Neighbours (k-NN), and Support Vector Machines (SVM), while initially excluding convolutional neural networks (CNN) from these early comparisons. The models were evaluated based on a variety of standard classification metrics, including accuracy, precision, recall, F1-score, as well as cross-validation to ensure robustness across different data splits. All models were tested without applying any data augmentation, uncertainty quantification, or hyperparameter optimisation techniques in order to establish their natural baseline performance under raw input conditions.
+
+Tables~\ref{tab:binary_classification_scores} and~\ref{tab:multi_class_classification_scores} present the results for binary and multi-class classification respectively on the RanSAP dataset. Table~\ref{tab:RDsetmetrics} shows analogous results for RDset under similar experimental settings. These tables provide valuable insight into the strengths and weaknesses of each classifier across both binary and multi-class formulations.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/Distribution_Labelled.png}
+\caption{\emph{Distribution of Labelled Data for RDset}}
+\label{fig8}
+\end{figure}
+
+Table~\ref{tab:binary_classification_scores} shows that, for binary classification on RanSAP, Random Forest achieves the strongest performance, yielding an F1-score of 0.9613. This suggests that the ensemble nature of Random Forest, which combines multiple decision trees, allows it to capture complex decision boundaries effectively even without additional model tuning or augmentation. In comparison, k-Nearest Neighbours achieves an F1-score of 0.8612, while Support Vector Machines yield an F1-score of 0.8029. Although both k-NN and SVM exhibit reasonable performance, their lower F1-scores suggest a reduced ability to balance precision and recall compared to Random Forest in this specific binary classification scenario.
+
+Expanding to the more challenging multi-class classification problem on RanSAP, Table~\ref{tab:multi_class_classification_scores} highlights a significant performance drop for k-NN and SVM. Random Forest remains the strongest performer, achieving an F1-score of 0.8755. However, k-NN and SVM struggle more with the increased class complexity, reflecting the inherent challenges of correctly separating multiple classes with limited data representation. This result reinforces the robustness of Random Forest as an initial baseline model across both binary and multi-class settings on the RanSAP dataset, while highlighting the greater sensitivity of k-NN and SVM to the increased classification complexity.
+
+In parallel, Table~\ref{tab:RDsetmetrics} presents the corresponding baseline results for the RDset dataset, which features a larger and more diverse data distribution. Once again, Random Forest outperforms all other classical machine learning models, achieving an impressive F1-score of 0.9864, demonstrating near-perfect classification performance. Notably, deep learning begins to demonstrate its strengths on this dataset: the CNN model achieves an F1-score of 0.9733, indicating that neural network-based approaches can capture complex, non-linear patterns in RDset very effectively. This strong CNN performance provides early evidence that more advanced deep learning architectures may offer additional benefits, especially as data complexity increases.
+
+To further investigate the potential of deep learning approaches on RDset, we implemented a convolutional neural network (CNN) architecture using PyTorch. The network was designed as a fully connected CNN rather than one using traditional convolutional layers, due to the nature of the input data. The architecture consisted of two hidden layers with 128 and 64 neurons respectively, followed by an output layer whose size matched the number of output classes. Rectified Linear Unit (ReLU) activation functions were used throughout the network to introduce non-linearity and improve learning dynamics. The model was optimised using the Adam optimiser with a learning rate of 0.001, and trained using CrossEntropyLoss to handle the multi-class classification objective. The RDset dataset was partitioned into training and testing subsets using a 70/30 split, and training was conducted over 10 epochs with a batch size of 32.
+
+The CNN demonstrated strong generalisation capability across both binary and multi-class scenarios. After training, the model achieved an accuracy of 0.9838, a precision of 0.9684, a recall of 0.9782, and an F1-score of 0.9733 on the held-out test set. These results confirm that the CNN was able to capture complex and subtle patterns in the RDset data, yielding robust performance that closely rivals and, in some metrics, approaches the strong baseline set by Random Forest. This also suggests that CNN-based deep learning models may offer greater scalability and adaptability as the dataset size and complexity increase.
+
+\begin{table*}[h!]
+\centering
+\caption{Initial Model Performance Metrics (30s) - Binary Classification Models for RanSAP}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} & \textbf{Cross-Validation Scores} \\ \hline
+Random Forest  & 0.9593  & 0.9600  & 0.9625  & 0.9613  & [0.9632, 0.9632, 0.9354, 0.9815, 0.9531]  \\ \hline
+k-NN           & 0.8281  & 0.8400  & 0.8800  & 0.8612  & [0.7918, 0.8396, 0.8409, 0.8148, 0.8543]  \\ \hline
+SVM            & 0.7301  & 0.7800  & 0.8300  & 0.8029  & [0.7152, 0.7503, 0.7033, 0.7302, 0.7517]  \\ \hline
+\end{tabular}%
+}
+\label{tab:binary_classification_scores}
+\end{table*}
+
+\begin{table*}[h!]
+\centering
+\caption{Initial Model Performance Metrics (30s) - Multi-Class (12) Classification Models for RanSAP}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} & \textbf{Cross-Validation Scores} \\ \hline
+Random Forest  & 0.8508  & 0.8700  & 0.8800  & 0.8755  & [0.8680, 0.7819, 0.8574, 0.8415, 0.9054]  \\ \hline
+k-NN           & 0.5114  & 0.5900  & 0.6400  & 0.6140  & [0.5281, 0.5377, 0.5055, 0.4776, 0.5083]  \\ \hline
+SVM            & 0.2723  & 0.2500  & 0.3000  & 0.2715  & [0.2801, 0.2823, 0.2234, 0.2834, 0.2923]  \\ \hline
+\end{tabular}%
+}
+\label{tab:multi_class_classification_scores}
+\end{table*}
+
+\vspace{0.5cm}
+
+\begin{table}
+\centering
+\caption{Initial Model Performance Metrics for RDset}
+\label{tab:RDsetmetrics}
+\begin{tabular}{lrrrr}
+\toprule
+        Model &  Accuracy &  Precision &  Recall &  F1 Score \\
+\midrule
+Random Forest &    0.9918 &     0.9834 &  0.9894 &    0.9864 \\
+SVM           &    0.9760 &     0.9710 &  0.9486 &    0.9597 \\
+KNN           &    0.9856 &     0.9735 &  0.9790 &    0.9762 \\
+CNN           &    0.9838 &     0.9684 &  0.9782 &    0.9733 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Data Augmentation}
+ Data augmentation plays a crucial role in addressing class imbalance and enhancing model performance, particularly in domains such as ransomware detection where the number of benign samples often significantly exceeds the number of malicious instances. In imbalanced datasets, models tend to become biased toward the majority class, leading to poor detection rates for minority classes, such as rare or newly emerging ransomware variants. By artificially generating additional samples for underrepresented classes, data augmentation helps create a more balanced dataset that allows machine learning algorithms to better learn the underlying patterns associated with both benign and malicious behaviours.
+
+Through augmentation, the model is exposed to a wider variety of scenarios, which improves its ability to generalise to unseen data and reduces the risk of overfitting to the dominant class. Techniques such as Synthetic Minority Oversampling Technique (SMOTE) generate synthetic samples by interpolating between existing minority class samples, producing realistic data points that strengthen the decision boundaries between classes. More advanced methods like Conditional Tabular Generative Adversarial Networks (CTGAN) further enhance the diversity of synthetic data by modelling complex distributions within the minority class, capturing intricate relationships between features that simpler oversampling methods may overlook.
+
+In ransomware detection specifically, augmentation not only helps balance the dataset but also exposes the model to potential variations in ransomware behaviour, including adversarial patterns that may arise in real-world attacks. This results in models that are more robust to sophisticated and evolving threats. Additionally, augmented data enables better training of deep learning models, such as Convolutional Neural Networks (CNNs), which often require large and diverse datasets to fully leverage their representation learning capabilities.
+
+Here, we examine SMOTE and CTGAN for ransomware detection across RanSAP and RDset.
+
+\textbf{Performance on RanSAP Dataset:}
+ For RanSAP, SMOTE and PSO balanced classes and tuned hyperparameters. Figure~\ref{fig22} and Table~\ref{tab:pso_smote_comparison} show marginal gains in precision and recall for binary classification, but limited multi-class improvements. While SMOTE and PSO lowered false positives in binary classification, their effects may diminish in more complex scenarios. Figure 7 compares model performance metrics with and without applying SMOTE and PSO for the RanSAP dataset. The bar graph shows that applying SMOTE and PSO leads to slight improvements in precision and recall for binary classification. However, for multi-class classification, these improvements are negligible, suggesting that the RanSAP dataset’s rich feature set may already allow models to perform well without extensive preprocessing. Table 4 compares performance metrics with and without PSO and SMOTE for RanSAP. The results show minor improvements in binary classification after applying PSO and SMOTE, while multi-class classification sees virtually no change, suggesting that the intrinsic feature quality in RanSAP already supports strong performance.
+
+\textbf{Performance on RDset Dataset:}
+ We first assessed RDset without augmentation (Table~\ref{tab:RDsetmetrics}). Random Forest led at 0.9918 accuracy, 0.9834 precision, 0.9894 recall, and 0.9864 F1. KNN, CNN, and SVM also performed well. Applying SMOTE (Table~\ref{tab:metrics_smote}) yielded steady improvements across all models. Random Forest  soared to 0.9961 accuracy (F1 = 0.9962). KNN and CNN also  improved, while SVM maintained a solid 0.9732 F1. Hence SMOTE effectively addresses class imbalance, boosting generalisation.
+
+ Conversely, CTGAN (Table~\ref{tab:metrics_ctgan}) produced mixed outcomes. Random Forest reached 0.9965 accuracy (F1 = 0.9955), but SVM, KNN, and CNN declined, indicating possible noise or outliers from CTGAN. Fine-tuning the CTGAN process may be necessary for broader compatibility. Table 6 presents performance after applying CTGAN to RDset. While Random Forest improves slightly to an F1-score of 0.9955, SVM’s performance collapses entirely, achieving an F1-score of zero. KNN and CNN also experience reduced performance. This shows that CTGAN can introduce noisy synthetic samples that harm certain models if not properly tuned.
+
+\textbf{Combined RanSAP and RDset Results:} Table~\ref{tab:combined_results}  shows we tested both datasets together. Under SMOTE, Random Forest led with a 0.9963 F1 and 99.63\% accuracy, with KNN and CNN also scoring 0.9925 and 0.9906 F1, respectively. SVM achieved 0.9884. With CTGAN, CNN + Monte Carlo Dropout topped at 0.9978 F1 and 99.77\% accuracy, while Random Forest excelled at 0.9976 F1 and 99.75\% accuracy. SVM gained ground (0.9970 F1), and KNN remained consistent. Overall, SMOTE consistently boosts results; CTGAN offers large improvements for robust models, however, but may hamper others with added noise. Tailoring these methods to the model and dataset is crucial for optimal performance.
+
+\begin{table}[h!]
+\centering
+\caption{Comparison of Performance Metrics with and without PSO/SMOTE for RanSAP}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Classification Type} & \textbf{PSO/SMOTE} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} \\ \hline
+Binary Classification         & With PSO/SMOTE    & 0.972  & 0.976  & 0.969 & 0.970  \\ \cline{2-6}
+                              & Without PSO/SMOTE & 0.974  & 0.974  & 0.974 & 0.974  \\ \hline
+Multi-Class Classification    & With PSO/SMOTE    & 0.895  & 0.903  & 0.887 & 0.885  \\ \cline{2-6}
+                              & Without PSO/SMOTE & 0.896  & 0.905  & 0.887 & 0.885  \\ \hline
+\end{tabular}%
+}
+\label{tab:pso_smote_comparison}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{ExAI_Paper_Figures/comparison_metrics_pso_smote.png}
+\caption{\emph{Visual comparison metrics with and without PSO/SMOTE for RanSAP}}
+\label{fig22}
+\end{figure}
+
+\begin{table}
+\centering
+\caption{Model Performance Metrics with SMOTE for RDset}
+\label{tab:metrics_smote}
+\begin{tabular}{lrrrr}
+\toprule
+Model         & Accuracy & Precision & Recall & F1 Score \\
+\midrule
+Random Forest & 0.9961   & 0.9907    & 0.9969 & 0.9962    \\
+SVM           & 0.9733   & 0.9798    & 0.9666 & 0.9732    \\
+KNN           & 0.9887   & 0.9839    & 0.9937 & 0.9888    \\
+CNN           & 0.9845   & 0.9850    & 0.9840 & 0.9845    \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}
+\centering
+\caption{Model Performance Metrics with CTGAN for RDset}
+\label{tab:metrics_ctgan}
+\begin{tabular}{lrrrr}
+\toprule
+Model         & Accuracy & Precision & Recall & F1 Score \\
+\midrule
+Random Forest & 0.9965   & 0.9948    & 0.9961 & 0.9955    \\
+SVM           & 0.6101   & 0.0000    & 0.0000 & 0.0000    \\
+KNN           & 0.7503   & 0.6810    & 0.6762 & 0.6786    \\
+CNN           & 0.6555   & 0.5360    & 0.8669 & 0.6624    \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Uncertainty Quantification}
+ We employed Monte Carlo-based uncertainty estimation to examine its effect on Random Forest, SVM, k-NN, and CNN models (Figure~\ref{fig:precision_uncertainty}). Table~\ref{tab:uncertainty_comparison} compares precision with and without uncertainty. Moreover, a CNN with Monte Carlo Dropout combined with CTGAN  reached 0.9978 F1 and 99.77\% accuracy (Table~\ref{tab:combined_results}). Hence, combining uncertainty-aware strategies with advanced augmentation can greatly improve ransomware detection.
+
+Random Forest also benefited from uncertainty  estimation, especially with SMOTE,  showing improved precision and recall in binary and multi-class tasks (Table~\ref{tab:results}). Monte Carlo Dropout  curbed overconfident predictions,  boosting reliability for real-world ransomware scenarios. Conformal prediction  added another layer of interpretability, identifying ambiguous samples  for manual review. Collectively, these methods enhance both robustness and explainability.
+
+\begin{table}[h!]
+\centering
+\caption{Optimised Features as per Random Forest Model for RanSAP (10s)}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Metric} & \textbf{Binary Classification} & \textbf{Multi-Class Classification} \\ \hline
+Conformal Prediction Coverage & 0.9698 & 0.8922 \\ \hline
+Optimised Random Forest F1 Score & 0.9700 & 0.8894 \\ \hline
+Best Parameters (n\_estimators, max\_depth) & \multicolumn{2}{c|}{[78.18, 9.44]} \\ \hline
+Best Cross-Validation Score & \multicolumn{2}{c|}{0.9740} \\ \hline
+\end{tabular}%
+}
+\label{tab:results}
+\end{table}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.4\textwidth]{ExAI_Paper_Figures/precision_uncertainty_comparison.png}
+\caption{\emph{Precision Enhancement by Uncertainty Estimation (Monte Carlo) for RanSAP.}}
+\label{fig:precision_uncertainty}
+\end{figure}
+
+
+
+\begin{table*}[h!]
+\centering
+\caption{Comparison metrics with and without Uncertainty Estimation (Monte Carlo) for RanSAP}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\hline
+\multirow{2}{*}{\textbf{Model}} & \multicolumn{4}{c|}{\textbf{Without Uncertainty}} & \multicolumn{4}{c|}{\textbf{With Uncertainty}} \\ \cline{2-9} 
+ & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} \\ \hline
+Random Forest & 0.9598 & 0.9613 & 0.9582 & 0.9597 & 0.9689 & 0.9725 & 0.9653 & 0.9689 \\ \hline
+SVM           & 0.7976 & 0.8029 & 0.7923 & 0.7976 & 0.8094 & 0.8153 & 0.8034 & 0.8093 \\ \hline
+k-NN          & 0.8569 & 0.8612 & 0.8525 & 0.8568 & 0.8686 & 0.8734 & 0.8637 & 0.8685 \\ \hline
+\end{tabular}%
+}
+\label{tab:uncertainty_comparison}
+\end{table*}
+
+
+
+\begin{table*}[h!]
+\centering
+\caption{Performance Metrics for Ransomware Detection Models Using Combined RanSAP and RDset Datasets}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|l|c|c|c|c|}
+\hline
+\textbf{Technique} & \textbf{Model}                & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\ \hline
+\multirow{4}{*}{SMOTE} & Random Forest               & 0.9963            & 0.9976             & 0.9950          & 0.9963            \\ \cline{2-6} 
+                      & SVM                         & 0.9885            & 0.9881             & 0.9888          & 0.9884            \\ \cline{2-6} 
+                      & KNN                         & 0.9926            & 0.9970             & 0.9881          & 0.9925            \\ \cline{2-6} 
+                      & CNN with MC Dropout         & 0.9906            & 0.9948             & 0.9864          & 0.9906            \\ \hline
+\multirow{4}{*}{CTGAN} & Random Forest               & 0.9975            & 0.9968             & 0.9984          & 0.9976            \\ \cline{2-6} 
+                      & SVM                         & 0.9968            & 0.9967             & 0.9973          & 0.9970            \\ \cline{2-6} 
+                      & KNN                         & 0.9922            & 0.9902             & 0.9947          & 0.9925            \\ \cline{2-6} 
+                      & CNN with MC Dropout         & \textbf{0.9977}   & \textbf{0.9972}    & \textbf{0.9983} & \textbf{0.9978}   \\ \hline
+\end{tabular}%
+}
+\label{tab:combined_results}
+\end{table*}
+
+\subsection{SHAP Analysis for Explainable AI}
+To interpret model predictions,  we computed SHAP values for both binary and multi-class models. SHAP  reveals each feature’s contribution, thus clarifying AI decision processes \cite{gulmez2024xran}. Figures~\ref{fig7} and~\ref{fig23} show feature importances for RDset and RanSAP, respectively. Tables~\ref{tab:RDsetFeature} and~\ref{tab:RanSAPFeature} provide tabular views of these impacts. Figure 9 presents feature importance results from the Random Forest model trained on RDset. The figure identifies ‘SizeOfStackReserve’ as the most critical feature, followed by entropy-based features such as ‘SectionsMaxEntropy’ and ‘ResourcesMinEntropy’. This indicates that ransomware detection in this dataset heavily depends on features derived from the Portable Executable (PE) header and entropy measures. Figure 10 shows the SHAP feature importance summary for the RanSAP dataset. The mean absolute SHAP values indicate that ‘Hwrite’ (the normalized Shannon entropy of write operations) is the most influential feature, followed by ‘Twrite’ (write throughput), ‘Vwrite’ (variance of write LBAs), ‘Tread’ (read throughput), and ‘Vread’ (variance of read LBAs). This demonstrates that disk-level storage behaviour, especially write patterns, is highly predictive for ransomware detection. Table 10 lists the feature importance rankings for RDset as calculated by the Random Forest model. ‘SizeOfStackReserve’ ranks highest, followed by entropy-related features such as ‘SectionsMaxEntropy’ and ‘ResourcesMinEntropy’. These features are effective in distinguishing ransomware from benign files in RDset. Table 11 summarises the SHAP values for RanSAP, confirming that ‘Hwrite’, ‘Twrite’, and ‘Vwrite’ are the most critical features for classification, aligning with the findings from the SHAP visualisation.
+
+For binary classification on RanSAP, Figure~\ref{fig23}  highlights ``Hwrite'' and ``Vwrite'' as top influences in identifying ransomware from benign. For multi-class, SHAP  analyses identify ``Twrite'' and ``Tread''  as critical in distinguishing families like Darkside and GandCrab4. Such insights guide enhanced feature selection and model refinements. 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/Feature_Importance_RF_Model.png}
+\caption{\emph{Feature Importance on Random Forest Model for RDset}}
+\label{fig7}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/Feature value_Ransap.PNG}
+\caption{\emph{SHAP Feature value and mean for RanSAP}}
+\label{fig23}
+\end{figure}
+
+\begin{table}[h!]
+\centering
+\caption{Feature Importance in RDset}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Feature}           & \textbf{Importance} \\
+\hline
+SizeOfStackReserve         & 0.30  \\
+SectionsMaxEntropy         & 0.18  \\
+ResourcesMinEntropy        & 0.15  \\
+SizeOfOptionalHeader       & 0.08  \\
+SectionsMinVirtualsize     & 0.06  \\
+SectionsMinEntropy         & 0.05  \\
+AddressOfEntryPoint        & 0.04  \\
+MajorLinkerVersion         & 0.03  \\
+OperatingSystemVersion     & 0.02  \\
+SizeOfHeaders              & 0.01  \\
+SectionAlignment           & 0.01  \\
+LoaderFlags                & 0.01  \\
+\hline
+\end{tabular}%
+\label{tab:RDsetFeature}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{SHAP Values for Important Features in RanSAP}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Feature}           & \textbf{Mean(|SHAP Value|)} \\
+\hline
+Hwrite                     & 0.70 \\
+Twrite                     & 0.50 \\
+Vwrite                     & 0.40 \\
+Tread                      & 0.30 \\
+Vread                      & 0.20 \\
+\hline
+\end{tabular}
+\label{tab:RanSAPFeature}
+\end{table}
+
+\subsection{LIME for Local Explanations}
+Local Interpretable Model-Agnostic Explanations (LIME)  further clarify individual predictions by approximating local model behaviour. Figures~\ref{fig:lime_legitimate} and~\ref{fig:lime_ransomware} show how LIME highlights key features driving legitimate or ransomware classifications. For instance, ``ImageBase,'' ``Subsystem,'' and ``SectionsMaxEntropy'' dominantly shape predictions in RDset, offering practical insight into feature relevance and potential attack surfaces. Figure 11 presents a LIME explanation for a single benign file classification in RDset. The explanation highlights that features such as ‘Subsystem’, ‘ImageBase’, and ‘SectionsMaxEntropy’ contributed most strongly to the model classifying this sample as benign. This provides transparency into why the model made a certain prediction. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/lime_explanation_legitimate.png}
+    \caption{LIME explanation for a legitimate file, showing the top contributing features for RDset.}
+    \label{fig:lime_legitimate}
+\end{figure}
+
+Figure 12 shows a LIME explanation for a ransomware file in RDset. In this case, features like ‘SectionsMaxEntropy’ and ‘ResourcesMinEntropy’ were most influential in classifying the file as ransomware. This local interpretability helps security analysts understand what aspects of the file’s structure signalled malicious behaviour.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/lime_explanation_ransomware.png}
+    \caption{LIME explanation for a ransomware file, showing the top contributing features for RDset.}
+    \label{fig:lime_ransomware}
+\end{figure}
+
+\subsection{Model Evaluation through Confusion Matrices}
+Confusion matrices (Figures~\ref{fig12} and~\ref{fig13}) for Random Forest, SVM, and k-NN reveal performance nuances in binary and multi-class tasks.  Although Random Forest achieves a balanced trade-off between true positives and false negatives, its accuracy varies by class in multi-class classification, pointing to possible improvements in feature engineering or hybrid modelling. Figure 13 depicts the multi-class confusion matrix for RanSAP using 12 classes. The matrix shows how frequently each ransomware family and benign class were correctly or incorrectly classified. Random Forest performs well overall, but some confusion exists between ransomware families such as Darkside and GandCrab4, which share overlapping features and behaviours. 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/rf_confusion_matrix_multi.png}
+\caption{\emph{12 Classes Confusion Matrix of 30-second time window for RanSAP}}
+\label{fig12}
+\end{figure}
+
+Figure 14 presents the binary confusion matrix for RanSAP, classifying data simply as ransomware or benign. The matrix indicates a very high true positive rate and very low false positive and false negative rates, showcasing strong performance in the simpler binary classification task.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ExAI_Paper_Figures/rf_confusion_matrix_binary.png}
+\caption{\emph{2 Classes Confusion Matrix of 30-second time window for RanSAP}}
+\label{fig13}
+\end{figure}
+
+\subsection{Negative Predictive Value (NPV) Analysis for Multi-Class Classification} NPV indicates how effectively the model identifies true negatives. Figure~\ref{fig18} shows NPV per class for multi-class RanSAP detection, with ``Excel,'' ``SDelete,'' and ``Zip''  yielding high NPVs, while ``Darkside'' and ``GandCrab4'' are occasionally  misclassified. An average NPV of 0.9627 underscores overall effectiveness but pinpoints classes needing further calibration. Figure 15 displays the Negative Predictive Value (NPV) for each class in multi-class classification for RanSAP. The benign classes such as Excel, SDelete, and Zip have near-perfect NPV, meaning they are rarely misclassified as ransomware. Conversely, ransomware families like Darkside and GandCrab4 have lower NPVs, suggesting that these are occasionally misclassified as benign, warranting further model refinement.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{ExAI_Paper_Figures/npv_multi.png}
+\caption{\emph{Negative Predictive Value (NPV) - Multi-Class Classification for RanSAP}}
+\label{fig18}
+\end{figure}
+
+\subsection{Loss Analysis in Deep Learning Models}
+We examined loss curves (Figure~\ref{fig25}) for binary vs. multi-class CNN training on RanSAP. Binary loss converged steadily, showing minimal over fitting. Multi-class loss fluctuated more, suggesting difficulties in handling complex class boundaries. Potential solutions include advanced hyper parameter tuning or stronger data augmentation. Figure~\ref{fig25} compares the training loss curves for CNN models on RanSAP for binary and multi-class classification. The binary classification model shows a steady decrease in loss and stable convergence, while the multi-class model’s loss curve fluctuates more, reflecting the increased difficulty of distinguishing between many ransomware families.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{ExAI_Paper_Figures/Comparison of Training Loss over Epochs.png}
+\caption{\emph{CNN Comparison of Training Loss over Epochs for RanSAP}}
+\label{fig25}
+\end{figure}
+
+\subsection{Classification Results Comparison}
+Table~\ref{tab:resultsk} provides a comprehensive performance summary across various preprocessing conditions for RDset. It shows that models consistently benefit from applying Z-score standardisation, variance thresholding, and VIF-based feature selection. Random Forest with SMOTE consistently delivers excellent results, while SVM continues to struggle with CTGAN-generated data unless feature selection is carefully applied. It compiles results for Random Forest, SVM, KNN, and CNN under various preprocessing steps (Z-score, variance threshold, Monte Carlo Dropout). Masum et al.~\cite{masum2022ransomware} also employed a feature selection approach, achieving \(0.99 \pm 0.01\) accuracy with Random Forest—similar to our 99.61\%  using SMOTE. Meanwhile, Hirano et al.~\cite{hirano2022ransap} introduced the RanSAP dataset and attained a 0.959 F1 in binary classification using Random Forest. Our CTGAN-based approach reached 99.54\% accuracy, illustrating the impact of synthetic oversampling.
+
+\begin{table}[ht]
+    \centering
+    \caption{Comparison of Techniques/Aspect with Related Works}
+    \label{tab:compact_comparison}
+    \resizebox{\columnwidth}{!}{%
+    \begin{tabular}{p{3.5cm} c c c}
+    \toprule
+    \textbf{Technique/Aspect} & \textbf{Current} & \textbf{Masum et al.\cite{masum2022ransomware}} & \textbf{Hirano et al.\cite{hirano2022ransap}} \\
+    \midrule
+    Adversarial Handling           & \cmark & \xmark & \xmark \\
+    Uncertainty Handling           & \cmark & \xmark & \xmark \\
+    Explainable AI (SHAP/LIME)     & \cmark & \xmark & \xmark \\
+    Continuous Learning            & \cmark & \xmark & \xmark \\
+    RanSAP Dataset                 & \cmark & \xmark & \cmark \\
+    RDset Dataset                  & \cmark & \cmark & \xmark \\
+    Feature Calculation            & \cmark & \cmark & \cmark \\
+    SMOTE for Imbalance            & \cmark & \xmark & \xmark \\
+    PSO for Optimisation           & \cmark & \xmark & \xmark \\
+    Accuracy                       & \textbf{0.9977} & $0.99 \pm 0.01$ & $0.962$ \\
+    Precision                      & \textbf{0.9972} & $0.99 \pm 0.00$ & $0.951$ \\
+    Recall                         & \textbf{0.9983} & $0.97 \pm 0.03$ & $0.941$ \\
+    F1-Score                       & \textbf{0.9978} & $0.97 \pm 0.03$ & $0.962$ \\
+    False Positive Rate            & \textbf{0.0024} & xxx             & $0.059$ \\
+    \bottomrule
+    \end{tabular}%
+    }
+\end{table}
+
+Our framework surpasses the two compared works in Table~\ref{tab:compact_comparison} (where the check mark(\cmark) represents the technique/aspect used and crossmark (\xmark) represents the opposite.), achieving 0.9977 accuracy and 0.9978 F1, reflecting more balanced detection (fewer false positives and negatives). We attribute this to adversarial training (CTGAN), uncertainty estimation, and enhanced explainability (SHAP/LIME),  which collectively bolster reliability. Table 12 compares the proposed framework against two previous studies by Masum et al. and Hirano et al. The current framework outperforms both prior works across all metrics, including accuracy, precision, recall, and F1-score, largely due to the integration of advanced augmentation, uncertainty handling, and explainability techniques.
+
+\begin{table*}[h!]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|c|c|c|c|c|}
+\hline
+\textbf{Section}                 & \textbf{Model}                 & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Incorrect Predictions} \\ \hline
+
+\multirow{9}{*}{Without Z-Score, Variance, High VIF} & RF with SMOTE               & 0.9961 & 0.9949 & 0.9975 & 0.9962 & -  \\ \cline{2-7}
+ & SVM with SMOTE               & 0.4989 & 1.0000 & 0.0001 & 0.0001 & -  \\ \cline{2-7}
+ & KNN with SMOTE               & 0.9897 & 0.9854 & 0.9942 & 0.9898 & -  \\ \cline{2-7}
+ & CNN with SMOTE               & 0.9687 & 0.9757 & 0.9614 & 0.9685 & -  \\ \cline{2-7}
+ & RF with CTGAN                & 0.9954 & 0.9932 & 0.9976 & 0.9954 & -  \\ \cline{2-7}
+ & SVM with CTGAN               & 0.5045 & 0.9999 & 0.0032 & 0.0064 & -  \\ \cline{2-7}
+ & KNN with CTGAN               & 0.9796 & 0.9745 & 0.9875 & 0.9810 & -  \\ \cline{2-7}
+ & CNN with CTGAN               & 0.9634 & 0.9702 & 0.9558 & 0.9630 & -  \\ \cline{2-7}
+ & Monte Carlo CNN              & 0.9843 & 0.9848 & 0.9839 & 0.9843 & 912\\ \hline
+
+\multirow{9}{*}{With Z-Score, Variance, High VIF Removed} & RF with SMOTE        & 0.9951 & 0.9935 & 0.9968 & 0.9951 & -  \\ \cline{2-7}
+ & SVM with SMOTE               & 0.9809 & 0.9878 & 0.9738 & 0.9808 & -  \\ \cline{2-7}
+ & KNN with SMOTE               & 0.9884 & 0.9850 & 0.9920 & 0.9885 & -  \\ \cline{2-7}
+ & CNN with SMOTE               & 0.9877 & 0.9834 & 0.9923 & 0.9878 & -  \\ \cline{2-7}
+ & RF with CTGAN                & 0.9962 & 0.9945 & 0.9979 & 0.9962 & -  \\ \cline{2-7}
+ & SVM with CTGAN               & 0.5150 & 0.9870 & 0.0224 & 0.0438 & -  \\ \cline{2-7}
+ & KNN with CTGAN               & 0.9891 & 0.9871 & 0.9910 & 0.9890 & -  \\ \cline{2-7}
+ & CNN with CTGAN               & 0.9865 & 0.9820 & 0.9912 & 0.9865 & -  \\ \cline{2-7}
+ & Monte Carlo CNN              & 0.9833 & 0.9852 & 0.9800 & 0.9826 & 691\\ \hline
+\end{tabular}%
+}
+\caption{Performance Results of Different Models and Techniques on RDset}
+\label{tab:resultsk}
+\end{table*}
+
+By blending feature engineering, data augmentation, optimisation, and explainability techniques (e.g., SHAP, LIME, PSO),  our holistic framework sets a novel benchmark for ransomware detection. High accuracy, strong F1, and low false positives highlight its reliability in practical security contexts.
+
+
+\section{Discussion and Insights}
+\label{sec:Discussion}
+This study explores the integration of uncertainty estimation, explainable AI, data augmentation, and advanced optimisation techniques—specifically, Monte Carlo Dropout, Bayesian Neural Networks (BNN), LIME, SHAP, SMOTE, CTGAN, and PSO—for ransomware detection, particularly in imbalanced datasets. The results underscore the necessity of tailoring these methods to the dataset’s characteristics and the classification objectives.
+
+SMOTE and PSO moderately improved precision by reducing false positives in binary classification, but their impact on recall and F1 score was limited. This suggests that these methods primarily assist in addressing minority class representation without substantially enhancing the overall model balance. In multi-class tasks, SMOTE and PSO offered negligible improvements, indicating that RanSAP’s intrinsic engineered feature quality already supports strong performance without requiring extensive preprocessing. Therefore, SMOTE and PSO should be applied selectively, depending on dataset traits and the specific classification challenges.
+
+The SHAP analysis identified ‘Hwrite’ and ‘Twrite’ as key features for both binary and multi-class detection, highlighting their importance in distinguishing benign samples from ransomware. Additionally, SHAP revealed that certain features are uniquely significant for specific ransomware families. This insight allows for more refined detection strategies, enhancing the model’s adaptability to various ransomware variants and enabling better targeting of model improvements for specific families.
+
+When evaluating model performance with SMOTE and CTGAN, Random Forest, SVM, KNN, and CNN exhibited different responses. SMOTE consistently improved the models’ performance by effectively mitigating class imbalance, with Random Forest achieving an impressive F1-score of 0.9963 on the combined dataset. In contrast, CTGAN produced mixed results; CNN benefitted greatly, achieving an F1-score of 0.9978, while SVM and KNN struggled, likely due to the presence of noise or outliers introduced by the synthetic data. These observations reaffirm the importance of model-specific tuning when employing augmentation techniques.
+
+Uncertainty estimation also played a crucial role in enhancing model reliability. Monte Carlo Dropout produced an average uncertainty score of 0.15 in binary classification, which is particularly valuable in cybersecurity contexts where high-stakes decisions demand reliable confidence measures. Conformal prediction added an additional interpretability layer by quantifying uncertainty and identifying ambiguous cases that may require further review. Collectively, these approaches improved the reliability of predictions and provided actionable insights into model confidence, supporting informed decision-making in practical deployments.
+
+The analysis of Negative Predictive Value (NPV) revealed important real-world implications. NPV varied considerably across ransomware types in multi-class tasks. While classes such as ‘Excel’ and ‘SDelete’ achieved near-perfect NPV, ransomware families like ‘Darkside’ and ‘GandCrab4’ exhibited lower values, emphasising the need for per-class model refinements to minimise false negatives. Maintaining high NPV is essential in practical environments since misclassifying benign software as ransomware can lead to severe operational consequences.
+
+These findings carry significant implications for both researchers and cybersecurity practitioners. In datasets like RanSAP, which are rich in distinctive features, simpler models may perform sufficiently well even without extensive data augmentation. However, datasets like RDset, which are characterised by strong class imbalance, benefit substantially from augmentation techniques such as SMOTE and CTGAN, particularly when these are combined with uncertainty-aware methods. SHAP analysis further underscores the importance of explainable AI by illuminating the contributions of individual features, thereby improving transparency and trust. Uncertainty quantification complements these explainability efforts by highlighting ambiguous predictions, ultimately establishing a solid foundation for robust, interpretable, and adaptive ransomware detection systems.
+
+\subsection{Recommendations}
+
+Across our experiments, a CNN with Monte Carlo Dropout and CTGAN consistently achieved the highest F1 score (0.9978) and accuracy (0.9977), making it a strong pick for scenarios requiring precise, reliable detection. For scalability, combining Random Forest with SMOTE proved effective (F1 = 0.9963) and is well-suited for faster training when computational resources are constrained. Hybridising CTGAN with dimensionality reduction or feature selection could further improve SVM and KNN.
+
+We also recommend incorporating dynamic features (For example, storage access patterns) for added context, as combining static and dynamic features (RanSAP plus RDset  can yield stronger results. Lastly, explainable AI tools like SHAP and LIME, used in  tandem with Monte Carlo dropout, enhance transparency and reliability —qualities that are vital for cybersecurity stakeholders in high-stakes  settings. Prioritising these strategies can foster greater trust in AI-driven security solutions.
+
+\subsection{ Limitations}
+
+One key limitation is the dataset scope. Although RanSAP spans multiple ransomware families and RDset includes varied legitimate samples, neither dataset may fully represent every emerging ransomware variant or real-world benign application. Newly discovered threats with different behaviours could require further testing and adaptation.
+
+Another constraint arises from synthetic data noise. While CTGAN greatly aids adversarial training, it sometimes introduces outliers that complicate performance for certain algorithms (e.g., SVM, KNN). Consequently, synthetic data might not always perfectly capture the real-world distribution of ransomware, diminishing its effectiveness.
+
+ Computational overheads also pose a challenge. Methods involving Monte Carlo Dropout and iterative optimisations (e.g., PSO) can be resource-intensive, potentially limiting applicability in large-scale or real-time environments. Regular retraining or fine-tuning might become cumbersome under strict latency or resource constraints.
+
+ Additionally, class imbalance improvements from SMOTE and similar techniques were not uniformly beneficial across all classes. Ransomware families such as “Darkside” or “GandCrab4” showed relatively lower NPV and recall, indicating that certain features or representations might be lacking for more complex multi-class tasks.
+
+ Explainability remains partially limited, even though SHAP and LIME add transparency to model decisions. These post-hoc tools offer insights into predictions but do not make the underlying models intrinsically interpretable. Security analysts still need domain knowledge to interpret results and implement effective remediation measures.
+
+ Finally, real-time deployment has not been extensively tested. Although the models achieved high accuracy in offline experiments, sub-second detection or on-the-fly adaptation in production environments may require additional engineering, particularly in latency-sensitive scenarios.
+
+
+\subsection{Future Directions}
+
+Building on the current findings, several promising research avenues warrant exploration. Advanced optimisation techniques such as Bayesian Optimisation, Genetic Algorithms, or Grid Search could be employed to refine hyperparameters across a wide range of models and datasets. Moreover, the combination of Particle Swarm Optimisation (PSO) with CTGAN offers an opportunity to jointly optimise both feature selection and synthetic data generation, potentially leading to even more robust and well-calibrated models.
+
+In addition to optimisation, enhanced resampling methods may provide further improvements in handling severe class imbalance. Techniques like Borderline-SMOTE, ADASYN, and SMOTE-ENN could surpass the performance of standard SMOTE, especially in scenarios where certain ransomware families are heavily underrepresented. By generating more informative synthetic samples, these methods can help models generalise better across minority classes.
+
+Integrated explainable AI represents another important direction. The combination of SHAP and LIME with Counterfactual Explanations, alongside uncertainty quantification, can offer a more comprehensive understanding of model behaviour and decision-making. This integrated approach has the potential to significantly increase trust in AI-driven cybersecurity solutions by not only explaining why a prediction was made but also illustrating how alternative scenarios could have led to different outcomes.
+
+Class-specific tuning remains a crucial area for improvement, particularly for ransomware families that currently exhibit lower Negative Predictive Value (NPV). Tailoring models through class-specific hyperparameter adjustments, targeted feature engineering, or specialised loss functions can help reduce false negatives and ensure that even the more challenging ransomware variants are detected reliably.
+
+Expanding the framework to incorporate multiple datasets would also strengthen its generalisability. By integrating additional ransomware datasets and employing cross-dataset learning strategies, the framework could achieve greater robustness and adaptability when encountering new or evolving ransomware families.
+
+Real-time detection capabilities offer another avenue for advancement. Future work could involve developing lightweight, latency-optimised CNN architectures capable of generating rapid ransomware alerts. Complementing this, adaptive learning mechanisms may allow models to be updated dynamically as new ransomware strains emerge, ensuring that detection remains effective over time.
+
+Finally, extending the framework’s application beyond ransomware to include other types of malware such as rootkits, spyware, and advanced persistent threats (APTs) would demonstrate the broader feasibility of the techniques employed in this study. The combination of SMOTE, CTGAN, and Monte Carlo Dropout may prove equally valuable in these other cybersecurity domains, potentially leading to comprehensive AI-powered solutions for a wide array of cyber threats.
+
+\section{Conclusion}
+\label{sec:Conclusion}
+
+This study presents a unified ransomware detection framework that integrates data augmentation, explainable AI, and uncertainty quantification. By combining RanSAP and RDset datasets, the framework achieves marked performance improvements. When SMOTE  was applied, Random Forest reached an F1-score of 0.9963, while a CNN with Monte Carlo Dropout  attained 0.9906.  Further incorporating CTGAN  boosted the CNN’s F1-score to 0.9978, underscoring the robustness of our approach.
+
+Compared to existing methods, our framework delivers higher detection accuracy and a lower false positive rate, qualities vital for real-world deployment. SHAP-based explanations satisfy the demand for interpretability in high-stakes cybersecurity settings, while Monte Carlo Dropout safeguards against overconfident predictions by providing rigorous uncertainty estimates.
+
+By merging diverse datasets with advanced  modelling and augmentation techniques, this work advances the state of ransomware detection. Future research aims to refine real-time detection capabilities, explore dynamic behavioural features, and extend coverage to other forms of malware.  Overall, our framework offers a solid foundation for scalable, interpretable, and reliable AI-based solutions in cybersecurity.
+
+

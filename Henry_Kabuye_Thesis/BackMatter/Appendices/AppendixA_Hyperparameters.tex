@@ -1,0 +1,172 @@
+% ============================================================
+%  Appendix A: Hyperparameter Configurations
+% ============================================================
+
+\chapter{Hyperparameter Configurations}
+\label{app:hyperparameters}
+
+This appendix documents the complete hyperparameter configurations used across all three
+empirical studies.
+Hyperparameters were selected by Bayesian optimisation with Tree-structured Parzen Estimator
+(TPE) sampling via Optuna \cite{optuna2019} on the respective validation partitions, unless
+stated otherwise as fixed architectural choices.
+
+% ------------------------------------------------------------
+\section*{A.1\quad CNN Agent Architecture}
+% ------------------------------------------------------------
+
+Table~\ref{tab:app_cnn} reports the shared architectural hyperparameters for the Semantic
+Agent (Chapter~4 and 5) and Behavioural Agent (Chapters~3, 4, and 5).
+Both agents use the same architecture; only the input dimension differs.
+
+\begin{table}[ht]
+\centering
+\caption{CNN agent architecture hyperparameters shared across all empirical studies.}
+\label{tab:app_cnn}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Hyperparameter} & \textbf{Value} & \textbf{Notes} \\
+\midrule
+Convolutional layers ($L$)      & 3             & Fixed architectural choice \\
+Kernel size ($K$)               & 3             & Fixed architectural choice \\
+Filters per layer ($C$)         & 64            & Fixed architectural choice \\
+Input dimension — Semantic      & 384           & Positional-embedding feature vectors \\
+Input dimension — Behavioural   & 16            & Telemetry / API-trace features \\
+Input dimension — Knowledge     & 23            & ATT\&CK tactic and tool features \\
+Activation function             & ReLU          & All convolutional and dense layers \\
+Dropout rate ($p$)              & 0.5           & Applied at every layer during training \\
+                                &               & and retained at inference (MC Dropout) \\
+Batch normalisation             & Yes           & After each convolutional block \\
+Optimiser                       & Adam          & Learning rate $= 1\times10^{-3}$ \\
+Training epochs                 & 100           & Early stopping patience $= 10$ \\
+Batch size                      & 32            & \\
+Loss function                   & Binary cross-entropy & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section*{A.2\quad Monte Carlo Dropout Settings}
+% ------------------------------------------------------------
+
+\begin{table}[ht]
+\centering
+\caption{Monte Carlo Dropout inference parameters per study and agent.}
+\label{tab:app_mcd}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Study} & \textbf{Agent} & \textbf{MC passes ($T$)} & \textbf{Notes} \\
+\midrule
+Chapter~3 (IEEE Access) & Single agent     & 30  & Fixed \\
+Chapter~4 (ESWA)        & Semantic         & 30  & Fixed \\
+Chapter~4 (ESWA)        & Behavioural      & 30  & Fixed \\
+Chapter~5 (TIFS)        & Semantic         & 30  & Fixed \\
+Chapter~5 (TIFS)        & Behavioural      & 30  & Fixed \\
+Chapter~5 (TIFS)        & Knowledge        & 5--50 & Adaptive: starts at $T_{\min}=5$, \\
+                        &                  &       & increases if $\sigma > \kappa_{\mathrm{local}}$ \\
+                        &                  &       & up to $T_{\max}=50$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section*{A.3\quad CTGAN Score-Space Augmentation}
+% ------------------------------------------------------------
+
+\begin{table}[ht]
+\centering
+\caption{CTGAN training hyperparameters for score-space augmentation (Chapters~4 and~5).}
+\label{tab:app_ctgan}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Hyperparameter} & \textbf{Value} & \textbf{Notes} \\
+\midrule
+Training epochs ($E_{\mathrm{CTGAN}}$)      & 200   & \\
+Generator hidden layers                     & 2     & Widths: [256, 256] \\
+Discriminator hidden layers                 & 2     & Widths: [256, 256] \\
+Input score dimension — Chapter~4           & 2     & $(\bar{p}_{\mathrm{sem}}, \bar{p}_{\mathrm{beh}})$ \\
+Input score dimension — Chapter~5           & 3     & $(\bar{p}_{\mathrm{sem}}, \bar{p}_{\mathrm{beh}}, \bar{p}_{\mathrm{know}})$ \\
+Augmented dataset size ($N_{\mathrm{aug}}$) & $2\times$ original & Balanced across classes \\
+Batch size                                  & 500   & \\
+Optimiser                                   & Adam  & $\beta_1=0.5$, $\beta_2=0.9$ \\
+Training time (CPU)                         & 5--10 min & 200 epochs on score-space dataset \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section*{A.4\quad Decision Agent MLP}
+% ------------------------------------------------------------
+
+\begin{table}[ht]
+\centering
+\caption{Decision Agent MLP architecture and training hyperparameters.}
+\label{tab:app_mlp}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Hyperparameter} & \textbf{Chapter~4} & \textbf{Chapter~5} \\
+\midrule
+Input dimension ($d$)         & 4  & 6  \\
+Score vector $\mathbf{v}$     & $[\bar{p}_{\mathrm{sem}},\bar{p}_{\mathrm{beh}},\sigma_{\mathrm{sem}},\sigma_{\mathrm{beh}}]$ & $[\bar{p}_{\mathrm{sem}},\bar{p}_{\mathrm{beh}},\bar{p}_{\mathrm{know}},\sigma_{\mathrm{sem}},\sigma_{\mathrm{beh}},\sigma_{\mathrm{know}}]$ \\
+Hidden layers ($H$)           & 2  & 2  \\
+Hidden width ($h$)            & 64 & 64 \\
+Activation                    & ReLU & ReLU \\
+Output activation             & Sigmoid & Sigmoid \\
+Dropout (training only)       & 0.3 & 0.3 \\
+Trainable parameters          & $\approx$4,000 & $\approx$4,200 \\
+Optimiser                     & Adam, lr $= 1\times10^{-3}$ & Adam, lr $= 1\times10^{-3}$ \\
+Training epochs               & 50 & 50 \\
+Batch size                    & 32 & 32 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section*{A.5\quad Bayesian TPE Triage Threshold Optimisation}
+% ------------------------------------------------------------
+
+\begin{table}[ht]
+\centering
+\caption{TPE optimisation search space and optimal triage thresholds per operating policy.}
+\label{tab:app_tpe}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Search range} & \textbf{ESWA safety-optimal}
+                   & \textbf{ESWA / TIFS low-escalation} \\
+\midrule
+$\tau$ (detection threshold)        & [0.1, 1.0] & 0.999999 & 0.2330 \\
+$\kappa$ (uncertainty threshold)    & [0.0, 1.0] & 0.458    & 0.1969 \\
+$\tau_{\mathrm{high}}$              & [0.1, 1.0] & ---      & 0.8545 \\
+$\kappa_{\mathrm{low}}$             & [0.0, 1.0] & ---      & 0.1969 \\
+TPE trials ($T_{\mathrm{TPE}}$)     & ---        & 200      & 200    \\
+Objective $\lambda$                 & ---        & 0.5      & 0.5    \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section*{A.6\quad Temperature Calibration}
+% ------------------------------------------------------------
+
+Post-hoc temperature scaling \cite{guo2017calibration} was applied to all agent posterior
+probabilities before fusion.
+The calibration temperature $T_{\mathrm{cal}}$ was fitted by minimising the negative
+log-likelihood on a held-out calibration partition (10\% of the training set, withheld
+before any model training).
+
+\begin{table}[ht]
+\centering
+\caption{Fitted temperature scaling values per agent and study.}
+\label{tab:app_temp}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Study} & \textbf{Agent} & \textbf{$T_{\mathrm{cal}}$} \\
+\midrule
+Chapter~4 (ESWA) & Semantic     & 1.12 \\
+Chapter~4 (ESWA) & Behavioural  & 1.34 \\
+Chapter~5 (TIFS) & Semantic     & 1.12 \\
+Chapter~5 (TIFS) & Behavioural  & 1.34 \\
+Chapter~5 (TIFS) & Knowledge    & 1.08 \\
+\bottomrule
+\end{tabular}
+\end{table}

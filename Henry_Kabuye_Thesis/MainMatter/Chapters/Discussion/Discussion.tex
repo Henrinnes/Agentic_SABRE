@@ -1,0 +1,127 @@
+% ============================================================
+%  Chapter 7: Discussion and Synthesis
+%  Henry Kabuye PhD Thesis — Northumbria University
+% ============================================================
+
+\chapter{Discussion and Synthesis}
+\label{chap:discussion}
+
+\lettrine{T}{his} chapter synthesises the findings of the three empirical investigations
+presented in Chapters~3, 4, and~5, situating them within the broader literature reviewed in
+Chapter~2 and addressing the research questions stated in Chapter~1.
+Where individual empirical chapters reported results in isolation, this chapter analyses them
+comparatively — examining how performance, uncertainty behaviour, and operational
+characteristics evolve as the framework progresses from a single uncertainty-aware agent,
+through a two-agent triage system, to the full three-agent knowledge-augmented architecture.
+The chapter also addresses the limitations of the research programme as a whole, distinguishes
+contributions to theoretical knowledge from contributions to engineering practice, and
+identifies the conditions under which the proposed frameworks would and would not be expected
+to transfer to operational deployment.
+
+% ============================================================
+\section{Evolution of the Detection Framework}
+\label{sec:disc_evolution}
+% ============================================================
+
+% TODO: Compare detection performance across all three chapters on shared evaluation axes.
+% Key points to address:
+%  - How accuracy, AUC, and balanced accuracy change from Chapter 3 → 4 → 5
+%  - How the escalation rate evolves as the triage policy becomes more sophisticated
+%  - How calibration quality (ECE) changes as temperature scaling and peer consultation
+%    are added
+%  - Whether the addition of each new component (Knowledge Agent, Peer Consultation,
+%    Expert Feedback Loop) produces a measurable performance gain over the preceding system
+
+% ============================================================
+\section{Uncertainty as an Executive Control Variable}
+\label{sec:disc_uncertainty}
+% ============================================================
+
+% TODO: Cross-cutting analysis of the role of uncertainty across all three studies.
+% Key points to address:
+%  - In Chapter 3, uncertainty is a diagnostic signal reported alongside accuracy
+%  - In Chapter 4, uncertainty is operationalised as a triage threshold — a direct
+%    controller of autonomous versus human-reviewed decisions
+%  - In Chapter 5, uncertainty drives inter-agent communication (Peer Consultation)
+%    and indirectly drives the Expert Feedback Loop (escalated cases are uncertain cases)
+%  - Discuss whether this progressive operationalisation of uncertainty is a general
+%    principle applicable beyond ransomware detection
+
+% ============================================================
+\section{Knowledge Integration and Neuro-Symbolic Design}
+\label{sec:disc_neurosym}
+% ============================================================
+
+% TODO: Discuss the Knowledge Agent's contribution relative to the two data-driven agents.
+% Key points to address:
+%  - How much does the Knowledge Agent improve fusion performance on the held-out test set?
+%  - Under what conditions does it help most (novel families? low-confidence semantic?)
+%  - Limitations of the RansKnow dataset (YouTube-sourced, 307 samples, labelling heuristic)
+%  - Relationship to the neuro-symbolic AI literature (Besold et al. 2021)
+%  - Future directions for richer knowledge representation (knowledge graphs, LLM-derived)
+
+% ============================================================
+\section{Continual Learning and Operational Realism}
+\label{sec:disc_continual}
+% ============================================================
+
+% TODO: Discuss the Expert Feedback Loop's behaviour under simulated replay.
+% Key points to address:
+%  - How much does the feedback loop reduce calibration error and improve balanced accuracy
+%    on held-out test sets compared to the frozen Decision MLP?
+%  - Limitations of the simulated replay evaluation vs live deployment
+%  - The assumption that analyst labels are accurate — implications of label noise
+%  - Relationship to the concept drift literature (Ceschin 2022, Fernando 2024)
+
+% ============================================================
+\section{Research Gaps Revisited}
+\label{sec:disc_gaps}
+% ============================================================
+
+% TODO: Return to the seven research gaps identified in Chapter 2 and assess the degree
+% to which each has been addressed.
+% Structure as: Gap → What was claimed → What the results show → Residual limitations
+% Use a summary table (Gap, Status, Remaining Open Questions)
+
+% ============================================================
+\section{Limitations of the Research Programme}
+\label{sec:disc_limitations}
+% ============================================================
+
+% TODO: Honest discussion of the programme-level limitations. Key items:
+%  - All evaluation is on static benchmark datasets; no live deployment evaluation
+%  - RanSAP and RDset represent a snapshot of the ransomware landscape; family coverage
+%    may not generalise to families not represented in the benchmarks
+%  - RansKnow is small (307 samples) and labelled by a heuristic threshold rule
+%  - The framework has not been evaluated under adversarial attack (evasion attempts)
+%  - Inference latency figures are from a research environment; production latency
+%    would depend on hardware and integration architecture
+%  - No formal user study to validate the usefulness of counterfactual explanations
+%    with real analysts
+
+% ============================================================
+\section{Implications for Theory and Practice}
+\label{sec:disc_implications}
+% ============================================================
+
+% TODO: Discuss the theoretical and practical implications of the findings.
+% Theoretical:
+%  - The operationalisation of epistemic uncertainty as an executive variable is a
+%    general design principle applicable beyond ransomware detection
+%  - Score-space CTGAN augmentation is a viable strategy for any multi-agent system
+%    with low-dimensional fused representations
+%  - The Peer Consultation Protocol generalises to any multi-agent system where agents
+%    have heterogeneous confidence profiles under distributional shift
+% Practical:
+%  - Organisations seeking to deploy automated ransomware containment should treat the
+%    escalation rate as a first-class design parameter alongside detection accuracy
+%  - The low parameter count of the Decision MLP (~4,000 parameters) makes the Expert
+%    Feedback Loop practical for deployment with modest computational resources
+
+% ============================================================
+\section{Summary}
+\label{sec:disc_summary}
+% ============================================================
+
+% TODO: One-paragraph synthesis pulling together the key insights from this chapter.
+% Connect back to research questions and point forward to Conclusions.

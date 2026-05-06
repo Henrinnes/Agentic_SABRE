@@ -1,0 +1,46 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {1}{\ignorespaces Identified research gaps and their correspondence to the empirical contributions of this thesis. Representative prior works that partially address each gap are listed in column\nobreakspace {}2; column\nobreakspace {}3 identifies the chapter that resolves it.}}{20}{table.2.1}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2}{\ignorespaces Summary characteristics of the three datasets used in this thesis.}}{29}{table.3.2}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3}{\ignorespaces Initial Model Performance Metrics (30s) - Binary Classification Models for RanSAP}}{55}{table.4.3}%
+\contentsline {table}{\numberline {4}{\ignorespaces Initial Model Performance Metrics (30s) - Multi-Class (12) Classification Models for RanSAP}}{55}{table.4.4}%
+\contentsline {table}{\numberline {5}{\ignorespaces Initial Model Performance Metrics for RDset}}{55}{table.4.5}%
+\contentsline {table}{\numberline {6}{\ignorespaces Comparison of Performance Metrics with and without PSO/SMOTE for RanSAP}}{57}{table.4.6}%
+\contentsline {table}{\numberline {7}{\ignorespaces Model Performance Metrics with SMOTE for RDset}}{58}{table.4.7}%
+\contentsline {table}{\numberline {8}{\ignorespaces Model Performance Metrics with CTGAN for RDset}}{58}{table.4.8}%
+\contentsline {table}{\numberline {9}{\ignorespaces Optimised Features as per Random Forest Model for RanSAP (10s)}}{59}{table.4.9}%
+\contentsline {table}{\numberline {10}{\ignorespaces Comparison metrics with and without Uncertainty Estimation (Monte Carlo) for RanSAP}}{59}{table.4.10}%
+\contentsline {table}{\numberline {11}{\ignorespaces Performance Metrics for Ransomware Detection Models Using Combined RanSAP and RDset Datasets}}{59}{table.4.11}%
+\contentsline {table}{\numberline {12}{\ignorespaces Feature Importance in RDset}}{60}{table.4.12}%
+\contentsline {table}{\numberline {13}{\ignorespaces SHAP Values for Important Features in RanSAP}}{61}{table.4.13}%
+\contentsline {table}{\numberline {14}{\ignorespaces Comparison of Techniques/Aspect with Related Works}}{66}{table.4.14}%
+\contentsline {table}{\numberline {15}{\ignorespaces Performance Results of Different Models and Techniques on RDset}}{67}{table.4.15}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {16}{\ignorespaces Individual agent performance prior to fusion.}}{85}{table.5.16}%
+\contentsline {table}{\numberline {17}{\ignorespaces Fusion and triage performance under safety-optimal and low-escalation policies.}}{85}{table.5.17}%
+\contentsline {table}{\numberline {18}{\ignorespaces Representative behavioural counterfactuals. Relative changes per Equation\nobreakspace {}\textup {\hbox {\mathsurround \z@ \normalfont (\ignorespaces \ref {eq:eswa_cf}\unskip \@@italiccorr )}}.}}{88}{table.5.18}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {19}{\ignorespaces RansKnow dataset feature groups (23 features, 307 samples).}}{100}{table.6.19}%
+\contentsline {table}{\numberline {20}{\ignorespaces Per-agent standalone evaluation on balanced test sets.}}{105}{table.6.20}%
+\contentsline {table}{\numberline {21}{\ignorespaces Three-agent fusion triage distribution (200 samples, low-escalation policy, $\lambda =0.5$).}}{107}{table.6.21}%
+\contentsline {table}{\numberline {22}{\ignorespaces Peer consultation statistics per agent ($\kappa _\text {local} = 0.05$).}}{108}{table.6.22}%
+\contentsline {table}{\numberline {23}{\ignorespaces Score vector scaler statistics (fitted on training pool).}}{109}{table.6.23}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {24}{\ignorespaces CNN agent architecture hyperparameters shared across all empirical studies.}}{118}{table.a.A.24}%
+\contentsline {table}{\numberline {25}{\ignorespaces Monte Carlo Dropout inference parameters per study and agent.}}{118}{table.a.A.25}%
+\contentsline {table}{\numberline {26}{\ignorespaces CTGAN training hyperparameters for score-space augmentation (Chapters\nobreakspace {}4 and\nobreakspace {}5).}}{119}{table.a.A.26}%
+\contentsline {table}{\numberline {27}{\ignorespaces Decision Agent MLP architecture and training hyperparameters.}}{119}{table.a.A.27}%
+\contentsline {table}{\numberline {28}{\ignorespaces TPE optimisation search space and optimal triage thresholds per operating policy.}}{120}{table.a.A.28}%
+\contentsline {table}{\numberline {29}{\ignorespaces Fitted temperature scaling values per agent and study.}}{120}{table.a.A.29}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {30}{\ignorespaces RanSAP dataset class distribution and train/test split.}}{121}{table.a.B.30}%
+\contentsline {table}{\numberline {31}{\ignorespaces RanSAP feature group summary.}}{122}{table.a.B.31}%
+\contentsline {table}{\numberline {32}{\ignorespaces RDset class distribution and train/test split.}}{122}{table.a.B.32}%
+\contentsline {table}{\numberline {33}{\ignorespaces RDset feature group summary.}}{122}{table.a.B.33}%
+\contentsline {table}{\numberline {34}{\ignorespaces RansKnow class distribution.}}{123}{table.a.B.34}%
+\contentsline {table}{\numberline {35}{\ignorespaces RansKnow full feature specification (23 features).}}{123}{table.a.B.35}%
+\addvspace {10\p@ }

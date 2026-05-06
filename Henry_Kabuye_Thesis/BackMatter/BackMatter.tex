@@ -1,0 +1,19 @@
+%% ============================================================
+%%  Back Matter
+%%  Appendices → Glossary/Acronyms → References → Index
+%% ============================================================
+
+%% Appendices (A: Hyperparameters, B: Datasets, C: Publications)
+\input{BackMatter/Appendices.tex}
+
+%% Glossary and List of Acronyms
+\printglossaries
+
+%% References — only entries actually cited in the thesis
+\cleardoublepage
+\addcontentsline{toc}{chapter}{References}
+\bibliographystyle{RequiredFiles/Harvard}
+\bibliography{RequiredFiles/Library}
+
+%% Index
+\printindex

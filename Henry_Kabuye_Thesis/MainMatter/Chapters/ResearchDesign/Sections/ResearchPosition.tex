@@ -1,0 +1,542 @@
+% ============================================================
+%  Research Design Chapter Content
+%  Research Position, Methodology, Methods, Ethics
+%  Henry Kabuye PhD Thesis — Northumbria University
+% ============================================================
+
+\lettrine{E}{stablishing} a coherent research design is foundational to any doctoral investigation.
+The methodological and philosophical choices made at the outset of a research programme determine
+the types of knowledge it produces, the criteria by which its findings are evaluated, and the degree
+to which its conclusions can be generalised beyond the specific experimental context in which they
+were obtained \cite{saunders2019research}.
+This chapter articulates the philosophical stance and methodological framework underpinning the
+three empirical investigations presented in Chapters~3, 4, and 5.
+Each investigation builds incrementally upon its predecessor: the first establishes a single-agent
+uncertainty-aware detection baseline \cite{kabuye2025explainable}; the second extends this to a
+two-agent multi-modal framework with uncertainty-driven triage \cite{kabuye2025sabre_eswa}; and
+the third introduces a knowledge-grounded third agent with inter-agent consultation and continual
+learning.
+All three studies share the same philosophical orientation, experimental strategy, and evaluation
+framework, which are described here to avoid repetition and to demonstrate the internal consistency
+of the research programme as a whole.
+
+% ============================================================
+\section{Research Position}
+\label{sec:research_position}
+% ============================================================
+
+The philosophical orientation of a research programme is most systematically articulated through
+the Research Onion framework proposed by Saunders, Lewis and Thornhill \cite{saunders2019research}.
+Working from the outermost philosophical layer inward through research approach, strategy, time
+horizon, and data collection and analysis techniques, the framework ensures that each methodological
+choice is coherent with the philosophical commitments from which it derives.
+Figure~\ref{fig:research-onion} illustrates the Research Onion and the position adopted within each
+layer for this thesis.
+The three innermost layers — strategy, time horizon, and techniques — are addressed in
+Section~\ref{sec:methodology} and Section~\ref{sec:methods}; the three outermost philosophical
+layers are addressed below.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.78\textwidth]{ResearchOnion}
+    \caption{The Research Onion (adapted from \protect\cite{saunders2019research}), illustrating the
+    nested layers of philosophical and methodological choice.
+    This thesis occupies a post-positivist realist position, adopts a deductive approach,
+    employs an experimental mono-method quantitative strategy, and applies a cross-sectional
+    time horizon with a simulated longitudinal component in Chapter~5.}
+    \label{fig:research-onion}
+\end{figure}
+
+% ------------------------------------------------------------
+\subsection{Ontology}
+\label{sec:ontology}
+% ------------------------------------------------------------
+
+Ontology concerns the nature of reality and what entities exist in the world independently of an
+observer's perceptions of them.
+The ontological position adopted in this thesis is \emph{post-positivist realism}: the view that
+ransomware constitutes an objective, observer-independent phenomenon with measurable behavioural and
+structural signatures.
+A ransomware binary either encrypts user data or it does not; it either contacts
+command-and-control infrastructure or it does not; it either exhibits the MITRE ATT\&CK tactic
+patterns documented by practitioner communities or it does not.
+These are facts about the world, not social constructions, and they are in principle discoverable
+through careful measurement \cite{saunders2019research}.
+
+This realist stance does not, however, imply that all knowledge about ransomware is complete or
+certain.
+The thesis departs from na\"{i}ve positivism in acknowledging that measurements are inherently noisy,
+datasets are finite, and the classification boundary between malicious and benign software is
+probabilistic in marginal cases.
+Novel ransomware families can exhibit structural and behavioural signatures that overlap
+substantially with legitimate software, particularly during the reconnaissance and staging phases
+of an attack that precede the encryption payload \cite{razaulla2023age, beaman2021ransomware}.
+The precise boundary of the malicious class is therefore epistemically uncertain even if its
+existence is ontologically real.
+
+This observation directly motivates the epistemic uncertainty quantification that is central to
+each empirical chapter in this thesis.
+Rather than merely acknowledging measurement uncertainty as a limitation to be minimised, the
+research operationalises it as an executive control variable embedded directly in the detection
+pipeline's triage logic.
+The position is consistent with what Saunders et al.\ \cite{saunders2019research} term
+\emph{critical realism}: an ontological stance that accepts the independent existence of a real
+world but holds that knowledge of it is always mediated by observation, theory, and the instruments
+of measurement.
+In applied security research, this position has practical consequences: a model that assigns
+overconfident posterior probabilities to borderline cases provides less actionable intelligence to
+an analyst than one that correctly identifies and communicates the limits of its own
+knowledge \cite{gawlikowski2023Uncertainity, Doan2024uncertainBay}.
+
+% ------------------------------------------------------------
+\subsection{Epistemology}
+\label{sec:epistemology}
+% ------------------------------------------------------------
+
+Epistemology concerns how knowledge is acquired, validated, and distinguished from belief or
+conjecture.
+The epistemological stance adopted here is broadly \emph{empiricist} and quantitative: knowledge
+about ransomware detection is generated by designing controlled experiments, collecting labelled
+data from authoritative sources, training models on that data, and evaluating their predictions
+against held-out ground truth.
+The primary epistemological commitment is to \emph{falsifiability}: every empirical claim in this
+thesis is, in principle, refutable by experiment.
+The proposition that an uncertainty-aware triage policy reduces false containment events compared to
+a threshold-only policy, for example, is directly testable by comparing the two policies' decisions
+against ground-truth labels on a held-out evaluation partition.
+
+The thesis operates within a \emph{post-positivist} paradigm rather than a strictly positivist one.
+Strict positivism holds that scientific knowledge is derived from direct, value-free observation and
+that measurement produces certain knowledge about the world.
+Post-positivism acknowledges that all observations are theory-laden, that all measurement is
+imperfect, and that probabilistic rather than deterministic claims are appropriate when working with
+complex natural phenomena \cite{saunders2019research}.
+This is directly reflected in the methodology: each model is evaluated not only by point-estimate
+accuracy metrics but also by calibration diagnostics that assess the reliability of probability
+estimates across the full confidence distribution \cite{guo2017calibration}, and by escalation-rate
+analyses that quantify the operational cost of residual uncertainty.
+
+Ground truth for this research is established through expert-consensus mechanisms.
+The RanSAP and RDset benchmarks provide labels derived from multi-scanner analysis and controlled
+dynamic sandbox execution; the RansKnow dataset provides labels derived from practitioner-validated
+thresholds on ATT\&CK tactic prevalence.
+These are accepted proxies for ground truth rather than perfect knowledge of it — consistent with
+the post-positivist acknowledgement that all empirical knowledge is provisional and subject to
+revision as better data and methods become available.
+
+% ------------------------------------------------------------
+\subsection{Axiology}
+\label{sec:axiology}
+% ------------------------------------------------------------
+
+Axiology concerns the role of values in the design and conduct of research, including both the
+values of the investigator and the values embedded in the choice of research problem.
+The axiological position adopted in this thesis is broadly \emph{objectivist}: the investigator
+aims to maintain value-neutrality in data collection, model training, and the reporting of
+evaluation results, disclosing performance honestly regardless of whether findings support or
+contradict prior hypotheses.
+All evaluation metrics — including cases where the proposed frameworks fall short of stated targets
+or produce results that require qualification — are reported in full in the empirical chapters.
+
+However, the choice of research problem is itself a value-laden act.
+This thesis is motivated by the measurable harm that ransomware causes to public-sector
+organisations, critical infrastructure, and individual users \cite{europol2020iocta,
+beaman2021ransomware}.
+The research is therefore oriented toward the development of defensive detection capabilities rather
+than toward understanding ransomware for its own sake or producing knowledge that could assist
+adversarial actors.
+This orientation does not compromise methodological objectivity but it does delimit the scope of
+the investigation: techniques that might yield detection insights but require active deployment of
+malicious payloads in non-sandboxed environments, reverse engineering of proprietary production
+systems, or collection of personal data from affected individuals fall outside the scope of this
+research.
+
+All datasets used are either publicly available research benchmarks or researcher-constructed
+from open-source public materials.
+No personally identifiable information was collected or processed at any stage of the investigation.
+These commitments are addressed in greater detail in Section~\ref{sec:ethics}.
+
+% ============================================================
+\section{Research Methodology}
+\label{sec:methodology}
+% ============================================================
+
+Having established the philosophical position of the research, this section addresses the three
+inner layers of the Research Onion: the research approach, the research strategy, and the time
+horizon.
+Together these choices define the logical structure of each empirical investigation and ensure
+that the methods employed in Chapters~3--5 are coherent with the post-positivist realist stance
+described above.
+
+% ------------------------------------------------------------
+\subsection{Research Approach}
+\label{sec:approach}
+% ------------------------------------------------------------
+
+The research approach adopted throughout this thesis is \emph{deductive}.
+A deductive approach begins with general theory and established prior knowledge, derives specific
+testable hypotheses from that theory, and then subjects those hypotheses to empirical
+evaluation \cite{saunders2019research}.
+The general theoretical premises of this thesis are drawn from the established literature on
+machine learning-based malware detection \cite{razaulla2023age, gibert2020rise}, uncertainty
+quantification in deep neural networks \cite{gal2016dropout, gawlikowski2023Uncertainity},
+neuro-symbolic artificial intelligence \cite{Besold2021neurosymbolicsurvey}, and multi-agent
+detection systems \cite{MultiAgentAdaptiveDetection2023}.
+From these premises, the thesis derives and tests a progression of three hypotheses:
+
+\begin{enumerate}
+    \item That integrating data augmentation, Monte Carlo Dropout uncertainty quantification, and
+    post-hoc explainability within a single-agent CNN framework yields detection accuracy and
+    analyst interpretability superior to baseline classifiers on the RanSAP and RDset benchmarks.
+
+    \item That decomposing detection across modality-specialised agents fused through a learned
+    decision layer, with an uncertainty-driven triage policy governing the balance between
+    autonomous containment and human escalation, yields superior operational control compared to
+    a single unified model under both safety-optimal and low-escalation operating conditions.
+
+    \item That augmenting the two-agent framework with a knowledge-grounded third agent trained
+    on threat-intelligence data, a Peer Consultation Protocol enabling inter-agent uncertainty
+    communication, and an Expert Feedback Loop for continual learning yields robust detection
+    performance under distributional shift introduced by novel ransomware family variants.
+\end{enumerate}
+
+Each hypothesis is tested in a separate empirical chapter using controlled experiments on the
+corresponding datasets, with performance assessed against the evaluation framework described in
+Section~\ref{sec:eval_framework}.
+
+% ------------------------------------------------------------
+\subsection{Research Strategy}
+\label{sec:strategy}
+% ------------------------------------------------------------
+
+The research strategy employed is \emph{experimental}.
+Controlled experiments on benchmark datasets with pre-defined and fixed training, validation, and
+test partitions allow direct, reproducible comparison between the proposed frameworks and
+established baseline approaches \cite{saunders2019research}.
+Each empirical chapter follows a consistent experimental protocol: the full dataset is partitioned
+before any model training; hyperparameter selection is performed exclusively on the validation
+partition through Bayesian optimisation \cite{optuna2019}; and all final performance figures are
+computed on the held-out test partition only, which is never used for model selection or threshold
+tuning.
+
+The experimental strategy supports two complementary forms of analysis.
+\emph{Confirmatory analysis} tests the specific performance hypotheses stated above using
+pre-specified evaluation metrics.
+\emph{Exploratory analysis} examines uncertainty distributions, calibration curves,
+counterfactual explanations, and the effects of the peer consultation mechanism in order to
+characterise model behaviour and generate insights that motivate the extensions presented in
+subsequent chapters.
+Ablation studies are employed in each chapter to isolate the contribution of individual
+framework components — data augmentation, MC Dropout, the triage policy thresholds, peer
+consultation, and continual learning — from the performance of the system as a whole.
+
+A \emph{mono-method quantitative} methodological choice is adopted throughout.
+All data are numeric, all hypotheses are stated in quantitative terms, and all findings are
+expressed as measurable performance metrics.
+Mixed-methods or qualitative approaches are not employed, as the research questions are
+amenable to precise quantitative formulation and the available datasets provide sufficient
+quantitative evidence to answer them.
+
+% ------------------------------------------------------------
+\subsection{Time Horizon}
+\label{sec:time_horizon}
+% ------------------------------------------------------------
+
+The primary time horizon of the research is \emph{cross-sectional}: all three empirical
+investigations evaluate their respective frameworks on static, fixed datasets at a single point
+in time, reflecting the standard practice in machine learning benchmarking
+research \cite{saunders2019research}.
+Cross-sectional evaluation on held-out test sets provides the most direct and reproducible
+measure of a model's generalisation ability, and is the standard adopted by the security
+machine learning community.
+
+The third empirical study (Chapter~5) introduces a controlled \emph{longitudinal element} through
+the Expert Feedback Loop mechanism, which models the behaviour of a detection framework receiving
+labelled analyst feedback over successive deployment cycles and updating its decision logic
+incrementally through experience replay \cite{rolnick2019experience}.
+This element is evaluated through a simulated sequential replay protocol on the RansKnow
+dataset rather than through live deployment, preserving the experimental control of a
+cross-sectional design while demonstrating the system's capacity for temporal adaptation under
+concept drift.
+The distinction between this simulated longitudinal evaluation and genuine longitudinal study
+in a production environment is discussed in Chapter~5.
+
+% ============================================================
+\section{Research Methods and Techniques}
+\label{sec:methods}
+% ============================================================
+
+The preceding sections established the philosophical and strategic orientation of the research.
+This section describes the specific datasets, model architectures, and evaluation procedures
+through which the three research hypotheses are pursued.
+
+% ------------------------------------------------------------
+\subsection{Datasets and Data Sources}
+\label{sec:datasets}
+% ------------------------------------------------------------
+
+Three datasets provide the empirical basis for the investigations in this thesis.
+Each captures a distinct dimension of ransomware activity, reflecting the thesis's core
+argument that ransomware exhibits multiple observable signatures most effectively detected by
+specialised models trained on different data modalities.
+The key characteristics of all three datasets are summarised in Table~\ref{tab:datasets}.
+
+\textbf{RanSAP} (Ransomware System API behaviour dataset) \cite{hirano2022ransap} captures
+dynamic runtime behaviour through system API call sequences recorded during controlled sandbox
+execution of ransomware samples and benign applications.
+The dataset records 30-second time-window API traces across multiple ransomware families,
+providing a temporal signal that reflects the characteristic I/O access patterns, file
+enumeration sequences, and encryption activity exhibited during a live ransomware attack.
+In this thesis, RanSAP serves as the primary dataset for training the Behavioural Agent in
+Chapters~4 and~5, and also contributes to the multi-class classification task in Chapter~3.
+
+\textbf{RDset} provides PE-format static analysis features derived from portable executable
+file headers, including section entropy profiles, import address table contents, and PE
+flag configurations.
+These features encode the semantic structure of executable files without requiring dynamic
+execution, enabling rapid pre-execution screening of samples at the point of entry.
+The Semantic Agent in Chapters~4 and~5 is trained on the RDset, and Chapter~3 employs these
+features in the CNN-based binary classifier.
+
+\textbf{RansKnow} is a researcher-constructed threat-intelligence dataset comprising 307
+samples sourced from publicly available YouTube security briefings, conference presentations,
+and practitioner walkthroughs.
+Each sample is represented by 23 features spanning ten MITRE ATT\&CK tactic occurrence
+indicators, eight ransomware-associated tool count features, three platform-specificity
+signals, and two aggregate totals.
+Binary labels are derived from the operational threshold condition
+(\emph{Tactic\textunderscore Total}~$>$~10) OR (\emph{Tool\textunderscore Total}~$>$~2),
+which reflects practitioner consensus on the minimum tactical breadth and tooling complexity
+that distinguishes a documented ransomware deployment from benign or marginal activity.
+RansKnow is used in Chapter~5 to train the Knowledge Agent.
+
+\begin{table}[ht]
+\centering
+\caption{Summary characteristics of the three datasets used in this thesis.}
+\label{tab:datasets}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Dataset}  & \textbf{Modality}         & \textbf{Primary Use}              & \textbf{Chapter} \\
+\midrule
+RanSAP   & Runtime API traces        & Behavioural Agent training        & 3, 4, 5          \\
+RDset    & PE / static file features & Semantic Agent training           & 3, 4, 5          \\
+RansKnow & Threat-intelligence       & Knowledge Agent training          & 5                \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\subsection{Machine Learning Architecture and Training}
+\label{sec:ml_arch}
+% ------------------------------------------------------------
+
+The primary classification architecture employed across all empirical chapters is a
+\emph{Convolutional Neural Network} (CNN) adapted for structured tabular feature representations.
+CNNs have been demonstrated to extract effective local feature interactions from security
+data \cite{kolosnjaji2016deep, zahoora2022Deep}, and their convolutional structure provides
+a natural basis for applying Monte Carlo Dropout uncertainty estimation without modification
+to the standard training procedure \cite{gal2016dropout}.
+Each CNN backbone consists of stacked convolutional blocks followed by fully connected layers;
+specific architectural hyperparameters are reported within each empirical chapter.
+
+\emph{Uncertainty quantification} is implemented via Monte Carlo (MC) Dropout throughout all
+three studies.
+At inference time, dropout masks are sampled $T$ times per input, producing a distribution over
+class probabilities from which the mean prediction $\bar{p}$ and predictive standard deviation
+$\sigma$ are computed.
+This approach yields calibrated epistemic uncertainty estimates that reflect genuine uncertainty
+about the decision boundary, particularly on inputs near or between the training
+classes \cite{gawlikowski2023Uncertainity}.
+The value of $T$ is tuned per study to balance uncertainty quality against inference latency,
+with values of $T=30$ used in Chapter~3 and Chapter~4, and an adaptive mechanism
+($T_{\min}=5$, $T_{\max}=50$) employed by the Knowledge Agent in Chapter~5.
+
+\emph{Score-space data augmentation} via Conditional Tabular GAN (CTGAN) \cite{xu2019ctgan} is
+applied in Chapters~4 and~5 to augment the training distribution of the Decision MLP on the
+fused agent score vectors.
+CTGAN learns the conditional distribution of features given class labels through an adversarial
+training procedure and generates high-fidelity synthetic tabular samples that preserve feature
+correlations without overfitting to the artefacts of a finite dataset.
+This is a departure from the raw-feature augmentation employed in Chapter~3 and is justified
+by the substantially lower dimensionality of the score space (four dimensions in Chapter~4,
+six dimensions in Chapter~5) compared to the original feature representations.
+
+\emph{Explainability} is provided through SHAP (SHapley Additive exPlanations) feature
+attribution values \cite{lundberg2017shap} and, in Chapter~4, through a novel counterfactual
+explanation protocol that identifies the minimal feature perturbation necessary to reverse a
+ransomware prediction.
+These mechanisms address the practical analyst requirement for interpretable explanations that
+accompany automated detection decisions and can be acted upon without specialist knowledge of
+the underlying model architecture.
+
+\emph{Temperature calibration} is applied to all agent posterior probabilities following
+\cite{guo2017calibration} before fusion, ensuring that each agent's confidence score reflects
+a reliable frequency-of-correctness estimate rather than an uncalibrated logit output.
+The calibration temperature is fitted by minimising the negative log-likelihood on a held-out
+validation set and is fixed thereafter.
+
+\emph{Continual learning} in Chapter~5 employs the Expert Feedback Loop, which updates the
+Decision MLP weights after each labelled feedback batch through reservoir-sampled experience
+replay \cite{rolnick2019experience}, preventing catastrophic forgetting of previously seen
+distributions while incorporating new information from analyst corrections.
+Only the Decision MLP (approximately 4,000 parameters) is updated; all agent backbone CNNs
+remain frozen throughout the feedback process.
+
+% ------------------------------------------------------------
+\subsection{Evaluation Framework}
+\label{sec:eval_framework}
+% ------------------------------------------------------------
+
+Model performance is quantified using a complementary set of metrics chosen to characterise
+different aspects of operational utility.
+\emph{AUC} (Area Under the ROC Curve) provides a threshold-independent measure of
+discriminative ability.
+\emph{Balanced accuracy} (the arithmetic mean of per-class recall) accounts for class
+imbalance without requiring threshold selection and is the primary metric used for
+Bayesian hyperparameter optimisation.
+\emph{Precision}, \emph{recall}, and \emph{F1-score} characterise the precision--recall
+trade-off at the selected operating threshold.
+
+\emph{Calibration quality} is assessed via the Expected Calibration Error (ECE) and
+reliability diagrams following the temperature scaling protocol of Guo et al.\
+\cite{guo2017calibration}, which decompose the gap between model confidence and empirical
+accuracy across equal-width confidence bins.
+
+The \emph{operational performance} of the uncertainty-aware triage policy in Chapters~4 and~5
+is assessed through two complementary metrics: the \emph{escalation rate} (the fraction of
+test-set predictions forwarded to human review) and the \emph{containment precision} (the
+fraction of auto-contained predictions that correspond to genuine ransomware).
+Together these metrics characterise the practical utility of the framework for a human analyst
+who must act on the system's decisions under time pressure.
+
+Hyperparameter selection in all three studies employs Bayesian optimisation with
+Tree-structured Parzen Estimator (TPE) sampling as implemented in the Optuna
+library \cite{optuna2019}, which builds probabilistic surrogate models of the objective
+function and efficiently directs the search toward regions of the hyperparameter space likely
+to yield high-performing configurations.
+
+% ============================================================
+\section{Ethical Considerations}
+\label{sec:ethics}
+% ============================================================
+
+The research presented in this thesis raises a number of ethical considerations that were
+addressed proactively at the design stage.
+
+\textbf{Data ethics and privacy.}
+All datasets used in this thesis are either publicly available research benchmarks or
+researcher-constructed from openly accessible public materials.
+The RanSAP and RDset benchmarks are distributed by their originators for academic use without
+restriction on non-commercial research.
+The RansKnow dataset was constructed exclusively from publicly available YouTube videos,
+conference proceedings, practitioner blog posts, and security briefing transcripts; no private
+communications, organisational records, or personally identifiable information were collected
+or processed at any stage.
+The research does not interact with any production systems, operational networks, or
+live user data.
+
+\textbf{Malware handling.}
+The thesis does not require direct interaction with live malware payloads or command-and-control
+infrastructure.
+The RanSAP dataset provides pre-collected API execution traces from controlled sandbox
+environments operated by the dataset's originators; this thesis uses these traces as static
+feature matrices without re-execution of any malicious code.
+The RDset provides pre-extracted PE structural features; no executable binaries are loaded or
+analysed dynamically within this research.
+All experiments were conducted on isolated research computing infrastructure with no external
+network connectivity during model training or evaluation.
+
+\textbf{No human subjects.}
+The research involves no human participants, surveys, interviews, user studies, or any
+collection of personal data.
+No ethical approval for human-subjects research was required or sought.
+The research does not profile any individual and does not produce outputs that could be used
+to identify, monitor, or discriminate against any person.
+
+\textbf{Defensive orientation and responsible disclosure.}
+The multi-agent framework described in this thesis is a prototype research system evaluated
+on benchmark datasets.
+It is designed exclusively to detect ransomware activity and produce analyst-interpretable
+explanations, and it does not produce techniques, tools, or knowledge that would provide
+operational advantages to adversarial actors beyond what is already available in the public
+security research literature.
+Any future deployment of these methods in an operational security environment would require
+independent security auditing, institutional oversight, and appropriate governance to ensure
+that automated containment decisions are exercised responsibly, with suitable human review
+mechanisms in place for escalated or uncertain cases.
+
+% ============================================================
+\section{Thesis Chapter Structure}
+\label{sec:chapter_structure}
+% ============================================================
+
+The following provides a concise orientation to the chapters of this thesis and their
+relationship to the research objectives stated above.
+
+\textbf{Chapter~1: Introduction} provides the motivating context for the research, documents
+the scale and impact of ransomware attacks on modern organisations and critical
+infrastructure \cite{europol2020iocta, beaman2021ransomware}, identifies the principal
+limitations of existing detection approaches with respect to uncertainty, interpretability,
+and multi-modal reasoning, and states the specific research objectives and contributions of
+the thesis.
+
+\textbf{Chapter~2: Research Design} (this chapter) establishes the philosophical position,
+methodological framework, dataset characteristics, evaluation approach, and ethical
+commitments that underpin all three empirical investigations, ensuring that their findings
+are interpreted within a coherent epistemological context.
+
+\textbf{Chapter~3: Explainable and Uncertainty-Aware AI-based Ransomware Detection} presents
+the first empirical study, published as a journal article in IEEE Access
+\cite{kabuye2025explainable}.
+This chapter develops a single-agent CNN framework that integrates MC Dropout uncertainty
+quantification, CTGAN-based class-imbalance augmentation, and SHAP/LIME post-hoc
+explainability.
+The study establishes the performance baseline upon which the subsequent multi-agent
+architectures build, and demonstrates that operationalising uncertainty alongside
+accuracy-based metrics provides a richer characterisation of model behaviour than
+accuracy metrics alone.
+
+\textbf{Chapter~4: Agentic SABRE --- An Uncertainty-Aware Neuro-Symbolic Multi-Agent
+Framework for Adaptive Ransomware Detection} presents the second empirical study
+(currently under review at the \emph{Expert Systems with Applications} journal)
+\cite{kabuye2025sabre_eswa}.
+This chapter decomposes ransomware detection into two modality-specialised agents (Semantic
+and Behavioural) fused through a learned Decision Agent.
+The uncertainty-aware triage policy is introduced as the primary operational contribution,
+enabling the system to balance autonomous containment against human escalation through
+learnable threshold parameters optimised with Bayesian TPE.
+
+\textbf{Chapter~5: Extended Agentic SABRE --- Knowledge-Augmented Three-Agent Ransomware
+Detection with Peer Consultation and Continual Learning} presents the third empirical study
+(currently under review at \emph{IEEE Transactions on Information Forensics and Security}).
+This chapter introduces the Knowledge Agent trained on the RansKnow threat-intelligence
+dataset, the Peer Consultation Protocol through which agents communicate epistemic uncertainty
+before fusion, and the Expert Feedback Loop for analyst-guided continual learning.
+Together these three extensions address the limitations of purely data-driven detection and
+bring the framework closer to the neuro-symbolic ideal of combining learned statistical
+representations with structured domain knowledge.
+
+% ============================================================
+\section{Summary}
+\label{sec:resdesign_summary}
+% ============================================================
+
+This chapter has established the philosophical and methodological foundations of the research
+programme.
+A post-positivist realist ontology justifies the treatment of ransomware behaviour as
+objectively measurable while acknowledging the inherent probabilistic uncertainty of
+measurements near the decision boundary.
+An empiricist epistemology grounds knowledge claims in controlled, reproducible experiments
+evaluated against authoritative ground truth.
+A deductive research approach derives testable hypotheses from the established literature and
+tests them through mono-method quantitative experiments under a cross-sectional (with
+limited longitudinal) time horizon.
+Three purpose-selected datasets covering runtime API behaviour, static PE-format features,
+and practitioner-curated threat intelligence provide the empirical material; CNNs with MC
+Dropout uncertainty quantification, CTGAN score-space augmentation, and SHAP/LIME
+explainability constitute the core technical framework; and the evaluation combines
+discriminative accuracy, calibration quality, and operational triage metrics to assess each
+system against both technical performance and practical deployment criteria.
+The following three chapters present the empirical investigations conducted within this
+framework, building from the single-agent baseline through the two-agent triage system
+to the full three-agent knowledge-augmented architecture.
