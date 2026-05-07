@@ -128,5 +128,38 @@
     ],
     "checkpoint": "checkpoints/behavioral_cnn_hardware_holdout.pt",
     "scaler": "checkpoints/behavioral_scaler_hardware_holdout.joblib"
+  },
+  "behavioral_temporal_holdout": {
+    "split": "temporal_holdout",
+    "split_seed": 42,
+    "training_parquet": "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet",
+    "n_train_windows": 25067,
+    "n_val_windows": 5494,
+    "n_test_windows": 5296,
+    "n_configs": 15,
+    "epochs_run": 30,
+    "best_val_auc": 0.9636,
+    "test_auc": 0.9673,
+    "test_accuracy": 0.8948,
+    "features": [
+      "avg_read_throughput",
+      "avg_write_throughput",
+      "read_LBA_variance",
+      "write_LBA_variance",
+      "write_entropy_mean",
+      "mem_read_entropy_mean",
+      "mem_write_entropy_mean",
+      "mem_readwrite_entropy_mean",
+      "mem_read_GPA_variance",
+      "mem_write_GPA_variance",
+      "mem_readwrite_GPA_variance",
+      "mem_exec_GPA_variance",
+      "mem_read_count",
+      "mem_write_count",
+      "mem_readwrite_count",
+      "mem_exec_count"
+    ],
+    "checkpoint": "checkpoints/behavioral_cnn_temporal_holdout.pt",
+    "scaler": "checkpoints/behavioral_scaler_temporal_holdout.joblib"
   }
 }
