@@ -1,0 +1,89 @@
+{
+  "description": "Hardware holdout: train on celeron-gen6+i3-gen12 original configs; test on i5-gen12+i7-gen12+i3-ddr5 extra configs",
+  "train_partitions": [
+    "original"
+  ],
+  "test_partitions": [
+    "extra"
+  ],
+  "train_configs": [
+    "original/celeron-gen6/ddr4-1600-16g",
+    "original/celeron-gen6/ddr4-1600-8g",
+    "original/celeron-gen6/ddr4-1866-16g",
+    "original/celeron-gen6/ddr4-1866-8g",
+    "original/celeron-gen6/ddr4-2133-16g",
+    "original/celeron-gen6/ddr4-2133-8g",
+    "original/i3-gen12/ddr4-2133-16g",
+    "original/i3-gen12/ddr4-2133-8g",
+    "original/i3-gen12/ddr4-2666-16g",
+    "original/i3-gen12/ddr4-2666-8g",
+    "original/i3-gen12/ddr4-3200-16g",
+    "original/i3-gen12/ddr4-3200-8g"
+  ],
+  "test_configs": [
+    "extra/i3-gen12/ddr5-4800-16g",
+    "extra/i5-gen12/ddr4-2133-16g",
+    "extra/i7-gen12/ddr4-2133-16g"
+  ],
+  "seed": 42,
+  "train": {
+    "n_sessions": 1203,
+    "n_windows": 24296,
+    "ransom_windows": 12437,
+    "benign_windows": 11859,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  },
+  "val": {
+    "n_sessions": 213,
+    "n_windows": 4278,
+    "ransom_windows": 2185,
+    "benign_windows": 2093,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  },
+  "test": {
+    "n_sessions": 360,
+    "n_windows": 7283,
+    "ransom_windows": 3772,
+    "benign_windows": 3511,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  }
+}
