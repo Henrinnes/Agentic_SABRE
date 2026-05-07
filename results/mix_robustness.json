@@ -1,0 +1,236 @@
+{
+  "dataset": "ransmap_mix",
+  "n_windows": 1944,
+  "n_class_combos": 10,
+  "hardware": "mix/i3-gen12/ddr4-2133-16g",
+  "checkpoint": "behavioral_cnn_random_stratified.pt",
+  "overall": {
+    "B": {
+      "detection_rate": 0.8379629629629629,
+      "ci95": [
+        0.8220164609053497,
+        0.8528935185185185
+      ],
+      "mean_prob": 0.7800228972531361,
+      "mean_uncert": 0.06899541198966257
+    },
+    "BK": {
+      "detection_rate": 0.4156378600823045,
+      "ci95": [
+        0.39351851851851855,
+        0.43725565843621395
+      ],
+      "mean_prob": 0.5913129410704847
+    }
+  },
+  "combined_auprc_B": 0.9273591063258274,
+  "combined_auroc_B": 0.9184013369406036,
+  "uncertainty": {
+    "p25": 0.017463518772274256,
+    "p50": 0.04728597402572632,
+    "p75": 0.10026058368384838,
+    "p90": 0.16388306766748428,
+    "p95": 0.2033202804625034,
+    "high_uncert_rate": 0.2525720164609053
+  },
+  "per_class": {
+    "AESCrypt_Conti": {
+      "n_windows": 192,
+      "ransom_family": "Conti",
+      "detection_rate_B": 0.953125,
+      "ci95_B": [
+        0.921875,
+        0.9791666666666666
+      ],
+      "detection_rate_BK": 1.0,
+      "mean_prob_B": 0.912586269977813,
+      "mean_prob_K": 0.9968465492129326,
+      "mean_prob_BK": 0.9547164095953727,
+      "mean_uncert_B": 0.03691522675944725
+    },
+    "AESCrypt_REvil": {
+      "n_windows": 203,
+      "ransom_family": "REvil",
+      "detection_rate_B": 0.9211822660098522,
+      "ci95_B": [
+        0.8866995073891626,
+        0.9556650246305419
+      ],
+      "detection_rate_BK": 0.014778325123152709,
+      "mean_prob_B": 0.8235633111434985,
+      "mean_prob_K": 0.010337420757584677,
+      "mean_prob_BK": 0.4169503659505415,
+      "mean_uncert_B": 0.0701884704233684
+    },
+    "Firefox_Conti": {
+      "n_windows": 191,
+      "ransom_family": "Conti",
+      "detection_rate_B": 0.9738219895287958,
+      "ci95_B": [
+        0.9527486910994765,
+        0.9947643979057592
+      ],
+      "detection_rate_BK": 1.0,
+      "mean_prob_B": 0.9112423244883253,
+      "mean_prob_K": 0.9969438804381805,
+      "mean_prob_BK": 0.9540931024632529,
+      "mean_uncert_B": 0.05467767601482892
+    },
+    "Firefox_Office_REvil": {
+      "n_windows": 194,
+      "ransom_family": "REvil",
+      "detection_rate_B": 0.9587628865979382,
+      "ci95_B": [
+        0.9278350515463918,
+        0.9845360824742269
+      ],
+      "detection_rate_BK": 0.041237113402061855,
+      "mean_prob_B": 0.8666839319396495,
+      "mean_prob_K": 0.010273906539107874,
+      "mean_prob_BK": 0.4384789192393787,
+      "mean_uncert_B": 0.06864619238983802
+    },
+    "Firefox_REvil": {
+      "n_windows": 193,
+      "ransom_family": "REvil",
+      "detection_rate_B": 0.9637305699481865,
+      "ci95_B": [
+        0.9326424870466321,
+        0.9845854922279791
+      ],
+      "detection_rate_BK": 0.031088082901554404,
+      "mean_prob_B": 0.8475799345618857,
+      "mean_prob_K": 0.010171538382923047,
+      "mean_prob_BK": 0.4288757364724044,
+      "mean_uncert_B": 0.07096108062183147
+    },
+    "Office_REvil": {
+      "n_windows": 195,
+      "ransom_family": "REvil",
+      "detection_rate_B": 0.9384615384615385,
+      "ci95_B": [
+        0.9025641025641026,
+        0.9692307692307692
+      ],
+      "detection_rate_BK": 0.041025641025641026,
+      "mean_prob_B": 0.8363824260540498,
+      "mean_prob_K": 0.010823167339922526,
+      "mean_prob_BK": 0.42360279669698614,
+      "mean_uncert_B": 0.07612976674109888
+    },
+    "SDelete_Conti": {
+      "n_windows": 197,
+      "ransom_family": "Conti",
+      "detection_rate_B": 0.5989847715736041,
+      "ci95_B": [
+        0.5279187817258884,
+        0.6649746192893401
+      ],
+      "detection_rate_BK": 0.9949238578680203,
+      "mean_prob_B": 0.5874795287686192,
+      "mean_prob_K": 0.9969218294632617,
+      "mean_prob_BK": 0.7922006791159404,
+      "mean_uncert_B": 0.12251005493468477
+    },
+    "SDelete_REvil": {
+      "n_windows": 192,
+      "ransom_family": "REvil",
+      "detection_rate_B": 0.2708333333333333,
+      "ci95_B": [
+        0.203125,
+        0.3385416666666667
+      ],
+      "detection_rate_BK": 0.03125,
+      "mean_prob_B": 0.2949764876967877,
+      "mean_prob_K": 0.010428060387008978,
+      "mean_prob_BK": 0.15270227404189834,
+      "mean_uncert_B": 0.0813344751169931
+    },
+    "Zip_Conti": {
+      "n_windows": 193,
+      "ransom_family": "Conti",
+      "detection_rate_B": 0.9533678756476683,
+      "ci95_B": [
+        0.9222797927461139,
+        0.9792746113989638
+      ],
+      "detection_rate_BK": 1.0,
+      "mean_prob_B": 0.9208722666600825,
+      "mean_prob_K": 0.9966460552857948,
+      "mean_prob_BK": 0.9587591609729387,
+      "mean_uncert_B": 0.04190868311778792
+    },
+    "Zip_REvil": {
+      "n_windows": 194,
+      "ransom_family": "REvil",
+      "detection_rate_B": 0.845360824742268,
+      "ci95_B": [
+        0.7938144329896907,
+        0.8917525773195877
+      ],
+      "detection_rate_BK": 0.02577319587628866,
+      "mean_prob_B": 0.798999117356101,
+      "mean_prob_K": 0.009977569685980063,
+      "mean_prob_BK": 0.4044883435210405,
+      "mean_uncert_B": 0.06520840964344878
+    }
+  },
+  "per_family_concurrent": {
+    "Conti": {
+      "n_windows": 773,
+      "detection_rate_B": 0.8680465717981889,
+      "ci95_B": [
+        0.8434670116429496,
+        0.8913324708926261
+      ],
+      "detection_rate_BK": 0.9987063389391979,
+      "mean_prob_B": 0.831469162284378,
+      "mean_uncert_B": 0.06436483353235727
+    },
+    "REvil": {
+      "n_windows": 1171,
+      "detection_rate_B": 0.8181041844577285,
+      "ci95_B": [
+        0.7975875320239112,
+        0.8394534585824082
+      ],
+      "detection_rate_BK": 0.030742954739538857,
+      "mean_prob_B": 0.7460622116261935,
+      "mean_uncert_B": 0.07205214738462157
+    }
+  },
+  "solo_baseline": {
+    "REvil": {
+      "n_windows": 463,
+      "detection_rate": 0.8768898488120951,
+      "ci95": [
+        0.8466522678185745,
+        0.9049676025917927
+      ],
+      "mean_prob": 0.7998498687842462,
+      "mean_uncert": 0.071385893661209
+    },
+    "Conti": {
+      "n_windows": 456,
+      "detection_rate": 0.9473684210526315,
+      "ci95": [
+        0.9232456140350878,
+        0.9692982456140351
+      ],
+      "mean_prob": 0.8793008847064093,
+      "mean_uncert": 0.0592564905696475
+    }
+  },
+  "concurrent_vs_solo": {
+    "Conti": {
+      "solo": 0.9473684210526315,
+      "concurrent": 0.8680465717981889,
+      "delta": -0.07932184925444263
+    },
+    "REvil": {
+      "solo": 0.8768898488120951,
+      "concurrent": 0.8181041844577285,
+      "delta": -0.05878566435436661
+    }
+  }
+}
