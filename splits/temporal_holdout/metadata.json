@@ -1,0 +1,76 @@
+{
+  "description": "Temporal holdout: sorted by window_start; train=first 70%, val=70-85%, test=last 15%",
+  "seed": "none (temporal, no randomisation)",
+  "train_date_range": [
+    "2022-09-16",
+    "2023-06-27"
+  ],
+  "val_date_range": [
+    "2023-06-27",
+    "2024-02-21"
+  ],
+  "test_date_range": [
+    "2024-02-21",
+    "2024-03-01"
+  ],
+  "train": {
+    "n_sessions": 1243,
+    "n_windows": 25067,
+    "ransom_windows": 12627,
+    "benign_windows": 12440,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  },
+  "val": {
+    "n_sessions": 266,
+    "n_windows": 5494,
+    "ransom_windows": 3982,
+    "benign_windows": 1512,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry"
+    ]
+  },
+  "test": {
+    "n_sessions": 267,
+    "n_windows": 5296,
+    "ransom_windows": 1785,
+    "benign_windows": 3511,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  },
+  "class_imbalance_note": "Val/test label imbalance is expected and real: extra hardware configs (i5/i7-gen12, recorded Feb-Mar 2024) fall entirely in the test period, and their session distributions differ from the original configs. Do NOT re-balance; use AUPRC alongside AUROC for reporting."
+}

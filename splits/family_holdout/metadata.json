@@ -1,0 +1,64 @@
+{
+  "description": "Family holdout: REvil+WannaCry (ransom) and Firefox+Zip (benign) unseen at test",
+  "holdout_families": [
+    "Firefox",
+    "REvil",
+    "WannaCry",
+    "Zip"
+  ],
+  "train_families": [
+    "AESCrypt",
+    "Conti",
+    "Darkside",
+    "Idle",
+    "LockBit",
+    "Office",
+    "Ryuk",
+    "SDelete"
+  ],
+  "seed": 42,
+  "train": {
+    "n_sessions": 1016,
+    "n_windows": 20633,
+    "ransom_windows": 10676,
+    "benign_windows": 9957,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Idle",
+      "LockBit",
+      "Office",
+      "Ryuk",
+      "SDelete"
+    ]
+  },
+  "val": {
+    "n_sessions": 180,
+    "n_windows": 3620,
+    "ransom_windows": 1882,
+    "benign_windows": 1738,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Idle",
+      "LockBit",
+      "Office",
+      "Ryuk",
+      "SDelete"
+    ]
+  },
+  "test": {
+    "n_sessions": 580,
+    "n_windows": 11604,
+    "ransom_windows": 5836,
+    "benign_windows": 5768,
+    "families": [
+      "Firefox",
+      "REvil",
+      "WannaCry",
+      "Zip"
+    ]
+  }
+}

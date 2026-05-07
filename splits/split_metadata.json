@@ -1,0 +1,24 @@
+{
+  "splits": [
+    "random_stratified",
+    "family_holdout",
+    "hardware_holdout",
+    "temporal_holdout",
+    "rdset_random"
+  ],
+  "ransmap_parquet": "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet",
+  "rdset_parquet": "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet",
+  "global_seed": 42,
+  "split_unit": "session (not window) \u2014 prevents within-session leakage",
+  "holdout_sets_never_used_for_training": {
+    "ood_variants": "ransmap_ood_variants.parquet (Conti_01\u201307)",
+    "mix_partition": "ransmap_mix.parquet (concurrent execution)"
+  },
+  "notes": [
+    "RanSMAP temporal range: 2022-09-16 to 2024-03-01 (18 months)",
+    "Hardware holdout test configs: extra/i5-gen12/ddr4-2133-16g, extra/i7-gen12/ddr4-2133-16g, extra/i3-gen12/ddr5-4800-16g",
+    "Family holdout test families: REvil, WannaCry (ransomware), Firefox, Zip (benign)",
+    "Temporal holdout: natural time ordering, no shuffling",
+    "RDset: no family/temporal holdout possible \u2014 hash-only labels, no timestamps"
+  ]
+}

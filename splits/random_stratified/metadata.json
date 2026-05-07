@@ -1,0 +1,64 @@
+{
+  "description": "Random stratified 70/15/15 by class_name",
+  "seed": 42,
+  "train": {
+    "n_sessions": 1242,
+    "n_windows": 25125,
+    "ransom_windows": 12900,
+    "benign_windows": 12225,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  },
+  "val": {
+    "n_sessions": 267,
+    "n_windows": 5335,
+    "ransom_windows": 2730,
+    "benign_windows": 2605,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  },
+  "test": {
+    "n_sessions": 267,
+    "n_windows": 5397,
+    "ransom_windows": 2764,
+    "benign_windows": 2633,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  }
+}
