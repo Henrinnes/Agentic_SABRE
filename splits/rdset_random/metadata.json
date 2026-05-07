@@ -1,0 +1,21 @@
+{
+  "description": "RDset 70/15/15 stratified by label, index-based",
+  "seed": 42,
+  "n_total": 138047,
+  "train": {
+    "n": 96632,
+    "ransom": 67706,
+    "benign": 28926
+  },
+  "val": {
+    "n": 20707,
+    "ransom": 14509,
+    "benign": 6198
+  },
+  "test": {
+    "n": 20708,
+    "ransom": 14509,
+    "benign": 6199
+  },
+  "note": "No family holdout possible: RDset uses VirusShare hash filenames with no family labels. AUC=1.0 is expected: ransomware PE files vs benign application binaries are highly discriminative in static PE feature space. Document as 'closed-set PE classification'."
+}
