@@ -29,5 +29,38 @@
   ],
   "behavioral_training_data": "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet",
   "behavioral_configs": 15,
-  "behavioral_train_rows": 35857
+  "behavioral_train_rows": 35857,
+  "behavioral_random_stratified": {
+    "split": "random_stratified",
+    "split_seed": 42,
+    "training_parquet": "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet",
+    "n_train_windows": 25125,
+    "n_val_windows": 5335,
+    "n_test_windows": 5397,
+    "n_configs": 15,
+    "epochs_run": 30,
+    "best_val_auc": 0.9685,
+    "test_auc": 0.9646,
+    "test_accuracy": 0.8933,
+    "features": [
+      "avg_read_throughput",
+      "avg_write_throughput",
+      "read_LBA_variance",
+      "write_LBA_variance",
+      "write_entropy_mean",
+      "mem_read_entropy_mean",
+      "mem_write_entropy_mean",
+      "mem_readwrite_entropy_mean",
+      "mem_read_GPA_variance",
+      "mem_write_GPA_variance",
+      "mem_readwrite_GPA_variance",
+      "mem_exec_GPA_variance",
+      "mem_read_count",
+      "mem_write_count",
+      "mem_readwrite_count",
+      "mem_exec_count"
+    ],
+    "checkpoint": "checkpoints/behavioral_cnn_random_stratified.pt",
+    "scaler": "checkpoints/behavioral_scaler_random_stratified.joblib"
+  }
 }
