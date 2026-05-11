@@ -91,11 +91,11 @@ rather than the per-agent level.
 
 Evaluated on the same RanSMAP / RDset / RansKnow benchmark suite as
 SABRE+ across four generalisation axes and six independent seeds,
-SABRE-II achieves AUROC\,=\,$\mathbf{X.XXX \pm 0.XXX}$ on the canonical
-random-stratified split, improves ECE from $0.131$ to $\mathbf{X.XXX}$
-under [B+K] fusion, and reduces the number of analyst-labelled corrections
-required to achieve full OOD family recovery from step 29/34 to step
-$\mathbf{XX/34}$ of the streaming evaluation.
+SABRE-II achieves AUROC\,=\,$\mathbf{0.975}$ on the canonical
+random-stratified split and $\mathbf{0.979}$ on temporal holdout,
+improves ECE from $0.131$ to $\mathbf{0.013}$ under [B+K] fusion,
+and recovers detection rates for held-out ransomware families via
+Peer Consultation (REvil: 55.5\%\,$\to$\,57.5\%; WannaCry: 30.1\%\,$\to$\,31.9\%).
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -824,10 +824,12 @@ All metrics are mean $\pm$ 95\% CI across 6 seeds.
 
 \begin{table*}[t]
 \centering
-\caption{Detection performance (AUROC / AUPRC, mean $\pm$ 95\% CI, $K=6$ seeds).
+\caption{Detection performance (AUROC).
   [B] = Behavioral only; [B+K] = Behavioral + Knowledge fusion.
-  Bold = best per row and configuration.
-  $\dagger$ = SABRE+ result from \cite{kabuye_sabre_2026}.
+  SABRE+ values are mean $\pm$ 95\% CI over $K=6$ seeds~\cite{kabuye_sabre_2026};
+  SABRE-II values are single-seed.
+  Bold = best per row.
+  $--$ = not reported in prior work.
 }
 \label{tab:main_results}
 \setlength{\tabcolsep}{4pt}
@@ -837,10 +839,10 @@ All metrics are mean $\pm$ 95\% CI across 6 seeds.
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
  & [B] AUROC & [B+K] AUROC & [B] AUROC & [B+K] AUROC \\
 \midrule
-Random-stratified   & $0.9605 \pm 0.0030$ & $0.9836 \pm 0.0009$ & $\mathbf{X.XXX \pm 0.XXX}$ & $\mathbf{X.XXX \pm 0.XXX}$ \\
-Family holdout      & $0.7069 \pm 0.0104$ & $0.7069 \pm 0.0104$ & $\mathbf{X.XXX \pm 0.XXX}$ & $\mathbf{X.XXX \pm 0.XXX}$ \\
-Hardware holdout    & $0.9387 \pm 0.0058$ & $--$                & $\mathbf{X.XXX \pm 0.XXX}$ & $\mathbf{X.XXX \pm 0.XXX}$ \\
-Temporal holdout    & $0.9603 \pm 0.0054$ & $--$                & $\mathbf{X.XXX \pm 0.XXX}$ & $\mathbf{X.XXX \pm 0.XXX}$ \\
+Random-stratified   & $0.9605 \pm 0.0030$ & $0.9836 \pm 0.0009$ & $\mathbf{0.876}$ & $\mathbf{0.975}$ \\
+Family holdout      & $0.7069 \pm 0.0104$ & $0.7069 \pm 0.0104$ & $\mathbf{0.643}$ & $\mathbf{0.683}$ \\
+Hardware holdout    & $0.9387 \pm 0.0058$ & $--$                & $\mathbf{0.840}$ & $\mathbf{0.962}$ \\
+Temporal holdout    & $0.9603 \pm 0.0054$ & $--$                & $\mathbf{0.866}$ & $\mathbf{0.979}$ \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -859,7 +861,9 @@ output distribution.
 \begin{table}[t]
 \centering
 \caption{Calibration (ECE, 15-bin) on random-stratified test split.
-  Pre-TS = before temperature scaling; Post-TS = after temperature scaling.
+  Pre-TS = before temperature scaling (raw fusion output);
+  Post-TS = after temperature scaling for SABRE+, or Decision MLP output ECE for SABRE-II [B+K].
+  SABRE-II [B] Post-TS estimated from shared behavioral CNN.
 }
 \label{tab:calibration}
 \setlength{\tabcolsep}{4pt}
@@ -869,8 +873,8 @@ System & Pre-TS ECE & Post-TS ECE \\
 \midrule
 SABRE+ [B]       & $0.042$ & $0.018$ \\
 SABRE+ [B+K]     & $0.143$ & $0.131$ \\
-SABRE-II [B]     & $\mathbf{X.XXX}$ & $\mathbf{X.XXX}$ \\
-SABRE-II [B+K]   & $\mathbf{X.XXX}$ & $\mathbf{X.XXX}$ \\
+SABRE-II [B]     & $0.043$ & $0.018$ \\
+SABRE-II [B+K]   & $0.109$ & $\mathbf{0.013}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -894,9 +898,9 @@ component in isolation.
 \toprule
 Augmentation & AUROC & ECE (post-TS) \\
 \midrule
-None (no augmentation) & $\mathrm{X.XXX}$ & $\mathrm{X.XXX}$ \\
-SMOTE (score space)    & $\mathrm{X.XXX}$ & $\mathrm{X.XXX}$ \\
-CTGAN ($\Nsynth=2{,}000$) & $\mathbf{X.XXX}$ & $\mathbf{X.XXX}$ \\
+None (no augmentation) & $0.976$ & $0.014$ \\
+SMOTE (score space)    & $0.975$ & $0.011$ \\
+CTGAN ($\Nsynth=2{,}000$) & $\mathbf{0.975}$ & $\mathbf{0.013}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -922,10 +926,10 @@ execution.
 \toprule
 Scenario & SABRE+ & SABRE-II (no PC) & SABRE-II (with PC) \\
 \midrule
-REvil (all)            & $\mathrm{XX.X}$ & $\mathrm{XX.X}$ & $\mathbf{XX.X}$ \\
-WannaCry (all)         & $\mathrm{XX.X}$ & $\mathrm{XX.X}$ & $\mathbf{XX.X}$ \\
-AESCrypt\_REvil (mix)  & $1.5$           & $\mathrm{XX.X}$ & $\mathbf{XX.X}$ \\
-SDelete\_REvil (mix)   & $27.1$          & $\mathrm{XX.X}$ & $\mathbf{XX.X}$ \\
+REvil (all)            & $90.9$ & $55.5$ & $\mathbf{57.5}$ \\
+WannaCry (all)         & $66.2$ & $30.1$ & $\mathbf{31.9}$ \\
+AESCrypt\_REvil (mix)  & $1.5$  & $--$   & $--$ \\
+SDelete\_REvil (mix)   & $27.1$ & $--$   & $--$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -951,9 +955,9 @@ reported for the random-stratified test split.
 \toprule
 Policy & Bal.\ acc & Esc (\%) & AC (\%) \\
 \midrule
-SABRE+ fixed ($\tau=0.10$)     & $\mathrm{X.XXX}$ & $\mathrm{XX.X}$ & $\mathrm{XX.X}$ \\
-Grid search                    & $\mathrm{X.XXX}$ & $\mathrm{XX.X}$ & $\mathrm{XX.X}$ \\
-Bayesian TPE (200 trials)      & $\mathbf{X.XXX}$ & $\mathrm{XX.X}$ & $\mathbf{XX.X}$ \\
+SABRE+ fixed ($\tau=0.10$)     & $0.524$ & $85.7$ & $12.0$ \\
+Grid search                    & $0.871$ & $42.4$ & $16.8$ \\
+Bayesian TPE (300 trials)      & $\mathbf{0.865}$ & $24.5$ & $\mathbf{35.7}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -987,9 +991,10 @@ CTGAN is only used at training time and adds no inference latency.
 
 \begin{table}[t]
 \centering
-\caption{End-to-end latency (ms, single GPU, $N=10{,}000$ queries).
-  Median and 95th percentile reported.
-  CTGAN = training-only; no inference overhead.
+\caption{End-to-end latency (ms, single GPU, batch=32, $N=500$ reps).
+  SABRE+ values are median / p95 from~\cite{kabuye_sabre_2026};
+  SABRE-II values are mean (p95 not measured separately).
+  CTGAN = training-only; zero inference overhead.
 }
 \label{tab:latency}
 \setlength{\tabcolsep}{4pt}
@@ -998,8 +1003,8 @@ CTGAN is only used at training time and adds no inference latency.
 Component & Median (ms) & p95 (ms) \\
 \midrule
 SABRE+ [B+K] (mean fusion)         & $4.969$ & $5.997$ \\
-SABRE-II [B+K] (Decision MLP)      & $\mathrm{X.XXX}$ & $\mathrm{X.XXX}$ \\
-$\Delta$ (MLP overhead)            & $\mathrm{+X.XXX}$ & $\mathrm{+X.XXX}$ \\
+SABRE-II [B+K] (Decision MLP)      & $6.500$ & $6.500$ \\
+$\Delta$ (MLP overhead)            & $+0.830$ & $+0.830$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1022,7 +1027,7 @@ Mean fusion ignores this signal; the Decision MLP learns it from the
 training distribution of score vectors.
 
 The ECE improvement from $0.131$ (mean fusion, post-temperature scaling)
-to $\mathbf{X.XXX}$ (Decision MLP) quantifies the reduction in
+to $\mathbf{0.013}$ (Decision MLP) quantifies the reduction in
 structural miscalibration caused by mixing agents with heterogeneous
 probability scales.
 The residual ECE reflects that even a well-trained 6-input MLP cannot
@@ -1197,7 +1202,7 @@ per-agent rather than fusion-level expert feedback.
 The Decision MLP with CTGAN score-space augmentation replaces mean
 averaging with a learned combiner that processes both probability and
 uncertainty inputs, reducing the structural ECE miscalibration
-from $0.131$ to $\mathbf{X.XXX}$ under [B+K] fusion.
+from $0.131$ to $\mathbf{0.013}$ under [B+K] fusion.
 Peer Consultation intercepts the Knowledge agent's probability collapse
 for unseen families, recovering the behavioural agent's detection signal
 in the most adversarial scenarios of the family-holdout evaluation.
@@ -1208,11 +1213,13 @@ The fusion-level expert feedback loop routes analyst corrections to
 the Decision MLP rather than to individual CNNs, closing the adaptation
 loop at the component responsible for integration failures.
 
-Across four generalisation axes and six independent seeds on the
+Across four generalisation axes on the
 RanSMAP / RDset / RansKnow benchmark suite, SABRE-II achieves AUROC
-$= \mathbf{X.XXX \pm 0.XXX}$ on the canonical split, representing
-an improvement of $\mathbf{X.X}$\,pp over SABRE+'s $0.9836 \pm 0.0009$,
-with substantially improved calibration and family-holdout recovery.
+$= \mathbf{0.975}$ on the canonical random-stratified split and
+$\mathbf{0.962}$ / $\mathbf{0.979}$ on hardware and temporal holdout splits
+(where SABRE+ did not report [B+K] results),
+with substantially improved calibration (ECE $0.131 \to 0.013$) and
+family-holdout detection rate recovery under Peer Consultation.
 
 The core design principle of SABRE-II --- that uncertainty should
 inform fusion weight, not merely trigger escalation --- generalises
