@@ -945,23 +945,23 @@ RansKnow contains no meaningful ATT\&CK entries for REvil or WannaCry.
 This honest negative result directly motivates the expert feedback loop
 (Section~\ref{sec:triage_cl}).
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\caption{Ablation (E5): AUROC [95\% CI] / AUPRC across agent combinations.}
+\caption{Ablation (E5): AUROC [95\% bootstrap CI] across agent combinations and evaluation splits.}
 \label{tab:ablation}
-\setlength{\tabcolsep}{2.5pt}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Combination} & \textbf{random-strat} & \textbf{fam-holdout} &
-\textbf{hw-holdout} & \textbf{temp-holdout} \\
+\textbf{Combination} & \textbf{Random-stratified} & \textbf{Family holdout} &
+\textbf{Hardware holdout} & \textbf{Temporal holdout} \\
 \midrule
-{[}S{]} (RDset) & 1.000 [1.000] & --- & --- & --- \\
-{[}K{]} (LOCO)  & 0.997 [0.994,0.999] & 0.494 & --- & 0.885 [0.873,0.897] \\
-{[}B{]}         & 0.962 [0.958,0.967] & 0.707 [0.696,0.719] & 0.944 [0.938,0.951] & 0.967 [0.962,0.971] \\
-{[}B{+}K{]}     & \textbf{0.984} [0.982,0.987] & 0.707 & \textbf{0.973} [0.968,0.978] & \textbf{0.991} [0.989,0.993] \\
+{[}S{]} (RDset)  & 1.000 [1.000, 1.000] & ---                   & ---                   & ---                   \\
+{[}K{]} (LOCO)   & 0.997 [0.994, 0.999] & 0.494                 & ---                   & 0.885 [0.873, 0.897]  \\
+{[}B{]}          & 0.962 [0.958, 0.967] & 0.707 [0.696, 0.719]  & 0.944 [0.938, 0.951]  & 0.967 [0.962, 0.971]  \\
+{[}B{+}K{]}      & \textbf{0.984} [0.982, 0.987] & 0.707         & \textbf{0.973} [0.968, 0.978] & \textbf{0.991} [0.989, 0.993] \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \begin{figure*}[!t]
   \centering
