@@ -1,0 +1,140 @@
+{
+  "E1_main": {
+    "random_stratified": {
+      "n_test": 5397,
+      "n_ransom": 2764,
+      "B": {
+        "auroc": 0.8756,
+        "auprc": 0.7893
+      },
+      "BK_mean": {
+        "auroc": 0.8921,
+        "auprc": 0.805
+      },
+      "BK_mlp": {
+        "auroc": 0.9753,
+        "auprc": 0.9787
+      }
+    },
+    "family_holdout": {
+      "n_test": 11604,
+      "n_ransom": 5836,
+      "B": {
+        "auroc": 0.6429,
+        "auprc": 0.582
+      },
+      "BK_mean": {
+        "auroc": 0.6503,
+        "auprc": 0.5945
+      },
+      "BK_mlp": {
+        "auroc": 0.6826,
+        "auprc": 0.6783
+      }
+    },
+    "hardware_holdout": {
+      "n_test": 7283,
+      "n_ransom": 3772,
+      "B": {
+        "auroc": 0.8402,
+        "auprc": 0.7567
+      },
+      "BK_mean": {
+        "auroc": 0.861,
+        "auprc": 0.7716
+      },
+      "BK_mlp": {
+        "auroc": 0.9621,
+        "auprc": 0.9687
+      }
+    },
+    "temporal_holdout": {
+      "n_test": 5296,
+      "n_ransom": 1785,
+      "B": {
+        "auroc": 0.8655,
+        "auprc": 0.6378
+      },
+      "BK_mean": {
+        "auroc": 0.8941,
+        "auprc": 0.6766
+      },
+      "BK_mlp": {
+        "auroc": 0.9791,
+        "auprc": 0.9674
+      }
+    }
+  },
+  "E2_calibration": {
+    "B_ece": 0.0428,
+    "BK_mean_pre": 0.1088,
+    "BK_mean_post": 0.1516,
+    "T_sp": 0.702,
+    "BK_mlp_ece": 0.0134
+  },
+  "E3_ctgan_ablation": {
+    "no_aug": {
+      "auroc": 0.9758,
+      "auprc": 0.9793,
+      "ece": 0.0143
+    },
+    "smote": {
+      "auroc": 0.9751,
+      "auprc": 0.9786,
+      "ece": 0.0113
+    },
+    "ctgan": {
+      "auroc": 0.9754,
+      "auprc": 0.9789,
+      "ece": 0.0134
+    }
+  },
+  "E4_peer_consultation": {
+    "auroc_no_pc": 0.6838,
+    "auroc_with_pc": 0.6794,
+    "per_family": {
+      "REvil": {
+        "n": 3046,
+        "ransom": 3046,
+        "B_dr": 0.9087,
+        "mlp_nopc": 0.5548,
+        "mlp_pc": 0.5752
+      },
+      "WannaCry": {
+        "n": 2790,
+        "ransom": 2790,
+        "B_dr": 0.6616,
+        "mlp_nopc": 0.3011,
+        "mlp_pc": 0.3194
+      }
+    }
+  },
+  "E5_policy_comparison": {
+    "sabre_plus_fixed": {
+      "balanced_accuracy": 0.5241,
+      "escalation_rate": 0.8566,
+      "ac_rate": 0.1199,
+      "allow_rate": 0.0235
+    },
+    "grid_search": {
+      "balanced_accuracy": 0.8714,
+      "escalation_rate": 0.4245,
+      "ac_rate": 0.1682,
+      "allow_rate": 0.4073
+    },
+    "bayesian_tpe": {
+      "balanced_accuracy": 0.8645,
+      "escalation_rate": 0.2451,
+      "ac_rate": 0.3572,
+      "allow_rate": 0.3976
+    }
+  },
+  "E6_latency": {
+    "batch_size": 32,
+    "n_reps": 500,
+    "sabre_plus_ms": 5.67,
+    "sabre2_ms": 6.5,
+    "overhead_ms": 0.83,
+    "overhead_pct": 14.6
+  }
+}
