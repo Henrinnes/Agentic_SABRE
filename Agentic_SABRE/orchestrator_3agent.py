@@ -12,6 +12,8 @@ from .agents.decision import DecisionAgent
 
 from .contracts import AgentOutput
 from .consultation import apply_consultation, apply_consultation_batch
+from .feedback_store import append_feedback, feedback_as_training_rows
+from .agents.decision import DecisionTrainer
 
 import json
 from pathlib import Path
@@ -83,6 +85,8 @@ class Orchestrator:
         κ_low: float | None = 0.08,
         decision_artifact: str | None = "checkpoints/decision_fuser_3agent.json",
         agent_policies_path: str = "checkpoints/agent_policies.json",
+        feedback_log: str = "checkpoints/feedback/feedback_log.json",
+        auto_retrain_threshold: int = 50,
     ):
 
         # --- expert agents ---
@@ -106,6 +110,11 @@ class Orchestrator:
 
         # per-agent policies (loaded once; fallback keeps consultation inactive)
         self._agent_policies = _load_agent_policies(agent_policies_path)
+
+        # feedback store paths
+        self._feedback_log = feedback_log
+        self._decision_artifact = decision_artifact
+        self._auto_retrain_threshold = auto_retrain_threshold
 
     def _decide(self, fused_p: float, uncert_max: float) -> Action:
 
@@ -232,10 +241,23 @@ class Orchestrator:
         # --------------------------------------------------
 
         if decision == "AUTO_CONTAIN":
-            pass
+            self.actions.isolate_host(
+                host=context.get("host", sample_id),
+                reason=f"SABRE fused_p={fused.prob:.3f}",
+            )
 
         elif decision == "ESCALATE":
-            pass
+            self.tickets.create_ticket({
+                "sample_id": sample_id,
+                "score_fused": fused.prob,
+                "uncert_max": uncert_max,
+                "by_agent": {
+                    "p_sem": o_sem.prob,  "σ_sem": o_sem.uncert,
+                    "p_beh": o_beh.prob,  "σ_beh": o_beh.uncert,
+                    "p_know": o_know.prob, "σ_know": o_know.uncert,
+                },
+                "context": context,
+            })
 
         # --------------------------------------------------
         # 5. Return rich result
@@ -261,6 +283,85 @@ class Orchestrator:
             },
             "consultation_triggered": consultation_triggered,
         }
+
+    # ------------------------------------------------------------------
+    # Analyst Feedback API
+    # ------------------------------------------------------------------
+
+    def record_analyst_correction(
+        self,
+        result: Dict[str, Any],
+        expert_correction: int,
+        expert_id: str = "analyst",
+        reasoning: str = "",
+    ) -> int:
+        """
+        Record an analyst correction for a previously ESCALATE'd sample.
+
+        Parameters
+        ----------
+        result : dict
+            The dict returned by `handle()` for the sample.
+        expert_correction : int
+            0 = analyst confirmed benign, 1 = analyst confirmed ransomware.
+        expert_id : str
+            Analyst identifier (for audit trail).
+        reasoning : str
+            Free-text analyst note.
+
+        Returns
+        -------
+        int
+            Total number of feedback records in the log after this append.
+            If count reaches `auto_retrain_threshold`, the Decision MLP is
+            automatically retrained and saved back to the artifact path.
+        """
+        by_agent = result.get("by_agent", {})
+        sem   = by_agent.get("semantic",   {})
+        beh   = by_agent.get("behavioral", {})
+        know  = by_agent.get("knowledge",  {})
+        fused = by_agent.get("fusion",     {})
+
+        count = append_feedback(
+            sample_id           = result.get("sample_id", ""),
+            original_decision   = result.get("decision", "ESCALATE"),
+            p_sem               = sem.get("prob", 0.5),
+            p_beh               = beh.get("prob", 0.5),
+            p_know              = know.get("prob", 0.5),
+            sigma_sem           = sem.get("uncert", 0.0),
+            sigma_beh           = beh.get("uncert", 0.0),
+            sigma_know          = know.get("uncert", 0.0),
+            fused_prob          = fused.get("prob", result.get("score_fused", 0.5)),
+            expert_correction   = expert_correction,
+            expert_id           = expert_id,
+            reasoning           = reasoning,
+            consultation_triggered = result.get("consultation_triggered"),
+            log_path            = self._feedback_log,
+        )
+
+        # Trigger incremental Decision MLP retrain when threshold is reached
+        if (
+            count >= self._auto_retrain_threshold
+            and count % self._auto_retrain_threshold == 0
+            and self._decision_artifact is not None
+            and Path(self._decision_artifact).exists()
+        ):
+            X_fb, y_fb = feedback_as_training_rows(self._feedback_log)
+            if len(X_fb) >= 10:
+                updated = DecisionTrainer.retrain_incremental(
+                    base_artifact = self._decision_artifact,
+                    X_feedback    = X_fb,
+                    y_feedback    = y_fb,
+                    out_path      = self._decision_artifact,
+                )
+                # Reload the decision agent with the updated artifact
+                self.dec.trainer = DecisionTrainer.load(self._decision_artifact)
+                print(
+                    f"[Orchestrator] Decision MLP retrained on {len(X_fb)} "
+                    f"feedback rows → {self._decision_artifact}"
+                )
+
+        return count
 
     def handle_batch(
         self,
