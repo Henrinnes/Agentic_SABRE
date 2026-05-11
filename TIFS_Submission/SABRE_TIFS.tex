@@ -656,7 +656,8 @@ below the detection threshold, propagating the uncertainty signal to the triage 
 
 \subsection{Uncertainty-Driven Three-Way Triage}
 
-The triage rule (Eq.~\eqref{eq:triage}) is asymmetric by design.
+The triage rule (Eq.~\eqref{eq:triage}) is asymmetric by design
+(Fig.~\ref{fig:triage_scatter}).
 \texttt{DETECT} fires whenever $\tilde{p}_{\mathrm{fused}} \geq 0.5$ regardless of
 uncertainty, accepting the risk of high-uncertainty detections (which may be false
 positives) rather than silently missing high-confidence ransomware.
@@ -676,7 +677,20 @@ The primary adversarial robustness metric is:
 where $\mathcal{R}$ is the set of true ransomware samples.
 Under worst-case feature-space mimicry, TC holds at 91.9\% while
 the detection rate falls to 81.7\%, recovering 10.2~pp through escalation
-(Section~\ref{sec:results}).
+(Section~\ref{sec:results}, Fig.~\ref{fig:adversarial}).
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{Figures/fig4_triage_scatter.pdf}
+  \caption{Triage decision space for the Behavioral agent [B] on the
+  random-stratified test split.
+  Each point is a 10-second window coloured by true label (blue = benign,
+  red = ransomware).
+  The vertical dashed line at $\bar{p}=0.5$ separates \textsc{Detect} from
+  the uncertain region; the horizontal dotted line at $\sigma=\tau=0.10$
+  separates \textsc{Escalate} from \textsc{Benign}.}
+  \label{fig:triage_scatter}
+\end{figure}
 
 \subsection{Temperature Scaling}
 
@@ -900,8 +914,8 @@ Frozen split files and trained checkpoints are committed to the repository.
 \subsection{Agent Contribution Ablation (E5)}
 \label{subsec:e5}
 
-Table~\ref{tab:ablation} reports AUROC and AUPRC for all agent combinations across the
-four evaluation splits.
+Table~\ref{tab:ablation} and Fig.~\ref{fig:roc_curves} report AUROC and AUPRC for all
+agent combinations across the four evaluation splits.
 All results use 1,000-bootstrap 95\% CIs; cross-dataset combinations where an agent has
 no feature input are excluded.
 
@@ -949,10 +963,21 @@ This honest negative result directly motivates the expert feedback loop
 \end{tabular}
 \end{table}
 
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig2_roc_curves.pdf}
+  \caption{ROC curves for SABRE+ agents.
+  (a)~Behavioral agent [B] across all four evaluation splits; (b)~[B] vs.\
+  [B+K] fusion on the random-stratified split, with shaded fusion-gain region.
+  AUROC values in legend are for seed~0; multi-seed statistics are in
+  Table~\ref{tab:multiseed}.}
+  \label{fig:roc_curves}
+\end{figure*}
+
 \subsection{Multi-Seed Reproducibility}
 \label{subsec:multiseed}
 
-Table~\ref{tab:multiseed} confirms that results are not artefacts of a lucky initialisation.
+Table~\ref{tab:multiseed} and Fig.~\ref{fig:multiseed} confirm that results are not artefacts of a lucky initialisation.
 The {[}B{]} standard deviation of 0.003 across seeds indicates highly stable training
 dynamics.
 {[}B{+}K{]} is even more stable ($\pm 0.0009$) because the Knowledge agent is
@@ -979,6 +1004,15 @@ temp-holdout  & {[}B{]}   & $0.9603\pm0.0054$ & [0.9546, 0.9660] \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{Figures/fig10_multiseed.pdf}
+  \caption{Multi-seed AUROC (mean $\pm$ 95\% $t$-CI, 6 seeds) across the four
+  evaluation splits. The [B+K] bar is shown only for the random-stratified
+  split; other splits use [B] alone (no shared dataset for tri-modal evaluation).}
+  \label{fig:multiseed}
+\end{figure}
 
 \subsection{Realistic Class Imbalance (E4)}
 \label{subsec:e4}
@@ -1031,7 +1065,8 @@ lowest across all conditions.
 Knowledge fusion compensates for SDelete\_Conti (DR: $0.599 \to 0.995$) but cannot
 rescue SDelete\_REvil (DR: $0.271 \to 0.031$) due to absent REvil knowledge coverage.
 MC-Dropout correctly routes 25.3\% of mix-partition windows to \texttt{ESCALATE}
-($\sigma \geq 0.10$), including the majority of SDelete pairings.
+($\sigma \geq 0.10$), including the majority of SDelete pairings
+(Fig.~\ref{fig:mix_partition}).
 
 \begin{table}[t]
 \centering
@@ -1055,6 +1090,19 @@ AESCrypt\_REvil   & 203 & 0.921 & 0.015 \\
 \end{tabular}
 \small{$^\dagger${[}B{]} preferred for unseen-family concurrent scenarios.}
 \end{table}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig9_mix_partition.pdf}
+  \caption{Concurrent-execution mix partition: per-class detection rates for [B]
+  and [B+K].
+  Dashed horizontal lines mark the overall means.
+  REvil-paired classes show near-zero [B+K] DR due to absent REvil coverage in
+  RansKnow (annotated).
+  SDelete+Conti is rescued by knowledge fusion ($0.599 \to 0.995$); SDelete+REvil
+  is not.}
+  \label{fig:mix_partition}
+\end{figure*}
 
 \subsection{Adversarial Mimicry Stress Tests (E12)}
 \label{subsec:e12}
@@ -1094,6 +1142,18 @@ full-blend    & 1.0 & 1.000 & 1.000 & 0.000 \\
 \end{tabular}
 \end{table}
 
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig5_adversarial.pdf}
+  \caption{Adversarial feature-space mimicry results.
+  (a)~Direct detection rate vs.\ blend factor $\alpha$; (b)~Triage coverage
+  (detection rate + escalation recovery) vs.\ $\alpha$.
+  Full-blend DR increases toward 1.0 because the mean benign feature vector
+  falls inside the ransomware decision region.
+  Slow-encrypt at $\alpha=1.0$ produces the worst-case: DR\,=\,0.817, TC\,=\,0.919.}
+  \label{fig:adversarial}
+\end{figure*}
+
 \subsection{Expert Feedback Loop Under Temporal Drift (E10)}
 \label{subsec:e10}
 
@@ -1108,7 +1168,7 @@ Replay is the worst strategy (AUPRC~$= 0.8802$, FN~$= 574$): gradient conflict b
 the 500-sample replay buffer and OOD-variant gradients degrades performance.
 All four strategies recover to AUPRC~$\geq 0.80$ at the same stream step (29/34),
 establishing that the labelling budget---not the update algorithm---is the binding
-constraint on adaptation speed.
+constraint on adaptation speed (Fig.~\ref{fig:feedback_loop}).
 
 \begin{table}[t]
 \centering
@@ -1126,6 +1186,17 @@ replay     & 0.8802 & 0.589 & 0.012 & 574 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\linewidth]{Figures/fig7_feedback_loop.pdf}
+  \caption{Rolling AUPRC (500-window window) over the 34-step stream for four
+  continual learning strategies.
+  OOD Conti sub-variant arrival begins at step 28 (dotted vertical line).
+  All strategies recover to AUPRC\,$\geq$\,0.80 at step 29, confirming that
+  the labelling budget---not the update algorithm---is the binding constraint.}
+  \label{fig:feedback_loop}
+\end{figure}
 
 \subsection{Probability Calibration and Conformal Triage (E6/E7)}
 \label{subsec:e6e7}
@@ -1158,6 +1229,17 @@ $T$ fitted on val, evaluated on test.}
 \end{tabular}
 \end{table}
 
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig3_reliability.pdf}
+  \caption{Reliability diagrams before and after temperature scaling.
+  (a)~Behavioral agent [B]: ECE drops from 0.042 to 0.018 ($T=0.703$).
+  (b)~Fused [B+K]: residual miscalibration (ECE 0.143$\to$0.131, $T=0.702$)
+  persists due to the Knowledge agent's bimodal probability distribution for
+  covered vs.\ absent families.}
+  \label{fig:reliability}
+\end{figure*}
+
 \textbf{Conformal triage (E7).}
 Table~\ref{tab:conformal} reports Mondrian ICP outcomes at three coverage targets.
 At 95\% coverage, {[}B{+}K{]} achieves: DETECT rate~$= 50.0\%$, BENIGN~$= 47.7\%$,
@@ -1168,7 +1250,8 @@ DETECT precision~$= 0.991$ and DETECT recall~$= 0.801$, escalating 22.9\% to ana
 review---a substantially more decisive and complete profile than {[}B{]} alone
 (41.1\% escalation, 53.7\% recall at the same guarantee level).
 Empirical coverage tracks the target within 1.2\,pp across all tested
-$\varepsilon \in \{0.10, 0.05, 0.01\}$.
+$\varepsilon \in \{0.10, 0.05, 0.01\}$ (Fig.~\ref{fig:conformal},
+Fig.~\ref{fig:reliability}).
 
 \begin{table}[t]
 \centering
@@ -1189,6 +1272,19 @@ $\varepsilon \in \{0.10, 0.05, 0.01\}$.
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig6_conformal.pdf}
+  \caption{Mondrian conformal triage outcomes at 90\%, 95\%, and 99\% coverage
+  targets for [B] (left) and [B+K] (right).
+  Bars show fractions routed to \textsc{Detect}, \textsc{Escalate}, and
+  \textsc{Benign}.
+  The purple diamond line (secondary axis) shows \textsc{Detect} precision;
+  the green dashed line shows empirical coverage.
+  At 99\% coverage, [B+K] auto-classifies 77\% of traffic with 99.1\% precision.}
+  \label{fig:conformal}
+\end{figure*}
 
 \subsection{Runtime and Deployment Efficiency (E16)}
 \label{subsec:e16}
@@ -1231,12 +1327,14 @@ storage access---the principal I/O signature of active encryption---drives class
 This is consistent with counterfactual analysis in~\cite{kabuye2025sabre_eswa}, where
 minimal relative changes to LBA and GPA variance sufficed to flip the agent's prediction.
 
-\begin{figure}[t]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=\linewidth]{Figures/Behaviour_feature_importance.png}
-  \caption{Permutation feature importance for the Behavioral agent (RanSMAP).
-  LBA and GPA variance features are the primary drivers of classification,
-  reflecting the I/O signature of active file encryption.}
+  \includegraphics[width=\linewidth]{Figures/fig8_feature_importance.pdf}
+  \caption{Permutation feature importance for the Behavioral agent (RanSMAP,
+  random-stratified test split).
+  Red bars indicate AUROC drop $> 0.02$; blue bars indicate smaller drops.
+  LBA and GPA variance features are the primary discriminators, reflecting the
+  spatial dispersion of I/O access during active file encryption.}
   \label{fig:feat_imp}
 \end{figure}
 
