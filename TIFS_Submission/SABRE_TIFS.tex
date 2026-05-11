@@ -67,7 +67,7 @@ telemetry features extracted from 10-second execution windows, a semantic agent
 embedding PE static structure via a sentence transformer, and a knowledge agent
 encoding ATT\&CK tactic profiles derived from threat-intelligence transcripts.
 All agents employ Monte Carlo Dropout for uncertainty quantification, enabling
-a three-way triage decision --- \textsc{Detect}, \textsc{Benign}, or
+a three-way triage decision --- \texttt{AUTO-CONTAIN}, \texttt{ALLOW}, or
 \textsc{Escalate} --- rather than a binary verdict.
 A Mondrian conformal prediction wrapper provides formal, distribution-free
 coverage guarantees on triage outcomes.
@@ -188,8 +188,8 @@ a single inference pipeline, with mean fusion controllable by agent
 availability at deployment time.
 
 \item \textbf{Uncertainty-driven triage.}
-MC-Dropout uncertainty quantification enables a \textsc{Detect} /
-\textsc{Benign} / \textsc{Escalate} triage that, under worst-case
+MC-Dropout uncertainty quantification enables a \texttt{AUTO-CONTAIN} /
+\texttt{ALLOW} / \textsc{Escalate} triage that, under worst-case
 feature-space mimicry attacks, maintains \textbf{91.9\% triage coverage}
 while the direct detection rate falls to 81.7\% --- recovering 10.2\,pp
 through analyst escalation of high-uncertainty samples.
@@ -404,8 +404,8 @@ Agents are trained independently on their native datasets and frozen.
 At inference, each active agent performs $T=10$ MC-Dropout forward passes,
 producing a predictive mean $\bar{p}_i$ and epistemic uncertainty $\sigma_i$.
 The Fusion Layer averages active agents into a fused probability and fused
-uncertainty, which the Triage Decision Module maps to \texttt{DETECT},
-\texttt{ESCALATE}, or \texttt{BENIGN}.
+uncertainty, which the Triage Decision Module maps to \texttt{AUTO-CONTAIN},
+\texttt{ESCALATE}, or \texttt{ALLOW}.
 A Mondrian Conformal Wrapper converts temperature-scaled probabilities into
 prediction sets with formal coverage guarantees.
 \texttt{ESCALATE} decisions are queued for analyst review; verified labels
@@ -545,10 +545,10 @@ $\tilde{p}_{\mathrm{fused}}$ and fused uncertainty $\sigma_{\mathrm{fused}}$ are
 to one of three outcomes:
 \begin{equation}
 \text{outcome}(\mathbf{x}) = \begin{cases}
-  \texttt{DETECT}   & \text{if } \tilde{p}_{\mathrm{fused}} \geq 0.5, \\
+  \texttt{AUTO-CONTAIN}   & \text{if } \tilde{p}_{\mathrm{fused}} \geq 0.5, \\
   \texttt{ESCALATE} & \text{if } \tilde{p}_{\mathrm{fused}} < 0.5 \;\text{and}\;
                       \sigma_{\mathrm{fused}} \geq \tau, \\
-  \texttt{BENIGN}   & \text{otherwise.}
+  \texttt{ALLOW}   & \text{otherwise.}
 \end{cases}
 \label{eq:triage}
 \end{equation}
@@ -558,7 +558,7 @@ The uncertainty threshold $\tau = 0.10$ is the 90th percentile of $\sigma_{\math
 over benign validation samples, bounding the false-\texttt{ESCALATE} rate to at most 10\%
 on in-distribution clean traffic.
 \emph{Triage coverage} (TC) denotes the fraction of true ransomware samples that receive
-either \texttt{DETECT} or \texttt{ESCALATE}; it is the primary robustness criterion under
+either \texttt{AUTO-CONTAIN} or \texttt{ESCALATE}; it is the primary robustness criterion under
 adversarial feature manipulation (Section~\ref{sec:results}).
 
 \subsection{Conformal Prediction Wrapper}
@@ -574,10 +574,10 @@ at significance level $\varepsilon$; the prediction set $C(\mathbf{x})$ satisfie
 \label{eq:coverage_arch}
 \end{equation}
 Prediction sets map to triage outcomes as:
-$C\!=\!\{1\}\!\Rightarrow\!\texttt{DETECT}$;
-$C\!=\!\{0\}\!\Rightarrow\!\texttt{BENIGN}$;
+$C\!=\!\{1\}\!\Rightarrow\!\texttt{AUTO-CONTAIN}$;
+$C\!=\!\{0\}\!\Rightarrow\!\texttt{ALLOW}$;
 $C\!=\!\{0,1\}\!\Rightarrow\!\texttt{ESCALATE}$;
-$C\!=\!\emptyset\!\Rightarrow\!\texttt{DETECT}$ (conservative edge).
+$C\!=\!\emptyset\!\Rightarrow\!\texttt{AUTO-CONTAIN}$ (conservative edge).
 The full Mondrian formulation and empirical validation are given in
 Section~\ref{sec:triage_cl}.
 
@@ -661,7 +661,7 @@ below the detection threshold, propagating the uncertainty signal to the triage 
 
 The triage rule (Eq.~\eqref{eq:triage}) is asymmetric by design
 (Fig.~\ref{fig:triage_scatter}).
-\texttt{DETECT} fires whenever $\tilde{p}_{\mathrm{fused}} \geq 0.5$ regardless of
+\texttt{AUTO-CONTAIN} fires whenever $\tilde{p}_{\mathrm{fused}} \geq 0.5$ regardless of
 uncertainty, accepting the risk of high-uncertainty detections (which may be false
 positives) rather than silently missing high-confidence ransomware.
 The \texttt{ESCALATE} branch applies only in the $\tilde{p} < 0.5$ region: a sample
@@ -674,7 +674,7 @@ recoverable.
 The primary adversarial robustness metric is:
 \begin{equation}
 \mathrm{TC} = \frac{|\{x \in \mathcal{R} : \text{outcome}(x) \in
-    \{\texttt{DETECT},\texttt{ESCALATE}\}\}|}{|\mathcal{R}|},
+    \{\texttt{AUTO-CONTAIN},\texttt{ESCALATE}\}\}|}{|\mathcal{R}|},
 \label{eq:tc}
 \end{equation}
 where $\mathcal{R}$ is the set of true ransomware samples.
@@ -689,9 +689,9 @@ the detection rate falls to 81.7\%, recovering 10.2~pp through escalation
   random-stratified test split.
   Each point is a 10-second window coloured by true label (blue = benign,
   red = ransomware).
-  The vertical dashed line at $\bar{p}=0.5$ separates \textsc{Detect} from
+  The vertical dashed line at $\bar{p}=0.5$ separates \texttt{AUTO-CONTAIN} from
   the uncertain region; the horizontal dotted line at $\sigma=\tau=0.10$
-  separates \textsc{Escalate} from \textsc{Benign}.}
+  separates \textsc{Escalate} from \texttt{ALLOW}.}
   \label{fig:triage_scatter}
 \end{figure}
 
@@ -1245,11 +1245,11 @@ $T$ fitted on val, evaluated on test.}
 
 \textbf{Conformal triage (E7).}
 Table~\ref{tab:conformal} reports Mondrian ICP outcomes at three coverage targets.
-At 95\% coverage, {[}B{+}K{]} achieves: DETECT rate~$= 50.0\%$, BENIGN~$= 47.7\%$,
+At 95\% coverage, {[}B{+}K{]} achieves: AUTO-CONTAIN rate~$= 50.0\%$, ALLOW~$= 47.7\%$,
 ESCALATE~$= 2.4\%$, empirical coverage~$= 0.946$ (matching 0.95 to within 0.4\,pp),
-DETECT precision~$= 0.949$.
+AUTO-CONTAIN precision~$= 0.949$.
 At 99\% coverage, {[}B{+}K{]} auto-classifies 77.1\% of traffic with
-DETECT precision~$= 0.991$ and DETECT recall~$= 0.801$, escalating 22.9\% to analyst
+AUTO-CONTAIN precision~$= 0.991$ and AUTO-CONTAIN recall~$= 0.801$, escalating 22.9\% to analyst
 review---a substantially more decisive and complete profile than {[}B{]} alone
 (41.1\% escalation, 53.7\% recall at the same guarantee level).
 Empirical coverage tracks the target within 1.2\,pp across all tested
@@ -1263,8 +1263,8 @@ Fig.~\ref{fig:reliability}).
 \setlength{\tabcolsep}{2pt}
 \begin{tabular}{llccccc}
 \toprule
-\textbf{Agent} & \textbf{Target} & \textbf{DETECT} & \textbf{BENIGN} &
-\textbf{ESC} & \textbf{Det. prec.} & \textbf{Det. rec.} \\
+\textbf{Agent} & \textbf{Target} & \textbf{A-CONT.} & \textbf{ALLOW} &
+\textbf{ESC} & \textbf{AC prec.} & \textbf{AC rec.} \\
 \midrule
 {[}B{]}   & 90\% & 0.504 & 0.490 & 0.000 & 0.900 & 0.885 \\
 {[}B{]}   & 95\% & 0.441 & 0.439 & 0.120 & 0.943 & 0.813 \\
@@ -1281,9 +1281,9 @@ Fig.~\ref{fig:reliability}).
   \includegraphics[width=\textwidth]{Figures/fig6_conformal.pdf}
   \caption{Mondrian conformal triage outcomes at 90\%, 95\%, and 99\% coverage
   targets for [B] (left) and [B+K] (right).
-  Bars show fractions routed to \textsc{Detect}, \textsc{Escalate}, and
-  \textsc{Benign}.
-  The purple diamond line (secondary axis) shows \textsc{Detect} precision;
+  Bars show fractions routed to \texttt{AUTO-CONTAIN}, \textsc{Escalate}, and
+  \texttt{ALLOW}.
+  The purple diamond line (secondary axis) shows \texttt{AUTO-CONTAIN} precision;
   the green dashed line shows empirical coverage.
   At 99\% coverage, [B+K] auto-classifies 77\% of traffic with 99.1\% precision.}
   \label{fig:conformal}
@@ -1410,7 +1410,7 @@ robustness: an adversary who successfully obfuscates one modality
 the benign region) typically does so at the cost of increased
 semantic uncertainty.
 This elevated $\sigma_{\mathrm{fused}}$ triggers the \textsc{Escalate} outcome
-rather than \textsc{Benign}, ensuring that uncertain adversarial samples are
+rather than \texttt{ALLOW}, ensuring that uncertain adversarial samples are
 routed to analyst review rather than silently allowed.
 The adversarial evaluation (Section~\ref{sec:results}) confirms this
 empirically: under worst-case feature-space mimicry that reduces direct
@@ -1561,7 +1561,7 @@ centroid.
 Two important adversarial scenarios are not modelled.
 First, \textbf{adaptive uncertainty attacks}: an adversary who knows that high $\sigma$
 triggers ESCALATE rather than MISS might optimise for low-uncertainty benign predictions
-($\bar{p}$ slightly below 0.5, $\sigma$ below $\tau$), landing in the BENIGN outcome
+($\bar{p}$ slightly below 0.5, $\sigma$ below $\tau$), landing in the ALLOW outcome
 without triggering ESCALATE.
 Second, \textbf{physical evasion}: memory-resident ransomware that patches its own memory
 access patterns to mimic benign processes, or that executes encryption in a co-process
@@ -1650,8 +1650,8 @@ manually curated transcripts.
 
 \subsubsection{Uncertainty-Aware Adversarial Training}
 
-An adversary specifically targeting the BENIGN outcome would optimise for simultaneously
-low $\bar{p}$ and low $\sigma$, landing in the BENIGN cell of the triage without
+An adversary specifically targeting the ALLOW outcome would optimise for simultaneously
+low $\bar{p}$ and low $\sigma$, landing in the ALLOW cell of the triage without
 triggering ESCALATE.
 \textbf{Uncertainty-aware adversarial training} would directly harden the model against
 this threat: augmenting the training set with adversarially perturbed windows generated to
