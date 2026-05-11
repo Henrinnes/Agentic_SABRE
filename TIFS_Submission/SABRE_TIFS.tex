@@ -33,9 +33,9 @@
 
 \begin{document}
 
-\title{Extended Agentic SABRE: Knowledge-Augmented Three-Agent
-Ransomware Detection via Uncertainty-Driven Peer Consultation
-and Expert-Guided Continual Adaptation}
+\title{Extended Agentic SABRE: Multi-Modal Ransomware Detection via
+Uncertainty-Driven Triage, Conformal Guarantees, and Expert-Guided
+Continual Adaptation}
 
 \author{Henry~Kabuye,
         Biju~Issac,~\IEEEmembership{Member,~IEEE,}
@@ -56,47 +56,45 @@ E-mail: bissac@ieee.org.}%
 
 %%------------------------------------------------------------
 \begin{abstract}
-Ransomware has become one of the most sophisticated and economically
-devastating categories of malware, characterised by rapid mutation,
-behavioural polymorphism, and deliberate evasion of
-machine-learning-based detectors.
-In this paper we present \textbf{Extended Agentic SABRE} (\textbf{SABRE+}):
-a three-agent, uncertainty-aware, neuro-symbolic framework for adaptive
-ransomware detection that augments the previously proposed two-agent
-system with a dedicated \emph{Knowledge Agent} trained on
-practitioner-grounded threat-intelligence discourse.
-SABRE+ introduces three principled advances beyond the two-agent baseline.
-First, a Knowledge Agent operates on \emph{RansKnow}, a novel
-307-sample dataset derived from YouTube security-practitioner transcripts
-and structured according to MITRE ATT\&CK tactics, tool signatures, and
-platform indicators; the agent achieves 0.9550 accuracy and 0.9950
-AUC on balanced evaluation.
-Second, a \emph{Peer Consultation Protocol} enables any agent whose
-epistemic uncertainty exceeds a per-agent threshold $\kappa_{\mathrm{local}}$
-to adjust its probability estimate via inverse-uncertainty-weighted peer
-scores, without modifying its uncertainty---a design that preserves the
-integrity of downstream triage.
-Third, an \emph{Expert Feedback Loop} closes the human-in-the-loop
-cycle by routing analyst corrections back to incrementally retrain the
-Decision MLP, preventing performance decay under concept drift without
-catastrophic forgetting.
-SABRE+ fuses all three agents into a six-dimensional score vector,
-applies Bayesian threshold optimisation (Tree-structured Parzen Estimator)
-to a composite objective balancing balanced accuracy and escalation rate,
-and enforces a four-region triage policy (AUTO-CONTAIN / ESCALATE /
-ALLOW) governed by a fused risk score and $\smax = \max(\sigma_\sem,
-\sigma_\beh, \sigma_\know)$.
-Empirical evaluation on three independent datasets confirms that each
-agent discriminates reliably within its modality, that peer consultation
-reduces uncertainty-induced misclassification under high-$\sigma$
-conditions, and that the knowledge agent provides a complementary signal
-absent from both static and runtime representations.
+Ransomware remains among the most operationally damaging classes of malware,
+yet existing detectors typically exploit a single signal modality and provide
+no principled mechanism for expressing uncertainty or handling novel attack
+variants at deployment time.
+We present \textbf{SABRE+} (Scalable Agent-Based Ransomware Evidence),
+a multi-agent detection architecture that fuses three complementary evidence
+sources: a convolutional behavioral agent operating on 16-dimensional runtime
+telemetry features extracted from 10-second execution windows, a semantic agent
+embedding PE static structure via a sentence transformer, and a knowledge agent
+encoding ATT\&CK tactic profiles derived from threat-intelligence transcripts.
+All agents employ Monte Carlo Dropout for uncertainty quantification, enabling
+a three-way triage decision --- \textsc{Detect}, \textsc{Benign}, or
+\textsc{Escalate} --- rather than a binary verdict.
+A Mondrian conformal prediction wrapper provides formal, distribution-free
+coverage guarantees on triage outcomes.
+
+We evaluate SABRE+ on RanSMAP (35,857 windows, 15 hardware configurations,
+12 families), RDset (138,047 PE samples), and RansKnow (307 ATT\&CK
+transcripts) using frozen session-level splits across four generalisation axes.
+Across six independent training seeds, the behavioral agent achieves
+AUROC\,=\,$0.9605 \pm 0.0030$; knowledge fusion ([B+K]) raises this to
+$0.9836 \pm 0.0009$.
+Under realistic 5\% ransomware prevalence, [B+K] achieves AUPRC\,=\,0.898,
+reducing false positives by 31\% over the behavioral baseline.
+On unseen concurrent-execution traces, the system detects 83.8\% of ransomware
+despite no concurrent-execution training examples.
+Under worst-case feature-space mimicry, the uncertainty mechanism holds triage
+coverage at 91.9\%.
+At 99\% conformal coverage, [B+K] auto-classifies 77\% of traffic with 99.1\%
+detection precision, escalating the remaining 23\% to analyst review.
+An expert feedback loop with Elastic Weight Consolidation achieves the lowest
+false-negative count (515) under OOD family drift with negligible catastrophic
+forgetting ($\Delta$AUPRC\,=\,0.001 on retained families).
 \end{abstract}
 
 \begin{IEEEkeywords}
-Ransomware detection, multi-agent systems, uncertainty quantification,
-Monte Carlo Dropout, peer consultation, MITRE ATT\&CK, threat intelligence,
-continual learning, explainable AI, triage policy.
+Ransomware detection, behavioral analysis, multi-agent systems, uncertainty
+quantification, conformal prediction, continual learning, threat intelligence,
+Monte Carlo Dropout.
 \end{IEEEkeywords}
 
 
@@ -104,101 +102,149 @@ continual learning, explainable AI, triage policy.
 \section{Introduction}
 \label{sec:intro}
 
-\IEEEPARstart{R}{ansomware} continues to evolve at a pace that outstrips
-the deployment cycle of conventional detection systems.
-Modern families such as LockBit~3.0, ALPHV/BlackCat, and RansomHub
-employ code polymorphism, living-off-the-land techniques, and multi-stage
-delivery chains that are specifically engineered to circumvent both
-signature-based and machine-learning-based
-defences~\cite{razaulla2023age,fernando2020study}.
-Enterprise environments therefore face two compounding problems:
-(i)~statistical detectors trained on known malware degrade rapidly under
-concept drift as attacker tooling evolves~\cite{Ceschin2022ConceptDrift};
-(ii)~static classifiers that output a single point prediction cannot
-communicate their confidence to downstream response systems, forcing
-analysts to choose between aggressive automatic containment
-(high false-positive cost) and conservative manual review
-(high analyst workload and delayed response)~\cite{Doan2024uncertainBay}.
+\IEEEPARstart{R}{ansomware} has emerged as the defining cyber threat of the
+past decade.
+By encrypting victim files and demanding payment for decryption keys,
+ransomware attacks have disrupted hospitals, shut down fuel pipelines,
+paralysed municipal governments, and cost organisations an estimated
+\$20\,billion globally in 2021 alone --- a figure projected to exceed
+\$265\,billion by 2031~\cite{cybersecurity_ventures_2022}.
+Unlike traditional malware, ransomware's damage is immediate, highly visible,
+and often irreversible: encrypted files cannot be recovered without either the
+decryption key or a prior backup, and paying the ransom provides no guarantee
+of decryption.
+The operational consequences of a missed detection are therefore far more
+severe than the operational friction of a false alarm.
 
-Prior work on uncertainty-aware ransomware detection has shown that Monte
-Carlo Dropout (MC Dropout)~\cite{gal2016dropout} can quantify epistemic
-uncertainty for individual binary classifiers, and that this signal can
-be used to trigger human escalation when the model is
-unreliable~\cite{kabuye2025explainable}.
-A two-agent SABRE architecture fusing semantic
-(PE-embedding-based) and behavioural (runtime-telemetry-based) signals
-with an uncertainty-aware triage policy has demonstrated that
-automatic containment and human escalation can be separated by a
-risk--uncertainty decision boundary, reducing false escalation rates
-while preserving high recall~\cite{kabuye2025sabre_eswa}.
-However, two fundamental gaps remain.
+Existing detection approaches fall into three broad categories, each with a
+structural limitation that makes it insufficient on its own.
+\textbf{Signature-based} detectors match file hashes or byte patterns against
+a threat intelligence database; they are trivially evaded by obfuscation,
+packing, and polymorphism, and provide zero-day coverage only after a family
+has already been catalogued.
+\textbf{Static PE analysis} --- inspecting the structure of a Portable
+Executable file before execution --- can capture section entropy, import
+tables, and structural anomalies indicative of packed code.
+Machine-learning classifiers trained on static features achieve high accuracy
+on known families~\cite{rdset_2021}, but remain inherently offline: static
+analysis cannot observe the file-encryption loop, the ransom note drop, or the
+shadow-copy deletion that together constitute ransomware behaviour.
+\textbf{Dynamic/behavioural} analysis addresses this by monitoring execution
+at runtime (system calls, I/O patterns, memory access) and detecting the
+characteristic signatures of file encryption in motion.
+Behavioural detectors are harder to evade without also losing the attack's
+effectiveness, but they operate without context: they know \emph{what} a
+process is doing but not \emph{who} is doing it or \emph{why}, making
+family-level intelligence impossible from telemetry alone.
 
-\textbf{Gap~1 -- Knowledge blindness.}
-Both the semantic and the behavioural agents reason entirely from
-statistical regularities in measurement data.
-Neither incorporates the operational knowledge accumulated by
-security practitioners: which ATT\&CK tactics are most commonly paired
-with ransomware deployment, which tools (Cobalt Strike, Rclone, BloodHound,
-etc.) appear in attack chains, or which platforms are primary targets.
-This knowledge is publicly available in threat-intelligence briefings,
-security conference presentations, and analyst-authored YouTube transcripts,
-yet it has not previously been operationalised as an agent-level signal in
-a multi-agent detection framework.
+No production-grade system currently integrates all three evidence streams
+under a unified uncertainty-aware decision framework.
+More critically, no existing approach formalises the question of \emph{when
+to trust the detector's verdict}.
+In any realistic deployment, the class distribution is severely skewed ---
+ransomware constitutes a small minority of execution events --- and the
+consequences of a missed detection are asymmetric.
+An optimal system should distinguish between high-confidence detections
+(auto-flag), high-confidence benign events (auto-clear), and ambiguous cases
+requiring analyst review (escalate).
+Without a principled mechanism for this three-way triage, either false-positive
+rates overwhelm analyst queues, or high-uncertainty true positives are silently
+missed.
 
-\textbf{Gap~2 -- Agent isolation.}
-In the two-agent SABRE, agents produce independent predictions that are
-fused passively through a learned MLP.
-An agent operating under high epistemic uncertainty contributes noise to
-the fusion layer just as confidently as an agent with low uncertainty,
-because there is no mechanism for agents to communicate their reliability to
-one another before fusion.
-Under distributional shift---new ransomware families that appear semantically
-unusual but follow canonical ATT\&CK patterns---the most reliable agent
-cannot assist the uncertain one, and the fused prediction degrades.
+We present \textbf{SABRE+} (Scalable Agent-Based Ransomware Evidence),
+a multi-agent architecture that addresses these gaps.
+SABRE+ coordinates three specialist agents --- a \textbf{Behavioral agent}
+operating on runtime I/O and memory telemetry, a \textbf{Semantic agent}
+classifying PE file structure via a sentence-transformer embedding, and a
+\textbf{Knowledge agent} encoding ATT\&CK tactic profiles from
+threat-intelligence transcripts --- under a shared Monte Carlo Dropout
+uncertainty framework.
+Each agent contributes a probability estimate and an epistemic uncertainty;
+the fused uncertainty drives a three-way triage decision.
+A Mondrian conformal prediction wrapper converts the fused scores into
+prediction sets with guaranteed marginal coverage, so that auto-flagged
+samples carry a formal bound on detection precision.
+An expert feedback loop with Elastic Weight Consolidation (EWC) allows the
+behavioral agent to adapt to novel families at deployment time without
+catastrophic forgetting of established detection patterns.
 
-This paper addresses both gaps with three contributions.
+We evaluate SABRE+ on three complementary public datasets spanning runtime
+telemetry (RanSMAP: 35,857 windows across 15 hardware configurations and 12
+malware families), static PE structure (RDset: 138,047 PE files), and threat
+intelligence (RansKnow: 307 ATT\&CK-annotated transcripts).
+Experiments use frozen session-level splits across four generalisation axes
+(random stratification, family holdout, hardware holdout, and temporal
+holdout), replicated across six independent training seeds to quantify
+reproducibility.
+
+\textbf{The main contributions of this paper are:}
 
 \begin{enumerate}
-\item \textbf{Knowledge Agent and RansKnow Dataset.}
-We introduce a third agent---the Knowledge CNN---operating on a new
-23-feature threat-intelligence dataset (RansKnow) derived from
-307~YouTube security-practitioner transcripts.
-Features encode MITRE ATT\&CK tactic frequencies, ransomware-ecosystem
-tool mentions, and platform indicators.
-The agent achieves 0.9550 accuracy and 0.9950~AUC on balanced held-out
-evaluation, providing a modality-orthogonal signal that is independent
-of both PE structure and runtime telemetry.
 
-\item \textbf{Peer Consultation Protocol.}
-We formalise and implement an inter-agent consultation mechanism:
-when an agent's MC Dropout uncertainty $\sigma_i$ exceeds a
-per-agent threshold $\kappa_{\mathrm{local}}$, its probability estimate
-is adjusted via an inverse-uncertainty-weighted mean over all agents,
-including itself.
-Crucially, uncertainty is never modified---only the probability propagated
-to the fusion layer is updated---preserving the downstream triage
-policy's ability to measure true epistemic spread.
+\item \textbf{Multi-modal multi-agent architecture.}
+We introduce the first ransomware detection system to unify runtime
+behavioural telemetry, PE static semantics, and ATT\&CK knowledge features in
+a single inference pipeline, with mean fusion controllable by agent
+availability at deployment time.
 
-\item \textbf{Expert Feedback Loop.}
-We design and formalise a continual-adaptation mechanism in which analyst
-corrections to AUTO-CONTAIN and ESCALATE decisions are fed back to
-incrementally fine-tune the Decision MLP through a
-combined new-sample and experience-replay loss, with reservoir-sampled
-memory to prevent catastrophic forgetting.
+\item \textbf{Uncertainty-driven triage.}
+MC-Dropout uncertainty quantification enables a \textsc{Detect} /
+\textsc{Benign} / \textsc{Escalate} triage that, under worst-case
+feature-space mimicry attacks, maintains \textbf{91.9\% triage coverage}
+while the direct detection rate falls to 81.7\% --- recovering 10.2\,pp
+through analyst escalation of high-uncertainty samples.
+
+\item \textbf{Conformal triage with formal coverage guarantees.}
+Mondrian conformal prediction applied to temperature-scaled fused scores
+achieves empirical coverage within 1.2\,pp of the target at all tested levels.
+At 99\% coverage, [B+K] auto-classifies 77\% of traffic with
+\textbf{99.1\% detection precision}, escalating 23\% for analyst review.
+
+\item \textbf{Continual learning under distribution shift.}
+An EWC-regularised expert feedback loop reduces false negatives under OOD
+family arrival (515 vs.\ 520 for no-update) with negligible catastrophic
+forgetting (probe AUPRC drop\,=\,0.001), identifying the labelling budget ---
+not the update strategy --- as the primary constraint on adaptation speed.
+
+\item \textbf{Comprehensive generalisation evaluation.}
+Across six seeds, the behavioral agent achieves
+AUROC\,=\,$0.9605 \pm 0.0030$ on the canonical split,
+$0.9387 \pm 0.0058$ on unseen hardware, and $0.9603 \pm 0.0054$ under
+temporal holdout.
+Family-level generalisation degrades to $0.7069 \pm 0.0104$ for wholly unseen
+ransomware lineages, quantifying a clear research frontier.
+
+\item \textbf{Concurrent-execution robustness.}
+On the RanSMAP mix partition --- simultaneous benign and ransomware execution
+on unseen hardware --- [B] detects \textbf{83.8\%} of ransomware windows with
+no concurrent-execution training examples.
+SDelete co-execution reduces detection to 27.1\% (\texttt{SDelete\_REvil}),
+with MC-Dropout uncertainty correctly routing the remaining ambiguous windows
+to escalation.
+
+\item \textbf{Deployment-grade efficiency.}
+The [B+K] pipeline runs at \textbf{4.969\,ms} median end-to-end latency
+(p95\,=\,5.997\,ms) on a single GPU --- consuming 0.05\% of a 10-second
+telemetry window --- and supports over 2,000 concurrent monitored streams.
+The behavioral agent weighs 8,385 parameters (32.8\,KB), making it suitable
+for endpoint or embedded deployment without a GPU.
+
 \end{enumerate}
 
 The remainder of this paper is organised as follows.
 Section~\ref{sec:related} surveys related work.
-Section~\ref{sec:preliminaries} states the threat model and
-mathematical preliminaries.
-Section~\ref{sec:architecture} describes the Extended Agentic SABRE
-architecture in full.
-Section~\ref{sec:feedback} presents the Expert Feedback Loop.
-Section~\ref{sec:experiments} details experimental setup.
-Section~\ref{sec:results} reports results.
-Section~\ref{sec:security} provides a security analysis.
-Sections~\ref{sec:discussion}--\ref{sec:conclusion} discuss,
-limit, and conclude.
+Section~\ref{sec:preliminaries} states the threat model and mathematical
+preliminaries.
+Section~\ref{sec:architecture} describes the SABRE+ system architecture,
+including the three agent designs and the fusion and triage modules.
+Section~\ref{sec:experiments} presents the experimental datasets and
+evaluation protocol.
+Section~\ref{sec:triage_cl} describes the triage and continual learning
+mechanisms in detail.
+Section~\ref{sec:results} reports experimental results across all evaluation
+dimensions.
+Section~\ref{sec:limitations} discusses limitations and directions for future
+work, and Section~\ref{sec:conclusion} concludes.
 
 %%------------------------------------------------------------
 \section{Related Work}
@@ -262,9 +308,10 @@ Concept drift under evolving adversarial strategies requires detectors
 to adapt without retraining from scratch~\cite{Ceschin2022ConceptDrift}.
 Experience replay~\cite{rolnick2019experience} and elastic weight
 consolidation prevent catastrophic forgetting during incremental updates.
-SABRE+'s Expert Feedback Loop combines both techniques in a lightweight
-online adaptation layer targeting only the Decision MLP---the shallowest
-and fastest-to-retrain component---while leaving the agent backbones frozen.
+SABRE+'s Expert Feedback Loop combines both techniques to incrementally adapt
+the behavioral agent's classifier head while leaving the convolutional feature
+backbone frozen, limiting the risk of catastrophic forgetting to a small
+parameter subset.
 
 %%------------------------------------------------------------
 \section{Threat Model and Preliminaries}
@@ -331,33 +378,35 @@ and all $\sigma_i$ are the original MC Dropout standard deviations.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\linewidth]{Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png}
-  \caption{Extended Agentic SABRE pipeline. Three modality-specific base
-  detectors (Semantic CNN, Behavioural CNN, Knowledge CNN) produce
-  mean--uncertainty pairs via MC Dropout.
-  The Peer Consultation module adjusts agent probabilities under high
-  local uncertainty before scores enter the Score Pool.
-  CTGAN augments the pool during training.
-  A Decision MLP, tuned by Bayesian optimisation and calibrated by
-  temperature scaling, produces the fused risk estimate $\phat$.
-  The Triage Policy maps $(\phat, \smax)$ to one of four decisions.
-  Analyst corrections from the Expert Feedback Loop incrementally
-  retrain the Decision MLP.}
+  \caption{Extended Agentic SABRE+ pipeline. Three specialist agents
+  (Behavioral CNN, Semantic CNN, Knowledge CNN) produce
+  predictive mean--uncertainty pairs $(\bar{p}_i, \sigma_i)$ via MC-Dropout.
+  The Fusion Layer averages active agents into a fused probability
+  $\bar{p}_{\mathrm{fused}}$ and fused uncertainty $\sigma_{\mathrm{fused}}$.
+  The Triage Decision Module maps the fused pair to
+  \texttt{DETECT}, \texttt{ESCALATE}, or \texttt{BENIGN}.
+  A Mondrian Conformal Wrapper converts temperature-scaled probabilities
+  into prediction sets with formal, distribution-free coverage guarantees.
+  \texttt{ESCALATE} decisions queue for analyst review; verified labels
+  feed the EWC-regularised Expert Feedback Loop, which incrementally
+  retrains the Behavioral agent to adapt to novel ransomware families.}
   \label{fig:pipeline}
 \end{figure*}
 
 Fig.~\ref{fig:pipeline} illustrates the complete pipeline.
-The system decomposes detection into three specialised agents, each
-operating on a distinct modality: static PE-header semantics, runtime
-memory and I/O telemetry, and practitioner threat-intelligence discourse.
-Agents are trained independently and frozen after initial training.
-At inference, each agent performs $T$ MC Dropout forward passes,
-producing a predictive mean $\bar{p}_i$ and uncertainty $\sigma_i$.
-The Peer Consultation module conditionally adjusts agent probabilities
-using inverse-uncertainty-weighted peer scores.
-All six values are concatenated into $\mathbf{v}$, optionally augmented
-with CTGAN-synthesised score vectors during training, and passed to a
-Decision MLP whose thresholds are optimised by Bayesian search.
-The Triage Policy maps the output to AUTO-CONTAIN, ESCALATE, or ALLOW.
+The system coordinates three specialist agents, each operating on a distinct
+modality: runtime I/O and memory telemetry (Behavioral), static PE-header
+semantics (Semantic), and ATT\&CK threat-intelligence discourse (Knowledge).
+Agents are trained independently on their native datasets and frozen.
+At inference, each active agent performs $T=10$ MC-Dropout forward passes,
+producing a predictive mean $\bar{p}_i$ and epistemic uncertainty $\sigma_i$.
+The Fusion Layer averages active agents into a fused probability and fused
+uncertainty, which the Triage Decision Module maps to \texttt{DETECT},
+\texttt{ESCALATE}, or \texttt{BENIGN}.
+A Mondrian Conformal Wrapper converts temperature-scaled probabilities into
+prediction sets with formal coverage guarantees.
+\texttt{ESCALATE} decisions are queued for analyst review; verified labels
+are routed to the Expert Feedback Loop for incremental adaptation.
 
 \subsection{Semantic Agent}
 
@@ -467,247 +516,284 @@ behaviour.
 Together, the three agents provide overlapping but non-identical
 coverage of the ransomware detection surface.
 
-\subsection{Peer Consultation Protocol}
-\label{subsec:peer_consultation}
+\subsection{Fusion Layer}
+\label{subsec:fusion}
 
-\subsubsection{Motivation}
-An agent under high epistemic uncertainty ($\sigma_i \gg 0$) should
-not contribute to fusion with the same weight as a confident peer.
-The standard MLP fusion layer cannot distinguish this case because it
-receives probabilities $\bar{p}_i$ without access to per-agent
-uncertainty at the feature level.
-Peer consultation resolves this by \emph{adjusting} $\bar{p}_i$
-before fusion whenever $\sigma_i > \kappa_{\mathrm{local}}$,
-using peer scores weighted by peer confidence.
+Let $\mathcal{A} \subseteq \{\sem, \beh, \know\}$ denote the set of active agents for a
+given sample.
+The Fusion Layer computes an unweighted mean over all active agents:
+\begin{align}
+\bar{p}_{\mathrm{fused}} &= \frac{1}{|\mathcal{A}|} \sum_{i \in \mathcal{A}} \bar{p}_i,
+\label{eq:fused_prob}\\
+\sigma_{\mathrm{fused}} &= \frac{1}{|\mathcal{A}|} \sum_{i \in \mathcal{A}} \sigma_i.
+\label{eq:fused_unc}
+\end{align}
+Mean fusion is availability-aware by construction: absent agents are simply omitted from
+$\mathcal{A}$ without requiring model retraining.
+The primary limitation of mean fusion is structural miscalibration when agents have
+heterogeneous probability scales; the Mondrian conformal wrapper (below) provides
+post-hoc coverage guarantees that are valid regardless of calibration quality.
 
-\subsubsection{Formal Definition}
-Let $\mathcal{A} = \{\sem, \beh, \know\}$ denote the agent set
-and $\mathcal{P}_i = \mathcal{A} \setminus \{i\}$ the peers of
-agent $i$.
-For a sample $\mathbf{x}$, define
+\subsection{Triage Decision Module}
+\label{subsec:triage}
+
+After temperature scaling (Section~\ref{sec:triage_cl}), the calibrated fused probability
+$\tilde{p}_{\mathrm{fused}}$ and fused uncertainty $\sigma_{\mathrm{fused}}$ are mapped
+to one of three outcomes:
 \begin{equation}
-w_j = \frac{1}{\sigma_j + \epsilon}, \quad j \in \mathcal{A},
-\label{eq:peer_weights}
+\text{outcome}(\mathbf{x}) = \begin{cases}
+  \texttt{DETECT}   & \text{if } \tilde{p}_{\mathrm{fused}} \geq 0.5, \\
+  \texttt{ESCALATE} & \text{if } \tilde{p}_{\mathrm{fused}} < 0.5 \;\text{and}\;
+                      \sigma_{\mathrm{fused}} \geq \tau, \\
+  \texttt{BENIGN}   & \text{otherwise.}
+\end{cases}
+\label{eq:triage}
 \end{equation}
-where $\epsilon = 10^{-8}$ prevents division by zero.
-Consultation fires for agent $i$ if $\sigma_i > \kappa_{\mathrm{local},i}$.
-The adjusted probability is:
+The \texttt{ESCALATE} branch captures samples the model considers probably benign but is
+uncertain about; these are routed to analyst review rather than silently auto-cleared.
+The uncertainty threshold $\tau = 0.10$ is the 90th percentile of $\sigma_{\mathrm{fused}}$
+over benign validation samples, bounding the false-\texttt{ESCALATE} rate to at most 10\%
+on in-distribution clean traffic.
+\emph{Triage coverage} (TC) denotes the fraction of true ransomware samples that receive
+either \texttt{DETECT} or \texttt{ESCALATE}; it is the primary robustness criterion under
+adversarial feature manipulation (Section~\ref{sec:results}).
+
+\subsection{Conformal Prediction Wrapper}
+\label{subsec:conformal_arch}
+
+A post-hoc Mondrian inductive conformal prediction (ICP) layer converts
+temperature-scaled fused probabilities into \emph{prediction sets} with formal,
+distribution-free coverage guarantees~\cite{vovk_conformal_2005}.
+Class-conditional nonconformity thresholds $q_0, q_1$ are fitted on the validation split
+at significance level $\varepsilon$; the prediction set $C(\mathbf{x})$ satisfies:
 \begin{equation}
-\bar{p}_i^* = \frac{w_i \bar{p}_i + \sum_{j \in \mathcal{P}_i}
-              w_j \bar{p}_j}{w_i + \sum_{j \in \mathcal{P}_i} w_j}.
-\label{eq:consultation}
+\Pr\!\bigl[y \in C(\mathbf{x}) \mid y = c\bigr] \geq 1-\varepsilon, \quad c \in \{0,1\}.
+\label{eq:coverage_arch}
 \end{equation}
-If $\sigma_i \leq \kappa_{\mathrm{local},i}$, then $\bar{p}_i^* = \bar{p}_i$.
+Prediction sets map to triage outcomes as:
+$C\!=\!\{1\}\!\Rightarrow\!\texttt{DETECT}$;
+$C\!=\!\{0\}\!\Rightarrow\!\texttt{BENIGN}$;
+$C\!=\!\{0,1\}\!\Rightarrow\!\texttt{ESCALATE}$;
+$C\!=\!\emptyset\!\Rightarrow\!\texttt{DETECT}$ (conservative edge).
+The full Mondrian formulation and empirical validation are given in
+Section~\ref{sec:triage_cl}.
 
-\textbf{Uncertainty invariance.}
-By construction, $\sigma_i$ is never modified by consultation.
-The original MC Dropout standard deviation is always propagated to
-$\mathbf{v}$ (Eq.~\eqref{eq:scorevec}), preserving the
-semantics of $\smax$ in the triage policy.
+\subsection{Availability-Aware Operation}
+\label{subsec:availability}
 
-\subsubsection{Properties}
-\begin{itemize}
-\item \emph{Confidence-preserving}: a highly confident peer
-  ($\sigma_j \approx 0$) dominates the weighted average, pulling
-  the uncertain agent toward the peer's estimate.
-\item \emph{Self-inclusive}: agent $i$ retains weight $w_i$ in the
-  weighted mean, so consultation cannot invert a strongly confident
-  uncertain agent.
-\item \emph{Threshold-gated}: consultation is a no-op when all
-  agents are confident, incurring no computational overhead beyond
-  the threshold comparison.
-\end{itemize}
-
-\subsection{Score Pool and CTGAN Augmentation}
-\label{subsec:ctgan}
-
-After consultation, the six-dimensional score vector
-$\mathbf{v} \in \mathbb{R}^6$ (Eq.~\eqref{eq:scorevec}) is collected
-in a Score Pool.
-During training, CTGAN~\cite{xu2019ctgan} is applied to the pool to
-synthesise additional score vectors, preserving correlations between
-agent probabilities and uncertainties.
-CTGAN augmentation addresses the scarcity of high-uncertainty samples
-in balanced training data and prevents the Decision MLP from being
-trained entirely on well-separated score configurations.
-At inference, no CTGAN augmentation is applied.
-
-\subsection{Feature Fusion and Decision MLP}
-\label{subsec:decision_mlp}
-
-The Decision MLP $f: \mathbb{R}^6 \rightarrow [0,1]$ takes the
-(possibly consultation-adjusted) score vector $\mathbf{v}$ as input
-and produces the fused risk estimate $\phat$:
-\begin{equation}
-\phat = f(\bar{p}_\sem^*, \bar{p}_\beh^*, \bar{p}_\know^*,
-          \sigma_\sem, \sigma_\beh, \sigma_\know).
-\label{eq:fused}
-\end{equation}
-The network uses two hidden layers (64 and 32 units), ReLU activations,
-and a sigmoid output.
-Inputs are standardised using a fitted StandardScaler; scaler statistics
-from the trained checkpoint are summarised in Table~\ref{tab:scaler_stats}.
+Table~\ref{tab:deployment_configs} summarises the four supported deployment configurations.
+The {[}B{]} configuration passes the Behavioral agent's output directly to triage, with
+conformal thresholds recomputed on {[}B{]}-only scores.
+In {[}B{+}K{]}, the Knowledge agent contributes its family-matched ATT\&CK prior; for
+families absent from RansKnow the corpus-mean vector provides a near-uniform prior and
+the system logs a coverage-gap warning.
+The Semantic agent ({[}S{]}) is excluded from the primary evaluation pipeline because it
+requires an unobfuscated PE file unavailable during live execution of packed ransomware;
+its AUROC = 1.000 on RDset reflects closed-set structural separability
+(Section~\ref{sec:results}).
 
 \begin{table}[t]
 \centering
-\caption{Score vector scaler statistics (fitted on training pool).}
-\label{tab:scaler_stats}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccc}
+\caption{SABRE+ deployment configurations under partial agent availability.}
+\label{tab:deployment_configs}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lp{2.1cm}p{2.3cm}}
 \toprule
-\textbf{Feature} & \textbf{Mean} & \textbf{Std} & \textbf{Interpretation} \\
+\textbf{Config.} & \textbf{Input requirements} & \textbf{Typical scenario} \\
 \midrule
-$\bar{p}_\sem$  & 0.9520 & 0.2138 & High mean prob, moderate spread \\
-$\bar{p}_\beh$  & 0.9339 & 0.2154 & High mean prob, moderate spread \\
-$\bar{p}_\know$ & 0.4527 & 0.4411 & Centred; high variance \\
-$\sigma_\sem$   & $2.8\times10^{-8}$ & $3.1\times10^{-6}$ & Near-zero (deterministic) \\
-$\sigma_\beh$   & 0.0138 & 0.0258 & Low uncertainty \\
-$\sigma_\know$  & 0.0499 & 0.0734 & Moderate uncertainty \\
+{[}B{]}       & Runtime telemetry    & Packed binaries; PE unavailable \\
+{[}S{]}       & PE file only         & Offline pre-execution scan \\
+{[}K{]}       & Family name resolved & Threat-intel triage \\
+{[}B{+}K{]}   & Telemetry + family   & Standard EDR deployment \\
+{[}B{+}S{+}K{]} & All three inputs   & Sandboxed deep analysis \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The $\bar{p}_\know$ distribution (mean $\approx 0.45$, std $\approx 0.44$)
-reflects the high variability of discourse-based signals: some
-security videos discuss ransomware in depth (high $\bar{p}_\know$),
-others cover unrelated topics (low $\bar{p}_\know$).
-The nearly zero $\sigma_\sem$ confirms that the semantic embedding
-space provides a well-separated distribution under the current RDset
-training regime.
-
-\subsection{Bayesian Threshold Optimisation}
-\label{subsec:bayesian_opt}
-
-The triage policy is governed by four scalar thresholds:
-$\tau, \kappa, \tauh, \klow$ (defined in
-Section~\ref{subsec:triage_policy}).
-Thresholds are jointly optimised on a held-out validation set using
-a Tree-structured Parzen Estimator (TPE):
-\begin{equation}
-(\tau^*, \kappa^*, \tauh^*, \klow^*) =
-\arg\max_{\tau,\kappa,\tauh,\klow}
-\bigl[\balAcc(\tau,\kappa) - \lambda\,\escRate(\tau,\kappa)\bigr],
-\label{eq:objective}
-\end{equation}
-subject to $\tau \leq \tauh$ and $\klow \leq \kappa$.
-The trade-off parameter $\lambda = 0.5$ balances detection
-accuracy against escalation load.
-The optimised low-escalation policy yields:
-$\tau^* = 0.2330$, $\kappa^* = 0.1969$,
-$\tauh^* = 0.8545$, $\klow^* = 0.1969$.
-
-\subsection{Temperature Calibration}
-\label{subsec:temperature}
-
-Post-hoc temperature scaling is applied to $\phat$:
-\begin{equation}
-\phat_{\mathrm{cal}} = \sigma\!\left(\frac{\ln
-\frac{\phat}{1-\phat}}{T_{\mathrm{cal}}}\right),
-\label{eq:temperature}
-\end{equation}
-where $T_{\mathrm{cal}} > 0$ is fitted on the validation set by
-minimising negative log-likelihood.
-Temperature scaling preserves the threshold-relative ordering of
-$\phat$ while reducing overconfidence, improving the semantic
-alignment between the fused risk score and the binary labels used
-by the triage policy.
-
-\subsection{Triage Policy}
-\label{subsec:triage_policy}
-
-The global uncertainty aggregate is:
-\begin{equation}
-\smax = \max(\sigma_\sem, \sigma_\beh, \sigma_\know).
-\label{eq:sigmamax}
-\end{equation}
-The triage policy maps $(\phat_{\mathrm{cal}}, \smax)$ to a decision:
-\begin{align}
-\text{AUTO-CONTAIN}  &\quad \text{if}\quad
-  \phat_{\mathrm{cal}} \geq \tauh \;\wedge\; \smax \leq \klow,
-\label{eq:auto}\\
-\text{ESCALATE}      &\quad \text{if}\quad
-  \phat_{\mathrm{cal}} \geq \tau \;\vee\; \smax > \kappa,
-\label{eq:esc}\\
-\text{ALLOW}         &\quad \text{otherwise.}
-\label{eq:allow}
-\end{align}
-The four-region geometry ensures that:
-(a)~automatic containment requires both high risk \emph{and}
-low uncertainty;
-(b)~human escalation is triggered by either elevated risk
-\emph{or} elevated uncertainty;
-(c)~samples with low risk and low uncertainty are autonomously
-allowed without analyst involvement.
-Threshold ordering $\tau \leq \tauh$ and $\klow \leq \kappa$
-guarantees consistency (AUTO-CONTAIN is always a strict subset of
-the ESCALATE region before the $\smax \leq \klow$ condition
-is applied).
-
 %%------------------------------------------------------------
-\section{Expert Feedback Loop}
-\label{sec:feedback}
+\section{Triage and Continual Learning}
+\label{sec:triage_cl}
 
-\subsection{Architecture}
+This section provides the mathematical formulations underlying SABRE+'s inference
+pipeline and online adaptation mechanism.
+Section~\ref{sec:architecture} introduced these components architecturally;
+here we give the specifications used in the experimental evaluation
+(Section~\ref{sec:results}).
 
-The Expert Feedback Loop closes the human-in-the-loop cycle.
-Whenever a sample receives an ESCALATE or AUTO-CONTAIN decision,
-the analyst reviews it and provides a correction label
-$\tilde{y} \in \{0, 1\}$ (0 = benign, 1 = ransomware).
-Correction labels are accumulated in a correction queue
-$\mathcal{Q}_{\mathrm{new}}$.
+\subsection{MC-Dropout Uncertainty Estimation}
 
-\subsection{Incremental Retraining}
-
-The Decision MLP is fine-tuned on a mixed loss:
+At inference, each agent runs in MC-Dropout mode: evaluation mode except for Dropout
+layers, which remain active via selective module traversal.
+For $T$ stochastic passes on input $\mathbf{x}$, agent $i$ produces:
 \begin{equation}
-\mathcal{L}_{\mathrm{total}} =
-\underbrace{\frac{1}{|\mathcal{Q}_{\mathrm{new}}|}
-\sum_{(\mathbf{v},\tilde{y}) \in \mathcal{Q}_{\mathrm{new}}}
-\mathrm{BCE}(f(\mathbf{v}), \tilde{y})}_{\text{new-sample loss}}
-+\;\gamma \cdot
-\underbrace{\frac{1}{|\mathcal{B}|}
-\sum_{(\mathbf{v},y) \in \mathcal{B}}
-\mathrm{BCE}(f(\mathbf{v}), y)}_{\text{replay loss}},
-\label{eq:feedback_loss}
+\bar{p}_i = \frac{1}{T}\sum_{t=1}^{T} p_i^{(t)},
+\qquad
+\sigma_i = \sqrt{\frac{1}{T}\sum_{t=1}^{T}\bigl(p_i^{(t)} - \bar{p}_i\bigr)^2}.
+\label{eq:mc_dropout}
 \end{equation}
-where $\mathcal{B}$ is a replay buffer of size $N_{\mathrm{replay}}$
-updated by reservoir sampling, and $\gamma \geq 0$ controls the
-forgetting--adaptation trade-off.
-Agent backbone weights are frozen: only the Decision MLP is updated.
-This design limits parameter exposure, reduces catastrophic forgetting
-risk to the shallowest component, and keeps update latency low
-(the Decision MLP has $\leq 4{,}000$ parameters).
+Under the MC-Dropout variational approximation~\cite{gal2016dropout},
+$\bar{p}_i$ estimates the posterior predictive mean and $\sigma_i$
+estimates posterior predictive standard deviation.
+High $\sigma_i$ arises when dropout mask configurations disagree: the sample is near
+a decision boundary, out-of-distribution, or presents an underrepresented feature pattern.
 
-\subsection{Reservoir Sampling}
-Each round, the replay buffer $\mathcal{B}$ is updated by reservoir
-sampling~\cite{vitter1985random}: for each new sample at position
-$n$, it replaces a uniformly random element of $\mathcal{B}$ with
-probability $N_{\mathrm{replay}} / n$.
-This provides an unbiased uniform sample over all historical
-correction labels, preventing recent-class bias.
+All reported results use $T=10$ passes.
+Validation-set profiling confirms that $95\%$ of samples have running
+$\mathrm{std}(\{p^{(t)}\})$ within $10^{-3}$ of their $T=50$ value by $T=8$.
+The $T=10$ latency overhead is $3.70\times$ a deterministic pass
+(Section~\ref{sec:results}).
 
-Algorithm~\ref{alg:feedback_loop} summarises the full feedback process.
+\subsection{Fusion and Uncertainty Aggregation}
 
-\begin{algorithm}[t]
-\caption{Expert Feedback Loop (one round)}
-\label{alg:feedback_loop}
-\begin{algorithmic}[1]
-\Require Correction queue $\mathcal{Q}_{\mathrm{new}}$,
-         replay buffer $\mathcal{B}$, MLP $f_\theta$,
-         learning rate $\eta$, replay weight $\gamma$
-\For{each epoch}
-  \State Compute $\mathcal{L}_{\mathrm{total}}$
-         (Eq.~\eqref{eq:feedback_loss})
-  \State $\theta \leftarrow \theta - \eta \nabla_\theta
-         \mathcal{L}_{\mathrm{total}}$
-\EndFor
-\For{$(\mathbf{v}, \tilde{y}) \in \mathcal{Q}_{\mathrm{new}}$}
-  \State Update $\mathcal{B}$ via reservoir sampling
-\EndFor
-\State Clear $\mathcal{Q}_{\mathrm{new}}$
-\State \Return Updated $f_\theta$, updated $\mathcal{B}$
-\end{algorithmic}
-\end{algorithm}
+Fused probability and fused uncertainty are defined in
+Eqs.~\eqref{eq:fused_prob}--\eqref{eq:fused_unc}.
+Mean fusion over uncertainties is conservative: one high-$\sigma$ agent and one
+low-$\sigma$ agent yield an intermediate fused uncertainty, reflecting the average
+epistemic state.
+Under adversarial feature-space mimicry (Section~\ref{sec:results}), this conservatism
+is beneficial: a deceived agent exhibits elevated $\sigma$ even when $\bar{p}$ falls
+below the detection threshold, propagating the uncertainty signal to the triage layer.
+
+\subsection{Uncertainty-Driven Three-Way Triage}
+
+The triage rule (Eq.~\eqref{eq:triage}) is asymmetric by design.
+\texttt{DETECT} fires whenever $\tilde{p}_{\mathrm{fused}} \geq 0.5$ regardless of
+uncertainty, accepting the risk of high-uncertainty detections (which may be false
+positives) rather than silently missing high-confidence ransomware.
+The \texttt{ESCALATE} branch applies only in the $\tilde{p} < 0.5$ region: a sample
+the model considers probably benign but is uncertain about.
+This asymmetry reflects the asymmetric cost of ransomware detection: false negatives
+have irreversible operational consequences; false positives (analyst reviews) are
+recoverable.
+
+\textbf{Triage coverage.}
+The primary adversarial robustness metric is:
+\begin{equation}
+\mathrm{TC} = \frac{|\{x \in \mathcal{R} : \text{outcome}(x) \in
+    \{\texttt{DETECT},\texttt{ESCALATE}\}\}|}{|\mathcal{R}|},
+\label{eq:tc}
+\end{equation}
+where $\mathcal{R}$ is the set of true ransomware samples.
+Under worst-case feature-space mimicry, TC holds at 91.9\% while
+the detection rate falls to 81.7\%, recovering 10.2~pp through escalation
+(Section~\ref{sec:results}).
+
+\subsection{Temperature Scaling}
+
+Raw MC-Dropout probabilities are corrected by temperature scaling~\cite{guo2017calibration}:
+\begin{equation}
+\tilde{p} = \sigma\!\left(\frac{\mathrm{logit}(\bar{p}_{\mathrm{fused}})}{T_{\mathrm{cal}}}\right),
+\label{eq:temperature_scaling}
+\end{equation}
+where $T_{\mathrm{cal}} < 1$ sharpens underconfident predictions and $T_{\mathrm{cal}} > 1$
+softens overconfident ones.
+$T_{\mathrm{cal}}^*$ minimises NLL over the validation split:
+\begin{equation}
+T_{\mathrm{cal}}^* = \arg\min_{T>0}
+    -\frac{1}{n_{\mathrm{val}}}\sum_{j=1}^{n_{\mathrm{val}}}
+    \bigl[y_j\log\tilde{p}_j + (1{-}y_j)\log(1{-}\tilde{p}_j)\bigr].
+\label{eq:temp_nll}
+\end{equation}
+For {[}B{]}, $T_{\mathrm{cal}} = 0.703$ reduces test ECE from $0.042$ to $0.018$.
+For {[}B{+}K{]}, structural miscalibration from heterogeneous agent probability scales
+limits the reduction from $0.143$ to $0.131$; this is a known limitation of mean fusion
+(Section~\ref{sec:limitations}).
+
+\subsection{Mondrian Inductive Conformal Prediction}
+\label{subsec:mondrian}
+
+The Mondrian ICP wrapper converts temperature-scaled probabilities into
+\emph{prediction sets} with class-conditional, distribution-free coverage
+guarantees~\cite{vovk_mondrian_2003,vovk_conformal_2005}.
+For each class $c \in \{0,1\}$, the nonconformity score measures the mismatch
+between the calibrated probability and label $c$:
+\begin{equation}
+s(\mathbf{x}, c) = \begin{cases}
+  1 - \tilde{p}(\mathbf{x}) & c = 1, \\
+  \tilde{p}(\mathbf{x})     & c = 0.
+\end{cases}
+\label{eq:nonconformity}
+\end{equation}
+The class-conditional threshold is the upper $(1-\varepsilon)$ quantile of calibration-set
+nonconformity scores for class $c$:
+\begin{equation}
+q_c = \mathrm{Quantile}_{(1-\varepsilon)}\!\bigl(
+    \{s(\mathbf{x}_j, c) : y_j = c,\, j \in \mathcal{D}_{\mathrm{cal}}\}\bigr),
+\label{eq:mondrian_quantile}
+\end{equation}
+with the finite-sample adjustment $\lceil(n_c+1)(1-\varepsilon)\rceil/n_c$.
+The prediction set is $C(\mathbf{x}) = \{c : s(\mathbf{x},c) \leq q_c\}$,
+mapping to triage outcomes per Eq.~\eqref{eq:coverage_arch}.
+
+\textbf{Coverage guarantee.}
+Under exchangeability of calibration and test samples:
+\begin{equation}
+\Pr\!\bigl[y \in C(\mathbf{x}) \mid y = c\bigr] \geq 1-\varepsilon,\quad c \in \{0,1\}.
+\label{eq:coverage_formal}
+\end{equation}
+This guarantee is \emph{distribution-free} and label-conditional (not marginal), making it
+valid under class imbalance where marginal coverage would be dominated by the majority class.
+Empirical validation in Section~\ref{sec:results} confirms the guarantee holds to within
+1.2~pp across $\varepsilon \in \{0.10, 0.05, 0.01\}$.
+
+\subsection{Expert Feedback Loop}
+\label{subsec:efl}
+
+The Expert Feedback Loop enables the Behavioral agent to adapt to novel ransomware families
+observed at deployment time.
+Only the Behavioral agent is updated; the Semantic and Knowledge agents are frozen
+because their parameters depend on fixed external corpora that do not drift on the
+timescale of a deployment episode.
+
+\textbf{Stream structure.}
+Experiments use the temporal holdout split in two phases:
+\begin{itemize}
+\item \emph{Phase~1 (steps~1--27):} Temporal validation windows (Jun~2023--Feb~2024;
+  5,494~windows). No updates; establishes pre-drift AUPRC $= 0.9838$ baseline.
+\item \emph{Phase~2 (steps~28--34):} Temporal test windows merged with 1,397 OOD Conti
+  sub-variants (\texttt{Conti\_01}--\texttt{Conti\_07}).
+  Updates enabled; 50 of each step's 200~windows labelled by the analyst (25\% budget).
+\end{itemize}
+
+\subsection{Elastic Weight Consolidation}
+\label{subsec:ewc}
+
+EWC~\cite{kirkpatrick_ewc_2017} prevents catastrophic forgetting by penalising parameter
+changes proportional to their importance to previously learned detection patterns:
+\begin{equation}
+\mathcal{L}_{\mathrm{EWC}}(\boldsymbol{\theta}) =
+\mathcal{L}_{\mathrm{CE}}(\boldsymbol{\theta})
++ \frac{\lambda}{2}\sum_i \hat{F}_i \left(\theta_i - \theta_i^*\right)^2,
+\label{eq:ewc}
+\end{equation}
+where $\boldsymbol{\theta}^*$ are the pre-update parameters and
+$\hat{F}_i$ is the $i$-th diagonal of the Fisher information matrix:
+\begin{equation}
+\hat{F}_i = \frac{1}{N}\sum_{n=1}^{N}
+    \left(\frac{\partial}{\partial\theta_i}
+    \mathcal{L}_{\mathrm{CE}}^{(n)}(\boldsymbol{\theta}^*)\right)^{\!2},
+\label{eq:fisher}
+\end{equation}
+estimated on $N=300$ training windows.
+The regularisation coefficient $\lambda=300$ was selected by grid search over
+$\{10,30,100,300,1000\}$ maximising $\text{OOD AUPRC} - 10\cdot\Delta\text{AUPRC}_{\mathrm{probe}}$.
+At each Phase~2 step the model is updated for 2~epochs using
+Adam ($\mathrm{lr}=5\!\times\!10^{-5}$).
+
+\subsection{Competing Update Strategies}
+\label{subsec:update_strategies}
+
+The evaluation compares four update strategies:
+\begin{itemize}
+\item \textbf{No-update:} Model scored without weight changes. Lower bound on adaptation.
+\item \textbf{Fine-tune:} Standard SGD on labelled batches without forgetting protection.
+\item \textbf{Experience replay~\cite{rolnick2019experience}:} Fine-tuning on labelled
+  batches jointly with a 500-sample replay buffer drawn from original training data.
+\item \textbf{EWC:} As in Eqs.~\eqref{eq:ewc}--\eqref{eq:fisher}.
+\end{itemize}
+All four strategies converge to AUPRC~$\geq 0.80$ on OOD windows at the same stream step,
+establishing that the labelling budget---not the update algorithm---is the binding
+constraint on adaptation speed at a 25\% labelling rate (Section~\ref{sec:results}).
 
 %%------------------------------------------------------------
 \section{Experimental Setup}
@@ -715,357 +801,482 @@ Algorithm~\ref{alg:feedback_loop} summarises the full feedback process.
 
 \subsection{Datasets}
 
-\textbf{RDset.}
-138,047 PE-file records (ransom = 96,724; benign = 41,323).
-Each record carries a 384-dimensional semantic embedding derived
-from structured PE-header metadata.
-Evaluation uses stratified sampling (2000 per class).
+\textbf{RDset}~\cite{kabuye2025explainable} contains 138,047~PE files
+(96,724~ransomware; 41,323~benign).
+Each file is represented by a 384-dimensional sentence-transformer embedding of its PE
+header metadata (section names, import tables, compiler artefacts).
+Evaluation uses a fixed 70/15/15 stratified split (seed~42).
 
-\textbf{RanSMAP.}
-751,588 runtime monitoring records (ransom = 750,329; benign = 1,259;
-native 598:1 class ratio).
-Each record contains 16~I/O and memory telemetry features.
-Balanced evaluation uses 1000 per class;
-imbalanced evaluation uses the full natural distribution.
+\textbf{RanSMAP}~\cite{hirano2025ransmap} contains 35,857 non-overlapping 10-second
+execution windows from 1,776 sessions across 15~CPU/DRAM configurations.
+Twelve execution classes span 7~ransomware families (AESCrypt, Conti, Darkside, LockBit,
+REvil, Ryuk, WannaCry; label~$= 1$) and 5~benign processes (AESCrypt-tool, Firefox, Idle,
+Office, SDelete, Zip; label~$= 0$).
+Two additional partitions are held out from all model training:
+(i) the \emph{mix partition} (1,944~windows of concurrent ransomware + benign execution on
+unseen hardware, all label~$= 1$), and
+(ii) the \emph{OOD variant partition} (1,397~windows of seven Conti sub-variants,
+used in the continual learning evaluation).
 
-\textbf{RansKnow.}
-307~YouTube-sourced practitioner discourse samples
-(ransom-relevant = 140; benign = 167).
-Each sample carries 23 ATT\&CK/tool/platform features.
-Evaluation uses all available samples (100 per class where balanced).
+\textbf{RansKnow} is a novel dataset of 307 YouTube security practitioner transcript
+summaries (140~ransomware-relevant; 167~benign).
+Each transcript is summarised by the 23-dimensional ATT\&CK/tool/platform feature vector
+described in Section~\ref{sec:architecture}.
+Labels are derived from a threshold rule validated against manual review on 50~samples
+(96\% agreement).
+Evaluation uses leave-one-channel-out (LOCO) cross-validation across 44~source channels.
 
-All three datasets are entirely independent; no executable or video
-appears in more than one.
-Because no single dataset contains all three modalities simultaneously,
-fusion-level evaluation in Section~\ref{sec:results} uses the most
-reliable modality as the label source with cross-modality inputs
-noted explicitly.
+\subsection{RanSMAP Evaluation Splits}
+\label{subsec:splits}
 
-\subsection{Baselines}
-We compare against:
-(i)~the original two-agent SABRE~\cite{kabuye2025sabre_eswa};
-(ii)~the single-agent uncertainty-aware detector from~\cite{kabuye2025explainable};
-(iii)~LLM-LADE~\cite{ZhangLZYHY25};
-(iv)~FeSAD~\cite{Fernando2024FeSAD};
-(v)~the multi-agent adaptive detection system of~\cite{MultiAgentAdaptiveDetection2023}.
-Baselines are evaluated under identical data splits where possible.
-Results for external baselines not available for direct re-evaluation
-are taken from the reported literature values.
+All splits are defined at the \emph{session} level to prevent within-session leakage.
+Four frozen split configurations (global seed~42, fixed session ID lists) span
+distinct generalisation axes:
+
+\begin{table}[t]
+\centering
+\caption{RanSMAP evaluation splits (session-level boundaries; 6 seeds).}
+\label{tab:splits}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lp{2.6cm}cc}
+\toprule
+\textbf{Split} & \textbf{Generalisation axis} &
+\textbf{Test windows} & \textbf{Test sessions} \\
+\midrule
+random\_stratified & Random 70/15/15 by class & 5,397 & 267 \\
+family\_holdout & Unseen lineages at test (REvil, WannaCry, Firefox, Zip) & 11,604 & 580 \\
+hardware\_holdout & Unseen CPU/DRAM configs (i5, i7, i3+DDR5) & 7,283 & 360 \\
+temporal\_holdout & Future time slice (Feb--Mar 2024) & 5,296 & 267 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Multi-Seed Replication Protocol}
+
+Primary results are replicated across six independent training seeds $\{0,1,2,3,4,42\}$.
+Only weight initialisation, minibatch ordering, and dropout masks at training time differ;
+frozen split boundaries and the Knowledge agent checkpoint are shared across seeds.
+For each (split, metric) combination, the multi-seed estimate is:
+\begin{equation}
+\bar{m} \pm t_{0.025,5} \cdot \frac{s}{\sqrt{6}},
+\label{eq:ci}
+\end{equation}
+where $t_{0.025,5} = 2.571$ is the Student-$t$ critical value with 5~degrees of freedom.
+The Knowledge agent is deterministic (fixed checkpoint), so {[}B{+}K{]} CI reflects
+only Behavioral agent stochasticity.
 
 \subsection{Evaluation Metrics}
-We report accuracy, balanced accuracy, ROC-AUC, precision, recall,
-and F1-score.
-For triage systems we additionally report the escalation rate
-(fraction of samples routed to ESCALATE) and AUTO-CONTAIN rate.
-Expected Calibration Error (ECE) is computed for uncertainty quality.
-Uncertainty quality is assessed via mean $\sigma$ per class
-(lower for well-separated classes, higher for overlapping ones is
-the expected direction).
+
+\textbf{Threshold-free metrics.}
+AUROC and AUPRC are the primary metrics; AUPRC is the primary metric for the
+temporal-holdout split and all imbalanced evaluations.
+Bootstrap 95\% CIs use 1,000~replicates.
+
+\textbf{Triage metrics.}
+At the system level: detection rate (DR), ESCALATE rate (ER), triage coverage (TC~$=$~DR$+$ER),
+and miss rate ($1-$TC).
+
+\textbf{Calibration metrics.}
+Expected Calibration Error (ECE) uses 15 equal-width bins:
+\begin{equation}
+\mathrm{ECE} = \sum_{b=1}^{15} \frac{|B_b|}{n}
+    \bigl|\mathrm{acc}(B_b) - \mathrm{conf}(B_b)\bigr|.
+\label{eq:ece}
+\end{equation}
+
+\subsection{Experimental Controls}
+
+Hyperparameter selection (learning rate, dropout, batch size, uncertainty threshold
+$\tau$, conformal $\varepsilon$) was performed on validation metrics only; test sets
+are evaluated once after all parameters are fixed.
+All random seeds (PyTorch, NumPy, Python \texttt{random}) are set explicitly;
+CUDA determinism is enforced (\texttt{cudnn.deterministic=True}).
+Frozen split files and trained checkpoints are committed to the repository.
 
 %%------------------------------------------------------------
-\section{Results and Analysis}
+\section{Experimental Results}
 \label{sec:results}
 
-\subsection{Per-Agent Standalone Performance}
+\subsection{Agent Contribution Ablation (E5)}
+\label{subsec:e5}
 
-Table~\ref{tab:agent_perf} reports the per-agent performance on
-native-modality held-out data.
+Table~\ref{tab:ablation} reports AUROC and AUPRC for all agent combinations across the
+four evaluation splits.
+All results use 1,000-bootstrap 95\% CIs; cross-dataset combinations where an agent has
+no feature input are excluded.
 
-\begin{table}[t]
-\centering
-\caption{Per-agent standalone evaluation (balanced test sets).}
-\label{tab:agent_perf}
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{llccccc}
-\toprule
-\textbf{Agent} & \textbf{Dataset} & \textbf{n} &
-\textbf{Acc} & \textbf{AUC} & \textbf{F1} & \textbf{$\bar{\sigma}$} \\
-\midrule
-Semantic CNN   & RDset    & 4000 & 1.0000 & 1.0000 & 1.0000 & $\approx\!0$ \\
-Behavioural CNN & RanSMAP & 2000 & 0.9945 & 0.9967 & 0.9945 & 0.0138 \\
-Knowledge CNN  & RansKnow & 200  & 0.9550 & 0.9950 & 0.9550 & 0.0499 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\textbf{Standalone agents.}
+The Semantic agent achieves AUROC~$= 1.000$ [1.000, 1.000] on the RDset test split.
+A companion leakage audit confirms this reflects \emph{closed-set PE structural
+homogeneity}: 99.86\% of test ransomware samples have cosine similarity~$\geq 0.97$
+to a training ransomware neighbour in the sentence-transformer embedding space.
+The Knowledge agent achieves AUROC~$= 0.997$ [0.994, 0.999] under LOCO cross-validation
+on RansKnow.
+The Behavioral agent on the random-stratified split achieves AUROC~$= 0.962$
+[0.958, 0.967] and AUPRC~$= 0.966$ [0.963, 0.969]---strong detection from 16
+runtime telemetry features and no static file access.
 
-The Semantic CNN achieves perfect discrimination, consistent with prior
-findings~\cite{kabuye2025sabre_eswa} that PE-header embeddings form
-near-disjoint class clusters.
-The Behavioural CNN attains 0.9967~AUC on balanced evaluation;
-its 0.6030~AUC on the full imbalanced RanSMAP distribution
-(reported in~\cite{kabuye2025sabre_eswa}) reflects the difficulty of
-ranking under a 598:1 class ratio rather than a failure of the
-feature representation.
-The Knowledge CNN achieves 0.9550 accuracy and 0.9950~AUC
-on 200 balanced samples despite operating on only 23 features and
-307 total training samples, confirming the discriminative power of
-the structured ATT\&CK/tool feature set.
-The increasing $\bar{\sigma}$ sequence ($\approx 0 \to 0.0138
-\to 0.0499$) reflects decreasing distributional separation across
-the three modalities, consistent with the semantic $>$ behavioural
-$>$ discourse hierarchy of signal quality documented above.
+\textbf{Fusion gains.}
+{[}B{+}K{]} on the random-stratified split yields AUROC~$= 0.984$
+[0.982, 0.987]---a $+2.2$\,pp gain over {[}B{]} alone---and AUPRC~$= 0.988$.
+The gain is consistent across hardware-holdout ($+2.9$\,pp: $0.944 \to 0.973$) and
+temporal-holdout ($+2.4$\,pp: $0.967 \to 0.991$), confirming that the knowledge agent
+provides complementary signal for families with rich ATT\&CK documentation.
 
-Fig.~\ref{fig:roc_all} shows the ROC curves for all three agents.
-The Semantic Agent saturates at the top-left corner, the Behavioural
-Agent achieves near-optimal separation under balanced evaluation,
-and the Knowledge Agent achieves AUC~0.9958 from 23 structured features.
-
-\begin{figure*}[t]
-  \centering
-  \begin{subfigure}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/ROC_Curve_RDset.png}
-    \caption{Semantic Agent (RDset, AUC=1.0000)}
-    \label{fig:roc_sem}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/Roc_Curve_RanSMAP.png}
-    \caption{Behavioural Agent (RanSMAP, AUC=0.9967)}
-    \label{fig:roc_beh}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/ROC_Knowledge.png}
-    \caption{Knowledge Agent (RansKnow, AUC=0.9958)}
-    \label{fig:roc_know}
-  \end{subfigure}
-  \caption{ROC curves for each agent on its native modality dataset.
-  All three agents achieve AUC~$\geq$~0.9958 under balanced evaluation.}
-  \label{fig:roc_all}
-\end{figure*}
-
-\subsection{Fusion and Triage}
-
-Table~\ref{tab:fusion} reports the three-agent fusion behaviour
-on a 200-sample cross-modality test.
-Because no unified dataset spans all three modalities, we note
-that accuracy reflects semantic-agent dominance for this split.
+\textbf{Family holdout.}
+Under family-level generalisation (held-out: REvil, WannaCry, Firefox, Zip),
+{[}B{]} AUROC falls to 0.707~[0.696, 0.719].
+Critically, {[}B{+}K{]} provides no improvement on this split (AUROC~$= 0.707$) because
+RansKnow contains no meaningful ATT\&CK entries for REvil or WannaCry.
+This honest negative result directly motivates the expert feedback loop
+(Section~\ref{sec:triage_cl}).
 
 \begin{table}[t]
 \centering
-\caption{3-Agent fusion triage distribution (200 samples, $\lambda=0.5$
-low-escalation policy).}
-\label{tab:fusion}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Metric} & \textbf{Value} \\
-\midrule
-Fused accuracy             & 1.0000 \\
-Fused AUC                  & 1.0000 \\
-Mean fused probability     & 0.490  \\
-Mean $\smax$               & 0.066  \\
-AUTO-CONTAIN rate          & 43.5\% (87/200) \\
-ESCALATE rate              & 9.0\%  (18/200) \\
-ALLOW rate                 & 47.5\% (95/200) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The 9.0\% escalation rate is substantially lower than the
-two-agent SABRE baseline (which reported escalation rates up to
-22\% under the same $\lambda$~\cite{kabuye2025sabre_eswa}).
-The Knowledge Agent's additional confidence signal lowers
-$\smax$ for samples where discourse features are unambiguous,
-thereby enabling more AUTO-CONTAIN decisions without
-degrading recall.
-
-Fig.~\ref{fig:triage_space} shows the induced triage geometry in the
-$(\phat, \smax)$ plane.
-The four decision regions are clearly separated by the optimised
-thresholds, with benign samples concentrating in the low-risk
-low-uncertainty ALLOW region and high-risk low-uncertainty ransomware
-samples routed to AUTO-CONTAIN.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{Figures/Triage_policy_space.png}
-  \caption{Triage policy geometry in the $(\phat_{\mathrm{cal}},\,\smax)$
-  plane. The optimised thresholds
-  $\tau^*{=}0.233$, $\kappa^*{=}0.197$, $\tauh^*{=}0.855$,
-  $\klow^*{=}0.197$ partition the plane into AUTO-CONTAIN, ESCALATE,
-  and ALLOW regions. Uncertainty acts as a gating variable preventing
-  overconfident automatic containment.}
-  \label{fig:triage_space}
-\end{figure}
-
-\subsection{Epistemic Uncertainty Analysis}
-
-Fig.~\ref{fig:uncert_dist} visualises the per-agent, per-class
-epistemic uncertainty distributions collected over the balanced test splits.
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\linewidth]{Figures/Uncertainty_Distributions.png}
-  \caption{Epistemic uncertainty ($\sigma$) distributions for benign and
-  ransomware samples across all three agents.
-  The Semantic Agent is near-deterministic ($\bar{\sigma}\approx 0$);
-  the Behavioural Agent shows low but non-trivial uncertainty
-  ($\bar{\sigma}\approx 0.013$); the Knowledge Agent exhibits the highest
-  uncertainty ($\bar{\sigma}\approx 0.055$), consistent with its smaller
-  training set and heuristic label construction.}
-  \label{fig:uncert_dist}
-\end{figure*}
-
-\subsection{Calibration}
-
-Fig.~\ref{fig:calibration} shows reliability diagrams for the
-Semantic, Behavioural, and Decision (fused) agents after temperature
-calibration.
-All three agents achieve well-calibrated predictive probabilities,
-with reliability curves tracking the diagonal closely.
-
-\begin{figure*}[t]
-  \centering
-  \begin{subfigure}[t]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/calibration_semantic.png}
-    \caption{Semantic Agent}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/calibration_behavioral.png}
-    \caption{Behavioural Agent}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/calibration_decision.png}
-    \caption{Decision MLP (fused)}
-  \end{subfigure}
-  \caption{Reliability diagrams after temperature calibration.
-  Each bin plots the fraction of true positives against mean predicted
-  probability.  Well-calibrated agents track the diagonal closely.}
-  \label{fig:calibration}
-\end{figure*}
-
-\subsection{Peer Consultation Analysis}
-
-Table~\ref{tab:peer_consult} summarises the consultation
-behaviour of each agent on the balanced test splits.
-Consultation fires most frequently for the Knowledge Agent
-(highest $\bar{\sigma}_\know = 0.0499$) and rarely for the
-Semantic Agent ($\bar{\sigma}_\sem \approx 0$).
-
-\begin{table}[t]
-\centering
-\caption{Peer consultation statistics per agent
-($\kappa_{\mathrm{local}} = 0.05$ for all agents).}
-\label{tab:peer_consult}
-\setlength{\tabcolsep}{4pt}
+\caption{Ablation (E5): AUROC [95\% CI] / AUPRC across agent combinations.}
+\label{tab:ablation}
+\setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Agent} &
-\textbf{$\bar{\sigma}$} &
-\textbf{Consult.\ rate} &
-\textbf{$\Delta\bar{p}$ (mean)} &
-\textbf{$\Delta$Acc} \\
+\textbf{Combination} & \textbf{random-strat} & \textbf{fam-holdout} &
+\textbf{hw-holdout} & \textbf{temp-holdout} \\
 \midrule
-Semantic   & $\approx\!0$ & $<\!0.1\%$ & $\approx\!0$     & $0.00$ \\
-Behavioural & 0.0138 & $\approx\!12\%$ & $+0.023$    & $+0.0010$ \\
-Knowledge  & 0.0499 & $\approx\!38\%$ & $+0.041$    & $+0.0050$ \\
+{[}S{]} (RDset) & 1.000 [1.000] & --- & --- & --- \\
+{[}K{]} (LOCO)  & 0.997 [0.994,0.999] & 0.494 & --- & 0.885 [0.873,0.897] \\
+{[}B{]}         & 0.962 [0.958,0.967] & 0.707 [0.696,0.719] & 0.944 [0.938,0.951] & 0.967 [0.962,0.971] \\
+{[}B{+}K{]}     & \textbf{0.984} [0.982,0.987] & 0.707 & \textbf{0.973} [0.968,0.978] & \textbf{0.991} [0.989,0.993] \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The Knowledge Agent benefits most from consultation, receiving
-upward probability corrections from the more-confident Semantic
-and Behavioural agents.
-The net accuracy improvement ($+0.005$) confirms that peer
-consultation acts as a soft ensemble with uncertainty-selective
-activation, rather than indiscriminate score averaging.
+\subsection{Multi-Seed Reproducibility}
+\label{subsec:multiseed}
 
-Fig.~\ref{fig:consultation} illustrates the before-and-after
-probability adjustments for all Knowledge Agent samples for which
-consultation fired ($\kappa_{\mathrm{local}}=0.04$; $n=62/200$, or 31\%).
-The scatter plot confirms that consultation pulls uncertain predictions
-toward more confident peer estimates, with the mean adjustment
-$\Delta p = +0.041$, while the histogram shows the adjustment is
-broadly distributed rather than a constant offset.
+Table~\ref{tab:multiseed} confirms that results are not artefacts of a lucky initialisation.
+The {[}B{]} standard deviation of 0.003 across seeds indicates highly stable training
+dynamics.
+{[}B{+}K{]} is even more stable ($\pm 0.0009$) because the Knowledge agent is
+deterministic and anchors the fusion against behavioral training variance.
+The upper family-holdout CI bound (0.718) lies 24\,pp below the lower random-stratified
+bound (0.957), establishing the family-holdout degradation as a genuine generalisation
+gap rather than sampling noise.
 
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\linewidth]{Figures/Peer_Consultation_Effect.png}
-  \caption{Peer consultation effect on the Knowledge Agent.
-  \textbf{Left:} Scatter of probability before vs.\ after consultation
-  for triggered samples (red = ransomware, blue = benign).
-  Points above the diagonal indicate an upward correction by confident peers.
-  \textbf{Right:} Distribution of probability adjustments ($\Delta p$).
-  The mean positive adjustment ($+0.041$) reflects the Semantic and
-  Behavioural agents' higher confidence pulling the Knowledge Agent's
-  estimates toward the correct class boundary.}
-  \label{fig:consultation}
-\end{figure*}
+\begin{table}[t]
+\centering
+\caption{Multi-seed reproducibility (6 seeds, $\{0,1,2,3,4,42\}$).
+AUROC mean $\pm$ std [95\% $t$-CI, $df\!=\!5$].}
+\label{tab:multiseed}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llcc}
+\toprule
+\textbf{Split} & \textbf{Agent} & \textbf{AUROC} & \textbf{95\% CI} \\
+\midrule
+random-strat  & {[}B{]}   & $0.9605\pm0.0030$ & [0.9573, 0.9637] \\
+random-strat  & {[}B{+}K{]} & $0.9836\pm0.0009$ & [0.9826, 0.9845] \\
+family-holdout & {[}B{]}  & $0.7069\pm0.0104$ & [0.6959, 0.7178] \\
+hw-holdout    & {[}B{]}   & $0.9387\pm0.0058$ & [0.9326, 0.9447] \\
+temp-holdout  & {[}B{]}   & $0.9603\pm0.0054$ & [0.9546, 0.9660] \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{Explainability: Behavioural Feature Importance}
+\subsection{Realistic Class Imbalance (E4)}
+\label{subsec:e4}
 
-Fig.~\ref{fig:feat_imp} shows the permutation-based feature importance
-scores for the Behavioural Agent.
-LBA and GPA variance features dominate, confirming that spatial
-dispersion of memory and storage access---the principal I/O signature
-of active encryption---drives the behavioural classification decision.
-This is consistent with the counterfactual analysis reported
-in~\cite{kabuye2025sabre_eswa}, where minimal relative changes
-to LBA and GPA variance were sufficient to flip the agent's prediction.
+Table~\ref{tab:imbalance} reports AUPRC and estimated FP/day at 5\% ransomware prevalence
+with a cost model of 10,000~events/day ($c_{\mathrm{FN}}=20$, $c_{\mathrm{FP}}=1$),
+computed over 100~independent resampling repetitions.
+
+Under random-stratified conditions, {[}B{+}K{]} raises AUPRC from 0.729 to
+0.898~($+16.9$\,pp) and reduces FP/day from 3,814 to 2,619 ($-31\%$).
+The most critical finding is the family-holdout collapse: both {[}B{]}
+($\mathrm{AUPRC}=0.136$) and {[}B{+}K{]} (0.133) approach chance under 5\% imbalance
+for unseen families, quantifying the operational cost of encountering an unknown
+ransomware lineage.
+Temporal-holdout shows the largest {[}B{+}K{]} gain: AUPRC $0.728 \to 0.937$
+($+20.9$\,pp), suggesting that knowledge of established TTPs provides strong
+stabilisation when temporal shift is the dominant challenge.
+
+\begin{table}[t]
+\centering
+\caption{Realistic imbalance (E4). 5\% prevalence, 100 resampling reps,
+10\,K events/day.}
+\label{tab:imbalance}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Split} & \textbf{{[}B{]} AUPRC} & \textbf{{[}B{+}K{]} AUPRC} &
+\textbf{{[}B{]} FP/day} & \textbf{{[}B{+}K{]} FP/day} \\
+\midrule
+random-strat & $0.729{\pm}0.028$ & $\mathbf{0.898{\pm}0.018}$ & 3,814 & 2,619 \\
+fam-holdout  & $0.136{\pm}0.012$ & $0.133{\pm}0.011$ & 9,155 & 9,282 \\
+hw-holdout   & $0.618{\pm}0.026$ & $\mathbf{0.860{\pm}0.018}$ & 4,579 & 3,879 \\
+temp-holdout & $0.728{\pm}0.024$ & $\mathbf{0.937{\pm}0.011}$ & 3,667 & 2,132 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Concurrent-Execution Robustness (Mix Partition)}
+\label{subsec:mix}
+
+The mix partition contains 1,944~windows of simultaneous ransomware + benign execution
+on unseen hardware.
+The Behavioral agent achieves overall DR~$= 0.838$ [0.822, 0.853] and AUPRC~$= 0.927$
+with zero concurrent-execution training examples.
+
+The most revealing result is the SDelete pairing: SDelete's sequential file-overwrite
+I/O is structurally similar to ransomware encryption, nearly halving detection for
+SDelete\_Conti (DR~$= 0.599$) and reducing SDelete\_REvil to DR~$= 0.271$---the
+lowest across all conditions.
+Knowledge fusion compensates for SDelete\_Conti (DR: $0.599 \to 0.995$) but cannot
+rescue SDelete\_REvil (DR: $0.271 \to 0.031$) due to absent REvil knowledge coverage.
+MC-Dropout correctly routes 25.3\% of mix-partition windows to \texttt{ESCALATE}
+($\sigma \geq 0.10$), including the majority of SDelete pairings.
+
+\begin{table}[t]
+\centering
+\caption{Mix partition detection rates (concurrent execution). Overall $n\!=\!1944$.}
+\label{tab:mix}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Class combination} & \textbf{N} & \textbf{{[}B{]} DR} & \textbf{{[}B{+}K{]} DR} \\
+\midrule
+AESCrypt\_Conti   & 192 & 0.953 & 1.000 \\
+Firefox\_Conti    & 191 & 0.974 & 1.000 \\
+Zip\_Conti        & 193 & 0.953 & 1.000 \\
+Firefox\_REvil    & 193 & 0.964 & 0.031 \\
+Office\_REvil     & 195 & 0.938 & 0.041 \\
+AESCrypt\_REvil   & 203 & 0.921 & 0.015 \\
+\textbf{SDelete\_Conti}   & 197 & \textbf{0.599} & \textbf{0.995} \\
+\textbf{SDelete\_REvil}   & 192 & \textbf{0.271} & 0.031 \\
+\textbf{Overall}  & 1,944 & \textbf{0.838} & 0.416$^\dagger$ \\
+\bottomrule
+\end{tabular}
+\small{$^\dagger${[}B{]} preferred for unseen-family concurrent scenarios.}
+\end{table}
+
+\subsection{Adversarial Mimicry Stress Tests (E12)}
+\label{subsec:e12}
+
+Three feature-space mimicry attacks blend ransomware features toward the benign centroid
+by factor $\alpha \in [0,1]$:
+\textbf{slow-encrypt} targets the 4 highest-importance I/O features;
+\textbf{mem-mask} blends all 11 memory-subsystem features;
+\textbf{full-blend} blends all 16 features simultaneously.
+
+At baseline ($\alpha=0$), DR~$= 0.879$ and TC~$= 0.967$.
+Under slow-encrypt at $\alpha=1.0$: DR falls to 0.817 ($-6.2$\,pp) but \texttt{ESCALATE}
+rises to 10.2\%, holding TC at 0.919---only 8.1\% of samples are silently missed despite
+complete removal of the four primary discriminators.
+Counterintuitively, full-blend DR increases monotonically toward 1.0 as $\alpha \to 1$:
+the mean benign feature vector lies inside the model's ransomware decision region, making
+impersonating the ``average benign'' profile ineffective as an evasion strategy.
+
+\begin{table}[t]
+\centering
+\caption{Adversarial mimicry (E12) at key $\alpha$ values.
+DR = detection rate; TC = triage coverage; MR = miss rate.}
+\label{tab:adversarial}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Attack} & \textbf{$\alpha$} &
+\textbf{{[}B{]} DR} & \textbf{{[}B{]} TC} & \textbf{{[}B{]} MR} \\
+\midrule
+Baseline      & 0.0 & 0.879 & 0.967 & 0.033 \\
+slow-encrypt  & 0.5 & 0.920 & 0.975 & 0.025 \\
+slow-encrypt  & 1.0 & 0.817 & \textbf{0.919} & \textbf{0.081} \\
+mem-mask      & 0.5 & 0.904 & 0.972 & 0.028 \\
+mem-mask      & 1.0 & 0.847 & 0.936 & 0.064 \\
+full-blend    & 1.0 & 1.000 & 1.000 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Expert Feedback Loop Under Temporal Drift (E10)}
+\label{subsec:e10}
+
+The E10 simulation streams 34 steps (200~windows/step) across two phases:
+Phase~1 (steps 1--27, 5,494~windows, no updates) establishes AUPRC~$= 0.9838$;
+Phase~2 (steps 28--34) introduces novel Conti sub-variants and enables updates with a
+25\% labelling budget.
+
+EWC achieves the highest Phase~2 AUPRC (0.9178) and lowest FN count (515), with
+negligible catastrophic forgetting ($\Delta$AUPRC$_{\mathrm{probe}} = 0.001$).
+Replay is the worst strategy (AUPRC~$= 0.8802$, FN~$= 574$): gradient conflict between
+the 500-sample replay buffer and OOD-variant gradients degrades performance.
+All four strategies recover to AUPRC~$\geq 0.80$ at the same stream step (29/34),
+establishing that the labelling budget---not the update algorithm---is the binding
+constraint on adaptation speed.
+
+\begin{table}[t]
+\centering
+\caption{Feedback loop simulation (E10). Phase 1 baseline: AUPRC = 0.9838.}
+\label{tab:feedback}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Strategy} & \textbf{P2 AUPRC} & \textbf{OOD recall} & \textbf{Forgetting} & \textbf{FN} \\
+\midrule
+no\_update & 0.9167 & 0.628 & 0.000 & 520 \\
+finetune   & 0.9172 & 0.629 & 0.001 & 519 \\
+replay     & 0.8802 & 0.589 & 0.012 & 574 \\
+\textbf{EWC} & \textbf{0.9178} & \textbf{0.631} & \textbf{0.001} & \textbf{515} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Probability Calibration and Conformal Triage (E6/E7)}
+\label{subsec:e6e7}
+
+\textbf{Calibration (E6).}
+Table~\ref{tab:calibration} shows ECE and Brier scores before and after temperature
+scaling.
+{[}B{]} is well-calibrated in isolation ($T_{\mathrm{cal}}=0.703$, ECE: $0.042 \to 0.018$).
+Mean {[}B{+}K{]} fusion is structurally miscalibrated (ECE: $0.143 \to 0.131$); the
+residual arises from the Knowledge agent's bimodal probability distribution (near 0/1 for
+covered families, near 0.5 for absent ones) that no single temperature parameter can
+correct---directly motivating learned calibration-aware fusion as future work.
+
+\begin{table}[t]
+\centering
+\caption{Calibration (E6). Lower ECE/Brier is better.
+$T$ fitted on val, evaluated on test.}
+\label{tab:calibration}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Agent} & \textbf{Domain} & \textbf{ECE (raw)} &
+\textbf{ECE ($T$-scaled)} & \textbf{Brier} & \textbf{$T$} \\
+\midrule
+{[}B{]}   & RanSMAP  & 0.042 & \textbf{0.018} & 0.077 & 0.703 \\
+{[}B{+}K{]} & RanSMAP & 0.143 & 0.131 & 0.093 & 0.702 \\
+{[}S{]}   & RDset    & 0.000 & 0.000 & 0.000 & 0.205 \\
+{[}K{]}   & RansKnow & 0.047 & \textbf{0.023} & 0.022 & 0.430 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Conformal triage (E7).}
+Table~\ref{tab:conformal} reports Mondrian ICP outcomes at three coverage targets.
+At 95\% coverage, {[}B{+}K{]} achieves: DETECT rate~$= 50.0\%$, BENIGN~$= 47.7\%$,
+ESCALATE~$= 2.4\%$, empirical coverage~$= 0.946$ (matching 0.95 to within 0.4\,pp),
+DETECT precision~$= 0.949$.
+At 99\% coverage, {[}B{+}K{]} auto-classifies 77.1\% of traffic with
+DETECT precision~$= 0.991$ and DETECT recall~$= 0.801$, escalating 22.9\% to analyst
+review---a substantially more decisive and complete profile than {[}B{]} alone
+(41.1\% escalation, 53.7\% recall at the same guarantee level).
+Empirical coverage tracks the target within 1.2\,pp across all tested
+$\varepsilon \in \{0.10, 0.05, 0.01\}$.
+
+\begin{table}[t]
+\centering
+\caption{Mondrian conformal triage (E7). $T$-scaled probabilities; val split as cal set.}
+\label{tab:conformal}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{llccccc}
+\toprule
+\textbf{Agent} & \textbf{Target} & \textbf{DETECT} & \textbf{BENIGN} &
+\textbf{ESC} & \textbf{Det. prec.} & \textbf{Det. rec.} \\
+\midrule
+{[}B{]}   & 90\% & 0.504 & 0.490 & 0.000 & 0.900 & 0.885 \\
+{[}B{]}   & 95\% & 0.441 & 0.439 & 0.120 & 0.943 & 0.813 \\
+{[}B{]}   & 99\% & 0.278 & 0.311 & 0.411 & 0.987 & 0.537 \\
+{[}B{+}K{]} & 90\% & 0.474 & 0.455 & 0.000 & 0.965 & 0.893 \\
+{[}B{+}K{]} & \textbf{95\%} & \textbf{0.500} & \textbf{0.477} & \textbf{0.024} & \textbf{0.949} & \textbf{0.926} \\
+{[}B{+}K{]} & \textbf{99\%} & \textbf{0.414} & \textbf{0.357} & \textbf{0.229} & \textbf{0.991} & \textbf{0.801} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Runtime and Deployment Efficiency (E16)}
+\label{subsec:e16}
+
+Table~\ref{tab:runtime} reports single-sample inference latency and batch throughput
+measured over 500 repetitions on an NVIDIA GPU.
+The Behavioral agent achieves median latency of \textbf{1.935\,ms} ($p_{95}=2.260$\,ms)
+with $T=10$ MC-Dropout passes; its 8,385~parameters (32.8\,KB) make it viable for
+endpoint deployment without GPU infrastructure.
+The $T=10$ overhead is $3.70\times$ a deterministic pass (0.523\,ms).
+The {[}B{+}K{]} sequential pipeline achieves median end-to-end latency of
+\textbf{4.969\,ms} ($p_{95}=5.997$\,ms)---\textbf{0.05\%} of the 10-second telemetry
+window---supporting over \textbf{2,000 concurrent monitored streams} before becoming the
+throughput bottleneck.
+At batch size~1,024, {[}B{+}K{]} sustains 102\,K~samples/second.
+
+\begin{table}[t]
+\centering
+\caption{Runtime benchmark (E16). Single-sample: 500-rep median on GPU.}
+\label{tab:runtime}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Agent} & \textbf{Params} & \textbf{Weights} & \textbf{$p_{50}$ (ms)} & \textbf{$p_{95}$ (ms)} \\
+\midrule
+{[}B{]}     & 8,385   & 32.8\,KB  & \textbf{1.935} & 2.260 \\
+{[}K{]}     & 11,457  & 44.8\,KB  & 3.093 & 3.615 \\
+{[}S{]}     & 786,817 & 3.0\,MB   & 1.765 & 1.816 \\
+{[}B{+}K{]} & 19,842  & 77.6\,KB  & \textbf{4.969} & 5.997 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Explainability: Behavioral Feature Importance}
+
+Fig.~\ref{fig:feat_imp} shows permutation-based feature importance for the Behavioral
+agent.
+LBA and GPA variance features dominate, confirming that spatial dispersion of memory and
+storage access---the principal I/O signature of active encryption---drives classification.
+This is consistent with counterfactual analysis in~\cite{kabuye2025sabre_eswa}, where
+minimal relative changes to LBA and GPA variance sufficed to flip the agent's prediction.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{Figures/Behaviour_feature_importance.png}
-  \caption{Permutation feature importance for the Behavioural Agent
-  (RanSMAP).  LBA and GPA variance features are the primary drivers of
-  the behavioural classification decision, reflecting the I/O signature
-  of active file encryption.}
+  \caption{Permutation feature importance for the Behavioral agent (RanSMAP).
+  LBA and GPA variance features are the primary drivers of classification,
+  reflecting the I/O signature of active file encryption.}
   \label{fig:feat_imp}
 \end{figure}
 
 \subsection{Comparison with Prior Work}
 
-Table~\ref{tab:comparison} places SABRE+ in the context of
-representative prior systems.
+Table~\ref{tab:comparison} places SABRE+ in context.
+SABRE+ is the only system in this comparison to simultaneously support multi-agent
+architecture, uncertainty quantification, conformal triage guarantees, practitioner
+knowledge integration, and continual expert-driven adaptation.
 
 \begin{table*}[t]
 \centering
 \caption{Comparison of Extended Agentic SABRE+ with representative
 ransomware and intrusion-detection systems.
-\checkmark = fully supported; $\circ$ = partially supported;
-$\times$ = absent.}
+\checkmark = fully supported; $\circ$ = partial; $\times$ = absent.}
 \label{tab:comparison}
 \resizebox{\linewidth}{!}{
-\begin{tabular}{lcccccccc}
+\begin{tabular}{lccccccc}
 \toprule
 \textbf{System} &
 \textbf{Multi-Agent} &
 \textbf{Uncertainty} &
-\textbf{Peer Consult.} &
+\textbf{Conformal Triage} &
 \textbf{Knowledge} &
 \textbf{Triage Policy} &
 \textbf{Continual Adapt.} &
-\textbf{XAI} &
-\textbf{AUC (best reported)} \\
+\textbf{AUROC (best reported)} \\
 \midrule
-Fernando et al.~\cite{fernando2020study}          & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & 0.97 \\
-FeSAD~\cite{Fernando2024FeSAD}                    & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\circ$  & $\times$ & 0.98 \\
-Razaulla et al.~\cite{razaulla2023age}            & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\circ$  & $\times$ & N/A \\
-Soltani et al.~\cite{MultiAgentAdaptiveDetection2023} & \checkmark & $\times$ & $\times$ & $\times$ & $\times$ & $\circ$ & $\times$ & 0.96 \\
-LLM-LADE~\cite{ZhangLZYHY25}                     & $\times$ & $\times$ & $\times$ & $\circ$  & $\times$ & $\times$ & \checkmark & N/A \\
-Kabuye et al.~\cite{kabuye2025explainable}        & $\times$ & \checkmark & $\times$ & $\times$ & $\times$ & $\times$ & \checkmark & 1.00 \\
-2-Agent SABRE~\cite{kabuye2025sabre_eswa}         & \checkmark & \checkmark & $\times$ & $\times$ & \checkmark & $\times$ & \checkmark & 1.00 \\
+Fernando et al.~\cite{fernando2020study}          & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & 0.97 \\
+FeSAD~\cite{Fernando2024FeSAD}                    & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\circ$  & 0.98 \\
+Razaulla et al.~\cite{razaulla2023age}            & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\circ$  & --- \\
+Soltani et al.~\cite{MultiAgentAdaptiveDetection2023} & \checkmark & $\times$ & $\times$ & $\times$ & $\times$ & $\circ$ & 0.96 \\
+LLM-LADE~\cite{ZhangLZYHY25}                     & $\times$ & $\times$ & $\times$ & $\circ$  & $\times$ & $\times$ & --- \\
+Kabuye et al.~\cite{kabuye2025explainable}        & $\times$ & \checkmark & $\times$ & $\times$ & $\times$ & $\times$ & 1.00 \\
+2-Agent SABRE~\cite{kabuye2025sabre_eswa}         & \checkmark & \checkmark & $\times$ & $\times$ & \checkmark & $\times$ & 1.00 \\
 \midrule
-\textbf{SABRE+ (ours)} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \textbf{1.00} \\
+\textbf{SABRE+ (ours)} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \textbf{0.984} \\
 \bottomrule
 \end{tabular}}
 \end{table*}
-
-SABRE+ is the only system in this comparison that simultaneously
-supports multi-agent architecture, uncertainty quantification, peer
-consultation, practitioner knowledge integration, triage policy
-enforcement, continual expert-driven adaptation, and XAI.
-The three-agent fusion preserves the AUC~1.00 achieved by the
-Semantic Agent while reducing the escalation rate and adding
-the knowledge modality.
 
 
 %%------------------------------------------------------------
@@ -1092,14 +1303,18 @@ throttling mechanism that suppresses the statistical signature of
 ransomware I/O---a significant engineering cost.
 
 \subsection{Robustness via Uncertainty as a Security Property}
-The $\smax$ mechanism provides implicit adversarial
+The fused uncertainty $\sigma_{\mathrm{fused}}$ provides implicit adversarial
 robustness: an adversary who successfully obfuscates one modality
 (e.g., crafting a PE binary that moves the semantic embedding toward
 the benign region) typically does so at the cost of increased
 semantic uncertainty.
-This elevated $\sigma_\sem$ prevents AUTO-CONTAIN (Eq.~\eqref{eq:auto})
-and escalates the decision to human review, ensuring that uncertain
-adversarial samples are not silently allowed.
+This elevated $\sigma_{\mathrm{fused}}$ triggers the \textsc{Escalate} outcome
+rather than \textsc{Benign}, ensuring that uncertain adversarial samples are
+routed to analyst review rather than silently allowed.
+The adversarial evaluation (Section~\ref{sec:results}) confirms this
+empirically: under worst-case feature-space mimicry that reduces direct
+detection rate to 81.7\%, triage coverage is maintained at 91.9\% through the
+uncertainty-triggered escalation path.
 
 \subsection{Knowledge Agent Robustness}
 The Knowledge Agent operates on discourse features that the adversary
@@ -1115,96 +1330,363 @@ to the statistical agents.
 \section{Discussion}
 \label{sec:discussion}
 
-\textbf{Escalation rate reduction.}
-The 9\% escalation rate under the low-escalation policy, compared to
-up to 22\% in the two-agent baseline, demonstrates the practical
-benefit of the Knowledge Agent: discourse features provide a
-strong additional signal that resolves ambiguous cases before
-they reach the analyst queue.
+\textbf{Value of knowledge fusion.}
+The [B+K] configuration consistently outperforms [B] alone on
+random-stratified (AUROC\,+\,2.3\,pp), hardware-holdout, and temporal-holdout
+axes, demonstrating that ATT\&CK-derived discourse features provide a
+modality-orthogonal signal unavailable in raw telemetry.
+The gain is eliminated on the family-holdout axis (both AUROC\,=\,0.707),
+confirming that the Knowledge agent's benefit is conditioned on coverage of
+the target family in the RansKnow corpus.
+This conditional benefit is a feature, not a bug: a deployed system can
+monitor the Knowledge agent's per-sample confidence to detect when it is
+operating outside its coverage domain and fall back to the [B]-only
+configuration accordingly.
 
-\textbf{Uncertainty hierarchy.}
-The $\bar{\sigma}$ progression ($\approx 0 \to 0.014 \to 0.050$)
-is interpretable and expected: static PE structure is the most
-deterministic predictor, runtime telemetry introduces moderate
-overlap, and discourse features---derived from a small,
-heuristically labelled dataset---carry the most uncertainty.
-This hierarchy informs the assignment of $\kappa_{\mathrm{local}}$
-thresholds: the Semantic Agent rarely consults, while the Knowledge
-Agent consults approximately 38\% of the time.
+\textbf{Uncertainty as a first-class operational signal.}
+The three-way triage design intentionally rejects the false dichotomy of
+auto-detection versus manual review.
+At 99\% conformal coverage, 23\% of traffic is escalated to analyst review
+--- not because the system fails, but because these are genuinely hard cases
+where a formal coverage guarantee cannot be asserted at lower review burden.
+The 77\% auto-classified portion carries a rigorous statistical guarantee
+(99.1\% detection precision), enabling SOC teams to allocate analyst time to
+the cases that actually warrant it.
 
 \textbf{RansKnow dataset scale.}
-The 307-sample RansKnow is admittedly small.
-The heuristic labelling (tactic/tool count thresholds) may not
-generalise to all discourse styles.
-Future work should extend RansKnow with expert-annotated samples and
-include structured threat-intelligence feeds (TAXII/STIX) as
-additional feature sources.
+The 307-sample RansKnow is the smallest benchmark in this study.
+The heuristic labelling (tactic/tool count thresholds) validated at 96\%
+agreement may not generalise to all discourse styles.
+Future work should extend RansKnow with expert-annotated samples and include
+structured threat-intelligence feeds (TAXII/STIX) as additional feature
+sources, increasing both size and label quality.
 
 \textbf{Fusion without a unified dataset.}
-The current evaluation cannot measure true tri-modal fusion because
-no dataset provides simultaneous PE, runtime, and discourse features
-for the same executable.
-Constructing such a dataset is an important future direction.
+The current evaluation cannot measure true tri-modal fusion because no dataset
+provides simultaneous PE, runtime, and discourse features for the same
+executable.
+The modality-specific evaluation design (separate datasets per agent) is the
+correct response to this constraint, but constructing a unified dataset remains
+an important infrastructure direction for the ransomware detection community.
 
 %%------------------------------------------------------------
-\section{Limitations}
+\section{Limitations and Future Work}
 \label{sec:limitations}
 
-\begin{enumerate}
-\item \textbf{Dataset independence.}
-RDset, RanSMAP, and RansKnow cover distinct samples;
-a unified tri-modal dataset would enable true end-to-end fusion evaluation.
+\subsection{Limitations}
 
-\item \textbf{RansKnow scale and labelling.}
-307~samples with heuristic labels is the smallest benchmark
-in this study.
-Results should be interpreted with appropriate statistical caution.
+\subsubsection{Closed-Set Semantic Agent Performance}
 
-\item \textbf{Semantic agent saturation.}
-AUC~1.0 on RDset may reflect dataset saturation rather than
-a universal capability.
-Performance on out-of-distribution families is not measured here.
+The Semantic agent achieves AUROC\,=\,AUPRC\,=\,1.000 on the RDset test split, a result
+that warrants careful interpretation.
+The leakage audit (Section~\ref{sec:results}) confirms this is not classical data leakage:
+test samples do not appear in the training set.
+Rather, it reflects \emph{closed-set structural homogeneity}: malware-packed executables
+in RDset form a dense cluster in the \texttt{all-MiniLM-L6-v2} embedding space
+(99.86\% of test ransomware samples have cosine similarity $\geq$\,0.97 to a training
+ransomware neighbour), separable from legitimate Windows PE files by a near-linear
+boundary.
 
-\item \textbf{Consultation threshold tuning.}
-Per-agent $\kappa_{\mathrm{local}}$ thresholds are currently fixed;
-joint Bayesian optimisation over all seven policy hyperparameters
-($\tau, \kappa, \tauh, \klow, \kappa_{\mathrm{local},\sem},
-\kappa_{\mathrm{local},\beh}, \kappa_{\mathrm{local},\know}$)
-is left for future work.
+This result overestimates the semantic agent's deployment-time generalisation.
+Three conditions could break the observed separation:
+(i)~\textbf{novel packers} that produce PE structural signatures not represented in the
+RDset training distribution;
+(ii)~\textbf{legitimate software} compiled with build systems or linkers that produce PE
+headers similar to ransomware-style packing; and
+(iii)~\textbf{in-memory ransomware variants} that never materialise as PE files on disk.
+A packer-holdout evaluation is left as future work; it requires family-level and
+packer-level metadata not present in the public RDset release.
 
-\item \textbf{Expert Feedback Loop evaluation.}
-Due to the absence of a longitudinal deployment environment,
-the feedback loop is described and formalised but not empirically
-evaluated in this study.
-\end{enumerate}
+\subsubsection{Knowledge Agent Coverage Gaps}
+
+The Knowledge agent cannot contribute signal for ransomware families absent from the
+RansKnow corpus.
+In the family-holdout evaluation, the Knowledge agent achieves near-chance performance
+(AUROC\,$\approx$\,0.494) for REvil and WannaCry --- families for which no RansKnow
+transcripts provide meaningful ATT\&CK coverage --- and consequently [B+K] provides no
+improvement over [B] alone on this split (AUROC\,=\,0.707 for both).
+This is a fundamental limitation shared by all threat-intelligence-augmented systems:
+the coverage of the intelligence corpus is a hard ceiling on the agent's utility for
+novel families.
+
+The mix partition results reveal a more severe consequence: for REvil-concurrent classes,
+the Knowledge agent's per-family mean vector maps to near-zero probability
+(mean K-probability\,=\,0.010 for AESCrypt\_REvil), causing the [B+K] fused probability
+to collapse below 0.5 and [B+K] detection rate to fall as low as 1.5\%.
+In this scenario, [B] is the operationally correct configuration and [B+K] actively
+degrades performance.
+
+\subsubsection{Structural Fusion Miscalibration}
+
+Mean fusion of agents with heterogeneous probability scales introduces structural
+miscalibration that temperature scaling cannot fully correct.
+For [B+K], the fitted temperature $T_{\mathrm{cal}} = 0.702$ reduces ECE from 0.143 to
+0.131 --- a modest improvement compared to [B]'s reduction from 0.042 to 0.018.
+The residual miscalibration is structurally caused by the Knowledge agent's bimodal
+probability distribution: for families present in RansKnow it produces probabilities near
+0 or 1, while for absent families it produces probabilities near 0.5.
+
+This miscalibration has a downstream effect on the conformal triage: [B+K]'s conformal
+thresholds must accommodate a wider probability range, resulting in a larger ESCALATE band
+and lower auto-classification rate.
+At 99\% coverage, [B+K] auto-classifies 77\% of traffic compared to 69\% achievable by
+[B] at the same coverage --- [B+K] is better, but the structural miscalibration limits the
+achievable auto-classification rate under the current mean fusion design.
+
+\subsubsection{Family-Level Generalisation Frontier}
+
+The behavioral agent's family-holdout AUROC of 0.7069\,$\pm$\,0.0104 (compared to
+0.9605\,$\pm$\,0.0030 on random-stratified) reveals a fundamental limit of I/O and memory
+telemetry for detecting wholly unseen ransomware lineages.
+The 22\,pp degradation indicates that a substantial portion of the behavioral agent's
+discriminative power derives from family-specific execution patterns learned from training
+families, rather than from family-agnostic ransomware signatures.
+
+WannaCry's propagation-driven execution pattern produces I/O bursts interleaved with
+network activity that the purely disk-and-memory telemetry does not capture, while REvil's
+careful staged encryption (with configurable worker threads and priority throttling)
+produces lower sustained I/O than Conti or LockBit.
+Neither pattern is represented in training.
+Detecting truly novel ransomware lineages from behavioral telemetry alone requires either
+richer feature sets capturing lineage-invariant encryption signatures (e.g., cryptographic
+API call patterns, entropy change trajectories) or learning approaches that enforce
+family-agnostic feature extraction.
+
+\subsubsection{Adversarial Evaluation Scope}
+
+The adversarial evaluation (Section~\ref{sec:results}) covers \textbf{feature-space
+mimicry}: a mathematical blending of the ransomware feature vector toward the benign
+centroid.
+Two important adversarial scenarios are not modelled.
+First, \textbf{adaptive uncertainty attacks}: an adversary who knows that high $\sigma$
+triggers ESCALATE rather than MISS might optimise for low-uncertainty benign predictions
+($\bar{p}$ slightly below 0.5, $\sigma$ below $\tau$), landing in the BENIGN outcome
+without triggering ESCALATE.
+Second, \textbf{physical evasion}: memory-resident ransomware that patches its own memory
+access patterns to mimic benign processes, or that executes encryption in a co-process
+that does not generate file system I/O visible to the hypervisor telemetry agent.
+
+\subsubsection{Concurrent-Execution Detection Challenge}
+
+The mix partition evaluation reveals a hard case: \texttt{SDelete\_REvil} concurrent
+execution produces [B] detection rate of 27.1\% --- the lowest across all evaluation
+conditions.
+SDelete's legitimate secure-deletion I/O is structurally similar to REvil's encryption I/O
+(both involve sequential write passes with high entropy output), and their superimposed
+telemetry falls in a region the model associates with benign disk-intensive activity.
+MC-Dropout uncertainty is correctly elevated (25.3\% of all mix windows have
+$\sigma > \tau$, routing to ESCALATE), but this represents the ceiling of the uncertainty
+mechanism's recovery ability in this scenario.
+
+No concurrent-execution examples were included in training; the model cannot learn to
+detect the superposition of ransomware and benign I/O signatures without such examples.
+Generating synthetic concurrent-execution training data --- by linearly combining feature
+vectors or running actual concurrent sessions at training time --- is a direct path to
+improving mix-partition performance.
+
+\subsubsection{Labelling Budget as the Binding Constraint}
+
+All four continual learning strategies (no-update, fine-tune, replay, EWC) converge to
+AUPRC\,$\geq$\,0.80 on OOD windows at the same stream step (29 of 34), demonstrating that
+at a 25\% labelling budget, the update \emph{algorithm} is not the bottleneck --- the
+number of verified OOD labels is.
+The maximum gain from switching from no-update to EWC is 5 fewer false negatives
+(515 vs.\ 520) over the entire OOD arrival window.
+
+This finding is specific to the evaluated stream (Conti sub-variants, which share
+substantial behavioral overlap with the training Conti family) and the evaluated labelling
+rate (25\%).
+For a more divergent OOD family or a lower labelling rate (e.g., 10\%), the update
+algorithm may become the binding constraint.
+The cross of labelling rate and OOD divergence as covariates is left as future work.
+
+\subsubsection{RansKnow Label Construction Heuristic}
+
+The Knowledge agent's training labels are derived from a threshold-based heuristic
+(\texttt{Tactic\_Total\_Mentions}\,$>$\,10 OR \texttt{Tool\_Total\_Mentions}\,$>$\,2)
+rather than ground-truth manual annotation of all 307 transcripts.
+The heuristic was validated against manual review for a 50-transcript stratified sample
+with 96\% agreement, but the remaining 4\% disagreement represents approximately 12
+transcripts whose labels may be incorrect.
+A full manual annotation of all 307 transcripts --- or an inter-annotator reliability
+study --- would improve the dataset's reliability as a research benchmark.
+
+\subsection{Future Directions}
+
+\subsubsection{Learned Fusion with Agent Availability Gating}
+
+The mean-fusion design's structural miscalibration and knowledge-collapse pathology
+motivate replacing simple averaging with a \textbf{learned fusion combiner}.
+A natural design is an attention-weighted sum:
+\begin{equation}
+\bar{p}_{\mathrm{fused}} = \sum_{i \in \mathcal{A}}
+    w_i(\boldsymbol{\sigma}, \mathbf{a}) \cdot \bar{p}_i,
+\qquad \sum_{i} w_i = 1,
+\label{eq:learned_fusion}
+\end{equation}
+where the weights $w_i$ are predicted by a small MLP conditioned on the vector of
+per-agent uncertainties $\boldsymbol{\sigma}$ and a binary availability mask $\mathbf{a}$
+indicating which agents are active.
+Such a gating network would learn to down-weight the Knowledge agent when its uncertainty
+is high (indicating an absent or poorly-matched family) and up-weight the Behavioral agent
+when it is operating with high confidence.
+Learned fusion would also address the calibration mismatch: a gating network trained with
+NLL loss would implicitly learn to correct for the systematic miscalibration introduced by
+averaging agents with heterogeneous probability scales.
+
+\subsubsection{Graph-Based Threat Intelligence for Zero-Day Knowledge}
+
+The Knowledge agent's fundamental coverage gap motivates a graph-based extension.
+Rather than storing per-family mean vectors as independent points, a \textbf{knowledge
+graph} over families and ATT\&CK techniques would allow signal propagation from known
+families to structurally similar unknown families.
+Graph neural network propagation~\cite{sun_malware_kg_2022} over such a structure could
+provide a meaningful prior for zero-day families whose technique profile partially overlaps
+with known families, rather than the uninformative corpus-mean fallback.
+The primary obstacle is constructing the family-technique graph from automated sources
+(CVE databases, MITRE ATT\&CK group entries, threat intelligence feeds) rather than
+manually curated transcripts.
+
+\subsubsection{Uncertainty-Aware Adversarial Training}
+
+An adversary specifically targeting the BENIGN outcome would optimise for simultaneously
+low $\bar{p}$ and low $\sigma$, landing in the BENIGN cell of the triage without
+triggering ESCALATE.
+\textbf{Uncertainty-aware adversarial training} would directly harden the model against
+this threat: augmenting the training set with adversarially perturbed windows generated to
+maximise the probability of landing in the MISS region ($\bar{p} < 0.5$,
+$\sigma < \tau$) would force the model to maintain high uncertainty and thus trigger
+ESCALATE even when its mean prediction is pulled below the detection threshold.
+The interaction between adversarial training and the EWC penalty in continual learning
+scenarios is a further open question.
+
+\subsubsection{Active Labelling Optimisation}
+
+The finding that the labelling budget (not the update algorithm) is the primary bottleneck
+for OOD adaptation motivates formalising the labelling decision as an \textbf{active
+learning} problem.
+Rather than randomly selecting 25\% of each step's windows for analyst review, an
+uncertainty-aware selection policy would prioritise the windows most likely to improve
+OOD detection:
+\begin{equation}
+j^{*} = \arg\max_{j \in \mathcal{U}} \;
+    \sigma_j \cdot \mathbb{1}[\bar{p}_j < 0.5],
+\label{eq:active_label}
+\end{equation}
+where $\mathcal{U}$ is the set of unlabelled windows in the current step.
+This selects the highest-uncertainty windows that the model currently classifies as benign
+--- exactly the windows ESCALATE identifies as ambiguous and most likely to be
+misclassified OOD ransomware.
+Formalising this as a contextual bandit problem (with labelling cost, information gain,
+and forgetting as the multi-objective reward) is a natural extension.
+
+\subsubsection{Cross-Platform and Cross-OS Generalisation}
+
+All three agents are designed and evaluated exclusively for the Windows platform.
+Modern ransomware operations increasingly target Linux ESXi hypervisors and macOS
+endpoints.
+Extending SABRE+ requires re-evaluating each agent independently: the Behavioral agent's
+feature representation depends on OS-specific I/O patterns (EXT4/XFS vs.\ NTFS), the
+Semantic agent would need to process ELF or Mach-O binaries through a comparable text
+summary with a retrained sentence transformer, and the Knowledge agent's RansKnow
+vocabulary would need extension with Linux- and ESXi-specific tactics and tools
+(e.g., \texttt{chmod +x} scripts, VMware CLI tools, \texttt{esxcli} commands).
+
+\subsubsection{Cost-Sensitive Conformal Prediction}
+
+The current Mondrian ICP implementation uses symmetric significance levels
+($\varepsilon$ applied equally to ransomware and benign thresholds), implicitly assigning
+equal cost to missed ransomware detections and unnecessary analyst escalations.
+In ransomware detection the actual cost structure is highly asymmetric: a false negative
+carries orders-of-magnitude higher operational cost than a false positive.
+\textbf{Conformal risk control}~\cite{angelopoulos_conformal_risk_2022} generalises the
+coverage guarantee to arbitrary loss functions, enabling class-asymmetric thresholds that
+minimise expected cost rather than symmetric coverage.
+Applied to SABRE+, this would set the ransomware threshold $q_1$ tighter (lower false
+negative rate at the cost of more escalations) while allowing a looser benign threshold
+$q_0$.
+
+\subsubsection{Extended Temporal Drift Evaluation}
+
+The temporal holdout split covers 18 months of data collection (September 2022 to
+March 2024) with a single test window of approximately 7 days.
+The continual learning evaluation simulates a compressed deployment episode of 34 steps
+($\approx$\,19 hours).
+A more demanding temporal evaluation would span multiple years, capturing full family
+lifecycle events (emergence, peak prevalence, variant proliferation, decline) rather than
+a single OOD arrival event, and would vary the OOD divergence axis from minor variants to
+completely new families with different encryption algorithms and execution models.
+The public release of longer-horizon ransomware telemetry datasets represents an important
+infrastructure gap in the ransomware detection research community.
 
 %%------------------------------------------------------------
 \section{Conclusion}
 \label{sec:conclusion}
 
-This paper presented \textbf{Extended Agentic SABRE (SABRE+)},
-a three-agent uncertainty-aware framework for adaptive ransomware
-detection that advances the two-agent SABRE baseline through
-three principled contributions.
-The Knowledge Agent, trained on the novel RansKnow dataset of
-307 YouTube-sourced practitioner discourse samples, achieves 0.9550
-accuracy and 0.9950~AUC from 23 structured ATT\&CK and tool features,
-providing a modality-orthogonal signal that complements both static and
-runtime representations.
-The Peer Consultation Protocol enables agents under high epistemic
-uncertainty to update their probability estimates using
-inverse-uncertainty-weighted peer scores, improving Knowledge Agent
-accuracy by +0.005 at a 38\% consultation rate while leaving
-uncertainty values unchanged.
-The Expert Feedback Loop formalises analyst-correction-driven
-incremental retraining of the Decision MLP with experience replay,
-providing a principled path to continual adaptation without
-catastrophic forgetting.
-Together, these contributions reduce the escalation rate to 9\%
-under the low-escalation policy---a 59\% relative reduction versus
-the two-agent baseline---while maintaining perfect discrimination on the
-semantic modality and retaining the full security properties of the
-triage architecture.
+We presented SABRE+, a multi-agent ransomware detection system that fuses three
+complementary evidence streams --- runtime behavioural telemetry, PE static semantics,
+and ATT\&CK threat intelligence --- under a unified uncertainty-aware decision framework.
+The architecture advances the state of the art in five orthogonal dimensions
+simultaneously: multi-modal evidence fusion, Monte Carlo Dropout uncertainty
+quantification, Mondrian conformal triage guarantees, online continual learning with EWC,
+and hardware-generalised behavioral sensing evaluated across 15 CPU/memory configurations.
+
+\textbf{On detection accuracy.}
+The behavioral agent alone achieves AUROC\,=\,0.9605\,$\pm$\,0.0030 on the canonical
+random-stratified split, with tight confidence intervals across six independent training
+seeds confirming that results are not artefacts of a lucky initialisation.
+Knowledge fusion ([B+K]) raises this to AUROC\,=\,0.9836\,$\pm$\,0.0009, and at realistic
+5\% ransomware prevalence achieves AUPRC\,=\,0.898 --- 31\% fewer false positives than the
+behavioral baseline at matched recall.
+These accuracy figures hold across temporal and hardware generalisation axes (temporal
+AUROC\,=\,0.9603\,$\pm$\,0.0054; hardware AUROC\,=\,0.9387\,$\pm$\,0.0058), with the
+family-holdout axis (AUROC\,=\,0.7069\,$\pm$\,0.0104) correctly identifying
+unknown-lineage detection as an open research challenge.
+
+\textbf{On uncertainty-driven triage.}
+The MC-Dropout ESCALATE mechanism demonstrates clear value under adversarial conditions:
+when worst-case feature-space mimicry reduces the direct detection rate to 81.7\%,
+the three-way triage maintains 91.9\% triage coverage by routing high-uncertainty samples
+to analyst review rather than silently missing them.
+This 10.2\,pp recovery from escalation converts missed detections into queued reviews,
+allowing the analyst to make the final call on the hardest cases.
+
+\textbf{On formal conformal guarantees.}
+Mondrian conformal prediction applied to temperature-scaled fused scores achieves empirical
+coverage within 1.2\,pp of the target across all tested levels (90\%, 95\%, 99\%),
+confirming that the distribution-free theoretical guarantee holds in practice.
+At 99\% coverage, [B+K] auto-classifies 77\% of traffic with 99.1\% detection precision,
+escalating only 23\% for analyst review --- a practical operating point for high-assurance
+SOC deployment where false negatives carry severe operational consequences.
+
+\textbf{On continual learning.}
+The EWC-regularised expert feedback loop achieves the lowest false-negative count under
+OOD family arrival (515\,FN vs.\ 520 for the no-update baseline) with a negligible AUPRC
+drop of 0.001 on retained families.
+The most practically important finding is that all four update strategies recover full
+detection performance at the same stream step (29/34), confirming that the labelling
+budget --- not the update strategy --- is the binding constraint on adaptation speed.
+This has a direct implication for SOC resource planning: investing in analyst labelling
+throughput yields more return than selecting a more sophisticated online learning algorithm.
+
+\textbf{On deployment efficiency.}
+The [B+K] pipeline runs at 4.969\,ms median end-to-end latency (p95\,=\,5.997\,ms) on a
+single GPU, consuming 0.05\% of a 10-second telemetry window and supporting over 2,000
+concurrent monitored streams before becoming the throughput bottleneck.
+The behavioral agent's 8,385 parameters (32.8\,KB) make it viable for endpoint or
+embedded deployment without GPU infrastructure.
+
+Ransomware detection is ultimately an asymmetric problem: the cost of a false negative
+vastly exceeds the cost of a false positive, and attackers have every incentive to probe
+decision boundaries.
+SABRE+ addresses this asymmetry not by optimising a single threshold but by building a
+system that knows when it does not know --- routing ambiguous cases to human review rather
+than forcing a binary verdict, while providing formal coverage guarantees on the cases it
+decides automatically.
+We believe this uncertainty-first design philosophy, demonstrated here for ransomware but
+applicable across the broader malware detection landscape, represents the correct
+architectural response to an adversarial threat environment where the cost of overconfident
+misclassification is measured in operational disruption rather than classifier metrics.
 
 %%------------------------------------------------------------
 \appendix
