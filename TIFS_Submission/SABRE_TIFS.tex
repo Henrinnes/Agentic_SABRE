@@ -377,19 +377,22 @@ and all $\sigma_i$ are the original MC Dropout standard deviations.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\linewidth]{Figures/Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png}
-  \caption{Extended Agentic SABRE+ pipeline. Three specialist agents
-  (Behavioral CNN, Semantic CNN, Knowledge CNN) produce
-  predictive mean--uncertainty pairs $(\bar{p}_i, \sigma_i)$ via MC-Dropout.
-  The Fusion Layer averages active agents into a fused probability
-  $\bar{p}_{\mathrm{fused}}$ and fused uncertainty $\sigma_{\mathrm{fused}}$.
-  The Triage Decision Module maps the fused pair to
-  \texttt{DETECT}, \texttt{ESCALATE}, or \texttt{BENIGN}.
-  A Mondrian Conformal Wrapper converts temperature-scaled probabilities
-  into prediction sets with formal, distribution-free coverage guarantees.
-  \texttt{ESCALATE} decisions queue for analyst review; verified labels
-  feed the EWC-regularised Expert Feedback Loop, which incrementally
-  retrains the Behavioral agent to adapt to novel ransomware families.}
+  \includegraphics[width=\linewidth]{Figures/fig1_architecture.pdf}
+  \caption{Extended Agentic SABRE+ pipeline.
+  Three specialist agents (Behavioral CNN, Semantic CNN, Knowledge CNN)
+  each produce a predictive mean--uncertainty pair $(\bar{p}_i, \sigma_i)$
+  via $T\!=\!10$ MC-Dropout passes.
+  The Fusion Layer averages the active-agent outputs (controlled by
+  availability mask $\mathbf{a}$) into $(\bar{p}_f, \sigma_f)$.
+  Temperature scaling sharpens calibration before the Triage Decision Module
+  applies the three-way rule: $\tilde{p}\geq 0.5\Rightarrow$
+  \texttt{AUTO-CONTAIN}; $\tilde{p}<0.5$ and $\sigma\geq\tau\Rightarrow$
+  \texttt{ESCALATE}; otherwise $\Rightarrow$ \texttt{ALLOW} ($\tau=0.10$).
+  A Mondrian ICP wrapper (dashed border) provides formal distribution-free
+  coverage guarantees on \texttt{AUTO-CONTAIN} decisions.
+  \texttt{ESCALATE} and \texttt{AUTO-CONTAIN} outcomes feed the Expert
+  Feedback Loop: analyst corrections drive EWC-regularised incremental
+  retraining of the Behavioral agent ($\lambda=300$).}
   \label{fig:pipeline}
 \end{figure*}
 
