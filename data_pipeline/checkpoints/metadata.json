@@ -1,0 +1,6 @@
+{
+  "behavioral_input_dim": 16,
+  "behavioral_training_data": "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet",
+  "behavioral_configs": 15,
+  "behavioral_train_rows": 35857
+}
