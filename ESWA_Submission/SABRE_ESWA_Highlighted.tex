@@ -1692,9 +1692,9 @@ Table~\ref{tab:runtime_comparison} places Agentic~SABRE's computational profile 
 
 \begin{table*}[ht]
 \centering
-\caption{\hl{Approximate training and inference complexity of representative ransomware detection approaches. $N$: training samples; $d$: feature dimension; $E$: epochs; $L$, $K$, $C$: CNN depth, kernel size, filter count; $T$: MC Dropout passes.}}
+\caption{Approximate training and inference complexity of representative ransomware detection approaches. $N$: training samples; $d$: feature dimension; $E$: epochs; $L$, $K$, $C$: CNN depth, kernel size, filter count; $T$: MC Dropout passes.}
 \label{tab:runtime_comparison}
-\resizebox{\linewidth}{!}{
+\small
 \begin{tabular}{lllc}
 \toprule
 \textbf{Approach} & \textbf{Training} & \textbf{Inference (per sample)} & \textbf{Uncertainty} \\
@@ -1705,7 +1705,7 @@ Single CNN (no uncertainty) & $\mathcal{O}(E \cdot N \cdot L \cdot K \cdot C^2)$
 SABRE Semantic Agent (MC Dropout) & $\mathcal{O}(E \cdot N \cdot L \cdot K \cdot C^2)$ & $\mathcal{O}(T \cdot L \cdot K \cdot C^2)$ $\approx$150\,ms CPU & MC Dropout \\
 SABRE full pipeline (2 agents + fusion) & $\mathcal{O}(2E \cdot N \cdot L \cdot K \cdot C^2)$ + CTGAN & $\mathcal{O}(2T \cdot L \cdot K \cdot C^2)$ $\approx$0.3--0.7\,s CPU & MC Dropout \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table*}
 
 Overall, the mathematical structure of Agentic~SABRE demonstrates that uncertainty-aware evidence fusion is essential for ransomware detection, and that the triage policy cannot be decoupled from the predictive geometry of the agents themselves. The interplay between Eqs.~\eqref{eq:psem}--\eqref{eq:sigmamax} forms the core mechanism through which the system balances automation, accuracy, and operational safety.
