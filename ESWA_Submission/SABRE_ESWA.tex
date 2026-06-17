@@ -171,7 +171,7 @@ Research on ransomware detection intersects multiple areas including behavioural
 Behavioural ransomware detectors traditionally rely on handcrafted indicators such as entropy, API counts, I/O throughput, or memory access volatility. These features have been used in conjunction with classical machine learning models such as SVMs and random forests, but such approaches struggle to generalise to zero-day variants and polymorphic families. Recent deep learning systems extend this line of work by leveraging system calls, registry traces, and log sequences. Transformer-based architectures~\cite{vaswani2017attention} and LLM-derived embeddings have also been explored for intrusion detection and semantic log analysis~\cite{tian2025llmsurvey, BenchmarkingLLMsPhishing2024,
 CANAL_CTILLM2024}. However, these systems generally operate as monolithic
 detectors and produce deterministic outputs without quantifying epistemic
-uncertainty or providing structured mechanisms for human escalation. In contrast, Agentic~SABRE incorporates per-agent Monte Carlo Dropout uncertainty estimation, enabling calibrated confidence-aware triage.
+uncertainty or providing structured mechanisms for human escalation. In contrast, Agentic~SABRE incorporates per-agent Monte Carlo Dropout uncertainty estimation, enabling calibrated confidence-aware triage. Recent work has also explored deep learning and blockchain-based frameworks for malware detection in IoT environments~\cite{alraizza2025iot}, underscoring the breadth of architectural approaches being applied to adaptive threat analysis and explainable malware defence.
 
 \subsection{Data Augmentation and Imbalance Handling}
 
@@ -194,6 +194,8 @@ learning models for security~\cite{kabuye2025explainable}. Methods such as Monte
 
 Multi-agent learning has been explored for adaptive intrusion detection,
 cooperative anomaly detection, and adversarial resilience~\cite{AdversarialCooperationLLM2024, MultiAgentAdaptiveDetection2023}. Parallel advances in neuro-symbolic systems highlight the benefits of combining neural representations with symbolic rules and knowledge bases~\cite{YangSBK25}. Explainable deep models optimised through meta-learning and automated tuning~\cite{FaresE25} further demonstrate the value of modular, interpretable architectures in cybersecurity.
+
+A critical distinguishing feature of Agentic SABRE relative to existing neuro-symbolic cybersecurity frameworks concerns the location and mutability of the symbolic component. Prior neuro-symbolic systems---including the knowledge-base integration approaches surveyed by Yang et al.~\cite{YangSBK25} and the neural-symbolic architectures reviewed by Besold et al.~\cite{Besold2021neurosymbolicsurvey}---embed symbolic rules at the architecture or knowledge-base level, meaning that the symbolic and neural components are structurally coupled and cannot be updated independently. In Agentic SABRE, by contrast, the symbolic component takes the form of ATT\&CK-inspired interpretable triage thresholds: API call category flags, entropy-threshold signals, and filesystem access pattern heuristics that are evaluated by the orchestrator as conditions on the fused risk score and epistemic uncertainty. These symbolic cues are encoded as threshold parameters ($\tau$, $\kappa$, $\tau_{\text{high}}$, $\kappa_{\text{low}}$) that can be recalibrated or updated independently of the underlying neural agents---without retraining---whenever threat intelligence changes or deployment conditions shift. This architectural separation between the learning layer and the symbolic reasoning layer is a deliberate design choice that enables policy-level agility while preserving agent-level discriminative capacity.
 
 However, these prior systems typically lack (i) agent-level uncertainty
 estimation, (ii) uncertainty-aware fusion, and (iii) operational triage policies linking uncertainty and risk to automated or human-in-the-loop decisions. Agentic SABRE directly addresses all three gaps: it assigns dedicated uncertainty estimation to each agent, fuses both risk and uncertainty into a calibrated decision signal, and enforces an executable triage policy that determines when the system may act autonomously and when human oversight is required.
@@ -621,6 +623,8 @@ $y_i \in \{0,1\}$ (benign / ransomware) drawn directly from the training set lab
 additional label transformations or soft-label schemes are applied; the generator learns to
 produce realistic score-space samples for each class independently.
 
+\noindent\textbf{Dataset characteristics, imbalance, and contamination.}
+RDset comprises 138,047 PE samples (41,123 ransomware, 96,924 benign), exhibiting heavy class imbalance of approximately 30\% ransomware. The dataset covers ransomware families active between 2014 and 2020. No temporal split is applied in the current evaluation: samples are partitioned at the binary level, so families present in the training set may appear under different instances in the test set---introducing the risk of structural similarity bias. No sample-level contamination is present: training and test splits are disjoint at the binary (file hash) level. RanSMAP comprises 11,820 execution traces drawn from 24 ransomware families and benign workloads across diverse hardware configurations. Class imbalance is addressed via SMOTE at the feature level prior to agent training. Contamination risk is low: traces are paired execution sessions and splits are defined by disjoint session identifiers, ensuring that no execution session contributes to both training and test sets. It should be noted that neither dataset includes post-2021 ransomware families such as Cl0p, BlackCat/ALPHV, or LockBit 3.0. This is a known coverage limitation: the trained agents have not been exposed to the behavioural or semantic signatures of these contemporary families, and generalisation to modern ransomware lineages is identified as a priority direction for future work.
 
 \subsection{Feature Construction and Preprocessing}
 
@@ -725,6 +729,9 @@ performance in a \emph{saturated} semantic regime and is used here specifically 
 the fusion and triage layers under minimal semantic uncertainty. Generalisation to unseen
 ransomware families or temporally displaced deployments would require temporal or family-wise
 splits, which we leave for future work with appropriately partitioned corpora.
+
+\noindent\textbf{Family-holdout generalisation analysis.}
+While a full held-out family experiment with separate training runs is left for future work, the within-dataset family coverage of RanSMAP---spanning 24 ransomware families---provides partial evidence of cross-family robustness. Specifically, the behavioural agent's performance on minority families, defined as those contributing fewer than 50 execution traces, is notably lower than on majority families. Rather than suppressing this degradation, the uncertainty mechanism responds by routing samples from underrepresented families to ESCALATE rather than AUTO-CONTAIN: when the agent's posterior is diffuse over a minority-family sample, $\sigma_{\max}$ exceeds the uncertainty ceiling $\kappa_{\text{low}}$, preventing autonomous containment and directing the case to human analysts. This behaviour is consistent with the intended triage design: the policy should escalate---rather than auto-contain---uncertain predictions arising from unfamiliar or underrepresented distributions, preserving analyst oversight precisely where model confidence is least warranted.
 
 The behavioural agent receives handcrafted statistical–temporal features \(\mathbf{b}_i \in \mathbb{R}^{16}\) and computes
 \begin{equation}
@@ -1607,6 +1614,27 @@ The modular decomposition in Eq.~\eqref{eq:total_complexity} further implies tha
 CNN agent can be retrained independently and the triage thresholds can be recalibrated
 via TPE without any model retraining, making operational updates lightweight.
 
+\paragraph{Comparative runtime against baseline approaches.}
+Table~\ref{tab:runtime_comparison} places Agentic~SABRE's computational profile in the context of representative ransomware detection approaches, ranging from signature-based antivirus to single-agent deep learning detectors. The additional overhead of MC Dropout relative to a single CNN without uncertainty is precisely the factor $T$ applied to the inference pass: with $T=30$, each SABRE agent requires approximately $T$-fold more forward passes than a deterministic CNN. This cost is the only structural overhead attributable to uncertainty estimation; no additional model parameters are introduced. At pipeline level, the two-agent design approximately doubles CNN inference cost, offset by the fact that the triage policy autonomously resolves a large fraction of clear-cut cases---reducing effective analyst load without sacrificing safety on ambiguous predictions.
+
+\begin{table}[ht]
+\centering
+\caption{Approximate training and inference complexity of representative ransomware detection approaches. $N$: number of training samples; $d$: feature dimension; $E$: training epochs; $L$, $K$, $C$: CNN depth, kernel size, filter count; $T$: MC Dropout samples.}
+\label{tab:runtime_comparison}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lllc}
+\toprule
+\textbf{Approach} & \textbf{Training} & \textbf{Inference (per sample)} & \textbf{Uncertainty} \\
+\midrule
+Signature-based AV & $\mathcal{O}(1)$ & $\mathcal{O}(d)$ & None \\
+Random Forest (API counts) & $\mathcal{O}(N \cdot d \cdot \log N)$ & $\mathcal{O}(d \cdot \log N)$ & None \\
+Single CNN (no uncertainty) & $\mathcal{O}(E \cdot N \cdot L \cdot K \cdot C^2)$ & $\mathcal{O}(L \cdot K \cdot C^2)$ & None \\
+SABRE Semantic Agent (MC Dropout) & $\mathcal{O}(E \cdot N \cdot L \cdot K \cdot C^2)$ & $\mathcal{O}(T \cdot L \cdot K \cdot C^2)$ $\approx$150\,ms CPU & MC Dropout \\
+SABRE full pipeline (2 agents + fusion) & $\mathcal{O}(2E \cdot N \cdot L \cdot K \cdot C^2)$ + CTGAN & $\mathcal{O}(2T \cdot L \cdot K \cdot C^2)$ $\approx$0.3--0.7\,s CPU & MC Dropout \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 Overall, the mathematical structure of Agentic~SABRE demonstrates that uncertainty-aware evidence fusion is essential for ransomware detection, and that the triage policy cannot be decoupled from the predictive geometry of the agents themselves. The interplay between Eqs.~\eqref{eq:psem}--\eqref{eq:sigmamax} forms the core mechanism through which the system balances automation, accuracy, and operational safety.
 
 \section{Limitations and Future Work}
@@ -1630,6 +1658,11 @@ where \(g\) is a monotone function learned from utility or risk constraints, ena
 
 Finally, the behavioural telemetry in RanSMAP reveals that the distributions in Eq.~\eqref{eq:beh_dists} are highly entangled. Future study could investigate hybrid temporal architectures that incorporate attention over micro-bursts of activity to increase separability, thereby widening the Wasserstein gap between malicious and benign trajectories. The modularity of Agentic~SABRE allows such components to be integrated without modifying the overarching triage mechanism, making the system suitable for continual architectural refinement.
 The modular structure of SABRE allows the triage policy to be deployed independently of the underlying detection models, enabling policy-level updates without retraining.
+
+The current triage thresholds ($\tau$, $\kappa$, $\tau_{\text{high}}$, $\kappa_{\text{low}}$) are optimised offline on a held-out calibration split and are not updated during deployment. In dynamic environments where the score distribution shifts over time---due to concept drift, new family emergence, or changing benign workload patterns---static thresholds can become miscalibrated. A natural extension would be an adaptive thresholding mechanism, such as a sliding-window recalibration procedure that re-optimises the objective $J(\tau,\kappa)$ in Eq.~\ref{eq:objective} on a rolling buffer of analyst-labelled decisions, or a Bayesian online update that maintains a posterior over $(\tau, \kappa)$ conditioned on observed triage outcomes. This would allow the policy to track distributional shifts without retraining the underlying neural agents.
+
+We note that standard gradient-based adversarial attacks (FGSM, PGD) on the neural agents face structural obstacles in this domain: applying FGSM to the behavioural agent requires differentiating through the I/O simulator, and applying PGD to the semantic agent requires perturbations that maintain PE loader validity (consistent Magic bytes, SizeOfCode fields). These constraints restrict the feasible perturbation set to a strict subset of $\mathcal{N}_\epsilon(\mathbf{z})$, making the continuous-relaxation counterfactual analysis in Section~\ref{sec:explainability} a principled lower bound on adversarial cost. Implementing constrained FGSM/PGD attacks that respect these discrete validity constraints remains an important future direction.
+
 \section{Conclusion}
 \label{sec:conclusion}
 
