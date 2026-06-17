@@ -795,7 +795,6 @@ To assess generalisation beyond the standard random-stratified split, we evaluat
 \centering
 \caption{Generalisation performance across four evaluation splits (mean\,$\pm$\,std over 6 seeds). Family holdout uses families unseen during training; hardware holdout uses unseen hardware configurations; temporal holdout separates by collection date.}
 \label{tab:multiseed_splits}
-\resizebox{\linewidth}{!}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Split} & \textbf{AUROC} & \textbf{AUPRC} & \textbf{Accuracy} \\
@@ -805,7 +804,7 @@ Hardware holdout  & $0.939 \pm 0.005$ & $0.942 \pm 0.006$ & $0.850 \pm 0.008$ \\
 Temporal holdout  & $0.960 \pm 0.005$ & $0.929 \pm 0.010$ & $0.888 \pm 0.008$ \\
 Family holdout    & $0.707 \pm 0.010$ & $0.710 \pm 0.008$ & $0.660 \pm 0.008$ \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 \begin{changedblock}
@@ -848,7 +847,6 @@ Table~\ref{tab:agent_performance} summarises these base-agent results.
 
 \begin{table}[ht]
 \centering
-\resizebox{\linewidth}{!}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Agent} & \textbf{Dataset} & \textbf{Accuracy} & \textbf{AUC} \\
@@ -856,7 +854,7 @@ Table~\ref{tab:agent_performance} summarises these base-agent results.
 Semantic CNN & RDset & 1.0000 & 1.0000 \\
 Behavioural CNN & RanSMAP & 0.9872 & 0.6030 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \caption{Performance of the individual agents prior to fusion.}
 \label{tab:agent_performance}
 \end{table}
@@ -1056,7 +1054,6 @@ Table~\ref{tab:adversarial} reports detection rate, escalation rate, and mean ep
 \centering
 \caption{Behavioural agent robustness under adversarial evasion at attack intensities $\alpha \in \{0, 0.5, 1.0\}$. Detection rate (Det.), escalation rate (Esc.), and mean MC Dropout uncertainty ($\bar{\sigma}$) are reported.}
 \label{tab:adversarial}
-\resizebox{\linewidth}{!}{
 \begin{tabular}{llccc}
 \toprule
 \textbf{Attack} & $\boldsymbol{\alpha}$ & \textbf{Det.} & \textbf{Esc.} & $\bar{\boldsymbol{\sigma}}$ \\
@@ -1069,7 +1066,7 @@ Slow-encrypt & 0.5 & 0.920 & 0.055 & 0.059 \\
 Memory-mask  & 0.5 & 0.904 & 0.068 & 0.071 \\
              & 1.0 & 0.847 & 0.089 & 0.068 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 \begin{figure}[ht]
@@ -1273,7 +1270,6 @@ $\theta_{\mathrm{sem}}=0.49$. Crucially, the embedding dimensions most frequentl
 
 \begin{table}[t]
 \centering
-\resizebox{\linewidth}{!}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Sample} &
@@ -1285,14 +1281,13 @@ CF$^\mathrm{sem}_1$ & 0.92 & 0.31 & 0.08 \\
 CF$^\mathrm{sem}_2$ & 0.87 & 0.29 & 0.11 \\
 CF$^\mathrm{sem}_3$ & 0.95 & 0.41 & 0.09 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \caption{Representative semantic counterfactual shifts generated via the minimal-deformation objective in Equation~\eqref{eq:sem_cf_min}. Latent directions with the largest impact correspond to PE structural irregularities and entropy-driven embedding dimensions.}
 \label{tab:sem_cf}
 \end{table}
 
 \begin{table}[t]
 \centering
-\resizebox{\linewidth}{!}{%
 \begin{tabular}{c c c c c c}
 \hline
 \textbf{Index} & $\hat{p}_{\mathrm{sem}}(z_0)$ & $\mathrm{logit}(z_0)$ &
@@ -1305,7 +1300,7 @@ $\lVert \Delta z\rVert_2$ \\
 71097  & 1.0000 & 38.7963 & 0.0000 & -17.5210 & 3.340490 \\
 123595 & 1.0000 & 36.7834 & 0.0000 & -17.9020 & 3.332573 \\
 \hline
-\end{tabular}}
+\end{tabular}
 \caption{Semantic counterfactual flips for the Semantic Agent. Each counterfactual embedding $z_{\mathrm{cf}}$ is optimised to cross a low-risk target boundary while remaining close to the original embedding $z_0$.}
 \label{tab:sem_cf_flips}
 \end{table}
@@ -1313,7 +1308,7 @@ $\lVert \Delta z\rVert_2$ \\
 
 \begin{table}[t]
 \centering
-\resizebox{\linewidth}{!}{%
+
 \begin{tabular}{c c c}
 \hline
 \textbf{Latent dim} & \textbf{Count in Top-8} & \textbf{Interpretation} \\
@@ -1329,7 +1324,7 @@ $\lVert \Delta z\rVert_2$ \\
 104 & 2/5 & secondary direction \\
 245 & 1/5 & episodic direction \\
 \hline
-\end{tabular}}
+\end{tabular}
 \caption{Most frequently perturbed embedding dimensions across semantic counterfactuals. ``Count in Top-8'' reports how often the dimension appears among the highest-magnitude normalised changes $\delta_{\mathrm{sem}}$ per sample.}
 \label{tab:sem_cf_dims}
 \end{table}
@@ -1572,7 +1567,6 @@ A summary of these results is shown in Tables~\ref{tab:ablation_fusion} and \ref
 
 \begin{table}[ht]
 \centering
-\resizebox{\linewidth}{!}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Fusion Method} & \textbf{RDset AUC} & \textbf{RanSMAP AUC} \\
@@ -1581,7 +1575,7 @@ MLP w/ CTGAN & 1.0000 & 0.5397 \\
 MLP w/o CTGAN & 0.9967 & 0.5142 \\
 Mean Fusion (Eq.~\ref{eq:mean_fusion}) & 0.884 & 0.501 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \caption{Ablation of fusion strategies.}
 \label{tab:ablation_fusion}
 \end{table}
