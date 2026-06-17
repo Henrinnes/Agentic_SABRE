@@ -39,13 +39,14 @@
 CTGAN Score Augmentation, and Peer Consultation for
 Adaptive Ransomware Triage}
 
-\author{Henry~Kabuye\authorrefmark{1},
-        Biju~Issac\authorrefmark{1},~\IEEEmembership{Senior~Member,~IEEE,}
-        Rahul~Yumlembam\authorrefmark{1},
-        and~Jeyamohan~Neera\authorrefmark{1},~\IEEEmembership{Member,~IEEE}%
-\thanks{\authorrefmark{1}Department of Computer and Information Sciences,
+\author{Henry~Kabuye\IEEEauthorrefmark{1},
+        Biju~Issac\IEEEauthorrefmark{1},~\IEEEmembership{Senior~Member,~IEEE,}
+        Rahul~Yumlembam\IEEEauthorrefmark{1},
+        Zahra~Farzadpour\IEEEauthorrefmark{1},
+        and~Jeyamohan~Neera\IEEEauthorrefmark{1},~\IEEEmembership{Member,~IEEE}%
+\thanks{\IEEEauthorrefmark{1}Department of Computer and Information Sciences,
 Northumbria University, Newcastle, NE1~8ST, UK\@.
-E-mail: \{kabuyehenry2017, bissac, rahul.yumlembam, jeyamohan.neera\}@northumbria.ac.uk.}%
+E-mail: \{kabuyehenry2017, bissac, rahul.yumlembam, zahra.farzadpour, jeyamohan.neera\}@northumbria.ac.uk.}%
 \thanks{B.~Issac is the corresponding author.
 E-mail: bissac@ieee.org.}%
 \thanks{Manuscript received 2026.}}
@@ -59,42 +60,37 @@ E-mail: bissac@ieee.org.}%
 \begin{abstract}
 Multi-agent ransomware detection systems that fuse behavioural telemetry,
 static PE semantics, and threat-intelligence knowledge achieve strong
-detection accuracy, but their practical utility is constrained by three
-structural limitations of mean-fusion architectures: (i) each agent's
-probability estimate is treated as equally reliable regardless of its
-uncertainty, (ii) triage thresholds are hand-tuned rather than optimised
-to operational cost structure, and (iii) the expert feedback loop updates
-a behavioral agent that operates independently of the fused decision.
+detection accuracy, but mean-fusion architectures suffer three structural
+limitations: agent probabilities are weighted equally regardless of
+uncertainty, triage thresholds are hand-tuned rather than cost-optimised,
+and the expert feedback loop retrains only the behavioral CNN ---
+so analyst corrections on ESCALATE'd decisions never propagate to the
+fusion head that integrates all three agents.
 
-We present \textbf{SABRE-II}, which addresses all three limitations.
-The mean-fusion combiner of SABRE+ is replaced by a
-\textbf{Decision MLP} that takes the full six-dimensional score vector
+We present \textbf{SABRE-II}, which addresses all three.
+A \textbf{Decision MLP} replaces mean averaging, taking the full
+six-dimensional score vector
 $[p_{\sem}, p_{\beh}, p_{\know}, \sigma_{\sem}, \sigma_{\beh}, \sigma_{\know}]$
-as input and produces a single calibrated ransomware probability.
-A \textbf{CTGAN augmentation} step generates 2,000 synthetic score-space
-samples conditioned on the training distribution before MLP fitting,
-improving minority-class coverage without touching raw telemetry.
-\textbf{Peer Consultation} dynamically adjusts any agent's probability
-estimate when its uncertainty exceeds a per-agent threshold $\kappa_{\mathrm{local}}$,
-using an inverse-uncertainty-weighted average of the remaining agents'
-scores as a correction signal.
-\textbf{Bayesian TPE optimisation} via Optuna searches the joint
-$(\tau, \kappa, \tauh, \klow)$ policy space to minimise
-$-\balAcc + \lambda_{\mathrm{esc}} \cdot \escRate$ on a held-out
-calibration split, replacing ad-hoc threshold selection.
-Finally, the expert feedback loop is wired directly to the Decision MLP:
-analyst corrections are accumulated in a structured log and trigger
-incremental MLP retraining when the correction count crosses a
-configurable threshold, closing the adaptation loop at the fusion level
-rather than the per-agent level.
+as input to produce a calibrated fused probability.
+\textbf{CTGAN} generates 2,000 synthetic score-space samples to address
+class imbalance before MLP fitting.
+\textbf{Peer Consultation} intercepts agent probabilities when uncertainty
+exceeds a per-agent threshold, replacing them with an
+inverse-uncertainty-weighted peer average.
+\textbf{Bayesian TPE} (300 trials) searches the joint threshold policy
+space to minimise a calibration-split objective that balances detection
+accuracy against escalation rate.
+The \textbf{fusion-level feedback loop} accumulates analyst corrections
+on ESCALATE'd samples and triggers incremental MLP retraining, closing
+the adaptation loop at the Decision MLP, the component responsible for integration failures.
 
-Evaluated on the same RanSMAP / RDset / RansKnow benchmark suite as
-SABRE+ across four generalisation axes and six independent seeds,
-SABRE-II achieves AUROC\,=\,$\mathbf{0.975}$ on the canonical
-random-stratified split and $\mathbf{0.979}$ on temporal holdout,
-improves ECE from $0.131$ to $\mathbf{0.013}$ under [B+K] fusion,
-and recovers detection rates for held-out ransomware families via
-Peer Consultation (REvil: 55.5\%\,$\to$\,57.5\%; WannaCry: 30.1\%\,$\to$\,31.9\%).
+Evaluated on the RanSMAP / RDset / RansKnow benchmark suite across four
+generalisation axes, SABRE-II achieves
+AUROC\,=\,$\mathbf{0.975}$ on the random-stratified split and
+$\mathbf{0.979}$ on temporal holdout, reduces ECE from $0.131$ to
+$\mathbf{0.013}$ under [B+K] fusion, and recovers family-holdout
+detection rates via Peer Consultation
+(REvil: 55.5\%\,$\to$\,57.5\%; WannaCry: 30.1\%\,$\to$\,31.9\%).
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -149,8 +145,7 @@ the fused score distribution when agents are retrained.
 The EWC-regularised continual learning loop in SABRE+ targets the
 Behavioral CNN only.
 When analysts correct missed detections, the corrective signal propagates
-only to the agent that processes raw I/O telemetry, not to the fusion
-head that integrates all three agents.
+only to the Behavioral CNN, not to the fusion head that integrates all three agents.
 This is architecturally suboptimal: an analyst correction on an
 ESCALATE'd sample contains information about the fusion layer's failure
 mode, not about the behavioral agent's internal representation.
@@ -171,7 +166,7 @@ the raw telemetry imbalance.
 Conditional tabular GAN (CTGAN) \cite{xu_ctgan_2019} generates
 $\Nsynth = 2{,}000$ synthetic score-space rows from the training split
 before MLP fitting, improving boundary estimation for the minority
-(ransomware) class without exposing the model to raw features.
+(ransomware) class without exposing the Decision MLP to raw telemetry features.
 
 \item \textbf{Peer Consultation.}
 Before fusion, if agent $i$'s uncertainty $\sigma_i > \kappa_{\mathrm{local},i}$,
@@ -193,7 +188,7 @@ sample ID.
 When the correction count reaches a configurable threshold, the Decision
 MLP is incrementally retrained on the feedback rows (up-weighted by
 repetition) combined with a Gaussian approximation of the original
-training distribution, closing the adaptation loop at the correct layer.
+training distribution, closing the adaptation loop at the Decision MLP fusion layer.
 \end{enumerate}
 
 The remainder of this paper is organised as follows.
@@ -266,7 +261,7 @@ Peer consultation mechanisms in multi-agent systems trace to
 Dempster-Shafer belief combination \cite{shafer_mathematical_1976} and
 mixture-of-experts \cite{jacobs_mixture_1991}.
 More recent approaches use calibrated confidence
-\cite{guo_calibration_2017} to weight expert predictions.
+\cite{guo2017calibration} to weight expert predictions.
 Our Peer Consultation is closest to the temperature-calibrated ensemble
 weighting of \cite{lakshminarayanan_simple_2017}, but operates
 dynamically per-sample: consultation fires only when an agent's
@@ -294,8 +289,8 @@ Catastrophic forgetting under distribution shift is well-studied
 In malware detection, concept drift from evolving variants is a key
 challenge \cite{pendlebury_tesseract_2019, jordaney_transcend_2017}.
 Our feedback loop extends the EWC-regularised continual learning of
-SABRE+ by targeting the fusion layer rather than the per-agent CNN,
-ensuring that analyst corrections propagate directly to the model
+SABRE+ by targeting the Decision MLP rather than the Behavioral CNN,
+ensuring that analyst corrections propagate directly to the fusion
 component responsible for the integration failure.
 
 
@@ -305,7 +300,7 @@ component responsible for the integration failure.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{Figures/fig1_sabre2_architecture.pdf}
+  \includegraphics[width=\textwidth]{Figures/Prop_Agentic_Sabre_15_05_2026_3Agents_Fullpipeline.png}
   \caption{SABRE-II end-to-end pipeline.
     Three expert CNN agents (Behavioral, Semantic, Knowledge) each produce
     a probability--uncertainty pair via Monte Carlo Dropout (T=10 forward
@@ -365,7 +360,7 @@ following stages:
         \texttt{AUTO-CONTAIN} triggers an immediate containment action.
 \end{enumerate}
 The end-to-end latency budget is dominated by the three MC-Dropout forward
-passes; the Decision MLP adds at most 0.2\,ms median latency
+passes; the Decision MLP adds 0.83\,ms mean overhead
 (Section~\ref{sec:results}).
 
 \subsection{Training Protocol}
@@ -431,7 +426,7 @@ tactic and tool co-occurrence counts extracted by threshold-based
 heuristics.
 A CNN classifier maps this representation to a ransomware probability.
 For families absent from RansKnow, the agent falls back to the
-corpus-mean vector; the resulting near-zero MLP output is a known
+corpus-mean vector; the resulting near-zero Knowledge CNN output is a known
 limitation addressed by Peer Consultation in SABRE-II.
 
 
@@ -562,7 +557,7 @@ The per-agent uncertainty $\sigma_i$ is \emph{not} modified by consultation:
 only the probability estimate is adjusted.
 This preserves the semantics of $\sigma_i$ as an epistemic uncertainty
 measure and ensures that the adjusted probability still triggers
-ESCALATE if $\sigma_i > \kappa$.
+ESCALATE if $\sigma_i > \kappa$ (the global triage uncertainty threshold derived by Bayesian TPE, distinct from the per-agent $\kappa_{\mathrm{local},i}$).
 
 When consultation does not fire ($\sigma_i \leq \kappa_{\mathrm{local},i}$),
 the agent's output is passed through unmodified.
@@ -619,14 +614,14 @@ The SABRE-II triage policy is defined by four thresholds:
   \item $\tau$: fused probability threshold for ESCALATE (lower boundary).
   \item $\kappa$: uncertainty threshold for ESCALATE.
   \item $\tauh$: fused probability threshold for AUTO-CONTAIN (upper boundary).
-  \item $\klow$: uncertainty threshold for AUTO-CONTAIN (upper boundary).
+  \item $\klow$: maximum uncertainty ceiling for AUTO-CONTAIN; samples must satisfy $\sigma_{\max} \leq \klow$.
 \end{itemize}
 
 The triage decision rule is:
 \begin{equation}
   d(\pfused, \sigma_{\max}) = \begin{cases}
-    \texttt{AUTO-CONTAIN} & \text{if } \pfused \geq \tauh \text{ and } \sigma_{\max} \leq \klow \\
-    \texttt{ESCALATE}     & \text{if } \pfused \geq \tau \text{ or } \sigma_{\max} > \kappa \\
+    \texttt{AUTO-CONTAIN} & \pfused \geq \tauh,\,\sigma_{\max} \leq \klow \\
+    \texttt{ESCALATE}     & \pfused \geq \tau \text{ or } \sigma_{\max} > \kappa \\
     \texttt{ALLOW}        & \text{otherwise.}
   \end{cases}
 \end{equation}
@@ -666,7 +661,7 @@ is strictly harder to trigger than ESCALATE).
 
 \subsection{Optuna Configuration}
 
-Optimisation runs for 200 Optuna trials with TPE sampler and
+Optimisation runs for 300 Optuna trials with TPE sampler and
 MedianPruner (15-trial warm-up, minimum 5 trials per configuration).
 The best policy $\pi^*$ is written to \texttt{checkpoints/policy\_auto.json}
 and loaded by the orchestrator at inference time.
@@ -685,7 +680,7 @@ SABRE-II's expert feedback loop operates at the Decision MLP level.
 When the orchestrator issues an \texttt{ESCALATE} decision and an analyst
 provides a correction (confirmed ransomware = 1, confirmed benign = 0),
 the full six-dimensional score vector at the time of inference is
-appended to the feedback log along with:
+appended to the Feedback Store along with:
 \begin{itemize}
   \item Timestamp and unique sample ID.
   \item Original orchestrator decision and fused probability.
@@ -816,10 +811,10 @@ We report whether Peer Consultation bridges this gap.
 
 \subsection{Baseline Comparison}
 
-Table~\ref{tab:main_results} reports AUROC and AUPRC for SABRE-II
+Table~\ref{tab:main_results} and Figure~\ref{fig:roc} report AUROC and AUPRC for SABRE-II
 across four generalisation axes and compares against SABRE+
 \cite{kabuye_sabre_2026}.
-All metrics are mean $\pm$ 95\% CI across 6 seeds.
+SABRE+ metrics are mean $\pm$ 95\% CI over $K=6$ seeds; SABRE-II values are single-seed (see table caption).
 
 \begin{table*}[t]
 \centering
@@ -846,11 +841,23 @@ Temporal holdout    & $0.9603 \pm 0.0054$ & $--$                & $\mathbf{0.866
 \end{tabular}
 \end{table*}
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig2_sabre2_roc.pdf}
+  \caption{ROC curves for \textbf{[B]}, \textbf{[B+K] Mean}, and \textbf{[B+K] MLP}
+    across the four evaluation splits (binormal approximation from reported AUROC).
+    The Decision MLP consistently outperforms mean fusion, with the largest gain on
+    the random-stratified and temporal holdout splits.
+    Family holdout remains the hardest split due to unseen ransomware families.}
+  \label{fig:roc}
+\end{figure*}
+
 \subsection{Calibration: ECE Comparison}
 
 Table~\ref{tab:calibration} reports Expected Calibration Error (ECE,
 15-bin uniform) for [B+K] fusion before and after temperature scaling
-in SABRE+ versus SABRE-II.
+in SABRE+ versus SABRE-II; Figure~\ref{fig:reliability} shows the
+corresponding reliability diagrams.
 In SABRE+, mean fusion with temperature scaling achieved ECE\,=\,$0.131$
 for [B+K].
 The Decision MLP's implicit uncertainty weighting is expected to reduce
@@ -878,11 +885,21 @@ SABRE-II [B+K]   & $0.109$ & $\mathbf{0.013}$ \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig3_sabre2_calibration.pdf}
+  \caption{Reliability diagram (15 bins) on the random-stratified test split.
+    The Decision MLP [B+K] achieves near-perfect calibration (ECE\,=\,0.013),
+    substantially better than SABRE-II mean fusion before temperature scaling
+    (ECE\,=\,0.109) or after (ECE\,=\,0.152); both far exceed SABRE+ [B+K] post-TS (ECE\,=\,0.131).}
+  \label{fig:reliability}
+\end{figure}
+
 \subsection{CTGAN Augmentation Ablation}
 
-Table~\ref{tab:ctgan_ablation} reports Decision MLP performance
-with no augmentation, SMOTE, and CTGAN augmentation on the
-random-stratified test split.
+Table~\ref{tab:ctgan_ablation} and Figure~\ref{fig:ctgan} report
+Decision MLP performance with no augmentation, SMOTE, and CTGAN
+augmentation on the random-stratified test split.
 This ablation measures the contribution of the generative augmentation
 component in isolation.
 
@@ -897,12 +914,21 @@ component in isolation.
 \toprule
 Augmentation & AUROC & ECE (post-TS) \\
 \midrule
-None (no augmentation) & $0.976$ & $0.014$ \\
-SMOTE (score space)    & $0.975$ & $0.011$ \\
-CTGAN ($\Nsynth=2{,}000$) & $\mathbf{0.975}$ & $\mathbf{0.013}$ \\
+None (no augmentation) & $\mathbf{0.976}$ & $0.014$ \\
+SMOTE (score space)    & $0.975$ & $\mathbf{0.011}$ \\
+CTGAN ($\Nsynth=2{,}000$) & $0.975$ & $0.013$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig4_sabre2_ctgan.pdf}
+  \caption{Decision MLP AUROC, AUPRC, and ECE by score-space augmentation strategy.
+    All three variants achieve equivalent discrimination; CTGAN and SMOTE
+    improve calibration over no augmentation.}
+  \label{fig:ctgan}
+\end{figure}
 
 \subsection{Peer Consultation: Family-Holdout Recovery}
 
@@ -916,14 +942,15 @@ execution.
 \begin{table}[t]
 \centering
 \caption{[B+K] detection rate (\%) on family-holdout split
-  with and without Peer Consultation.
+  with and without Peer Consultation (PC).
+  No~PC / With~PC = SABRE-II variants.
   $\uparrow$ = higher is better.
 }
 \label{tab:consultation}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccc}
 \toprule
-Scenario & SABRE+ & SABRE-II (no PC) & SABRE-II (with PC) \\
+Scenario & SABRE+ & No PC & With PC \\
 \midrule
 REvil (all)            & $90.9$ & $55.5$ & $\mathbf{57.5}$ \\
 WannaCry (all)         & $66.2$ & $30.1$ & $\mathbf{31.9}$ \\
@@ -935,8 +962,8 @@ SDelete\_REvil (mix)   & $27.1$ & $--$   & $--$ \\
 
 \subsection{Bayesian TPE Policy vs Fixed Thresholds}
 
-Table~\ref{tab:policy} compares the triage policy derived by Bayesian
-TPE against the fixed thresholds used in SABRE+ ($\tau=0.10$,
+Table~\ref{tab:policy} and Figure~\ref{fig:policy} compare the triage
+policy derived by Bayesian TPE against the fixed thresholds used in SABRE+ ($\tau=0.10$,
 $\kappa=0.10$) and against a grid search baseline.
 Balanced accuracy, escalation rate, and auto-classify rate are
 reported for the random-stratified test split.
@@ -960,6 +987,18 @@ Bayesian TPE (300 trials)      & $\mathbf{0.865}$ & $24.5$ & $\mathbf{35.7}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig5_sabre2_policy.pdf}
+  \caption{Triage policy comparison on the random-stratified test split.
+    \textbf{Left}: decision rate breakdown (Escalate / Auto-Contain / Allow) for each policy.
+    Bayesian TPE achieves the lowest escalation rate (24.5\%) and highest
+    auto-classify rate (35.7\%), reducing analyst workload significantly.
+    \textbf{Right}: balanced accuracy for each policy.
+    Bayesian TPE and grid search both outperform the fixed SABRE+ threshold substantially.}
+  \label{fig:policy}
+\end{figure*}
 
 \subsection{Feedback Loop: OOD Adaptation Speed}
 
@@ -1002,8 +1041,9 @@ CTGAN is only used at training time and adds no inference latency.
 Component & Median (ms) & p95 (ms) \\
 \midrule
 SABRE+ [B+K] (mean fusion)         & $4.969$ & $5.997$ \\
-SABRE-II [B+K] (Decision MLP)      & $6.500$ & $6.500$ \\
-$\Delta$ (MLP overhead)            & $+0.830$ & $+0.830$ \\
+SABRE+ [B+K] (this benchmark)      & $5.670$ & $--$ \\
+SABRE-II [B+K] (Decision MLP)      & $6.500$ & $--$ \\
+$\Delta$ vs this benchmark         & $+0.830$ & $--$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1054,7 +1094,7 @@ A near-zero $p_{\know}$ with low $\sigma_{\know}$ (the agent is
 confidently predicting benign) would \emph{not} trigger consultation.
 This is the correct behaviour: if the Knowledge agent is certain and
 the other agents disagree, the disagreement should be resolved by the
-Decision MLP rather than by overriding the certainagent.
+Decision MLP rather than by overriding the certain agent.
 
 \subsection{Bayesian TPE and Cost-Sensitive Triage}
 
@@ -1078,10 +1118,10 @@ advantage of SABRE-II.
 
 The comparison between SABRE+'s EWC (behavioral agent) and SABRE-II's
 Gaussian-regularised MLP feedback (fusion layer) is instructive.
-EWC targets the component that directly processes raw telemetry;
-corrections inform the behavioral feature extractor about new patterns.
-Gaussian-regularised MLP feedback targets the component that integrates
-all three agents; corrections inform the fusion head about failure modes
+EWC targets the Behavioral CNN, which directly processes raw I/O telemetry;
+corrections inform its feature extractor about new execution patterns.
+Gaussian-regularised MLP feedback targets the Decision MLP, which integrates
+all three agents; corrections inform the fusion layer about failure modes
 in the current agent combination.
 
 For the Conti sub-variant OOD scenario evaluated in this paper
@@ -1110,8 +1150,9 @@ of the full family distribution (e.g., due to small family populations
 in RanSMAP), the synthetic rows may not improve coverage of rare
 execution patterns.
 A packer-holdout evaluation of the CTGAN augmentation's effectiveness
---- analogous to the family-holdout evaluation for the behavioral agent
---- is left as future work.
+--- analogous to the family-holdout evaluation for the Semantic CNN,
+which is most sensitive to packer variation in RDset ---
+is left as future work.
 
 \subsubsection{Peer Consultation with Two-Agent Subsets}
 
@@ -1158,11 +1199,13 @@ the probability inputs --- would make the uncertainty-weighting mechanism
 explicit and interpretable.
 Formally:
 \begin{equation}
-  \mathbf{a} = \softmax\!\left(
+\begin{aligned}
+  \mathbf{a} &= \softmax\!\left(
     \mathbf{W}_a [\sigma_{\sem}, \sigma_{\beh}, \sigma_{\know}]^\top
     + \mathbf{b}_a
-  \right), \quad
-  \pfused = \mathbf{a}^\top [p_{\sem}, p_{\beh}, p_{\know}]^\top.
+  \right), \\
+  \pfused &= \mathbf{a}^\top [p_{\sem}, p_{\beh}, p_{\know}]^\top.
+\end{aligned}
 \end{equation}
 This architecture would provide a direct, inspectable estimate of how
 much each agent contributed to any given fused decision, enabling
@@ -1210,7 +1253,7 @@ that directly encode the SOC cost structure, replacing the fixed
 $\tau = 0.10$ threshold of SABRE+.
 The fusion-level expert feedback loop routes analyst corrections to
 the Decision MLP rather than to individual CNNs, closing the adaptation
-loop at the component responsible for integration failures.
+loop at the Decision MLP fusion layer.
 
 Across four generalisation axes on the
 RanSMAP / RDset / RansKnow benchmark suite, SABRE-II achieves AUROC
@@ -1260,7 +1303,7 @@ Component & Parameter & Value \\
   & $\epsilon$ (weight floor)              & $10^{-6}$ \\
 \midrule
 \multirow{3}{*}{Bayesian TPE}
-  & Trials              & 200 \\
+  & Trials              & 300 \\
   & $\lambda_{\mathrm{esc}}$ & 0.1 \\
   & Warm-up trials      & 15 \\
 \midrule

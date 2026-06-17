@@ -36,6 +36,7 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from scipy.stats import t as scipy_t
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 ROOT    = Path(__file__).parent
@@ -58,10 +59,11 @@ BEHAVIOR_COLS = [
     "mem_readwrite_count","mem_exec_count",
 ]
 
-T_MC   = 10
-BATCH  = 512
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-RNG    = np.random.default_rng(42)
+T_MC    = 10
+BATCH   = 512
+DEVICE  = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+RNG     = np.random.default_rng(42)
+K_SEEDS = 6
 META   = json.loads((CKPT / "metadata.json").read_text())
 
 # ── CNN definitions matching saved checkpoints ────────────────────────────────
@@ -304,11 +306,12 @@ def score_bk(split, beh_m, beh_sc, know_m, know_sc, know_lookup,
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-def train_mlp_variant(X_tr_in, y_tr_in, X_te_in, y_te_in, aug="none"):
+def train_mlp_variant(X_tr_in, y_tr_in, X_te_in, y_te_in, aug="none", seed=42):
     """Train a FusionMLP with aug ∈ {none, smote, ctgan}.
 
     Returns (auroc, auprc, ece, trained_net, fitted_scaler).
     """
+    rng = np.random.default_rng(seed)
     X_a, y_a = X_tr_in.copy(), y_tr_in.copy()
 
     if aug == "smote":
@@ -320,9 +323,9 @@ def train_mlp_variant(X_tr_in, y_tr_in, X_te_in, y_te_in, aug="none"):
             _, idxs = nbrs.kneighbors(X_a[min_idx])
             new_rows = []
             for _ in range(target):
-                i  = int(RNG.integers(len(min_idx)))
-                nb = int(idxs[i, RNG.integers(1, idxs.shape[1])])
-                lam = float(RNG.random())
+                i  = int(rng.integers(len(min_idx)))
+                nb = int(idxs[i, rng.integers(1, idxs.shape[1])])
+                lam = float(rng.random())
                 new_rows.append(X_a[min_idx[i]]*lam + X_a[min_idx[nb]]*(1-lam))
             X_syn = np.stack(new_rows).astype(np.float32)
             X_a   = np.concatenate([X_a, X_syn])
@@ -351,9 +354,9 @@ def train_mlp_variant(X_tr_in, y_tr_in, X_te_in, y_te_in, aug="none"):
                 _, idxs = nbrs.kneighbors(X_a[min_idx])
                 new_rows = []
                 for _ in range(target):
-                    i  = int(RNG.integers(len(min_idx)))
-                    nb = int(idxs[i, RNG.integers(1, idxs.shape[1])])
-                    lam = float(RNG.random())
+                    i  = int(rng.integers(len(min_idx)))
+                    nb = int(idxs[i, rng.integers(1, idxs.shape[1])])
+                    lam = float(rng.random())
                     new_rows.append(X_a[min_idx[i]]*lam + X_a[min_idx[nb]]*(1-lam))
                 X_syn = np.stack(new_rows).astype(np.float32)
                 X_a   = np.concatenate([X_a, X_syn])
@@ -364,8 +367,9 @@ def train_mlp_variant(X_tr_in, y_tr_in, X_te_in, y_te_in, aug="none"):
     X_tes = sc2.transform(X_te_in).astype(np.float32)
 
     X_t, X_v, y_t, y_v = train_test_split(
-        X_as, y_a, test_size=0.2, stratify=(y_a>0.5).astype(int), random_state=42)
+        X_as, y_a, test_size=0.2, stratify=(y_a>0.5).astype(int), random_state=seed)
 
+    torch.manual_seed(seed)
     net = FusionMLP(X_a.shape[1], 32, 0.2).to(DEVICE)
     opt = torch.optim.Adam(net.parameters(), lr=1e-3)
     bce_loss = nn.BCELoss()
@@ -401,214 +405,288 @@ def train_mlp_variant(X_tr_in, y_tr_in, X_te_in, y_te_in, aug="none"):
 
 def main():
     print("="*70)
-    print("SABRE-II Evaluation (TIFS2)")
+    print(f"SABRE-II Evaluation (TIFS2) — {K_SEEDS} seeds")
     print("="*70)
 
     print("\nLoading models …")
-    sem_m              = load_semantic()
-    know_m, know_sc    = load_knowledge()
-    _, mlp_sc_ref, _, _ = load_decision_mlp()   # used only for σ_s clamp
-    policy             = json.loads((CKPT/"policy_auto.json").read_text())
-    know_lookup        = build_knowledge_lookup(know_m, know_sc)
-    print("  Building corpus-mean semantic fill (label-independent) …")
-    sem_fill           = build_semantic_fill(sem_m)
-    # σ_s from MC-Dropout on any embedding is out-of-distribution for the
-    # 6-D score scaler (training mean σ_s ≈ 2.75e-08).  Clamp to that mean
-    # so the scaled σ_s lands at 0 and does not saturate hidden neurons.
+    sem_m                = load_semantic()
+    know_m, know_sc      = load_knowledge()
+    _, mlp_sc_ref, _, _  = load_decision_mlp()
+    policy               = json.loads((CKPT/"policy_auto.json").read_text())
+    know_lookup          = build_knowledge_lookup(know_m, know_sc)
+    print("  Building corpus-mean semantic fill …")
+    sem_fill             = build_semantic_fill(sem_m)
     sem_fill = (sem_fill[0], float(mlp_sc_ref.mean_[3]))
     print(f"  Semantic fill: p_s={sem_fill[0]:.4f}  σ_s={sem_fill[1]:.2e}")
     print(f"  Policy (TPE): τ={policy['tau']:.4f}  κ={policy['kappa']:.4f}  "
           f"τ_h={policy['tau_high']:.4f}  κ_l={policy['kappa_low']:.4f}")
 
-    out = {"E1_main":{}, "E2_calibration":{},
-           "E3_ctgan_ablation":{}, "E4_peer_consultation":{},
-           "E5_policy_comparison":{}, "E6_latency":{}}
+    splits = ["random_stratified","family_holdout","hardware_holdout","temporal_holdout"]
 
-    # ── Build random_stratified 6-D training/test score spaces ───────────
-    print("\nBuilding 6-D score spaces (random_stratified) …")
-    beh_m_rs, beh_sc_rs = load_behavioral("random_stratified")
+    # ── Preload behavioural models for all splits ─────────────────────────
+    print("\nPre-loading behavioural models …")
+    beh_models = {}
+    for s in splits:
+        beh_models[s] = load_behavioral(s)
+    beh_m_rs, beh_sc_rs = beh_models["random_stratified"]
 
+    # ── Build 6-D MLP training score space (deterministic) ───────────────
+    print("\nBuilding 6-D training score space (random_stratified) …")
     X_beh_tr, y_tr, fam_tr = load_beh_split("random_stratified","train")
-    Xs_tr = beh_sc_rs.transform(X_beh_tr).astype(np.float32)
+    Xs_tr    = beh_sc_rs.transform(X_beh_tr).astype(np.float32)
     p_b_tr, sig_b_tr = mc_infer_batched(beh_m_rs, Xs_tr)
-    Xk_tr = np.stack([know_lookup(f) for f in fam_tr]).astype(np.float32)
+    Xk_tr    = np.stack([know_lookup(f) for f in fam_tr]).astype(np.float32)
     p_k_tr, sig_k_tr = mc_infer_batched(know_m, Xk_tr)
-    n_tr = len(p_b_tr)
-    p_s_tr   = np.full(n_tr, sem_fill[0], dtype=np.float32)
-    sig_s_tr = np.full(n_tr, sem_fill[1], dtype=np.float32)
-    # Apply PC so training features match what score_bk produces at eval time
-    p_s_tr_pc, p_b_tr_pc, p_k_tr_pc = peer_consult(p_s_tr, p_b_tr, p_k_tr,
-                                                     sig_s_tr, sig_b_tr, sig_k_tr)
+    n_tr     = len(p_b_tr)
+    p_s_tr   = np.full(n_tr, sem_fill[0], np.float32)
+    sig_s_tr = np.full(n_tr, sem_fill[1], np.float32)
+    p_s_tr_pc, p_b_tr_pc, p_k_tr_pc = peer_consult(
+        p_s_tr, p_b_tr, p_k_tr, sig_s_tr, sig_b_tr, sig_k_tr)
     X_tr_score = np.stack([p_s_tr_pc, p_b_tr_pc, p_k_tr_pc,
                            sig_s_tr, sig_b_tr, sig_k_tr], axis=1).astype(np.float32)
     y_tr_score = y_tr.astype(np.float32)
 
-    # Build test score space with PC (consistent with score_bk)
-    X_beh_te, y_te_rs, fam_te = load_beh_split("random_stratified","test")
-    Xs_te = beh_sc_rs.transform(X_beh_te).astype(np.float32)
-    p_b_te, sig_b_te = mc_infer_batched(beh_m_rs, Xs_te)
-    Xk_te = np.stack([know_lookup(f) for f in fam_te]).astype(np.float32)
-    p_k_te, sig_k_te = mc_infer_batched(know_m, Xk_te)
-    n_te = len(p_b_te)
-    p_s_te   = np.full(n_te, sem_fill[0], dtype=np.float32)
-    sig_s_te = np.full(n_te, sem_fill[1], dtype=np.float32)
-    p_s_te_pc, p_b_te_pc, p_k_te_pc = peer_consult(p_s_te, p_b_te, p_k_te,
-                                                     sig_s_te, sig_b_te, sig_k_te)
-    X_te_score = np.stack([p_s_te_pc, p_b_te_pc, p_k_te_pc,
-                           sig_s_te, sig_b_te, sig_k_te], axis=1).astype(np.float32)
-    probs_mean_rs = fuse_mean_bk(p_b_te_pc, p_k_te_pc)
-    sig_max_rs    = np.stack([sig_b_te, sig_k_te]).max(0)
-
-    # ── E3: CTGAN Ablation (train first — CTGAN MLP becomes primary) ──────
-    print("\n" + "─"*60)
-    print("E3: CTGAN Ablation — train Decision MLP variants (6-D score space)")
-    print("─"*60)
-    print("  No-aug …")
-    r_none  = train_mlp_variant(X_tr_score, y_tr_score, X_te_score, y_te_rs, "none")
-    print("  SMOTE …")
-    r_smote = train_mlp_variant(X_tr_score, y_tr_score, X_te_score, y_te_rs, "smote")
-    print("  CTGAN (100 epochs on 6-D score space) …")
-    r_ctgan = train_mlp_variant(X_tr_score, y_tr_score, X_te_score, y_te_rs, "ctgan")
-
-    for name, r in [("none",r_none),("smote",r_smote),("ctgan",r_ctgan)]:
-        print(f"  {name:6s}  AUROC={r[0]:.4f}  AUPRC={r[1]:.4f}  ECE={r[2]:.4f}")
-    out["E3_ctgan_ablation"] = {
-        "no_aug": {"auroc":round(r_none[0],4),  "auprc":round(r_none[1],4),  "ece":round(r_none[2],4)},
-        "smote":  {"auroc":round(r_smote[0],4), "auprc":round(r_smote[1],4), "ece":round(r_smote[2],4)},
-        "ctgan":  {"auroc":round(r_ctgan[0],4), "auprc":round(r_ctgan[1],4), "ece":round(r_ctgan[2],4)},
-    }
-
-    # Primary eval MLP = CTGAN-augmented variant (trained on random_stratified)
-    eval_mlp, eval_sc = r_ctgan[3], r_ctgan[4]
-    eval_mlp.eval()
-
-    # ── E1: Main AUROC/AUPRC across 4 splits ─────────────────────────────
-    print("\n" + "─"*60)
-    print("E1: Main AUROC / AUPRC across 4 splits")
-    print("─"*60)
-
-    splits = ["random_stratified","family_holdout","hardware_holdout","temporal_holdout"]
+    # ── Precompute test-set score matrices for all 4 splits (deterministic) ─
+    print("\nPrecomputing test-set score matrices …")
+    split_data = {}
     for split in splits:
-        beh_m_s, beh_sc_s = (beh_m_rs, beh_sc_rs) if split == "random_stratified" \
-                             else load_behavioral(split)
-        res = score_bk(split, beh_m_s, beh_sc_s, know_m, know_sc, know_lookup,
-                       eval_mlp, eval_sc, 1.0, sem_fill, use_pc=True)
-        y = res["y"]
-        auroc_b    = roc_auc_score(y, res["p_b"])
-        auprc_b    = average_precision_score(y, res["p_b"])
-        auroc_mean = roc_auc_score(y, res["probs_mean"])
-        auprc_mean = average_precision_score(y, res["probs_mean"])
-        auroc_mlp  = roc_auc_score(y, res["probs_mlp"])
-        auprc_mlp  = average_precision_score(y, res["probs_mlp"])
-        print(f"\n  [{split}]  n={len(y)}  ransom={y.sum()}")
-        print(f"    [B]             AUROC={auroc_b:.4f}  AUPRC={auprc_b:.4f}")
-        print(f"    [B+K] mean      AUROC={auroc_mean:.4f}  AUPRC={auprc_mean:.4f}")
-        print(f"    [B+K] DecisionMLP  AUROC={auroc_mlp:.4f}  AUPRC={auprc_mlp:.4f}")
-        out["E1_main"][split] = {
-            "n_test": int(len(y)), "n_ransom": int(y.sum()),
-            "B":       {"auroc": round(auroc_b,4),    "auprc": round(auprc_b,4)},
-            "BK_mean": {"auroc": round(auroc_mean,4), "auprc": round(auprc_mean,4)},
-            "BK_mlp":  {"auroc": round(auroc_mlp,4),  "auprc": round(auprc_mlp,4)},
+        beh_m_s, beh_sc_s = beh_models[split]
+        X_beh_s, y_s, fam_s = load_beh_split(split, "test")
+        Xs_s     = beh_sc_s.transform(X_beh_s).astype(np.float32)
+        p_b_s, sig_b_s = mc_infer_batched(beh_m_s, Xs_s)
+        Xk_s     = np.stack([know_lookup(f) for f in fam_s]).astype(np.float32)
+        p_k_s, sig_k_s = mc_infer_batched(know_m, Xk_s)
+        n_s      = len(p_b_s)
+        p_s_s    = np.full(n_s, sem_fill[0], np.float32)
+        sig_s_s  = np.full(n_s, sem_fill[1], np.float32)
+        # With-PC features (used for BK_mlp E1 and E4 pc-on)
+        p_s_pc, p_b_pc, p_k_pc = peer_consult(
+            p_s_s.copy(), p_b_s.copy(), p_k_s.copy(),
+            sig_s_s.copy(), sig_b_s.copy(), sig_k_s.copy())
+        X_te_pc  = np.stack([p_s_pc, p_b_pc, p_k_pc,
+                              sig_s_s, sig_b_s, sig_k_s], axis=1).astype(np.float32)
+        # Without-PC features (used for E4 pc-off baseline)
+        X_te_npc = np.stack([p_s_s, p_b_s, p_k_s,
+                              sig_s_s, sig_b_s, sig_k_s], axis=1).astype(np.float32)
+        pm_s     = fuse_mean_bk(p_b_pc, p_k_pc)
+        smax_s   = np.stack([sig_b_s, sig_k_s]).max(0)
+
+        auroc_b    = round(roc_auc_score(y_s, p_b_s), 4)
+        auprc_b    = round(average_precision_score(y_s, p_b_s), 4)
+        auroc_mean = round(roc_auc_score(y_s, pm_s), 4)
+        auprc_mean = round(average_precision_score(y_s, pm_s), 4)
+        print(f"  [{split}]  n={len(y_s)}  ransom={int(y_s.sum())}  "
+              f"B AUROC={auroc_b:.4f}  BK_mean AUROC={auroc_mean:.4f}")
+        split_data[split] = {
+            "y": y_s, "fam": fam_s, "p_b": p_b_s,
+            "n_test":   int(len(y_s)),
+            "n_ransom": int(y_s.sum()),
+            "B":       {"auroc": auroc_b,    "auprc": auprc_b},
+            "BK_mean": {"auroc": auroc_mean, "auprc": auprc_mean},
+            "X_te_pc":  X_te_pc,
+            "X_te_npc": X_te_npc,
+            "sig_max":  smax_s,
         }
 
-    # ── E2: Calibration ECE ───────────────────────────────────────────────
-    print("\n" + "─"*60)
-    print("E2: Calibration ECE  (random_stratified)")
-    print("─"*60)
+    # Aliases for the primary split used in E2/E3/E5
+    y_te_rs    = split_data["random_stratified"]["y"]
+    X_te_score = split_data["random_stratified"]["X_te_pc"]
+    sig_max_rs = split_data["random_stratified"]["sig_max"]
+    p_b_te     = split_data["random_stratified"]["p_b"]
+    # probs_mean = mean of PC-adjusted p_b, p_k (columns 1,2 of X_te_pc)
+    probs_mean_rs = fuse_mean_bk(X_te_score[:, 1], X_te_score[:, 2])
 
-    # SABRE+ temperature T=0.702 applied to mean fusion
-    T_sp = 0.702
+    # ── E2 deterministic parts ────────────────────────────────────────────
+    T_sp  = 0.702
     eps_c = 1e-6
-    logits_m = np.log(np.clip(probs_mean_rs,eps_c,1-eps_c)) - \
-               np.log(np.clip(1-probs_mean_rs,eps_c,1-eps_c))
-    pm_ts = 1 / (1 + np.exp(-logits_m / T_sp))
+    logits_m  = (np.log(np.clip(probs_mean_rs, eps_c, 1-eps_c)) -
+                 np.log(np.clip(1-probs_mean_rs, eps_c, 1-eps_c)))
+    pm_ts         = 1 / (1 + np.exp(-logits_m / T_sp))
+    ece_b         = round(ece(y_te_rs, p_b_te), 4)
+    ece_mean_pre  = round(ece(y_te_rs, probs_mean_rs), 4)
+    ece_mean_post = round(ece(y_te_rs, pm_ts), 4)
 
-    # SABRE-II Decision MLP (CTGAN, T=1.0)
-    X_te_sc2 = eval_sc.transform(X_te_score).astype(np.float32)
-    with torch.no_grad():
-        probs_mlp_rs = eval_mlp(torch.tensor(X_te_sc2).to(DEVICE)).cpu().numpy()
-
-    ece_b         = ece(y_te_rs, p_b_te)
-    ece_mean_pre  = ece(y_te_rs, probs_mean_rs)
-    ece_mean_post = ece(y_te_rs, pm_ts)
-    ece_mlp       = ece(y_te_rs, probs_mlp_rs)
-    print(f"  [B]              ECE = {ece_b:.4f}")
-    print(f"  [B+K] mean  pre-T = {ece_mean_pre:.4f}  post-T({T_sp}) = {ece_mean_post:.4f}")
-    print(f"  [B+K] DecisionMLP ECE = {ece_mlp:.4f}")
-    out["E2_calibration"] = {
-        "B_ece": round(ece_b,4),
-        "BK_mean_pre": round(ece_mean_pre,4), "BK_mean_post": round(ece_mean_post,4), "T_sp": T_sp,
-        "BK_mlp_ece":  round(ece_mlp,4),
-    }
-
-    # ── E4: Peer Consultation — family holdout ────────────────────────────
-    print("\n" + "─"*60)
-    print("E4: Peer Consultation — family holdout per-family detection rate")
-    print("─"*60)
-
-    beh_m_fh, beh_sc_fh = load_behavioral("family_holdout")
-    res_pc_off = score_bk("family_holdout", beh_m_fh, beh_sc_fh, know_m, know_sc,
-                           know_lookup, eval_mlp, eval_sc, 1.0, sem_fill, use_pc=False)
-    res_pc_on  = score_bk("family_holdout", beh_m_fh, beh_sc_fh, know_m, know_sc,
-                           know_lookup, eval_mlp, eval_sc, 1.0, sem_fill, use_pc=True)
-    y_fh  = res_pc_on["y"]
-    fam_fh= res_pc_on["fam"]
-    pc4   = {}
-
-    auroc_npc = roc_auc_score(y_fh, res_pc_off["probs_mlp"])
-    auroc_pc  = roc_auc_score(y_fh, res_pc_on["probs_mlp"])
-    print(f"  Overall AUROC  no-PC={auroc_npc:.4f}  with-PC={auroc_pc:.4f}")
-
+    # ── E4 deterministic B_dr per family ─────────────────────────────────
+    fam_fh  = split_data["family_holdout"]["fam"]
+    y_fh    = split_data["family_holdout"]["y"]
+    p_b_fh  = split_data["family_holdout"]["p_b"]
+    det_b_dr_fh = {}
     for f in sorted(set(fam_fh)):
         mask = (fam_fh == f)
         yf   = y_fh[mask]
         if yf.sum() == 0: continue
         ran  = yf == 1
-        dr_b   = float((res_pc_on["p_b"][mask][ran] >= 0.5).mean())
-        dr_npc = float((res_pc_off["probs_mlp"][mask][ran] >= 0.5).mean())
-        dr_pc  = float((res_pc_on["probs_mlp"][mask][ran] >= 0.5).mean())
-        print(f"  {f:25s}  [B]={dr_b:.3f}  MLP_noPC={dr_npc:.3f}  MLP+PC={dr_pc:.3f}")
-        pc4[f] = {"n":int(mask.sum()), "ransom":int(ran.sum()),
-                  "B_dr":round(dr_b,4), "mlp_nopc":round(dr_npc,4), "mlp_pc":round(dr_pc,4)}
-    out["E4_peer_consultation"] = {
-        "auroc_no_pc": round(auroc_npc,4), "auroc_with_pc": round(auroc_pc,4),
-        "per_family": pc4,
-    }
+        det_b_dr_fh[f] = {
+            "n": int(mask.sum()), "ransom": int(ran.sum()),
+            "B_dr": round(float((p_b_fh[mask][ran] >= 0.5).mean()), 4),
+        }
 
-    # ── E5: Policy Comparison ─────────────────────────────────────────────
-    print("\n" + "─"*60)
-    print("E5: Policy comparison  (random_stratified)")
-    print("─"*60)
-
+    # ── Policies ─────────────────────────────────────────────────────────
     policies = {
         "sabre_plus_fixed": {"tau":0.10,"kappa":0.10,"tau_high":0.95,"kappa_low":0.08},
         "grid_search":      {"tau":0.40,"kappa":0.20,"tau_high":0.85,"kappa_low":0.10},
         "bayesian_tpe":     policy,
     }
-    for pname, pol in policies.items():
-        decs  = apply_triage(probs_mlp_rs, sig_max_rs, pol)
-        preds = np.array([0 if d=="ALLOW" else 1 for d in decs])
-        ba    = balanced_accuracy_score(y_te_rs, preds)
-        esc   = decs.count("ESCALATE") / len(decs)
-        ac    = decs.count("AUTO_CONTAIN") / len(decs)
-        alw   = decs.count("ALLOW") / len(decs)
-        print(f"  {pname:22s}  bal_acc={ba:.4f}  esc={esc:.3f}  ac={ac:.3f}  allow={alw:.3f}")
-        out["E5_policy_comparison"][pname] = {
-            "balanced_accuracy": round(ba,4), "escalation_rate": round(esc,4),
-            "ac_rate": round(ac,4), "allow_rate": round(alw,4),
+
+    # ── Seed loop ─────────────────────────────────────────────────────────
+    seed_results = []
+    final_mlp_pair = None  # (eval_mlp, eval_sc) from last seed — used for E6
+
+    for seed in range(K_SEEDS):
+        print(f"\n{'='*60}")
+        print(f"Seed {seed+1}/{K_SEEDS}  (seed={seed})")
+        print(f"{'='*60}")
+
+        # E3: CTGAN Ablation — train 3 MLP variants
+        print("  E3: training MLP variants …")
+        r_none  = train_mlp_variant(X_tr_score, y_tr_score, X_te_score, y_te_rs, "none",  seed)
+        r_smote = train_mlp_variant(X_tr_score, y_tr_score, X_te_score, y_te_rs, "smote", seed)
+        r_ctgan = train_mlp_variant(X_tr_score, y_tr_score, X_te_score, y_te_rs, "ctgan", seed)
+        print(f"    none  AUROC={r_none[0]:.4f}  AUPRC={r_none[1]:.4f}  ECE={r_none[2]:.4f}")
+        print(f"    smote AUROC={r_smote[0]:.4f}  AUPRC={r_smote[1]:.4f}  ECE={r_smote[2]:.4f}")
+        print(f"    ctgan AUROC={r_ctgan[0]:.4f}  AUPRC={r_ctgan[1]:.4f}  ECE={r_ctgan[2]:.4f}")
+
+        eval_mlp, eval_sc = r_ctgan[3], r_ctgan[4]
+        eval_mlp.eval()
+        final_mlp_pair = (eval_mlp, eval_sc)
+
+        # E1: MLP AUROC/AUPRC for all 4 splits
+        print("  E1: scoring 4 splits …")
+        e1_mlp = {}
+        for split in splits:
+            probs_s = fuse_mlp(eval_mlp, eval_sc, 1.0, split_data[split]["X_te_pc"])
+            y_s     = split_data[split]["y"]
+            e1_mlp[split] = (
+                round(roc_auc_score(y_s, probs_s), 4),
+                round(average_precision_score(y_s, probs_s), 4),
+            )
+            print(f"    [{split}]  AUROC={e1_mlp[split][0]:.4f}  AUPRC={e1_mlp[split][1]:.4f}")
+
+        # E2: ECE for Decision MLP
+        probs_mlp_rs = fuse_mlp(eval_mlp, eval_sc, 1.0, X_te_score)
+        ece_mlp = round(ece(y_te_rs, probs_mlp_rs), 4)
+        print(f"  E2: ECE_mlp={ece_mlp:.4f}")
+
+        # E4: Peer Consultation — family holdout
+        print("  E4: Peer Consultation …")
+        probs_fh_npc = fuse_mlp(eval_mlp, eval_sc, 1.0, split_data["family_holdout"]["X_te_npc"])
+        probs_fh_pc  = fuse_mlp(eval_mlp, eval_sc, 1.0, split_data["family_holdout"]["X_te_pc"])
+        auroc_npc = round(roc_auc_score(y_fh, probs_fh_npc), 4)
+        auroc_pc  = round(roc_auc_score(y_fh, probs_fh_pc),  4)
+        e4_fam = {}
+        for f, dets in det_b_dr_fh.items():
+            mask = (fam_fh == f)
+            ran  = y_fh[mask] == 1
+            e4_fam[f] = (
+                round(float((probs_fh_npc[mask][ran] >= 0.5).mean()), 4),
+                round(float((probs_fh_pc[mask][ran]  >= 0.5).mean()), 4),
+            )
+        print(f"    AUROC no-PC={auroc_npc:.4f}  with-PC={auroc_pc:.4f}")
+
+        # E5: Policy Comparison
+        print("  E5: Policy Comparison …")
+        e5 = {}
+        for pname, pol in policies.items():
+            decs  = apply_triage(probs_mlp_rs, sig_max_rs, pol)
+            preds = np.array([0 if d=="ALLOW" else 1 for d in decs])
+            ba    = round(balanced_accuracy_score(y_te_rs, preds), 4)
+            esc   = round(decs.count("ESCALATE")     / len(decs), 4)
+            ac    = round(decs.count("AUTO_CONTAIN")  / len(decs), 4)
+            alw   = round(decs.count("ALLOW")         / len(decs), 4)
+            e5[pname] = (ba, esc, ac, alw)
+            print(f"    {pname:22s}  bal_acc={ba:.4f}  esc={esc:.3f}  ac={ac:.3f}  allow={alw:.3f}")
+
+        seed_results.append({
+            "e3": {
+                "no_aug": (r_none[0],  r_none[1],  r_none[2]),
+                "smote":  (r_smote[0], r_smote[1], r_smote[2]),
+                "ctgan":  (r_ctgan[0], r_ctgan[1], r_ctgan[2]),
+            },
+            "e1_mlp":    e1_mlp,
+            "e2_mlp_ece": ece_mlp,
+            "e4": {"auroc_npc": auroc_npc, "auroc_pc": auroc_pc, "fam": e4_fam},
+            "e5": e5,
+        })
+
+    # ── Aggregate across seeds with 95% t-CI ──────────────────────────────
+    print(f"\n{'='*70}")
+    print(f"Aggregating {K_SEEDS} seeds …")
+
+    def ci95(vals):
+        a  = np.array(vals, dtype=float)
+        n  = len(a)
+        m  = float(a.mean())
+        se = float(a.std(ddof=1)) / np.sqrt(n)
+        lo, hi = scipy_t.interval(0.95, df=n-1, loc=m, scale=se)
+        return {"mean": round(m,4), "ci95_lo": round(float(lo),4), "ci95_hi": round(float(hi),4)}
+
+    out = {
+        "K_seeds": K_SEEDS, "seeds": list(range(K_SEEDS)),
+        "E1_main":{}, "E2_calibration":{}, "E3_ctgan_ablation":{},
+        "E4_peer_consultation":{}, "E5_policy_comparison":{}, "E6_latency":{},
+    }
+
+    # E1
+    for split in splits:
+        out["E1_main"][split] = {
+            **{k: split_data[split][k] for k in ("n_test","n_ransom","B","BK_mean")},
+            "BK_mlp": {
+                "auroc": ci95([sr["e1_mlp"][split][0] for sr in seed_results]),
+                "auprc": ci95([sr["e1_mlp"][split][1] for sr in seed_results]),
+            },
         }
 
-    # ── E6: Latency ───────────────────────────────────────────────────────
+    # E2
+    out["E2_calibration"] = {
+        "B_ece":        ece_b,
+        "BK_mean_pre":  ece_mean_pre,
+        "BK_mean_post": ece_mean_post,
+        "T_sp":         T_sp,
+        "BK_mlp_ece":   ci95([sr["e2_mlp_ece"] for sr in seed_results]),
+    }
+
+    # E3
+    for aug_key in ["no_aug","smote","ctgan"]:
+        out["E3_ctgan_ablation"][aug_key] = {
+            "auroc": ci95([sr["e3"][aug_key][0] for sr in seed_results]),
+            "auprc": ci95([sr["e3"][aug_key][1] for sr in seed_results]),
+            "ece":   ci95([sr["e3"][aug_key][2] for sr in seed_results]),
+        }
+
+    # E4
+    out["E4_peer_consultation"] = {
+        "auroc_no_pc":   ci95([sr["e4"]["auroc_npc"] for sr in seed_results]),
+        "auroc_with_pc": ci95([sr["e4"]["auroc_pc"]  for sr in seed_results]),
+        "per_family": {
+            f: {
+                **dets,
+                "mlp_nopc": ci95([sr["e4"]["fam"][f][0] for sr in seed_results]),
+                "mlp_pc":   ci95([sr["e4"]["fam"][f][1] for sr in seed_results]),
+            }
+            for f, dets in det_b_dr_fh.items()
+        },
+    }
+
+    # E5
+    for pname in policies:
+        out["E5_policy_comparison"][pname] = {
+            "balanced_accuracy": ci95([sr["e5"][pname][0] for sr in seed_results]),
+            "escalation_rate":   ci95([sr["e5"][pname][1] for sr in seed_results]),
+            "ac_rate":           ci95([sr["e5"][pname][2] for sr in seed_results]),
+            "allow_rate":        ci95([sr["e5"][pname][3] for sr in seed_results]),
+        }
+
+    # ── E6: Latency (single-run with final seed's MLP) ────────────────────
     print("\n" + "─"*60)
     print("E6: Latency measurement  (batch=32, 500 reps)")
     print("─"*60)
-
+    eval_mlp, eval_sc = final_mlp_pair
     X_lat, _, fam_lat = load_beh_split("random_stratified","test")
-    Xs_lat  = beh_sc_rs.transform(X_lat[:256]).astype(np.float32)
-    Xk_lat  = np.stack([know_lookup(f) for f in fam_lat[:256]]).astype(np.float32)
-    n_lat   = 32
-    ps_lat  = np.full(n_lat, sem_fill[0], dtype=np.float32)
-    sigs_lat = np.full(n_lat, sem_fill[1], dtype=np.float32)
+    Xs_lat   = beh_sc_rs.transform(X_lat[:256]).astype(np.float32)
+    Xk_lat   = np.stack([know_lookup(f) for f in fam_lat[:256]]).astype(np.float32)
+    n_lat    = 32
+    ps_lat   = np.full(n_lat, sem_fill[0], np.float32)
+    sigs_lat = np.full(n_lat, sem_fill[1], np.float32)
 
     for _ in range(30):
         mc_infer(beh_m_rs, Xs_lat[:32]); mc_infer(know_m, Xk_lat[:32])
@@ -637,10 +715,11 @@ def main():
     print(f"  SABRE-II MLP+PC    :  {t_mlp:.3f} ms/batch-32")
     print(f"  Overhead           : +{t_mlp-t_mean:.3f} ms  ({(t_mlp-t_mean)/t_mean*100:.1f}%)")
     out["E6_latency"] = {
-        "batch_size":32, "n_reps":N_reps,
-        "sabre_plus_ms": round(t_mean,3), "sabre2_ms": round(t_mlp,3),
-        "overhead_ms": round(t_mlp-t_mean,3),
-        "overhead_pct": round((t_mlp-t_mean)/t_mean*100,1),
+        "batch_size": 32, "n_reps": N_reps,
+        "sabre_plus_ms": round(t_mean, 3),
+        "sabre2_ms":     round(t_mlp, 3),
+        "overhead_ms":   round(t_mlp-t_mean, 3),
+        "overhead_pct":  round((t_mlp-t_mean)/t_mean*100, 1),
     }
 
     # ── Save ──────────────────────────────────────────────────────────────
