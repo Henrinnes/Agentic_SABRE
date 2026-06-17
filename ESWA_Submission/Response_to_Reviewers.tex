@@ -706,26 +706,25 @@ imbalance and coverage limitations.
 \RC{Include validation on unseen ransomware families or temporally separated datasets
 to demonstrate real-world generalisation capability.}
 
-\RS{We acknowledge this as a substantive limitation and have addressed it directly in
-the revised manuscript. We have added a new paragraph titled \textbf{``Family-holdout
-generalisation analysis''} in Section~IX (Results), immediately after the existing
-``Generalisation caveats for AUC$=1.0$'' paragraph. This paragraph explains that
-the within-dataset family coverage of RanSMAP (24 ransomware families) provides
-partial evidence of cross-family robustness: behavioural agent performance is
-observably lower on minority families (those contributing fewer than 50 execution
-traces), and the uncertainty mechanism responds correctly by routing these samples to
-ESCALATE rather than AUTO-CONTAIN---demonstrating graceful degradation to human
-oversight when the system encounters underrepresented distributions. We explicitly
-acknowledge that a full held-out family experiment with disjoint training runs, or
-a temporally partitioned evaluation corpus, is required to make stronger generalisation
-claims, and identify this as a priority direction for future work. The existing
-``Generalisation caveats'' paragraph already noted that generalisation to unseen
-families or temporally displaced deployments requires family-wise or temporal splits,
-which we leave for future work with appropriately partitioned corpora.}
+\RS{We have conducted multi-seed generalisation experiments across four complementary
+evaluation splits of RanSMAP using 6 independent random seeds. The results are reported
+in the multi-seed generalisation table and the corresponding AUROC figure in the
+revised manuscript (Section~IX, new subsection ``Generalisation Across Evaluation
+Splits''). Temporal holdout (AUROC $0.960 \pm 0.005$) and hardware holdout
+(AUROC $0.939 \pm 0.005$) match random-stratified performance ($0.961 \pm 0.003$),
+confirming that Agentic~SABRE does not overfit to specific recording sessions or
+hardware configurations. Family holdout reveals a meaningful generalisation gap
+(AUROC $0.707 \pm 0.010$), which we acknowledge honestly: when training families are
+absent from the test set, the model must rely on general distributional signals rather
+than family-specific telemetry patterns. Crucially, the uncertainty mechanism responds
+correctly to this degraded regime---samples from unseen families exhibit elevated
+$\sigma_{\mathrm{beh}}$ and are routed to \textsc{ESCALATE} rather than
+\textsc{AUTO-CONTAIN}, maintaining analyst oversight precisely where the model is
+least reliable.}
 
-\CH{New \textbf{``Family-holdout generalisation analysis''} paragraph added in
-Section~IX (Results), immediately after the ``Generalisation caveats for
-AUC$=1.0$'' paragraph.}
+\CH{New subsection ``Generalisation Across Evaluation Splits'' added in Section~IX
+(Results) with a multi-seed results table (four evaluation splits) and an AUROC
+distribution figure (6 seeds).}
 
 %----
 \subsection*{R2.2 --- Adaptive thresholding for dynamic deployment environments}
@@ -757,29 +756,27 @@ mechanism.}
 \RC{Adversarial attack experiments (FGSM or PGD) in addition to theoretical
 perturbation analysis, or stronger justification.}
 
-\RS{We agree that standard gradient-based adversarial attack experiments would
-further strengthen robustness claims. However, we have added a new paragraph to
-Section~XIII (Limitations and Future Work) that provides a detailed structural
-justification for why FGSM and PGD face domain-specific obstacles that are not
-merely a matter of engineering effort. Specifically: (1)~applying FGSM to the
-behavioural agent requires differentiating through the I/O simulator used to generate
-execution telemetry, which is a non-differentiable black-box process; (2)~applying
-PGD to the semantic agent requires perturbations that preserve PE loader validity
-(Magic bytes, SizeOfCode field consistency, and section alignment), restricting the
-feasible perturbation set to a strict subset of the continuous neighbourhood
-$\mathcal{N}_\epsilon(\mathbf{z})$. These constraints mean that a naive
-continuous-space FGSM or PGD attack would produce perturbations that do not
-correspond to executable malware, rendering the experiment misleading. The
-continuous-relaxation counterfactual analysis in Section~X therefore constitutes a
-principled lower bound on adversarial cost: the true adversarial cost under executable
-constraints is at least as large. We identify the implementation of constrained
-FGSM/PGD attacks that respect these discrete validity constraints as an important
-future direction. This argument extends and strengthens the first-round response on
-the same point (Reviewer~\#4, Point~5).}
+\RS{We have implemented three operationally realistic behavioural evasion attacks on
+RanSMAP and report results in the adversarial robustness table and the corresponding per-family figure
+in the revised manuscript (new subsection ``Adversarial Robustness Under Behavioural
+Evasion'', inserted before Section~X). As noted, standard gradient-based attacks (FGSM,
+PGD) require differentiating through the I/O simulator, which is non-differentiable.
+Instead we evaluate: (i)~\textbf{slow-encrypt} (reduces read LBA variance and memory
+access counts; MITRE ATT\&CK T1486), (ii)~\textbf{memory-mask} (suppresses memory
+entropy and GPA variance statistics), and (iii)~\textbf{full-blend} (combines both),
+each at 10 intensity levels $\alpha \in [0, 1]$. At maximum intensity ($\alpha=1.0$),
+slow-encrypt reduces detection from $0.879$ to $0.817$ (a $7.1\%$ drop) and
+memory-mask reduces it to $0.847$. The escalation rate rises correspondingly (from
+$0.088$ to $0.102$ under full slow-encrypt), confirming that the triage mechanism
+routes adversarially-perturbed samples to human analysts rather than autonomous
+containment. Per-family results show WannaCry is most vulnerable (det$=0.809$ at
+$\alpha=0.5$), consistent with its elevated baseline uncertainty
+($\sigma_{\mathrm{beh}}=0.091$), while Ryuk and Conti remain above $0.950$.}
 
-\CH{New paragraph on structural obstacles to FGSM/PGD and their principled
-lower-bound justification added at the end of Section~XIII (Limitations and
-Future Work).}
+\CH{New subsection ``Adversarial Robustness Under Behavioural Evasion'' added before
+Section~X (Explainability), with an adversarial robustness table (detection/escalation
+rates across attack types and intensities) and a per-family detection figure
+(slow-encrypt $\alpha=0.5$).}
 
 %----
 \subsection*{R2.4 --- New citation in Section 3.1}
@@ -804,23 +801,20 @@ accompanying sentence. Bibliographic entry added to \texttt{Reference\_Sabre.bib
 \RC{A small comparative runtime or resource-consumption evaluation against existing
 ransomware detection approaches.}
 
-\RS{We have added a new paragraph titled \textbf{``Comparative runtime against
-baseline approaches''} in Section~XII (Discussion), immediately before the closing
-summary paragraph of the Computational Complexity subsection. The paragraph includes
-the runtime complexity comparison table (``Approximate training and inference complexity
-of representative ransomware detection approaches''), which compares five approaches:
-signature-based antivirus ($\mathcal{O}(1)$ training, $\mathcal{O}(d)$ inference),
-random forest on API counts ($\mathcal{O}(N \cdot d \cdot \log N)$ training), a
-single deterministic CNN, the SABRE Semantic Agent with MC Dropout
-($\approx$150\,ms CPU per sample), and the full SABRE pipeline with two agents and
-fusion ($\approx$0.3--0.7\,s CPU per sample). The prose explains that the only
-structural cost over a single CNN is the factor-$T$ inference overhead from MC
-Dropout, and that the triage policy mitigates effective analyst load by resolving
-clear-cut cases autonomously.}
+\RS{We have replaced the theoretical Big-O complexity table with empirically measured
+inference latency on an NVIDIA GB10 GPU (500 repetitions, 50 warm-up), reported in
+the runtime comparison table in the revised manuscript (Section~XII,
+``Measured runtime performance''). Key results: the Behavioral CNN requires
+$1.94$\,ms (p50) for $T=10$ MC Dropout passes; the Semantic CNN requires $1.77$\,ms;
+and the full pipeline is estimated at $\approx 3.7$\,ms ($\approx 270$ samples/s).
+The MC Dropout overhead is $3.7\times$ relative to a single deterministic forward
+pass ($0.52$\,ms). The Behavioral CNN has only 8,385 parameters (32.8\,KB), making
+it suitable for endpoint deployment. At a 10-second telemetry window, the pipeline
+supports over 2,000 concurrent monitored streams before becoming the bottleneck.}
 
-\CH{New \textbf{``Comparative runtime against baseline approaches''} paragraph and
-the runtime complexity comparison table added in Section~XII (Discussion), immediately
-before the closing summary paragraph of the Computational Complexity subsection.}
+\CH{Theoretical Big-O runtime table replaced with empirically measured latency table
+(the runtime comparison table) in Section~XII (Discussion). Paragraph
+retitled ``Measured runtime performance'' with GPU benchmark results on NVIDIA GB10.}
 
 \bigskip
 \hrule
