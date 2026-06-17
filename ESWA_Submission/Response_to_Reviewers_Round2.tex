@@ -1,0 +1,303 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{mdframed}
+
+% Colour scheme
+\definecolor{reviewerblue}{RGB}{0,70,127}
+\definecolor{responsegreen}{RGB}{0,100,50}
+\definecolor{changebrown}{RGB}{139,69,19}
+\definecolor{lightgray}{RGB}{245,245,245}
+
+% Reviewer comment box
+\newmdenv[
+  backgroundcolor=lightgray,
+  linecolor=reviewerblue,
+  linewidth=1pt,
+  leftmargin=0pt,
+  rightmargin=0pt,
+  innerleftmargin=10pt,
+  innerrightmargin=10pt,
+  innertopmargin=6pt,
+  innerbottommargin=6pt,
+  skipabove=8pt,
+  skipbelow=4pt
+]{reviewbox}
+
+% Section formatting
+\titleformat{\section}{\large\bfseries\color{reviewerblue}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{reviewerblue}}{}{0em}{}
+
+% Macros
+\newcommand{\RC}[1]{\begin{reviewbox}\textit{\textbf{Reviewer Comment:} #1}\end{reviewbox}}
+\newcommand{\RS}[1]{\noindent\textcolor{responsegreen}{\textbf{Response:}} #1\par\medskip}
+\newcommand{\CH}[1]{\noindent\textcolor{changebrown}{\textbf{Change in manuscript:}} #1\par\bigskip}
+
+\begin{document}
+
+% -----------------------------------------------------------------------
+%  HEADER
+% -----------------------------------------------------------------------
+\begin{center}
+  {\LARGE\bfseries Second Revision --- Response to Reviewers}\\[1em]
+  {\large Manuscript: \textit{Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic
+  Multi-Agent Framework for Adaptive Ransomware Detection}}\\[0.5em]
+  {\normalsize Expert Systems With Applications --- Second Revision}\\[0.5em]
+  {\normalsize \today}
+\end{center}
+
+\hrule
+\bigskip
+
+We thank the reviewers for their continued engagement with the manuscript. The
+second-round comments have prompted four substantive additions to the paper: a
+family-holdout generalisation analysis in the Results section, an adaptive
+thresholding discussion in the Limitations section, a structural explanation of
+the obstacles to standard adversarial attack experiments, and a new comparative
+runtime table in the Discussion. All new text is highlighted in \textbf{bold blue}
+in the revised manuscript. We also clarify below the architectural distinction
+between Agentic SABRE and existing neuro-symbolic frameworks, and the dataset
+imbalance and coverage limitations.
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  REVIEWER 2 (SECOND ROUND)
+% -----------------------------------------------------------------------
+\section{Reviewer \#2 --- Second Round}
+
+\subsection*{R2.1 --- Validation on unseen ransomware families or temporally separated datasets}
+
+\RC{Include validation on unseen ransomware families or temporally separated datasets
+to demonstrate real-world generalisation capability.}
+
+\RS{We have conducted multi-seed generalisation experiments across four complementary
+evaluation splits of RanSMAP using 6 independent random seeds. The results are reported
+in the multi-seed generalisation table and the corresponding AUROC figure in the
+revised manuscript (Section~IX, new subsection ``Generalisation Across Evaluation
+Splits''). Temporal holdout (AUROC $0.960 \pm 0.005$) and hardware holdout
+(AUROC $0.939 \pm 0.005$) match random-stratified performance ($0.961 \pm 0.003$),
+confirming that Agentic~SABRE does not overfit to specific recording sessions or
+hardware configurations. Family holdout reveals a meaningful generalisation gap
+(AUROC $0.707 \pm 0.010$), which we acknowledge honestly: when training families are
+absent from the test set, the model must rely on general distributional signals rather
+than family-specific telemetry patterns. Crucially, the uncertainty mechanism responds
+correctly to this degraded regime---samples from unseen families exhibit elevated
+$\sigma_{\mathrm{beh}}$ and are routed to \textsc{ESCALATE} rather than
+\textsc{AUTO-CONTAIN}, maintaining analyst oversight precisely where the model is
+least reliable.}
+
+\CH{New subsection ``Generalisation Across Evaluation Splits'' added in Section~IX
+(Results) with a multi-seed results table (four evaluation splits) and an AUROC
+distribution figure (6 seeds).}
+
+%----
+\subsection*{R2.2 --- Adaptive thresholding for dynamic deployment environments}
+
+\RC{Add a brief adaptive thresholding discussion for dynamic deployment environments.}
+
+\RS{We have added a new paragraph to Section~XIII (Limitations and Future Work)
+addressing this point directly. The paragraph explains that the four triage
+thresholds ($\tau$, $\kappa$, $\tau_{\text{high}}$, $\kappa_{\text{low}}$) are
+currently optimised offline and are not updated during deployment, creating the risk
+of miscalibration under concept drift or family emergence. We propose two concrete
+adaptive extensions: (1)~a sliding-window recalibration procedure that
+re-optimises the objective $J(\tau,\kappa)$ in Eq.~(12) on a rolling buffer of
+analyst-labelled triage decisions; and (2)~a Bayesian online update that maintains
+a posterior over $(\tau,\kappa)$ conditioned on observed outcomes. Both extensions
+are compatible with the modular structure of Agentic~SABRE---the triage policy is
+already separated from the neural agents, so threshold recalibration does not require
+any model retraining. We note that the existing Limitations section already
+identified the modular structure as enabling ``policy-level updates without
+retraining''; the new paragraph substantiates this claim with a concrete adaptive
+mechanism.}
+
+\CH{New paragraph on adaptive thresholding added at the end of Section~XIII
+(Limitations and Future Work).}
+
+%----
+\subsection*{R2.3 --- Adversarial attack experiments (FGSM or PGD) or stronger justification}
+
+\RC{Adversarial attack experiments (FGSM or PGD) in addition to theoretical
+perturbation analysis, or stronger justification.}
+
+\RS{We have implemented three operationally realistic behavioural evasion attacks on
+RanSMAP and report results in the adversarial robustness table and the corresponding per-family figure
+in the revised manuscript (new subsection ``Adversarial Robustness Under Behavioural
+Evasion'', inserted before Section~X). As noted, standard gradient-based attacks (FGSM,
+PGD) require differentiating through the I/O simulator, which is non-differentiable.
+Instead we evaluate: (i)~\textbf{slow-encrypt} (reduces read LBA variance and memory
+access counts; MITRE ATT\&CK T1486), (ii)~\textbf{memory-mask} (suppresses memory
+entropy and GPA variance statistics), and (iii)~\textbf{full-blend} (combines both),
+each at 10 intensity levels $\alpha \in [0, 1]$. At maximum intensity ($\alpha=1.0$),
+slow-encrypt reduces detection from $0.879$ to $0.817$ (a $7.1\%$ drop) and
+memory-mask reduces it to $0.847$. The escalation rate rises correspondingly (from
+$0.088$ to $0.102$ under full slow-encrypt), confirming that the triage mechanism
+routes adversarially-perturbed samples to human analysts rather than autonomous
+containment. Per-family results show WannaCry is most vulnerable (det$=0.809$ at
+$\alpha=0.5$), consistent with its elevated baseline uncertainty
+($\sigma_{\mathrm{beh}}=0.091$), while Ryuk and Conti remain above $0.950$.}
+
+\CH{New subsection ``Adversarial Robustness Under Behavioural Evasion'' added before
+Section~X (Explainability), with an adversarial robustness table (detection/escalation
+rates across attack types and intensities) and a per-family detection figure
+(slow-encrypt $\alpha=0.5$).}
+
+%----
+\subsection*{R2.4 --- New citation in Section 3.1}
+
+\RC{Cite ``Securing Digital Governance: A Deep Learning and Blockchain Framework for
+Malware Detection in IoT Networks'' in Section~3.1 (it focuses on intelligent malware
+detection using deep learning-based cybersecurity architectures).}
+
+\RS{We have added the requested citation (\texttt{alraizza2025iot}) at the end of
+Section~3.1 (Machine Learning for Ransomware Detection). The sentence reads: ``Recent
+work has also explored deep learning and blockchain-based frameworks for malware
+detection in IoT environments~\cite{alraizza2025iot}, underscoring the breadth of
+architectural approaches being applied to adaptive threat analysis and explainable
+malware defence.'' The full bibliographic entry has been added to the reference list.}
+
+\CH{Citation \texttt{alraizza2025iot} added at the end of Section~3.1 with
+accompanying sentence. Bibliographic entry added to \texttt{Reference\_Sabre.bib}.}
+
+%----
+\subsection*{R2.5 --- Comparative runtime or resource-consumption evaluation}
+
+\RC{A small comparative runtime or resource-consumption evaluation against existing
+ransomware detection approaches.}
+
+\RS{We have replaced the theoretical Big-O complexity table with empirically measured
+inference latency on an NVIDIA GB10 GPU (500 repetitions, 50 warm-up), reported in
+the runtime comparison table in the revised manuscript (Section~XII,
+``Measured runtime performance''). Key results: the Behavioral CNN requires
+$1.94$\,ms (p50) for $T=10$ MC Dropout passes; the Semantic CNN requires $1.77$\,ms;
+and the full pipeline is estimated at $\approx 3.7$\,ms ($\approx 270$ samples/s).
+The MC Dropout overhead is $3.7\times$ relative to a single deterministic forward
+pass ($0.52$\,ms). The Behavioral CNN has only 8,385 parameters (32.8\,KB), making
+it suitable for endpoint deployment. At a 10-second telemetry window, the pipeline
+supports over 2,000 concurrent monitored streams before becoming the bottleneck.}
+
+\CH{Theoretical Big-O runtime table replaced with empirically measured latency table
+(the runtime comparison table) in Section~XII (Discussion). Paragraph
+retitled ``Measured runtime performance'' with GPU benchmark results on NVIDIA GB10.}
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  REVIEWER 5 (SECOND ROUND)
+% -----------------------------------------------------------------------
+\section{Reviewer \#5 --- Second Round}
+
+\subsection*{R5.1 --- Architecture differentiation from existing neuro-symbolic frameworks and necessity of multi-agent design}
+
+\RC{The manuscript does not clearly articulate: (a)~how the architecture differs from
+existing neuro-symbolic cybersecurity frameworks, (b)~why the multi-agent design is
+necessary rather than architectural overhead.}
+
+\RS{We have added a new paragraph in Section~3.5 (Multi-Agent and Neuro-Symbolic
+Approaches) addressing both sub-points directly, inserted immediately before the
+existing ``However, these prior systems typically lack\ldots'' paragraph.
+
+\textbf{Differentiation from existing neuro-symbolic systems (R5.1a).}
+Prior neuro-symbolic cybersecurity frameworks---including the knowledge-base
+integration approaches surveyed by Yang et al.~\cite{YangSBK25} and the neural-symbolic
+architectures reviewed by Besold et al.~\cite{Besold2021neurosymbolicsurvey}---embed
+symbolic rules at the architecture or knowledge-base level, structurally coupling the
+neural and symbolic components so that neither can be updated independently. In
+Agentic~SABRE, the symbolic component consists of ATT\&CK-inspired interpretable
+triage thresholds (API call category flags, entropy-threshold signals, filesystem
+access pattern heuristics) that are evaluated as conditions on the fused risk score
+and epistemic uncertainty. These thresholds are encoded as the parameters
+$(\tau, \kappa, \tau_{\text{high}}, \kappa_{\text{low}})$ and can be recalibrated
+without retraining the neural agents whenever threat intelligence or operational
+requirements change. This separation between the learning layer and the symbolic
+reasoning layer is a deliberate architectural choice.
+
+\textbf{Necessity of multi-agent design (R5.1b).}
+The multi-agent design is motivated by complementary modality specialisation, not
+redundancy. The Semantic Agent operates on PE-level embedding vectors
+($\mathbb{R}^{384}$) derived from static file metadata, while the Behavioural Agent
+operates on sliding-window I/O telemetry vectors ($\mathbb{R}^{16}$) from runtime
+memory and storage access. These are structurally heterogeneous input spaces: a
+single monolithic agent would either require a common representation that discards
+modality-specific structure, or would need to be trained on concatenated features
+that conflate semantically incompatible signals. By maintaining separate agents,
+SABRE allows each modality to contribute its own posterior probability
+\emph{and its own epistemic uncertainty}, which are then combined by the
+orchestrator. The uncertainty from the weaker behavioural modality is the primary
+mechanism by which the system escalates ambiguous cases---a function that cannot
+be replicated by a single-agent architecture. The ``What Makes This Different from
+Ensemble-Based Approaches'' subsection in Section~I further elaborates this point
+as addressed in the first-round revision.}
+
+\CH{New differentiating paragraph added in Section~3.5, immediately before the
+existing ``However\ldots'' paragraph. The ``What Makes This Different from
+Ensemble-Based Approaches'' subsection in Section~I remains as added in the
+first revision.}
+
+%----
+\subsection*{R5.2 --- Dataset issues: description, modern threat coverage, imbalance, and contamination}
+
+\RC{Dataset Issues: datasets not sufficiently described; no evidence ransomware
+samples represent modern evolving threats; no discussion of dataset imbalance and
+contamination risks.}
+
+\RS{We have added a new paragraph titled \textbf{``Dataset characteristics,
+imbalance, and contamination''} in Section~VIII-A (Datasets), immediately after
+the existing ``CTGAN labels'' paragraph, addressing all three sub-issues.
+
+\textbf{Dataset description and imbalance.}
+RDset is described with its full sample counts: 138,047 PE samples (41,123
+ransomware, 96,924 benign), with $\approx$30\% ransomware prevalence constituting
+heavy class imbalance. RanSMAP is described with its 11,820 execution traces from
+24 ransomware families and benign workloads across diverse hardware, with imbalance
+addressed via SMOTE at the feature level.
+
+\textbf{Contamination risk.}
+For RDset, training and test splits are disjoint at the binary (file hash) level:
+no sample-level contamination is present, though the absence of a family-wise split
+means structural similarity bias is possible. For RanSMAP, contamination risk is
+low: splits are defined by disjoint session identifiers, ensuring no execution
+session appears in both training and test sets.
+
+\textbf{Modern threat coverage.}
+We explicitly acknowledge that neither dataset includes post-2021 ransomware families
+such as Cl0p, BlackCat/ALPHV, or LockBit 3.0. This is identified as a known
+coverage limitation, and generalisation to modern families is stated as a priority
+direction for future work. This is consistent with the temporal coverage constraints
+noted in the first-round revision (Reviewer~\#2, Point~2) and the ``Generalisation
+caveats'' paragraph in Section~IX.}
+
+\CH{New \textbf{``Dataset characteristics, imbalance, and contamination''} paragraph
+added in Section~VIII-A (Datasets), immediately after the ``CTGAN labels'' paragraph.}
+
+\bigskip
+\hrule
+\bigskip
+
+% -----------------------------------------------------------------------
+%  CLOSING
+% -----------------------------------------------------------------------
+\section*{Closing Remark}
+
+We believe the second revision addresses all remaining reviewer concerns in a precise
+and targeted manner. The additions are surgical: each new paragraph is confined to the
+specific location where the relevant evidence or argument belongs, without disturbing
+the structure of the existing manuscript. We are grateful to the reviewers for the
+rigour of their second-round evaluation and remain available to address any further
+questions the editor or reviewers may have.
+
+\bigskip
+\noindent\textit{The Authors}
+
+\end{document}
