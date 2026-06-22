@@ -1,7 +1,7 @@
 """
 build_crane_presentation.py
 ============================
-Builds an 8-slide CRANE AI-Cyber SIG presentation using the official template.
+Builds a 9-slide CRANE AI-Cyber SIG presentation using the official template.
 
 Title (as submitted):
   SABRE: An Uncertainty-Aware Modular Semantic–Behavioural Triage Framework
@@ -149,11 +149,19 @@ def add_slide_from_template(prs, template_slide_idx=1):
     template = prs.slides[template_slide_idx]
     blank_layout = template.slide_layout
     new_slide = prs.slides.add_slide(blank_layout)
-    # Copy all shapes from template
     for shape in template.shapes:
         el = copy.deepcopy(shape._element)
         new_slide.shapes._spTree.insert(2, el)
     return new_slide
+
+def insert_slide_at(prs, position, template_slide_idx=1):
+    """Clone a template slide and insert it at the given position index."""
+    new_slide = add_slide_from_template(prs, template_slide_idx)
+    xml_slides = prs.slides._sldIdLst
+    elem = xml_slides[-1]
+    xml_slides.remove(elem)
+    xml_slides.insert(position, elem)
+    return prs.slides[position]
 
 def set_title(slide, text, size_pt=28, color=NAVY):
     for shape in slide.shapes:
@@ -231,10 +239,33 @@ def build():
             run.font.color.rgb = BLUE
             run.font.name = FONT_BODY
 
-    # ── Slide 2: The Problem ──────────────────────────────────────────────────
-    s2 = prs.slides[1]
-    set_title(s2, "Ransomware Defence Is a Decision Problem")
+    # ── Slide 2: Agenda ───────────────────────────────────────────────────────
+    s2 = insert_slide_at(prs, 1, template_slide_idx=1)
+    set_title(s2, "Agenda")
     set_content_placeholder(s2, [
+        _bullet_xml("The Problem — why binary detection fails in practice",
+                    size_pt=18, color=NAVY, space_before=4),
+        _bullet_xml("SABRE Architecture — two complementary detection agents",
+                    size_pt=18, color=NAVY, space_before=4),
+        _bullet_xml("Triage Policy — operationalising uncertainty as a control variable",
+                    size_pt=18, color=NAVY, space_before=4),
+        _bullet_xml("Results — where SABRE works and where it struggles",
+                    size_pt=18, color=NAVY, space_before=4),
+        _bullet_xml("Explainability — making decisions auditable",
+                    size_pt=18, color=NAVY, space_before=4),
+        _bullet_xml("SABRE-II — learned fusion and Bayesian policy optimisation",
+                    size_pt=18, color=NAVY, space_before=4),
+        _bullet_xml("Conclusions & Discussion",
+                    size_pt=18, color=NAVY, space_before=4),
+        _para_xml("", size_pt=6),
+        _para_xml("15 min talk · 5 min Q&A", bold=False, size_pt=15,
+                  color=BLUE, align=PP_ALIGN.CENTER),
+    ])
+
+    # ── Slide 3: The Problem ──────────────────────────────────────────────────
+    s3 = prs.slides[2]
+    set_title(s3, "Ransomware Defence Is a Decision Problem")
+    set_content_placeholder(s3, [
         _para_xml("Current detectors give a binary answer — but deployment demands more",
                   bold=True, size_pt=18, color=NAVY),
         _para_xml("", size_pt=8),
@@ -252,14 +283,14 @@ def build():
                   bold=True, size_pt=18, color=ORANGE),
     ])
 
-    # ── Slide 3: Architecture ─────────────────────────────────────────────────
-    s3 = prs.slides[2]
-    set_title(s3, "SABRE: Two Complementary Detection Agents")
+    # ── Slide 4: Architecture ─────────────────────────────────────────────────
+    s4 = prs.slides[3]
+    set_title(s4, "SABRE: Two Complementary Detection Agents")
     # Architecture figure on right
     arch_img = ESWA_FIG / "Prop_Agentic_Sabre_27_04_2026_3Agents_Fullpipeline.png"
-    add_image(s3, arch_img, left=6.4, top=1.3, width=6.6)
+    add_image(s4, arch_img, left=6.4, top=1.3, width=6.6)
     # Text on left
-    add_textbox(s3, 0.6, 1.3, 5.6, 5.8, [
+    add_textbox(s4, 0.6, 1.3, 5.6, 5.8, [
         _bullet_xml("Semantic Agent", bold=True, size_pt=17, color=NAVY, space_before=0),
         _sub_bullet_xml("Input: PE file → section names → sentence transformer (384D)"),
         _sub_bullet_xml("Detects structural packing and obfuscation patterns"),
@@ -277,14 +308,14 @@ def build():
                     bold=True, size_pt=16, color=ORANGE),
     ])
 
-    # ── Slide 4: Triage Policy ────────────────────────────────────────────────
-    s4 = prs.slides[3]
-    set_title(s4, "Operationalising Uncertainty: The Triage Policy")
+    # ── Slide 5: Triage Policy ────────────────────────────────────────────────
+    s5 = prs.slides[4]
+    set_title(s5, "Operationalising Uncertainty: The Triage Policy")
     # Policy space figure on right
     policy_img = ESWA_FIG / "Triage_policy_space.png"
-    add_image(s4, policy_img, left=7.0, top=1.3, width=5.8)
+    add_image(s5, policy_img, left=7.0, top=1.3, width=5.8)
     # Text on left
-    add_textbox(s4, 0.6, 1.3, 6.2, 5.8, [
+    add_textbox(s5, 0.6, 1.3, 6.2, 5.8, [
         _para_xml("Three-way decision (not binary):", bold=True, size_pt=18, color=NAVY),
         _para_xml("", size_pt=6),
         _bullet_xml("AUTO-CONTAIN", bold=True, size_pt=17, color=GREEN),
@@ -305,12 +336,12 @@ def build():
                   bold=True, size_pt=16, color=DARK),
     ])
 
-    # ── Slide 5: Results ──────────────────────────────────────────────────────
-    s5 = prs.slides[4]
-    set_title(s5, "Results: Where SABRE Works and Where It Struggles")
+    # ── Slide 6: Results ──────────────────────────────────────────────────────
+    s6 = prs.slides[5]
+    set_title(s6, "Results: Where SABRE Works and Where It Struggles")
     roc_img = ESWA_FIG / "ROC_all_agents.png"
-    add_image(s5, roc_img, left=6.8, top=1.3, width=6.0)
-    add_textbox(s5, 0.6, 1.3, 6.0, 5.8, [
+    add_image(s6, roc_img, left=6.8, top=1.3, width=6.0)
+    add_textbox(s6, 0.6, 1.3, 6.0, 5.8, [
         _para_xml("Semantic setting (RDset — 138K PE files):", bold=True, size_pt=17, color=NAVY),
         _bullet_xml("Semantic agent: AUROC 0.996 — strong PE separation", size_pt=16),
         _bullet_xml("PE structural features discriminate clearly", size_pt=16),
@@ -332,12 +363,12 @@ def build():
                   bold=True, size_pt=16, color=BLUE),
     ])
 
-    # ── Slide 6: Explainability ───────────────────────────────────────────────
-    s6 = prs.slides[5]
-    set_title(s6, "Explainability: Making Decisions Auditable")
+    # ── Slide 7: Explainability ───────────────────────────────────────────────
+    s7 = prs.slides[6]
+    set_title(s7, "Explainability: Making Decisions Auditable")
     feat_img = ESWA_FIG / "Behaviour_feature_importance.png"
-    add_image(s6, feat_img, left=6.8, top=1.3, width=6.0)
-    add_textbox(s6, 0.6, 1.3, 6.0, 5.8, [
+    add_image(s7, feat_img, left=6.8, top=1.3, width=6.0)
+    add_textbox(s7, 0.6, 1.3, 6.0, 5.8, [
         _para_xml("Behavioural — Permutation Feature Importance:", bold=True, size_pt=17, color=NAVY),
         _bullet_xml("write_entropy_mean: top driver — ransomware encrypts → max entropy",
                     size_pt=16),
@@ -361,14 +392,14 @@ def build():
                     size_pt=16),
     ])
 
-    # ── Slide 7: SABRE-II — What We Built Since ───────────────────────────────
-    s7 = prs.slides[6]
-    set_title(s7, "Since This Abstract: SABRE-II — Learned Fusion & Policy")
+    # ── Slide 8: SABRE-II — What We Built Since ───────────────────────────────
+    s8 = prs.slides[7]
+    set_title(s8, "SABRE-II: Learned Fusion & Bayesian Policy")
 
     # Left box: SABRE (submitted)
-    add_colored_box(s7, left=0.5, top=1.3, width=5.9, height=0.45,
+    add_colored_box(s8, left=0.5, top=1.3, width=5.9, height=0.45,
                     fill_color=BLUE, text="SABRE (this abstract)", size_pt=15)
-    add_textbox(s7, 0.5, 1.8, 5.9, 2.8, [
+    add_textbox(s8, 0.5, 1.8, 5.9, 2.8, [
         _bullet_xml("Mean score fusion (equal weights)", size_pt=15, color=DARK),
         _bullet_xml("Fixed hand-tuned triage thresholds τ, κ", size_pt=15, color=DARK),
         _bullet_xml("2 agents: Semantic + Behavioural", size_pt=15, color=DARK),
@@ -377,9 +408,9 @@ def build():
     ])
 
     # Right box: SABRE-II
-    add_colored_box(s7, left=6.7, top=1.3, width=6.1, height=0.45,
+    add_colored_box(s8, left=6.7, top=1.3, width=6.1, height=0.45,
                     fill_color=NAVY, text="SABRE-II (current work)", size_pt=15)
-    add_textbox(s7, 6.7, 1.8, 6.1, 2.8, [
+    add_textbox(s8, 6.7, 1.8, 6.1, 2.8, [
         _bullet_xml("Decision MLP replaces mean fusion", size_pt=15, color=DARK),
         _sub_bullet_xml("ECE: 0.094 → 0.018  (calibration gain)"),
         _bullet_xml("CTGAN score-space augmentation", size_pt=15, color=DARK),
@@ -391,17 +422,17 @@ def build():
     ])
 
     # Arrow between boxes
-    add_colored_box(s7, left=6.0, top=1.85, width=0.65, height=0.35,
+    add_colored_box(s8, left=6.0, top=1.85, width=0.65, height=0.35,
                     fill_color=ORANGE, text="→", size_pt=20, bold=True)
 
     # Policy figure bottom
     policy_img2 = TIFS2_FIG / "fig5_sabre2_policy.png"
-    add_image(s7, policy_img2, left=0.5, top=4.65, width=12.3, height=2.5)
+    add_image(s8, policy_img2, left=0.5, top=4.65, width=12.3, height=2.5)
 
-    # ── Slide 8: Conclusions ──────────────────────────────────────────────────
-    s8 = prs.slides[7]
-    set_title(s8, "Conclusions")
-    set_content_placeholder(s8, [
+    # ── Slide 9: Conclusions ──────────────────────────────────────────────────
+    s9 = prs.slides[8]
+    set_title(s9, "Conclusions")
+    set_content_placeholder(s9, [
         _para_xml("SABRE makes uncertainty operational — not merely descriptive",
                   bold=True, size_pt=19, color=NAVY, space_after=2),
         _para_xml("", size_pt=6),
