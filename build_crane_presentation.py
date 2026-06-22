@@ -366,31 +366,30 @@ def build():
     # ── Slide 7: Explainability ───────────────────────────────────────────────
     s7 = prs.slides[6]
     set_title(s7, "Explainability: Making Decisions Auditable")
-    feat_img = ESWA_FIG / "Behaviour_feature_importance.png"
-    add_image(s7, feat_img, left=6.8, top=1.3, width=6.0)
-    add_textbox(s7, 0.6, 1.3, 6.0, 5.8, [
-        _para_xml("Behavioural — Permutation Feature Importance:", bold=True, size_pt=17, color=NAVY),
-        _bullet_xml("write_entropy_mean: top driver — ransomware encrypts → max entropy",
-                    size_pt=16),
-        _bullet_xml("write_LBA_variance: sequential writes across entire disk", size_pt=16),
-        _bullet_xml("mem_write_GPA_variance: broad memory pages written uniformly", size_pt=16),
-        _para_xml("", size_pt=6),
-        _para_xml("Semantic — Counterfactual Diagnostics:", bold=True, size_pt=17, color=NAVY),
-        _bullet_xml("For borderline PE files: minimal embedding shift to flip verdict",
-                    size_pt=16),
-        _bullet_xml("Short L₂ distance → closer to decision boundary → escalate",
-                    size_pt=16),
-        _bullet_xml("Supports audit: 'why was this file flagged?'", size_pt=16),
-        _para_xml("", size_pt=6),
-        _para_xml("On Reviewer 3's question — current operational practice:",
-                  bold=True, size_pt=17, color=ORANGE),
-        _bullet_xml("Antivirus/EDR: threshold-based scores, no principled uncertainty",
-                    size_pt=16),
-        _bullet_xml("SABRE adds: σ as a first-class decision variable + XAI audit trail",
-                    size_pt=16),
-        _bullet_xml("Analyst can see WHY a sample was escalated, not just THAT it was",
-                    size_pt=16),
+
+    # Top-left: concise text — short single-line bullets to stay within box
+    add_textbox(s7, 0.5, 1.3, 5.8, 2.5, [
+        _para_xml("Feature Importance (Behavioural):", bold=True, size_pt=15, color=NAVY),
+        _bullet_xml("write_entropy_mean: encryption → max entropy", size_pt=14),
+        _bullet_xml("write_LBA_variance: sequential full-disk writes", size_pt=14),
+        _bullet_xml("mem_write_GPA_variance: uniform memory spread", size_pt=14),
+        _para_xml("", size_pt=4),
+        _para_xml("Counterfactual Explanations:", bold=True, size_pt=15, color=NAVY),
+        _bullet_xml("Minimal L₂ shift flips verdict → analyst sees exactly WHY", size_pt=14),
+        _bullet_xml("Short distance → near decision boundary → ESCALATE", size_pt=14),
     ])
+
+    # Top-right: feature importance chart
+    feat_img = ESWA_FIG / "Behaviour_feature_importance.png"
+    add_image(s7, feat_img, left=6.4, top=1.25, width=6.7, height=2.6)
+
+    # Bottom-left: behavioral CF table (starts at y=4.1 — clear of all text)
+    beh_cf_img = ESWA_FIG / "Rep_Beh_CFs.png"
+    add_image(s7, beh_cf_img, left=0.5, top=4.1, width=5.9, height=3.1)
+
+    # Bottom-right: semantic CF scatter
+    sem_cf_img = ESWA_FIG / "fig_semantic_cf_p0_vs_l2.png"
+    add_image(s7, sem_cf_img, left=6.4, top=4.1, width=6.7, height=3.1)
 
     # ── Slide 8: SABRE-II — What We Built Since ───────────────────────────────
     s8 = prs.slides[7]
