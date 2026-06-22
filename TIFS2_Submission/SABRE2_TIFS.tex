@@ -745,12 +745,13 @@ SABRE-II is evaluated on the same three public datasets as SABRE+
 \subsection{Datasets}
 
 \textbf{RanSMAP} \cite{ransmap_2024} contains 35,857 ten-second
-execution windows from 15 hardware configurations (CPU/memory
-combinations) spanning 12 ransomware families (AESCrypt, Conti,
-Darkside, LockBit, Ryuk, SDelete-as-benign, REvil, WannaCry,
-Babuk, BlackMatter, Maze, RagnarLocker) and clean Windows execution.
-Windows are drawn from 217 sessions captured on a hypervisor-based
-monitoring infrastructure.
+execution windows across 1,776 sessions from 15 hardware configurations
+(CPU/memory combinations). The dataset spans six ransomware families
+(Conti, Darkside, LockBit, REvil, Ryuk, WannaCry) and six benign
+applications (AESCrypt, Firefox, Idle, Office, SDelete, Zip), captured
+under Windows~10 using a thin BitVisor hypervisor~\cite{hirano2025ransmap}.
+A separate variants partition provides 1,397 windows from seven Conti
+sub-variants (OOD holdout; never used for training).
 
 \textbf{RDset} \cite{rdset_2021} comprises 138,047 PE files (41,123
 ransomware, 96,924 benign) with family and packer metadata.
@@ -772,10 +773,12 @@ ensuring direct comparability:
 \begin{enumerate}
   \item \textbf{Random-stratified}: 60/20/20 train/validation/test split
         stratified by session.
-  \item \textbf{Family holdout}: REvil and WannaCry sessions held out for
-        test; all other families used for train/validation.
-  \item \textbf{Hardware holdout}: Six hardware configurations (3 CPU
-        $\times$ 2 memory) withheld; 9 configurations used for train/validation.
+  \item \textbf{Family holdout}: REvil and WannaCry (ransomware) and
+        Firefox and Zip (benign) held out for test; remaining eight families
+        used for train/validation.
+  \item \textbf{Hardware holdout}: Three extra hardware configurations
+        (i5-gen12, i7-gen12, i3-gen12/DDR5) withheld for test; twelve
+        original configurations used for train/validation.
   \item \textbf{Temporal holdout}: Sessions from February--March 2024
         (last 7 days of data collection) withheld as test; earlier
         sessions used for train/validation.
