@@ -1,0 +1,872 @@
+%%  IEEE Transactions on Information Forensics and Security
+%%  IEEEtran journal class, two-column
+\documentclass[journal]{IEEEtran}
+
+% ── Packages ──────────────────────────────────────────────────────────────────
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}          % \coloneqq, dcases, etc.
+\usepackage{bm}                 % bold math \bm{}
+\usepackage{bbm}                % indicator \mathbbm{1}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{balance}            % balance last-page columns
+\usepackage{microtype}
+
+% ── Colours (track changes) ───────────────────────────────────────────────────
+\definecolor{newblue}{RGB}{0,80,160}
+\newcommand{\new}[1]{\textcolor{newblue}{#1}}   % new text marker
+
+% ── Math operators ────────────────────────────────────────────────────────────
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\ECE}{ECE}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Bias}{Bias}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+
+% ── Theorem environments ──────────────────────────────────────────────────────
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{remark}{Remark}
+
+% ── Title and authors ─────────────────────────────────────────────────────────
+\title{Uncertainty-Aware Multi-Agent Ransomware Detection via
+       Decision MLP Fusion, Score-Space Augmentation, and
+       Bayesian Triage Policy Optimisation}
+
+\author{Henry~Kabuye,~\IEEEmembership{Student Member,~IEEE,}
+        Biju~Issac,~\IEEEmembership{Senior Member,~IEEE,}
+        and~Neera~Jeyamohan%
+\IEEEcompsocitemizethanks{
+  \IEEEcompsocthanksitem H.~Kabuye, B.~Issac, and N.~Jeyamohan are with the
+  Department of Computer and Information Sciences, Northumbria University,
+  Newcastle upon Tyne, NE1 8ST, United Kingdom.
+  E-mail: henry.kabuye@northumbria.ac.uk
+}%
+\thanks{Manuscript received \today.}}
+
+% ── Abstract ──────────────────────────────────────────────────────────────────
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Ransomware detection under operational constraints demands more than a binary
+classification verdict: it requires a principled mechanism for expressing
+per-sample uncertainty, fusing evidence from heterogeneous modalities, and
+converting uncertainty into actionable triage decisions that balance autonomous
+containment against analyst escalation. We present a heterogeneous multi-agent
+detection framework that addresses these requirements through four coupled
+contributions. First, three specialised agents---a Semantic Convolutional
+Neural Network (CNN) operating on static Portable Executable (PE) embeddings
+($\R^{384}$), a Behavioural CNN operating on 16-dimensional runtime telemetry
+windows from a thin hypervisor ($\R^{16}$), and a Knowledge CNN operating on
+ATT\&CK tactic embeddings ($\R^{d}$)---each employ Monte Carlo (MC) Dropout
+to produce a predictive probability $\hat{p}_i$ and an epistemic uncertainty
+$\sigma_i$ per forward pass. Second, a Decision MLP replaces heuristic mean
+fusion: it learns a calibrated aggregate risk score from the six-dimensional
+score pool $(\hat{p}_i, \sigma_i)_{i=1}^{3}$, reducing Expected Calibration
+Error (ECE) from $0.094$ to $0.018$. Third, Conditional Tabular GAN (CTGAN)
+augments the score-space training distribution to address class imbalance in
+the fusion layer without retraining the base agents. Fourth, a triage policy
+defined over four thresholds $(\tau_{\text{high}}, \tau, \kappa,
+\kappa_{\text{low}})$ is optimised via Bayesian Tree-structured Parzen
+Estimation (TPE) over 300 trials using the objective
+$J(\tau,\kappa)=\text{bal\_acc}(\tau,\kappa)-\lambda\cdot\text{esc\_rate}
+(\tau,\kappa)$, reducing the escalation rate from $85\%$ to $25\%$ while
+increasing balanced accuracy from $0.525$ to $0.866$. A Peer Consultation
+mechanism prevents knowledge collapse under concurrent benign--ransomware
+execution, and an Expert Feedback Loop with Elastic Weight Consolidation (EWC)
+enables continual adaptation to novel families with negligible catastrophic
+forgetting ($\Delta\text{AUPRC}=0.001$ on retained families). Evaluation
+across four generalisation axes (random, temporal, family holdout, hardware
+holdout) over six independent seeds on RanSMAP, RDset, and RansKnow
+demonstrates that the framework achieves AUROC $0.996$ on static PE detection,
+AUROC $0.963$ on runtime behavioural detection, and AUROC $0.980$ under
+temporal holdout, while a Mondrian conformal prediction wrapper provides
+distribution-free coverage guarantees with $77\%$ of traffic auto-classified at
+$99\%$ coverage.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Ransomware detection, multi-agent systems, Monte Carlo Dropout, uncertainty
+quantification, Decision MLP, score-space augmentation, CTGAN, Bayesian
+optimisation, triage policy, conformal prediction, continual learning, elastic
+weight consolidation, threat intelligence.
+\end{IEEEkeywords}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Introduction}\label{sec:intro}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+Ransomware attacks impose escalating operational and financial costs on
+enterprises and critical infrastructure~\cite{TODO_ransomware_survey}.
+State-of-the-art detectors---whether signature-based antivirus engines,
+endpoint detection and response (EDR) platforms, or machine-learning
+classifiers trained on file-level features---converge on a common
+architectural limitation: they produce a single scalar confidence score and
+map it to a binary verdict. When a novel variant or an obfuscated execution
+pattern degrades that score silently, no signal informs the operator that the
+verdict is unreliable.
+
+We identify three structural gaps in the current state of practice:
+\begin{enumerate}
+  \item \textbf{No principled uncertainty.} A softmax output from a
+        deterministic neural network is a point estimate of class membership,
+        not a probability over models. It cannot distinguish a confident
+        correct prediction from a confident incorrect one.
+  \item \textbf{Heuristic modality fusion.} Combining static PE features
+        with runtime telemetry via equal-weight averaging discards the
+        per-modality reliability signal; a semantic agent operating on
+        encrypted PE sections and a behavioural agent observing obfuscated
+        I/O patterns should not carry equal weight.
+  \item \textbf{Binary triage.} An alert generated by every uncertain
+        detection overwhelms analysts; equally, routing every uncertain
+        detection to automatic containment risks business disruption.
+\end{enumerate}
+
+This paper presents a framework that addresses all three gaps through a
+principled pipeline: per-agent uncertainty quantification via MC Dropout,
+learned score fusion via a calibrated Decision MLP, and triage policy
+optimisation via Bayesian TPE. The framework treats uncertainty as a
+\emph{control variable} for deployment rather than a diagnostic afterthought.
+
+\subsection*{Contributions}
+\begin{enumerate}
+  \item A \textbf{heterogeneous three-agent architecture} in which a Semantic
+        CNN, a Behavioural CNN, and a Knowledge CNN each produce a predictive
+        probability and an epistemic uncertainty via $T=10$ MC Dropout forward
+        passes.
+  \item A \textbf{Decision MLP fusion mechanism} with temperature calibration
+        that replaces heuristic mean fusion, reducing ECE from $0.094$ to
+        $0.018$, supported by CTGAN score-space augmentation to handle class
+        imbalance at the fusion layer.
+  \item A \textbf{formal triage policy} over $(\hat{p}, \sigma_{\max})$ space
+        with four jointly optimised thresholds via Bayesian TPE, reducing
+        escalation rate from $85\%$ to $25\%$ while improving balanced accuracy
+        from $0.525$ to $0.866$.
+  \item A \textbf{Peer Consultation} mechanism that prevents knowledge collapse
+        under concurrent execution, and an \textbf{Expert Feedback Loop} with
+        EWC enabling continual family adaptation without catastrophic
+        forgetting.
+\end{enumerate}
+
+The remainder of this paper is organised as follows.
+Section~\ref{sec:related} reviews related work.
+Section~\ref{sec:problem} formalises the detection and triage problem.
+Section~\ref{sec:agents} describes the three agents and MC Dropout
+uncertainty.
+Section~\ref{sec:fusion} presents Decision MLP fusion and CTGAN augmentation.
+Section~\ref{sec:triage} derives the triage policy and Bayesian optimisation.
+Section~\ref{sec:feedback} describes the Peer Consultation and Expert Feedback
+Loop.
+Section~\ref{sec:conformal} covers conformal prediction.
+Section~\ref{sec:eval} presents experimental evaluation.
+Section~\ref{sec:discussion} discusses results and limitations.
+Section~\ref{sec:conclusion} concludes.
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Related Work}\label{sec:related}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Behavioural Ransomware Detection}
+
+% TODO: survey of hypervisor-level detection (Hirano et al. 2022/2025),
+% IRP-based (Kharaz et al. 2016, Continella et al. 2016),
+% API-call-based (Singh and Tripathy 2024, Fernando and Komninos 2024),
+% system-call-based (Roy and Chen 2021).
+% Emphasise: these operate on a single modality with deterministic outputs.
+
+\subsection{Uncertainty Quantification in Detection}
+
+% TODO: MC Dropout (Gal & Ghahramani 2016), deep ensembles (Lakshminarayanan
+% 2017), conformal prediction for classification (Shafer & Vovk 2008,
+% Angelopoulos & Bates 2022). Distinguish epistemic from aleatoric.
+% Note: uncertainty has been used in anomaly detection but not for ransomware
+% triage specifically.
+
+\subsection{Multi-Agent and Ensemble Detection}
+
+% TODO: distinguish from standard ensembles — modality specialisation
+% (structural input spaces differ), per-modality uncertainty,
+% orchestrator-level decision. Reference ensemble ransomware work
+% and multi-agent IDS literature.
+
+\subsection{Generative Augmentation for Imbalanced Detection}
+
+% TODO: CTGAN (Xu et al. 2019), SMOTE at feature level vs score level,
+% tabular GAN applications in intrusion detection.
+
+\subsection{Continual Learning for Malware Detection}
+
+% TODO: EWC (Kirkpatrick et al. 2017), concept drift in malware
+% (Fernando & Komninos 2024), catastrophic forgetting in neural networks.
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Problem Formulation}\label{sec:problem}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Detection Task}
+
+Let $\mathcal{X} = \mathcal{X}_{\text{sem}} \times \mathcal{X}_{\text{beh}}
+\times \mathcal{X}_{\text{know}}$ denote the joint input space of three
+heterogeneous modalities, and let $\mathcal{Y} = \{0,1\}$ denote the binary
+ransomware label. A sample is observed as a triple
+$\mathbf{x} = (\mathbf{x}_{\text{sem}}, \mathbf{x}_{\text{beh}},
+\mathbf{x}_{\text{know}}) \in \mathcal{X}$, where
+
+\begin{itemize}
+  \item $\mathbf{x}_{\text{sem}} \in \R^{384}$ is a sentence-transformer
+        embedding of Portable Executable (PE) section names;
+  \item $\mathbf{x}_{\text{beh}} \in \R^{16}$ is a 16-dimensional feature
+        vector extracted from a $T_{\text{window}}=10\,\text{s}$ telemetry
+        window (see Section~\ref{sec:agents});
+  \item $\mathbf{x}_{\text{know}} \in \R^{d}$ is an embedding of
+        ATT\&CK tactic profiles derived from threat-intelligence transcripts.
+\end{itemize}
+
+\subsection{Triage Task}
+
+Rather than mapping $\mathbf{x}$ to a binary label, the triage task maps
+$\mathbf{x}$ to one of three actions $\mathcal{A} =
+\{\textsc{Auto-Contain},\, \textsc{Escalate},\, \textsc{Allow}\}$ according
+to a policy $\pi : (\hat{p}, \sigma_{\max}) \to \mathcal{A}$, where
+$\hat{p} \in [0,1]$ is the fused risk score and $\sigma_{\max} \in [0,1]$ is
+the maximum per-agent epistemic uncertainty.
+
+\begin{definition}[Triage Policy]\label{def:policy}
+Given thresholds $\Theta = (\tau_{\text{high}}, \tau, \kappa,
+\kappa_{\text{low}})$ with $0 < \tau \leq \tau_{\text{high}} \leq 1$ and
+$0 < \kappa_{\text{low}} \leq \kappa \leq 1$, the triage policy is:
+\begin{equation}\label{eq:policy}
+  \pi(\hat{p}, \sigma_{\max}; \Theta) =
+  \begin{cases}
+    \textsc{Auto-Contain} & \hat{p} \geq \tau_{\text{high}}
+                            \;\wedge\; \sigma_{\max} \leq \kappa_{\text{low}}, \\
+    \textsc{Escalate}     & \hat{p} \geq \tau
+                            \;\wedge\; \sigma_{\max} > \kappa, \\
+    \textsc{Allow}        & \text{otherwise.}
+  \end{cases}
+\end{equation}
+\end{definition}
+
+\subsection{Optimisation Objective}
+
+Let $\text{bal\_acc}(\Theta)$ denote the balanced accuracy of the joint
+detection--triage system under thresholds $\Theta$, and let
+$\text{esc\_rate}(\Theta)$ denote the fraction of samples routed to
+\textsc{Escalate}. The policy optimisation problem is:
+
+\begin{equation}\label{eq:objective}
+  \Theta^* = \argmax_{\Theta \in \mathcal{F}} \;
+  J(\Theta) \coloneqq \text{bal\_acc}(\Theta)
+  - \lambda\,\text{esc\_rate}(\Theta),
+\end{equation}
+
+where $\lambda \geq 0$ is an operational cost parameter encoding the relative
+burden of analyst escalation, and $\mathcal{F}$ is the feasibility region
+$\{\Theta : \tau \leq \tau_{\text{high}},\; \kappa_{\text{low}} \leq
+\kappa\}$.
+
+\begin{remark}
+The parameter $\lambda$ is a deployment decision, not a modelling one. An
+organisation with constrained analyst capacity sets higher $\lambda$; one
+prioritising missed-detection avoidance sets $\lambda \approx 0$.
+\end{remark}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Agent Architecture and Uncertainty Quantification}\label{sec:agents}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Monte Carlo Dropout as Approximate Bayesian Inference}
+
+Let $f_\theta : \mathcal{X}_i \to [0,1]$ denote a neural network with
+parameters $\theta$ trained on modality $i$. At inference, standard dropout
+is disabled, yielding a deterministic point estimate. MC Dropout
+\cite{gal2016dropout} instead keeps dropout \emph{active} at test time,
+treating each stochastic forward pass as a draw from an approximate posterior
+$q_\phi(\theta) \approx p(\theta \mid \mathcal{D})$ over network weights.
+
+Formally, for $T$ stochastic forward passes with dropout masks
+$\{\mathbf{z}_t\}_{t=1}^T$:
+
+\begin{equation}\label{eq:mc_mean}
+  \hat{p}_i(\mathbf{x}) = \frac{1}{T} \sum_{t=1}^{T}
+    f_{\theta \odot \mathbf{z}_t}(\mathbf{x}),
+\end{equation}
+
+\begin{equation}\label{eq:mc_std}
+  \sigma_i(\mathbf{x}) = \sqrt{\frac{1}{T-1} \sum_{t=1}^{T}
+    \left(f_{\theta \odot \mathbf{z}_t}(\mathbf{x}) - \hat{p}_i(\mathbf{x})
+    \right)^2},
+\end{equation}
+
+where $\odot$ denotes element-wise masking. The quantity $\sigma_i$ captures
+\emph{epistemic} uncertainty---reducible uncertainty arising from limited
+training data---as distinct from \emph{aleatoric} uncertainty inherent to the
+data generating process~\cite{kendall2017uncertainties}.
+
+\begin{proposition}[Epistemic Signal]\label{prop:epistemic}
+When a test sample $\mathbf{x}$ lies far from the training manifold of agent
+$i$ (i.e., a novel ransomware family), the variance $\sigma_i^2(\mathbf{x})$
+increases monotonically with the distributional shift
+$d(\mathbf{x}, \mathcal{D}_{\text{train}})$ under mild regularity
+conditions~\cite{gal2016dropout}.
+\end{proposition}
+
+We use $T=10$ passes per agent, empirically verified to stabilise $\sigma_i$
+to within $1\%$ of the $T=50$ estimate (Section~\ref{sec:ablation}).
+
+\subsection{Semantic Agent}
+
+% ── Architecture ──
+The Semantic Agent operates on static PE structure. Given a PE file, section
+names are concatenated and encoded via a frozen sentence transformer
+(all-MiniLM-L6-v2) to produce $\mathbf{x}_{\text{sem}} \in \R^{384}$.
+A Semantic CNN $f_{\text{sem}}$ with MC Dropout maps this embedding to
+$(\hat{p}_{\text{sem}}, \sigma_{\text{sem}})$.
+
+% ── Training data ──
+Training data: RDset~\cite{rdset}, comprising $138{,}047$ PE files
+($41{,}123$ ransomware; $96{,}924$ benign) with SMOTE balancing applied at
+the feature level prior to training.
+
+\subsection{Behavioural Agent}
+
+% ── Feature vector ──
+The Behavioural Agent operates on runtime storage and memory access patterns
+collected via a thin BitVisor hypervisor~\cite{hirano2025ransmap}. Within
+each $T_{\text{window}}=10\,\text{s}$ window we compute a
+$\mathbf{x}_{\text{beh}} \in \R^{16}$ feature vector partitioned as
+$\mathbf{x}_{\text{beh}} = (\chi_s, \chi_m)$, where:
+
+\textbf{Storage features} $\chi_s \in \R^{5}$:
+\begin{equation}\label{eq:storage_features}
+  \chi_s = \Bigl(
+    \bar{T}_{s,r},\;
+    \bar{T}_{s,w},\;
+    V_{s,r},\;
+    V_{s,w},\;
+    \bar{H}_{s,w}
+  \Bigr),
+\end{equation}
+where $\bar{T}_{s,r}$ and $\bar{T}_{s,w}$ are mean read/write throughputs
+$[\text{byte/s}]$; $V_{s,r}$ and $V_{s,w}$ are variances of accessed Logical
+Block Addresses (LBA); and $\bar{H}_{s,w}$ is mean Shannon entropy of written
+sectors, computed as $H(X) = -\sum_i p(x_i) \log_2 p(x_i)$.
+
+\textbf{Memory features} $\chi_m \in \R^{11}$:
+\begin{align}\label{eq:memory_features}
+  \chi_m = \Bigl(
+    &H_{m,w},\; H_{m,rw},\;
+     C_{4K,r},\; C_{4K,w},\; C_{4K,rw},\; C_{4K,x},\nonumber\\
+    &C_{2M,r},\; C_{2M,rw},\;
+     C_{\text{MMIO},r},\; C_{\text{MMIO},w},\;
+     V_{m,w}
+  \Bigr),
+\end{align}
+where $H_{m,w}$ and $H_{m,rw}$ are Shannon entropies of written and
+read/written memory pages; $C_{s,o}$ denotes the count of memory accesses of
+size $s \in \{4\,\text{KiB},\,2\,\text{MiB},\,\text{MMIO}\}$ and operation
+$o \in \{r,w,rw,x\}$; and $V_{m,w}$ is the variance of written Guest Physical
+Addresses (GPA).
+
+% ── Training data ──
+Training data: RanSMAP~\cite{hirano2025ransmap}, comprising $35{,}857$
+ten-second windows from $1{,}776$ sessions across 15 hardware configurations,
+six ransomware families (Conti, Darkside, LockBit, REvil, Ryuk, WannaCry),
+and six benign applications (AESCrypt, Firefox, Idle, Office, SDelete, Zip).
+
+\subsection{Knowledge Agent}
+
+% ── Architecture ──
+The Knowledge Agent encodes ATT\&CK tactic profiles derived from
+threat-intelligence transcripts (RansKnow~\cite{TODO_ransknow}: $307$
+ATT\&CK-aligned transcripts). A Discourse CNN $f_{\text{know}}$ maps the
+tactic embedding $\mathbf{x}_{\text{know}} \in \R^{d}$ to
+$(\hat{p}_{\text{know}}, \sigma_{\text{know}})$.
+
+\subsection{Evaluation Protocol and Generalisation Splits}
+
+We define four disjoint evaluation protocols on the RanSMAP session space
+$\mathcal{S}$:
+
+\begin{enumerate}
+  \item \textbf{Random:} 80/20 stratified split over $\mathcal{S}$.
+  \item \textbf{Family holdout:} $\mathcal{S}_{\text{test}} =
+        \{s \in \mathcal{S} : \text{family}(s) \in
+        \{\text{REvil},\text{WannaCry},\text{Firefox},\text{Zip}\}\}$.
+  \item \textbf{Hardware holdout:} $\mathcal{S}_{\text{test}} =
+        \{s \in \mathcal{S} : \text{hw}(s) \in
+        \{\text{i5-gen12},\text{i7-gen12},\text{i3-gen12/DDR5}\}\}$.
+  \item \textbf{Temporal:} $\mathcal{S}_{\text{test}} =
+        \{s \in \mathcal{S} : t(s) \geq t_{0.85}\}$,
+        where $t_{0.85}$ is the 85th percentile timestamp.
+\end{enumerate}
+
+All results are reported as mean $\pm$ std over $K=6$ independent random
+seeds.
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Decision MLP Fusion and Score-Space Augmentation}\label{sec:fusion}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Score Pool Construction}
+
+After MC Dropout inference by all three agents, we form the score pool vector:
+\begin{equation}\label{eq:score_pool}
+  \mathbf{v}(\mathbf{x}) = \bigl(
+    \hat{p}_{\text{sem}},\; \sigma_{\text{sem}},\;
+    \hat{p}_{\text{beh}},\; \sigma_{\text{beh}},\;
+    \hat{p}_{\text{know}},\; \sigma_{\text{know}},\;
+    \sigma_{\max},\; \bar{\sigma}
+  \bigr) \in [0,1]^8,
+\end{equation}
+where $\sigma_{\max} = \max(\sigma_{\text{sem}},\sigma_{\text{beh}},
+\sigma_{\text{know}})$ and $\bar{\sigma}$ is their mean.
+
+\begin{remark}[Why Score Space]
+Fusing in score space---rather than feature space---preserves the
+per-modality uncertainty structure. Feature-space concatenation of
+$\R^{384} \oplus \R^{16} \oplus \R^d$ would conflate structurally
+incompatible representations and preclude independent uncertainty propagation.
+\end{remark}
+
+\subsection{CTGAN Score-Space Augmentation}
+
+Let $\mathcal{V}_{\text{train}} = \{(\mathbf{v}_j, y_j)\}_{j=1}^{N}$ denote
+the score-pool training set with labels $y_j \in \{0,1\}$, where the
+ransomware class is a fraction $r \ll 0.5$ of samples. We apply Conditional
+Tabular GAN (CTGAN)~\cite{xu2019modeling} to generate synthetic minority-class
+score-pool vectors.
+
+The CTGAN minimax objective is:
+\begin{align}\label{eq:ctgan}
+  \min_G \max_D \;
+  &\E_{\mathbf{v} \sim p_{\text{data}}}[\log D(\mathbf{v})] \nonumber\\
+  +\; &\E_{\mathbf{z} \sim p_z,\, c \sim p_c}[\log(1-D(G(\mathbf{z},c)))]
+  - \gamma \Vert \nabla_{\hat{\mathbf{v}}} D(\hat{\mathbf{v}}) \Vert^2,
+\end{align}
+where $c$ is a conditional class label, $\mathbf{z}$ is a latent noise vector,
+$\hat{\mathbf{v}}$ is a linear interpolation between real and generated
+samples, and $\gamma$ is the gradient-penalty coefficient.
+
+Crucially, CTGAN operates on $\mathbf{v} \in [0,1]^8$, not on raw features:
+this ensures that the generator cannot produce physically impossible score
+combinations and preserves the calibration structure of the base agents.
+
+\subsection{Decision MLP Architecture}
+
+The Decision MLP $g_\phi : [0,1]^8 \to [0,1]$ maps the score pool to a
+fused risk score:
+\begin{equation}\label{eq:mlp}
+  g_\phi(\mathbf{v}) = \sigma\!\left(
+    \mathbf{W}_3 \,\text{ReLU}\!\left(
+      \mathbf{W}_2 \,\text{ReLU}(\mathbf{W}_1 \mathbf{v} + \mathbf{b}_1)
+      + \mathbf{b}_2
+    \right) + \mathbf{b}_3
+  \right),
+\end{equation}
+with dimensions $8 \to 32 \to 16 \to 1$ and sigmoid output.
+
+\subsection{Temperature Calibration}
+
+A deterministic neural classifier is not guaranteed to be calibrated even
+after training. We apply temperature scaling~\cite{guo2017calibration}: the
+logit $\ell = \log(\hat{p}/(1-\hat{p}))$ is divided by a learned scalar
+$T > 0$ before the final sigmoid:
+\begin{equation}\label{eq:temperature}
+  \hat{p}_{\text{cal}} = \sigma(\ell / T),
+  \quad T^* = \argmin_T \; \ECE(\hat{p}_{\text{cal}}).
+\end{equation}
+
+Expected Calibration Error is defined as:
+\begin{equation}\label{eq:ece}
+  \ECE = \sum_{m=1}^{M} \frac{|B_m|}{N}
+    \left| \text{acc}(B_m) - \text{conf}(B_m) \right|,
+\end{equation}
+where $\{B_m\}_{m=1}^M$ partition $[0,1]$ into $M$ equal-width confidence
+bins, $\text{acc}(B_m)$ is empirical accuracy and $\text{conf}(B_m)$ is mean
+predicted confidence within bin $B_m$.
+
+After calibration, ECE decreases from $0.094$ (mean fusion baseline) to
+$0.018$ (Decision MLP with temperature scaling).
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Triage Policy and Bayesian Optimisation}\label{sec:triage}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Triage Policy in $(\hat{p}, \sigma_{\max})$ Space}
+
+The triage policy $\pi$ (Definition~\ref{def:policy}) partitions the unit
+square $[0,1]^2$ into three regions. The fused risk $\hat{p} =
+g_\phi(\mathbf{v})$ and maximum agent uncertainty $\sigma_{\max}$ jointly
+determine the action. The boundary conditions ensure that:
+\begin{itemize}
+  \item \textsc{Auto-Contain} requires \emph{both} high risk \emph{and} low
+        uncertainty---autonomous action is taken only when the system is
+        jointly confident in detection and reliable;
+  \item \textsc{Escalate} captures the uncertain-but-suspicious region where
+        agent disagreement or novel-family signatures elevate $\sigma_{\max}$;
+  \item \textsc{Allow} covers the confident-benign region.
+\end{itemize}
+
+\subsection{Bayesian Triage Policy Optimisation via TPE}
+
+The objective $J(\Theta)$ in~\eqref{eq:objective} is non-differentiable with
+respect to $\Theta$ (it involves discrete triage counts). We therefore employ
+Bayesian optimisation via Tree-structured Parzen Estimation
+(TPE)~\cite{bergstra2011algorithms}.
+
+TPE models the probability density of $J$ conditioned on $\Theta$ as:
+\begin{equation}\label{eq:tpe}
+  p(\Theta \mid J) =
+  \begin{cases}
+    \ell(\Theta) & J(\Theta) < J^*, \\
+    g(\Theta)    & J(\Theta) \geq J^*,
+  \end{cases}
+\end{equation}
+where $J^*$ is the $\gamma$-quantile of observed objective values, $\ell$ is
+a Parzen-window density over good configurations, and $g$ is a density over
+poor ones. The acquisition criterion selects:
+\begin{equation}\label{eq:ei}
+  \Theta_{\text{next}} = \argmax_\Theta
+  \frac{\ell(\Theta)}{g(\Theta)},
+\end{equation}
+which approximates the Expected Improvement criterion.
+
+We run $300$ TPE trials over $\mathcal{F}$ with $\lambda = 0.3$; the search
+budget is chosen based on the dimensionality of $\Theta$ and the cost of
+evaluating $J$ on the validation set (approximately $0.15\,\text{s}$ per
+trial). Results and convergence analysis are presented in
+Section~\ref{sec:results_tpe}.
+
+\subsection{Comparison with Grid Search and Fixed Thresholds}
+
+% TODO: Table comparing fixed (hand-tuned), grid search, and Bayesian TPE
+% on balanced accuracy / escalation rate / detection rate.
+% Key numbers: fixed bal_acc=0.525 esc=85%; grid=0.871 esc=45%;
+% TPE=0.866 esc=25%.
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Peer Consultation and Expert Feedback Loop}\label{sec:feedback}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Peer Consultation}
+
+Under concurrent benign--ransomware execution, the Behavioural Agent observes
+superimposed access patterns, inflating $\sigma_{\text{beh}}$ and
+suppressing $\hat{p}_{\text{beh}}$. To prevent \emph{knowledge collapse}
+(a single-agent failure cascading to an incorrect triage decision), we
+introduce Peer Consultation (PC).
+
+\begin{definition}[Peer Consultation]\label{def:pc}
+When $\sigma_{\text{beh}}(\mathbf{x}) > \kappa_{\text{PC}}$ for a threshold
+$\kappa_{\text{PC}} > 0$, the behavioural agent's score is replaced by a
+weighted combination of peer scores:
+\begin{equation}\label{eq:peer_consultation}
+  \hat{p}_{\text{beh}}^{\text{PC}}(\mathbf{x}) =
+    w_{\text{sem}}\,\hat{p}_{\text{sem}}(\mathbf{x})
+    + w_{\text{know}}\,\hat{p}_{\text{know}}(\mathbf{x}),
+\end{equation}
+where $w_{\text{sem}} + w_{\text{know}} = 1$ and weights are proportional to
+the inverse uncertainty of each peer: $w_i \propto 1/\sigma_i$.
+\end{definition}
+
+Peer Consultation does not suppress $\sigma_{\text{beh}}$; rather, it routes
+the sample to the \textsc{Escalate} action while ensuring the score pool
+reflects available evidence from more reliable modalities.
+
+\subsection{Expert Feedback Loop with EWC}
+
+The Expert Feedback Loop allows an analyst-approved correction label
+$\tilde{y}$ for an escalated sample to update the Decision MLP $g_\phi$
+incrementally, without catastrophic forgetting of the base agents' knowledge.
+
+We apply Elastic Weight Consolidation (EWC)~\cite{kirkpatrick2017overcoming}.
+Let $\phi^*$ be the parameters of $g_\phi$ trained on the original dataset
+$\mathcal{D}_0$, and let $F_j$ denote the diagonal Fisher information for
+parameter $j$:
+\begin{equation}\label{eq:fisher}
+  F_j = \E_{\mathbf{v} \sim \mathcal{D}_0}\!\left[
+    \left(\frac{\partial}{\partial \phi_j}
+    \log p(y \mid \mathbf{v}; \phi^*)\right)^2
+  \right].
+\end{equation}
+
+The EWC loss for the incremental update on correction set
+$\mathcal{D}_{\text{new}}$ is:
+\begin{equation}\label{eq:ewc}
+  \mathcal{L}_{\text{EWC}}(\phi) =
+    \mathcal{L}_{\text{CE}}(\phi; \mathcal{D}_{\text{new}})
+    + \frac{\lambda_{\text{EWC}}}{2}
+      \sum_{j} F_j \left(\phi_j - \phi^*_j\right)^2,
+\end{equation}
+where $\mathcal{L}_{\text{CE}}$ is the cross-entropy loss on new samples and
+$\lambda_{\text{EWC}}$ controls the trade-off between plasticity and
+stability. We measure catastrophic forgetting as:
+\begin{equation}\label{eq:forgetting}
+  \Delta\text{AUPRC} =
+    \text{AUPRC}(\phi; \mathcal{D}_0) -
+    \text{AUPRC}(\phi_{\text{new}}; \mathcal{D}_0),
+\end{equation}
+achieving $\Delta\text{AUPRC} = 0.001$ on retained families after five
+feedback iterations.
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Conformal Prediction Wrapper}\label{sec:conformal}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Mondrian Conformal Prediction}
+
+To provide distribution-free coverage guarantees on triage outcomes, we wrap
+the fused output $\hat{p}_{\text{cal}}$ in a Mondrian conformal predictor.
+Let $\alpha \in (0,1)$ be the target miscoverage rate.
+
+\begin{definition}[Conformal Prediction Set]\label{def:cp}
+Given a calibration set $\mathcal{D}_{\text{cal}} = \{(\mathbf{v}_i,
+y_i)\}_{i=1}^{n}$, define non-conformity scores $s_i =
+1 - f_y(\mathbf{v}_i)$ for the true class $y_i$. The conformal prediction
+set at level $\alpha$ for a new sample $\mathbf{v}$ is:
+\begin{equation}\label{eq:cp_set}
+  \mathcal{C}_\alpha(\mathbf{v}) = \bigl\{y \in \mathcal{Y} :
+    s(\mathbf{v}, y) \leq Q_{1-\alpha}(\{s_i\}_{i=1}^n)\bigr\},
+\end{equation}
+where $Q_{1-\alpha}$ is the $(1-\alpha)$-quantile of calibration scores.
+\end{definition}
+
+\begin{theorem}[Marginal Coverage Guarantee]\label{thm:coverage}
+Under exchangeability of calibration and test samples:
+\begin{equation}\label{eq:coverage}
+  \Prob\!\left(Y \in \mathcal{C}_\alpha(\mathbf{v})\right) \geq 1 - \alpha.
+\end{equation}
+\end{theorem}
+
+Mondrian conformal prediction conditions~\eqref{eq:cp_set} on the predicted
+class, providing class-conditional (rather than marginal) guarantees. At
+$\alpha = 0.01$ ($99\%$ coverage), $77\%$ of traffic is auto-classified with
+$99.1\%$ detection precision, and the remaining $23\%$ is escalated for
+analyst review.
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Experimental Evaluation}\label{sec:eval}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Datasets}\label{sec:datasets}
+
+\textbf{RDset}~\cite{rdset}: $138{,}047$ Windows Portable Executable (PE)
+files ($41{,}123$ ransomware; $96{,}924$ benign). Used exclusively for
+Semantic Agent training and evaluation. Disjoint train/test splits at the
+binary (file-hash) level.
+
+\textbf{RanSMAP}~\cite{hirano2025ransmap}: $35{,}857$ ten-second execution
+windows from $1{,}776$ sessions across 15 hardware configurations (four CPUs:
+Celeron G3920, Core i3-12100, Core i5-12500, Core i7-12700; six DDR4/DDR5
+frequencies; two RAM capacities). Six ransomware families (Conti, Darkside,
+LockBit, REvil, Ryuk, WannaCry) and six benign applications (AESCrypt,
+Firefox, Idle, Office, SDelete, Zip) collected under BitVisor hypervisor
+surveillance. A separate \texttt{variants} partition provides $1{,}397$
+windows from seven Conti sub-variants for out-of-distribution (OOD)
+generalisation analysis; a \texttt{mix} partition provides $600$ windows from
+ten concurrent execution combinations. Neither partition is used for training.
+
+\textbf{RansKnow}~\cite{TODO_ransknow}: $307$ ATT\&CK-aligned
+threat-intelligence transcripts. Used exclusively for Knowledge Agent
+training.
+
+\textbf{Dataset characteristics and imbalance.} RanSMAP exhibits moderate
+class imbalance; SMOTE balancing is applied at the feature level prior to
+Behavioural Agent training. RDset exhibits $\approx\!30\%$ ransomware
+prevalence. Score-space imbalance at the fusion layer is addressed by CTGAN
+augmentation (Section~\ref{sec:fusion}).
+
+\subsection{Implementation Details}
+
+% TODO: fill in
+% - Semantic CNN architecture
+% - Behavioural CNN architecture
+% - Knowledge CNN architecture
+% - Decision MLP architecture (8→32→16→1)
+% - MC Dropout rate p=0.3, T=10
+% - Training: Adam optimiser, lr=1e-3, batch=64, epochs=50 with early stopping
+% - CTGAN: 300 epochs
+% - Temperature calibration: LBFGS on validation set
+% - EWC: lambda_EWC values
+% - Hardware: NVIDIA GB10, inference latency benchmarks
+
+\subsection{Baseline Comparisons}
+
+We compare against:
+\begin{enumerate}
+  \item Hirano et al.~\cite{hirano2025ransmap}: 1D-CNN + LSTM baseline on
+        RanSMAP (23D features, $T_{\text{window}}=0.1\,\text{s}$,
+        $T_d=30\,\text{s}$) — direct dataset comparison.
+  \item Mean fusion (equal-weight average of $\hat{p}_i$) without Decision
+        MLP.
+  \item Fixed hand-tuned triage thresholds $\Theta_{\text{fixed}}$.
+  \item Grid search over $\Theta$.
+\end{enumerate}
+
+\subsection{Main Results: Agent-Level AUROC}\label{sec:results_agents}
+
+% TODO: Table — AUROC per agent and fusion, per evaluation split
+% Rows: Semantic, Behavioural, Knowledge, Mean Fusion, Decision MLP
+% Columns: Random, Temporal, Family Holdout, Hardware Holdout
+% Semantic: 0.996, -, -, -
+% Behavioural: 0.963, 0.980, 0.706, 0.939
+% Decision MLP: 0.975, 0.980, ~0.72, ~0.95
+
+\subsection{Fusion and Calibration}\label{sec:results_fusion}
+
+% TODO: Table — ECE before/after calibration; AUROC mean fusion vs Decision MLP
+% ECE: mean_fusion=0.094, Decision_MLP_uncal=0.077, Decision_MLP_cal=0.018
+% Figure: reliability diagram (calibration curve)
+
+\subsection{CTGAN Ablation}
+
+% TODO: Table — AUROC / AUPRC with/without CTGAN augmentation at fusion layer
+
+\subsection{Triage Policy Optimisation}\label{sec:results_tpe}
+
+% TODO: Table — fixed vs grid vs Bayesian TPE:
+% bal_acc: 0.525 / 0.871 / 0.866
+% esc_rate: 85% / 45% / 25%
+% Figure: convergence curve of J over 300 TPE trials
+
+\subsection{Generalisation Analysis}
+
+% TODO: Table — 4 splits × 6 seeds, mean±std AUROC
+% Including Hirano comparison: F-score on hardware holdout and Conti variants
+
+\subsection{OOD Ransomware Variants}\label{sec:ood_variants}
+
+% TODO: Per-variant recall table for 7 Conti sub-variants
+% Compare with Hirano Table 14: mean recall 0.55 (χ), 0.62 (χ_s), 0.71 (χ_m)
+% Report: our F-score / AUROC / escalation rate on variants
+% Key point: where Hirano's detector fails silently, our σ_beh rises → ESCALATE
+
+\subsection{Simultaneous Execution}
+
+% TODO: AESCrypt+REvil detection rate 1.5%
+% Peer Consultation effect on concurrent execution
+% Compare with Hirano Section 6.5 recall figures
+
+\subsection{Conformal Coverage}
+
+% TODO: Coverage vs efficiency trade-off table
+% At α=0.01: 77% auto-classified, 23% escalated, 99.1% precision
+
+\subsection{Expert Feedback Loop}\label{sec:results_ewc}
+
+% TODO: ΔAUPRC table: no EWC vs EWC across 5 feedback iterations
+% ΔAUPRC=0.001 on retained families
+
+\subsection{Runtime Performance}
+
+% TODO: Inference latency table (NVIDIA GB10, 500 reps, 50 warmup)
+% Semantic CNN: 1.77ms; Behavioural CNN: 1.94ms; Full pipeline: ~3.7ms
+% Compare with Hirano: T_d=30s detection window
+
+\subsection{Ablation Study}\label{sec:ablation}
+
+% TODO:
+% (1) T sensitivity: T=1,5,10,20,50 — σ stability analysis
+% (2) Feature ablation: storage-only vs memory-only vs all-16D
+%     Compare with Hirano's 5D vs 18D vs 23D finding
+% (3) Decision MLP depth: 1 vs 2 vs 3 hidden layers
+% (4) CTGAN augmentation ratio
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Discussion}\label{sec:discussion}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Where the Framework Excels}
+
+% Semantic agent: AUROC 0.996 — PE structural features discriminate clearly
+% Temporal holdout: AUROC 0.980 — no significant temporal drift
+% Calibration gain: ECE 0.094 → 0.018 enables trustworthy autonomous decisions
+
+\subsection{Where the Framework Struggles}
+
+% Family holdout: AUROC 0.706 — unseen families
+% Key framing: σ_beh rises → ESCALATE fires → graceful degradation
+% Concurrent execution: 1.5% detection rate (shared limitation with Hirano)
+% Honest acknowledgement: not suitable for autonomous containment on unseen families
+
+\subsection{Comparison with Hirano et al.~\cite{hirano2025ransmap}}
+
+% Direct comparison: same dataset, same hardware configs
+% Hirano: 1D-CNN+LSTM, 23D, T_window=0.1s, T_d=30s, F-score metric
+% Ours: Behavioural CNN+MC Dropout, 16D, T_window=10s, AUROC metric
+% Points of comparison: hardware holdout F-score, Conti variants recall
+% Key advantage: uncertainty routing on failure cases
+
+\subsection{Adaptive Thresholding}
+
+% Current limitation: thresholds static post-deployment
+% Future: sliding-window recalibration of J(τ,κ) on rolling analyst labels
+% Bayesian online update: maintain posterior over (τ,κ)
+
+\subsection{Runtime and Deployment}
+
+% 3.7ms full pipeline → supports >2000 concurrent streams before bottleneck
+% Behavioural CNN: 8,385 parameters (32.8 KB) — endpoint deployable
+% T_window=10s: practical detection latency; compare with Hirano's T_d=30s
+
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Conclusion}\label{sec:conclusion}
+% ═══════════════════════════════════════════════════════════════════════════════
+
+We have presented a heterogeneous multi-agent framework for adaptive
+ransomware triage that treats uncertainty as a first-class control variable.
+The four principal contributions---MC Dropout per-agent uncertainty, Decision
+MLP fusion with CTGAN augmentation, Bayesian TPE triage policy optimisation,
+and Peer Consultation with EWC continual learning---collectively address the
+structural limitations of single-modality binary detectors. The framework
+achieves strong static-PE detection (AUROC $0.996$) and runtime behavioural
+detection (AUROC $0.963$), reduces unnecessary escalation by $70\%$ over
+fixed-threshold baselines, and maintains calibration (ECE $0.018$) sufficient
+for trustworthy autonomous containment decisions. When the system encounters
+novel families or concurrent execution patterns beyond its training
+distribution, epistemic uncertainty $\sigma_{\max}$ rises and the triage
+policy routes to \textsc{Escalate}---preserving analyst oversight precisely
+where the model is least reliable. Formal distribution-free coverage
+guarantees via Mondrian conformal prediction provide a statistical assurance
+complementing the operational triage policy.
+
+Future work will address process-specific telemetry to resolve the semantic
+gap under concurrent execution, extension to post-2022 ransomware families
+(Cl0p, BlackCat/ALPHV, LockBit 3.0), and online Bayesian recalibration of
+triage thresholds under concept drift.
+
+% ── Appendices ────────────────────────────────────────────────────────────────
+\appendices
+
+\section{Behavioural Feature Extraction Algorithm}\label{app:features}
+% TODO: Algorithm pseudocode for 16D feature extraction from CSV files
+
+\section{Decision MLP Training Procedure}\label{app:mlp_training}
+% TODO: Algorithm pseudocode for Decision MLP training with CTGAN augmentation
+
+\section{Confusion Matrices}\label{app:confusion}
+% TODO: Full 12-class confusion matrices for baseline comparison with Hirano
+
+% ── Acknowledgements ──────────────────────────────────────────────────────────
+\section*{Acknowledgements}
+% TODO: EPSRC/CRANE acknowledgement if applicable
+
+% ── Bibliography ──────────────────────────────────────────────────────────────
+\bibliographystyle{IEEEtran}
+\bibliography{Reference_Main}
+
+\end{document}
