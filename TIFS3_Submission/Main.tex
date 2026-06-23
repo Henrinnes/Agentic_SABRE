@@ -288,6 +288,21 @@ analyst-correction iterations---an operationally negligible forgetting penalty
 that enables continual adaptation to novel families without retraining the
 base agents.
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig0_pipeline.png}
+  \caption{End-to-end framework pipeline. Three specialised CNN agents (Semantic,
+    Behavioural, Knowledge) each run $T{=}10$ MC Dropout forward passes to produce
+    a probability--uncertainty pair $(\hat{p}_i, \sigma_i)$. Peer Consultation
+    adjusts any agent whose $\sigma_i$ exceeds its local threshold before the
+    six-dimensional score pool is assembled. The Decision MLP fuses the pool into
+    a calibrated risk score; Bayesian TPE derives the four-threshold triage policy
+    that maps $(\hat{p}, \sigma_{\max})$ to \textsc{Auto-Contain},
+    \textsc{Escalate}, or \textsc{Allow}. Analyst corrections on escalated samples
+    feed back into incremental Decision MLP retraining via EWC regularisation.}
+  \label{fig:pipeline}
+\end{figure*}
+
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Problem Formulation}\label{sec:problem}
 % ═══════════════════════════════════════════════════════════════════════════════
@@ -402,6 +417,19 @@ conditions~\cite{gal2016dropout}.
 
 We use $T=10$ passes per agent, empirically verified to stabilise $\sigma_i$
 to within $1\%$ of the $T=50$ estimate (Section~\ref{sec:ablation}).
+Fig.~\ref{fig:t_sensitivity} in the ablation section quantifies this
+stability and the associated latency trade-off.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig1_architecture.pdf}
+  \caption{Three-agent architecture. Each CNN produces a probability--uncertainty
+    pair $(\hat{p}_i, \sigma_i)$ via MC Dropout. The Semantic Agent
+    ($\R^{384}$ PE embeddings) and Knowledge Agent ($\R^{23}$ ATT\&CK profiles)
+    complement the Behavioural Agent ($\R^{16}$ runtime telemetry) in the fused
+    score pool.}
+  \label{fig:architecture}
+\end{figure}
 
 \subsection{Semantic Agent}
 
@@ -598,6 +626,24 @@ determine the action. The boundary conditions ensure that:
         agent disagreement or novel-family signatures elevate $\sigma_{\max}$;
   \item \textsc{Allow} covers the confident-benign region.
 \end{itemize}
+
+Fig.~\ref{fig:triage_space} illustrates the three regions geometrically and
+shows the distribution of training-distribution ransomware, benign, and OOD
+samples in $(\hat{p}, \sigma_{\max})$ space.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig14_triage_space.pdf}
+  \caption{Triage decision regions in $(\hat{p},\,\sigma_{\max})$ space under
+    Bayesian TPE-derived thresholds
+    $(\tau_{\text{high}}{=}0.78,\,\tau{=}0.35,\,\kappa{=}0.22,\,
+    \kappa_{\text{low}}{=}0.10)$.
+    Simulated samples from the training distribution (ransomware / benign)
+    and OOD unseen-family samples ($\triangle$) are overlaid.
+    OOD samples cluster in the \textsc{Escalate} region due to elevated
+    $\sigma_{\max}$.}
+  \label{fig:triage_space}
+\end{figure}
 
 \subsection{Bayesian Triage Policy Optimisation via TPE}
 
@@ -869,6 +915,17 @@ We compare against:
   \item Grid search over $\Theta$.
 \end{enumerate}
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/fig2_roc.pdf}
+  \caption{ROC curves for Behavioural CNN, Mean Fusion, and Decision MLP
+    across the four evaluation splits. The Decision MLP consistently outperforms
+    mean fusion; the family-holdout split (bottom-left) reveals the OOD
+    generalisation gap, which is correctly signalled by elevated
+    $\sigma_{\mathrm{beh}}$ routed to \textsc{Escalate}.}
+  \label{fig:roc}
+\end{figure*}
+
 \subsection{Main Results: Agent-Level AUROC}\label{sec:results_agents}
 
 Table~\ref{tab:auroc_splits} reports AUROC for each agent modality and for
@@ -920,6 +977,17 @@ Hirano et al.~\cite{hirano2025ransmap}
 \end{tabular}
 \end{table*}
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig12_radar.pdf}
+  \caption{Multi-dimensional performance radar comparing the Decision MLP
+    framework against the Behavioural CNN only, Mean Fusion, and Fixed-Threshold
+    baselines across seven axes. Larger area = stronger overall performance.
+    The Decision MLP (blue) dominates on auto-classify rate and
+    $1{-}\text{ECE}$ while matching the Behavioural CNN on OOD recall.}
+  \label{fig:radar}
+\end{figure}
+
 \subsection{Fusion and Calibration}\label{sec:results_fusion}
 
 Table~\ref{tab:calibration} reports ECE on the random-stratified test split.
@@ -955,6 +1023,16 @@ Decision MLP (ours) & $0.094$ & $\mathbf{0.018 \pm 0.002}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig3_calibration.pdf}
+  \caption{Reliability diagrams (15-bin) for Mean Fusion (pre- and
+    post-temperature scaling) and the Decision MLP.
+    The Decision MLP achieves ECE $0.018$, a $5.2\times$ reduction over
+    post-TS mean fusion (ECE $0.118$).}
+  \label{fig:calibration}
+\end{figure}
 
 \subsection{CTGAN Ablation}
 
@@ -995,6 +1073,15 @@ CTGAN ($N_{\text{synth}}{=}2{,}000$)
 \end{tabular}
 \end{table}
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig4_ctgan.pdf}
+  \caption{Decision MLP AUROC, AUPRC, and ECE by score-space augmentation
+    strategy (no augmentation / SMOTE / CTGAN). All three achieve equivalent
+    discrimination; CTGAN and SMOTE marginally improve boundary calibration.}
+  \label{fig:ctgan}
+\end{figure}
+
 \subsection{Triage Policy Optimisation}\label{sec:results_tpe}
 
 The triage policy optimisation results are reported in
@@ -1003,6 +1090,16 @@ The Bayesian TPE objective $J(\Theta)$ converged within approximately $120$
 trials out of the $300$ budget; the median-pruner discards clearly
 suboptimal configurations early, concentrating trials near
 $(\tau^*, \kappa^*) \approx (0.35, 0.22)$ for the random-stratified split.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig5_policy.pdf}
+  \caption{Triage policy comparison: decision-rate breakdown (Escalate /
+    Auto-Contain / Allow) and balanced accuracy for Fixed, Grid Search,
+    and Bayesian TPE policies. TPE achieves the lowest escalation rate
+    ($24.7\%$) and highest auto-classify rate ($35.3\%$).}
+  \label{fig:policy}
+\end{figure}
 
 \subsection{Generalisation Analysis}
 
@@ -1046,6 +1143,15 @@ Hardware      & $0.939 \pm 0.006$ & $0.962 \pm 0.000$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig7_multiseed.pdf}
+  \caption{AUROC distribution over $K{=}6$ seeds across four evaluation
+    splits. Temporal and hardware holdout match random-stratified
+    performance; family holdout reveals the OOD generalisation gap.}
+  \label{fig:multiseed}
+\end{figure}
 
 \subsection{OOD Ransomware Variants}\label{sec:ood_variants}
 
@@ -1099,6 +1205,17 @@ Mean    & $0.56$ & $\mathbf{0.68}$ & $0.26$ \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig13_ood_variants.pdf}
+  \caption{Per-variant recall on the RanSMAP \texttt{variants} partition
+    (seven Conti sub-variants). Our Behavioural CNN (16D, $T_w{=}10\,\text{s}$)
+    outperforms Hirano et al.\ (23D) on six of seven variants; the secondary
+    axis shows the escalation rate --- highest where recall is lowest,
+    confirming uncertainty-conditioned graceful degradation.}
+  \label{fig:ood_variants}
+\end{figure}
+
 \subsection{Simultaneous Execution}
 
 The \texttt{mix} partition of RanSMAP provides $600$ windows from ten
@@ -1128,6 +1245,16 @@ uncertain cases to analyst review rather than autonomous containment.
 This compares favourably with Hirano et al.~\cite{hirano2025ransmap}, whose
 detector produces a binary output and has no mechanism to express the
 ambiguity introduced by concurrent benign processes.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig9_mix_partition.pdf}
+  \caption{Detection performance on the RanSMAP \texttt{mix} partition
+    (concurrent benign + ransomware execution). Peer Consultation partially
+    recovers detection rate; the escalation rate rises to $>60\%$ for all
+    concurrent scenarios, ensuring analyst oversight is preserved.}
+  \label{fig:mix}
+\end{figure}
 
 \subsection{Conformal Coverage}
 
@@ -1161,6 +1288,17 @@ $0.01$ & $99\%$ & $77.0$ & $99.1$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig17_conformal_curve.pdf}
+  \caption{Mondrian conformal prediction coverage--efficiency trade-off.
+    At $99\%$ coverage ($\alpha{=}0.01$), $77\%$ of traffic is
+    auto-classified with $99.1\%$ detection precision.
+    Reducing the coverage target to $95\%$ raises the auto-classified
+    fraction to $89.3\%$.}
+  \label{fig:conformal}
+\end{figure}
 
 \subsection{Expert Feedback Loop}\label{sec:results_ewc}
 
@@ -1197,6 +1335,16 @@ EWC ($\lambda{=}300$) & $\mathbf{0.999}$ & $\mathbf{-0.001}$ & $0.827$ & $+0.827
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig16_ewc_loop.pdf}
+  \caption{Expert Feedback Loop: retained-family AUPRC (left) and new-family
+    AUPRC (right) across five feedback iterations. EWC reduces catastrophic
+    forgetting to $\Delta\text{AUPRC}{=}0.001$ while achieving equivalent
+    new-family adaptation speed.}
+  \label{fig:ewc}
+\end{figure}
 
 \subsection{Runtime Performance}
 
@@ -1241,7 +1389,46 @@ Overhead vs deterministic pass  & $3.7\times$ & $--$ \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig11_uncertainty.png}
+  \caption{$\sigma_{\mathrm{beh}}$ distribution per ransomware family and
+    benign class. Held-out (unseen) families REvil and WannaCry exhibit
+    markedly elevated uncertainty relative to trained families, confirming
+    the epistemic signal mechanism.}
+  \label{fig:uncertainty_dist}
+\end{figure}
+
 \subsection{Ablation Study}\label{sec:ablation}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig19_t_sensitivity.pdf}
+  \caption{MC Dropout pass count sensitivity. Left: $\sigma_{\mathrm{beh}}$
+    noise (as \% of mean) vs $T$ — stabilises below $1\%$ at $T{=}10$.
+    Right: inference latency vs $T$ on NVIDIA GB10. $T{=}10$ is the
+    chosen operating point.}
+  \label{fig:t_sensitivity}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig18_feature_ablation.pdf}
+  \caption{Behavioural feature subset ablation (random-stratified split,
+    $K{=}6$ seeds, mean $\pm$ 95\% CI). Storage-only (5D) and memory-only
+    (11D) subsets are complementary; the combined 16D vector achieves the
+    highest AUROC and AUPRC.}
+  \label{fig:feature_ablation}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig15_uncertainty_violin.pdf}
+  \caption{Violin plots of $\sigma_{\mathrm{beh}}$ per family. Held-out
+    families (marked *) exhibit elevated uncertainty; the dashed red line
+    marks the triage $\kappa$ threshold above which the system escalates.}
+  \label{fig:violin}
+\end{figure}
 
 \textbf{(1) MC Dropout pass count $T$.}
 We evaluate Behavioural CNN AUROC and $\sigma_{\text{beh}}$ stability for
@@ -1306,6 +1493,25 @@ split. We adopt $N_{\text{synth}}{=}2{,}000$ as a conservative default.
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Discussion}\label{sec:discussion}
 % ═══════════════════════════════════════════════════════════════════════════════
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig8_feature_importance.pdf}
+  \caption{SHAP feature importance for the Behavioural CNN on the
+    random-stratified test split. Write-entropy ($\bar{H}_{s,w}$) and
+    LBA write variance ($V_{s,w}$) are the dominant storage features;
+    GPA write variance ($V_{m,w}$) is the dominant memory feature.}
+  \label{fig:feature_importance}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig6_feedback.pdf}
+  \caption{Feedback loop adaptation: false-negative count vs streaming step
+    for OOD Conti sub-variant detection. EWC-regularised Decision MLP
+    retraining converges to AUPRC $\geq 0.80$ by iteration 3.}
+  \label{fig:feedback}
+\end{figure}
 
 \subsection{Where the Framework Excels}
 
