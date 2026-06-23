@@ -1410,7 +1410,8 @@ Features are computed over non-overlapping $T_{\text{window}}{=}10\,\text{s}$ wi
   \State $\chi_m \gets [H_{m,w},\, H_{m,rw},\, C_{4K,r},\, C_{4K,w},\,
          C_{4K,rw},\, C_{4K,x},\, C_{2M,r},\, C_{2M,rw},\,
          C_{\text{MMIO},r},\, C_{\text{MMIO},w},\, V_{m,w}]$ \Comment{11D}
-  \State $X[w, :] \gets [\chi_s \,;\, \chi_m]$ \Comment{16D row}
+  \State $X[w, :] \gets [\chi_s \,;\, \chi_m]$
+         \hfill\Comment{16D feature row}
 \EndFor
 \State \Return $X$
 \end{algorithmic}
