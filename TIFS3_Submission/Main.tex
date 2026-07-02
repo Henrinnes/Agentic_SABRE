@@ -45,16 +45,17 @@
        Decision MLP Fusion, Score-Space Augmentation, and
        Bayesian Triage Policy Optimisation}
 
-\author{Henry~Kabuye,~\IEEEmembership{Student Member,~IEEE,}
-        Biju~Issac,~\IEEEmembership{Senior Member,~IEEE,}
-        and~Neera~Jeyamohan%
-\IEEEcompsocitemizethanks{
-  \IEEEcompsocthanksitem H.~Kabuye, B.~Issac, and N.~Jeyamohan are with the
-  Department of Computer and Information Sciences, Northumbria University,
-  Newcastle upon Tyne, NE1 8ST, United Kingdom.
-  E-mail: henry.kabuye@northumbria.ac.uk
-}%
-\thanks{Manuscript received \today.}}
+\author{Henry~Kabuye\IEEEauthorrefmark{1},
+        Biju~Issac\IEEEauthorrefmark{1},~\IEEEmembership{Senior~Member,~IEEE,}
+        Rahul~Yumlembam\IEEEauthorrefmark{1},
+        Zahra~Farzadpour\IEEEauthorrefmark{1},
+        and~Jeyamohan~Neera\IEEEauthorrefmark{1},~\IEEEmembership{Member,~IEEE}%
+\thanks{\IEEEauthorrefmark{1}Department of Computer and Information Sciences,
+Northumbria University, Newcastle, NE1~8ST, UK\@.
+E-mail: \{kabuyehenry2017, bissac, rahul.yumlembam, zahra.farzadpour, jeyamohan.neera\}@northumbria.ac.uk.}%
+\thanks{B.~Issac is the corresponding author.
+E-mail: bissac@ieee.org.}%
+\thanks{Manuscript received 2026.}}
 
 % ── Abstract ──────────────────────────────────────────────────────────────────
 \begin{document}
@@ -420,16 +421,6 @@ to within $1\%$ of the $T=50$ estimate (Section~\ref{sec:ablation}).
 Fig.~\ref{fig:t_sensitivity} in the ablation section quantifies this
 stability and the associated latency trade-off.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig1_architecture.pdf}
-  \caption{Three-agent architecture. Each CNN produces a probability--uncertainty
-    pair $(\hat{p}_i, \sigma_i)$ via MC Dropout. The Semantic Agent
-    ($\R^{384}$ PE embeddings) and Knowledge Agent ($\R^{23}$ ATT\&CK profiles)
-    complement the Behavioural Agent ($\R^{16}$ runtime telemetry) in the fused
-    score pool.}
-  \label{fig:architecture}
-\end{figure}
 
 \subsection{Semantic Agent}
 
@@ -441,7 +432,7 @@ A Semantic CNN $f_{\text{sem}}$ with MC Dropout maps this embedding to
 $(\hat{p}_{\text{sem}}, \sigma_{\text{sem}})$.
 
 % ── Training data ──
-Training data: RDset~\cite{rdset}, comprising $138{,}047$ PE files
+Training data: RDset~\cite{kabuye2025explainable,mathur2020ransomware}, comprising $138{,}047$ PE files
 ($41{,}123$ ransomware; $96{,}924$ benign) with SMOTE balancing applied at
 the feature level prior to training.
 
@@ -552,7 +543,7 @@ incompatible representations and preclude independent uncertainty propagation.
 Let $\mathcal{V}_{\text{train}} = \{(\mathbf{v}_j, y_j)\}_{j=1}^{N}$ denote
 the score-pool training set with labels $y_j \in \{0,1\}$, where the
 ransomware class is a fraction $r \ll 0.5$ of samples. We apply Conditional
-Tabular GAN (CTGAN)~\cite{xu2019modeling} to generate synthetic minority-class
+Tabular GAN (CTGAN)~\cite{xu_ctgan_2019} to generate synthetic minority-class
 score-pool vectors.
 
 The CTGAN minimax objective is:
@@ -650,7 +641,7 @@ samples in $(\hat{p}, \sigma_{\max})$ space.
 The objective $J(\Theta)$ in~\eqref{eq:objective} is non-differentiable with
 respect to $\Theta$ (it involves discrete triage counts). We therefore employ
 Bayesian optimisation via Tree-structured Parzen Estimation
-(TPE)~\cite{bergstra2011algorithms}.
+(TPE)~\cite{bergstra_algorithms_2011}.
 
 TPE models the probability density of $J$ conditioned on $\Theta$ as:
 \begin{equation}\label{eq:tpe}
@@ -749,7 +740,7 @@ The Expert Feedback Loop allows an analyst-approved correction label
 $\tilde{y}$ for an escalated sample to update the Decision MLP $g_\phi$
 incrementally, without catastrophic forgetting of the base agents' knowledge.
 
-We apply Elastic Weight Consolidation (EWC)~\cite{kirkpatrick2017overcoming}.
+We apply Elastic Weight Consolidation (EWC)~\cite{kirkpatrick_ewc_2017}.
 Let $\phi^*$ be the parameters of $g_\phi$ trained on the original dataset
 $\mathcal{D}_0$, and let $F_j$ denote the diagonal Fisher information for
 parameter $j$:
@@ -820,7 +811,7 @@ analyst review.
 
 \subsection{Datasets}\label{sec:datasets}
 
-\textbf{RDset}~\cite{rdset}: $138{,}047$ Windows Portable Executable (PE)
+\textbf{RDset}~\cite{kabuye2025explainable,mathur2020ransomware}: $138{,}047$ Windows Portable Executable (PE)
 files ($41{,}123$ ransomware; $96{,}924$ benign). Used exclusively for
 Semantic Agent training and evaluation. Disjoint train/test splits at the
 binary (file-hash) level.
