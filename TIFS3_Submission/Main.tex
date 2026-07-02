@@ -1506,36 +1506,167 @@ split. We adopt $N_{\text{synth}}{=}2{,}000$ as a conservative default.
 
 \subsection{Where the Framework Excels}
 
-% Semantic agent: AUROC 0.996 — PE structural features discriminate clearly
-% Temporal holdout: AUROC 0.980 — no significant temporal drift
-% Calibration gain: ECE 0.094 → 0.018 enables trustworthy autonomous decisions
+The framework's strongest performance occurs across three distinct areas:
+static PE detection, temporal and hardware generalisation, and calibrated
+autonomous triage.
+
+The Semantic Agent achieves AUROC $0.996$ on RDset, demonstrating that
+sentence-transformer embeddings of PE structure provide near-perfect
+discriminability when evaluated on the same family distribution as training.
+This modality is well-suited to static pre-execution screening, where PE files
+can be analysed before execution begins.
+
+Across the two within-distribution behavioural generalisation axes---temporal
+holdout (AUROC $0.980$) and hardware holdout (AUROC $0.962$)---Decision MLP
+performance matches or exceeds random-stratified performance
+(Table~\ref{tab:generalisation}).
+The absence of temporal drift over the RanSMAP recording window suggests that
+the $10$-second I/O telemetry window captures behavioural signatures that are
+stable across recording sessions and across the three hardware configurations
+present in the dataset.
+
+Calibration improvement is the most operationally significant result.
+Mean fusion inherits structural miscalibration ($\text{ECE}=0.094$), and
+temperature scaling does not resolve it ($\text{ECE}$ rises to $0.118$).
+The Decision MLP learns to implicitly down-weight poorly-calibrated Knowledge
+Agent outputs under distributional shift, achieving $\text{ECE}=0.018$---a
+$5.2\times$ reduction that enables meaningful autonomous triage.
+At the Bayesian TPE-optimised operating point, $35.3\%$ of samples are
+autonomously classified without escalation, compared with $0\%$ under a
+fixed-threshold policy at comparable balanced accuracy.
+The Expert Feedback Loop demonstrates that analyst corrections can be
+incorporated incrementally: EWC limits catastrophic forgetting to
+$\Delta\text{AUPRC}=0.001$ across five feedback iterations
+(Table~\ref{tab:ewc_feedback}), permitting operational adaptation without
+full retraining.
 
 \subsection{Where the Framework Struggles}
 
-% Family holdout: AUROC 0.706 — unseen families
-% Key framing: σ_beh rises → ESCALATE fires → graceful degradation
-% Concurrent execution: 1.5% detection rate (shared limitation with Hirano)
-% Honest acknowledgement: not suitable for autonomous containment on unseen families
+The framework's principal failure mode is distributional shift at the family
+level.
+Under family holdout, the Behavioural CNN drops to AUROC $0.707$ and the
+Decision MLP to $0.676$---degradations of $0.254$ and $0.300$ from
+random-stratified performance respectively.
+Fusion does not recover this gap: the Knowledge Agent's corpus-mean fallback
+for unseen families injects noise into the score pool, and the Decision MLP's
+learned weighting cannot fully compensate.
+The framework is therefore not suitable for autonomous containment decisions
+on ransomware families entirely absent from training without prior operator
+review.
+
+Concurrent execution presents a more fundamental limitation.
+When ransomware and a benign application run simultaneously on the same host,
+the hypervisor-level telemetry aggregates both processes' I/O and memory
+events.
+The Behavioural Agent observes superimposed signals, suppressing
+$\hat{p}_{\text{beh}}$ and inflating $\sigma_{\text{beh}}$.
+For the most adversarial case---AESCrypt running concurrently with
+REvil---detection rate reaches only $1.5\%$ without Peer Consultation and
+$4.2\%$ with it (Section~\ref{sec:results_agents}).
+This limitation is shared with Hirano et al.~\cite{hirano2025ransmap}:
+hypervisor-level telemetry without process-level attribution cannot
+cleanly separate concurrent execution traces.
+
+Critically, the uncertainty mechanism provides graceful degradation rather
+than silent failure in both scenarios.
+Under family holdout, $\sigma_{\text{beh}}$ rises on unseen families
+(Figure~\ref{fig:violin}), and the triage policy routes these samples to
+\textsc{Escalate} with escalation rates of $32$--$38\%$ for the
+lowest-recall Conti sub-variants (Table~\ref{tab:ood_variants}).
+Under concurrent execution, escalation rate exceeds $60\%$ for all
+\texttt{mix} combinations under Bayesian TPE thresholds
+(Figure~\ref{fig:mix}).
+The system therefore identifies the scenarios in which it is least reliable
+and defers to analyst review---a property absent from single-output
+detectors.
 
 \subsection{Comparison with Hirano et al.~\cite{hirano2025ransmap}}
 
-% Direct comparison: same dataset, same hardware configs
-% Hirano: 1D-CNN+LSTM, 23D, T_window=0.1s, T_d=30s, F-score metric
-% Ours: Behavioural CNN+MC Dropout, 16D, T_window=10s, AUROC metric
-% Points of comparison: hardware holdout F-score, Conti variants recall
-% Key advantage: uncertainty routing on failure cases
+The closest direct comparator is the RanSMAP detector of Hirano et al., which
+operates on the same hypervisor-level telemetry and is evaluated on the same
+dataset.
+Architectural differences limit strict metric comparisons: Hirano et al.\ use
+a 1D-CNN+LSTM trained on 23D features ($\chi_s$ 5D storage $+$ $\chi_m$ 18D
+memory) with a $0.1$-second window aggregated over a $30$-second detection
+window and report F-score as their primary metric, while our Behavioural CNN
+uses 16D features ($5$D storage $+$ $11$D memory) with a $10$-second window
+and reports AUROC.
+
+On the hardware-holdout partition---the closest common ground---Hirano et al.\
+report F-score $0.856$, while our Behavioural CNN achieves AUROC $0.939$ on
+the same split (Table~\ref{tab:generalisation}).
+On the Conti sub-variant partition, Hirano et al.\ report mean recall $0.56$
+on their full 23D feature set; our Behavioural CNN achieves mean recall
+$0.68$ (Table~\ref{tab:ood_variants}), despite using seven fewer input
+dimensions and no LSTM temporal integration.
+This suggests that the $10$-second window captures sufficient temporal context
+without recurrent processing, at substantially lower architectural complexity.
+
+The primary qualitative advantage of the proposed framework is the uncertainty
+signal.
+Hirano et al.'s output is a binary classification without any measure of model
+confidence.
+On the Conti sub-variants and concurrent-execution scenarios where both
+frameworks struggle, the proposed system escalates rather than silently
+misclassifies: the inverse relationship between per-variant recall and
+escalation rate (Table~\ref{tab:ood_variants}) confirms that $\sigma_{\text{beh}}$
+reliably identifies samples most likely to be misclassified.
+This transforms undetected attacks into escalated events, preserving the
+analyst's ability to intervene precisely where the model is least reliable.
 
 \subsection{Adaptive Thresholding}
 
-% Current limitation: thresholds static post-deployment
-% Future: sliding-window recalibration of J(τ,κ) on rolling analyst labels
-% Bayesian online update: maintain posterior over (τ,κ)
+The Bayesian TPE policy optimisation (Section~\ref{sec:triage}) sets
+thresholds $(\tau^*, \kappa^*)$ once on the calibration split and holds them
+fixed for the lifetime of the deployment.
+This is appropriate when the operational cost parameter $\lambda$ is stable
+and the threat distribution is stationary.
+In practice, neither assumption holds indefinitely: new ransomware families
+shift the empirical risk-score distribution, and organisational risk tolerance
+changes in response to operational conditions.
+
+A principled extension would treat $(\tau, \kappa)$ as parameters of a
+Bayesian posterior updated online from rolling analyst feedback.
+Each analyst-confirmed or analyst-corrected triage decision provides a noisy
+observation of whether the current threshold was appropriate; a
+sliding-window estimate of $J(\tau, \kappa)$ on recent confirmed labels would
+allow thresholds to recalibrate without retraining the underlying agents.
+The Expert Feedback Loop (Section~\ref{sec:feedback}) already provides the
+infrastructure for incremental Decision MLP updates; adaptive thresholding
+would operate at the policy layer above it, requiring no change to agent or
+fusion model weights.
+We defer this extension to future work.
 
 \subsection{Runtime and Deployment}
 
-% 3.7ms full pipeline → supports >2000 concurrent streams before bottleneck
-% Behavioural CNN: 8,385 parameters (32.8 KB) — endpoint deployable
-% T_window=10s: practical detection latency; compare with Hirano's T_d=30s
+End-to-end inference latency for the full three-agent pipeline is
+$6.71\,\text{ms}$ median on an NVIDIA GB10 GPU (batch size $32$, MC Dropout
+$T{=}10$ passes), with a p95 of $7.24\,\text{ms}$ (Table~\ref{tab:latency}).
+At a $10$-second telemetry window, this supports approximately $1{,}490$
+concurrent monitored streams per GPU before inference becomes the scheduling
+bottleneck.
+For comparison, Hirano et al.'s $T_d{=}30\,\text{s}$ detection window
+requires three times the buffering latency to reach a detection decision,
+even before model inference.
+
+The Behavioural CNN is particularly well-suited to endpoint deployment: at
+$8{,}385$ parameters ($32.8\,\text{KB}$), it fits within the L1 cache of
+any modern processor and can run without a GPU.
+The MC Dropout overhead ($3.7\times$ over a single deterministic forward pass)
+is the dominant latency cost; at $T{=}10$, this overhead is $1.42\,\text{ms}$
+and noise in $\sigma_{\text{beh}}$ falls below $1\%$ of its mean---establishing
+$T{=}10$ as the practical operating point (Section~\ref{sec:ablation}).
+Deployments with tighter latency budgets can reduce $T$ to $5$ at the cost
+of $8.3\%$ noise in the uncertainty estimate, which remains usable for coarse
+escalation routing but degrades fine-grained threshold sensitivity.
+
+The Semantic CNN ($1.77\,\text{ms}$) and Knowledge CNN ($1.83\,\text{ms}$)
+are more parameter-intensive and assume GPU availability, but their inference
+can be parallelised with the Behavioural CNN since all three agents operate
+independently before fusion.
+End-to-end latency is therefore bounded by the slowest agent plus the
+Decision MLP rather than by the sum, making the $6.71\,\text{ms}$ figure a
+conservative serial-execution bound.
 
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Conclusion}\label{sec:conclusion}
