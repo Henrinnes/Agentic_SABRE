@@ -1735,9 +1735,10 @@ Features are computed over non-overlapping $T_{\text{window}}{=}10\,\text{s}$ wi
          compute $C_{s,o}$ as event count
   \State $V_{m,w} \gets \text{Var}(\{\text{GPA}(e) : e \in E_w,\,
          o(e){=}w\})$
-  \State $\chi_m \gets [H_{m,w},\, H_{m,rw},\, C_{4K,r},\, C_{4K,w},\,
-         C_{4K,rw},\, C_{4K,x},\, C_{2M,r},\, C_{2M,rw},\,
-         C_{\text{MMIO},r},\, C_{\text{MMIO},w},\, V_{m,w}]$ \Comment{11D}
+  \State $\chi_m \gets [H_{m,w},\, H_{m,rw},\, C_{4K,r},\, C_{4K,w},\,$
+  \Statex \hspace{3.2em}$C_{4K,rw},\, C_{4K,x},\, C_{2M,r},\, C_{2M,rw},$
+  \Statex \hspace{3.2em}$C_{\text{MMIO},r},\, C_{\text{MMIO},w},\, V_{m,w}]$
+         \Comment{11D}
   \State $X[w, :] \gets [\chi_s \,;\, \chi_m]$
          \hfill\Comment{16D feature row}
 \EndFor
