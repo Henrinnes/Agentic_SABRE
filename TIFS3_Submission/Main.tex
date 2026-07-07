@@ -1668,6 +1668,35 @@ End-to-end latency is therefore bounded by the slowest agent plus the
 Decision MLP rather than by the sum, making the $6.71\,\text{ms}$ figure a
 conservative serial-execution bound.
 
+\textbf{Computational complexity.}
+Per-sample inference cost is dominated by MC Dropout: each agent performs $T$
+independent forward passes, giving $\mathcal{O}(T \cdot P_i)$ operations per
+agent for a fixed-dimensional input, where $P_i$ is the parameter count of
+agent $i$.
+Since the three agents execute in parallel, the effective inference cost is
+$\mathcal{O}(T \cdot \max_i P_i)$, with $T{=}10$ and the Semantic CNN
+(input $\mathbb{R}^{384}$) setting the bound.
+The Decision MLP contributes $\mathcal{O}(1)$ (fixed $6{\to}32{\to}1$
+architecture).
+Behavioural feature extraction (Algorithm~\ref{alg:features}) costs
+$\mathcal{O}(|E_w|)$ per window, where $|E_w|$ is the number of
+hypervisor events in the $10$-second window---linear in telemetry volume
+and independent of model size.
+
+Offline training costs are incurred once at deployment time.
+CTGAN fitting scales as $\mathcal{O}(E_{\text{CTGAN}} \cdot N_{\text{tr}}
+\cdot d_v)$ with $E_{\text{CTGAN}}{=}50$ epochs, $N_{\text{tr}}$ the
+training set size, and $d_v{=}6$ the score-pool dimension.
+Bayesian TPE optimisation is $\mathcal{O}(K_{\max}^{2} \log K_{\max})$
+over $K_{\max}{=}300$ trials, as each trial's density estimation evaluates
+the $\ell(x)$ and $g(x)$ Parzen estimators over all prior observations.
+
+The Expert Feedback Loop incurs an online cost of
+$\mathcal{O}(N_F \cdot |\phi|)$ per feedback iteration---computing the
+diagonal Fisher over $N_F{=}1{,}000$ calibration samples and updating
+$|\phi|$ MLP parameters---which is negligible relative to initial training
+and completes in under one second on any modern GPU.
+
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Conclusion}\label{sec:conclusion}
 % ═══════════════════════════════════════════════════════════════════════════════
