@@ -320,7 +320,7 @@ Global feature importance for each agent is assessed via permutation importance:
 I_j = \text{AUC}_\text{orig} - \text{AUC}_j.
 \label{eq:eswa_permimp}
 \end{equation}
-For the Behavioural Agent, the highest $I_j$ values correspond to dispersion-based statistics: \texttt{read\_LBA\_variance}, \texttt{write\_LBA\_variance}, \texttt{mem\_read\_GPA\_variance}, and \texttt{mem\_write\_GPA\_variance}, confirming that ransomware distinguishes itself through irregular, spatially bursty memory and storage access footprints rather than raw activity volume.
+For the Behavioural Agent, the highest $I_j$ values correspond to dispersion-based statistics — \texttt{read\_LBA\_variance}, \texttt{write\_LBA\_variance}, \texttt{mem\_read\_GPA\_variance}, and \texttt{mem\_write\_GPA\_variance} — confirming that ransomware distinguishes itself through irregular, spatially bursty memory and storage access footprints rather than raw activity volume.
 
 \subsection{Gradient Saliency}
 
@@ -365,6 +365,7 @@ Counterfactual experiments on 50 high-confidence malicious samples show that onl
 \centering
 \caption{Representative behavioural counterfactuals. Relative changes per Equation~\eqref{eq:eswa_cf}.}
 \label{tab:eswa_cf}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Sample} & $p_\text{beh}(\mathbf{b})$ & $p_\text{beh}(\tilde{\mathbf{b}})$ & $\|\Delta^\star\|_2$ & \textbf{Most changed features} \\
@@ -373,7 +374,7 @@ CF$_1$ & 0.70 & 0.30 & 0.12 & \texttt{read\_LBA\_var} ($-1.6\%$), \texttt{mem\_w
 CF$_2$ & 0.60 & 0.10 & 0.09 & \texttt{write\_LBA\_var} ($-0.9\%$), \texttt{mem\_read\_GPA\_var} ($-0.6\%$) \\
 CF$_3$ & 0.90 & 0.40 & 0.14 & \texttt{mem\_write\_GPA\_var} ($-2.5\%$), \texttt{write\_LBA\_var} ($+1.4\%$) \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 At the fusion level, semantic counterfactuals are computed in embedding space. Given an original embedding $\mathbf{z}_0$, a counterfactual $\mathbf{z}_\text{cf}$ is obtained by solving:
