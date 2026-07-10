@@ -1,5 +1,5 @@
 %%  IEEE Transactions on Information Forensics and Security
-%%  Supplementary Material — Extended Agentic SABRE
+%%  Supplementary Material
 \documentclass[journal]{IEEEtran}
 
 \usepackage{amsmath,amssymb,amsthm}
@@ -213,9 +213,9 @@ events.
 \section{Adaptive Thresholding}\label{sec:supp_adaptive}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The Bayesian TPE policy optimisation sets thresholds $(\tau^*, \kappa^*)$ once
-on the calibration split and holds them fixed for the lifetime of the
-deployment.
+The Bayesian TPE policy optimisation sets four thresholds
+$(\tau_{\text{high}}^*, \tau^*, \kappa^*, \kappa_{\text{low}}^*)$ once on
+the calibration split and holds them fixed for the lifetime of the deployment.
 This is appropriate when the operational cost parameter $\lambda$ is stable
 and the threat distribution is stationary.
 In practice, neither assumption holds indefinitely: new ransomware families
@@ -236,6 +236,18 @@ We defer this extension to future work.
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Ablation Figures and Feature Analysis}\label{sec:supp_ablation}
 % ─────────────────────────────────────────────────────────────────────────────
+
+This section provides the full ablation figures supporting Section~VII-D of
+the main paper.
+Figure~\ref{fig:uncertainty_dist} shows the $\sigma_{\text{beh}}$
+distribution per class, confirming the epistemic signal mechanism.
+Figure~\ref{fig:t_sensitivity} quantifies MC Dropout pass-count stability
+and latency.
+Figure~\ref{fig:feature_ablation} and Table~\ref{tab:feature_ablation} report
+AUROC by feature subset.
+Figure~\ref{fig:violin} shows per-family uncertainty distributions.
+Figures~\ref{fig:feature_importance} and~\ref{fig:feedback} show SHAP feature
+importance and Expert Feedback Loop convergence respectively.
 
 \begin{figure}[h]
   \centering
