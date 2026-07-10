@@ -63,40 +63,29 @@ E-mail: bissac@ieee.org.}%
 
 \begin{abstract}
 Ransomware detection under operational constraints demands more than a binary
-classification verdict: it requires a principled mechanism for expressing
-per-sample uncertainty, fusing evidence from heterogeneous modalities, and
-converting uncertainty into actionable triage decisions that balance autonomous
-containment against analyst escalation. We present a heterogeneous multi-agent
-detection framework that addresses these requirements through four coupled
-contributions. First, three specialised agents---a Semantic Convolutional
-Neural Network (CNN) operating on static Portable Executable (PE) embeddings
-($\R^{384}$), a Behavioural CNN operating on 16-dimensional runtime telemetry
-windows from a thin hypervisor ($\R^{16}$), and a Knowledge CNN operating on
-ATT\&CK tactic embeddings ($\R^{d}$)---each employ Monte Carlo (MC) Dropout
-to produce a predictive probability $\hat{p}_i$ and an epistemic uncertainty
-$\sigma_i$ per forward pass. Second, a Decision MLP replaces heuristic mean
-fusion: it learns a calibrated aggregate risk score from the six-dimensional
-score pool $(\hat{p}_i, \sigma_i)_{i=1}^{3}$, reducing Expected Calibration
-Error (ECE) from $0.094$ to $0.018$. Third, Conditional Tabular GAN (CTGAN)
-augments the score-space training distribution to address class imbalance in
-the fusion layer without retraining the base agents. Fourth, a triage policy
-defined over four thresholds $(\tau_{\text{high}}, \tau, \kappa,
-\kappa_{\text{low}})$ is optimised via Bayesian Tree-structured Parzen
-Estimation (TPE) over 300 trials using the objective
-$J(\tau,\kappa)=\text{bal\_acc}(\tau,\kappa)-\lambda\cdot\text{esc\_rate}
-(\tau,\kappa)$, reducing the escalation rate from $85\%$ to $25\%$ while
-increasing balanced accuracy from $0.525$ to $0.866$. A Peer Consultation
-mechanism prevents knowledge collapse under concurrent benign--ransomware
-execution, and an Expert Feedback Loop with Elastic Weight Consolidation (EWC)
-enables continual adaptation to novel families with negligible catastrophic
-forgetting ($\Delta\text{AUPRC}=0.001$ on retained families). Evaluation
-across four generalisation axes (random, temporal, family holdout, hardware
-holdout) over six independent seeds on RanSMAP, RDset, and RansKnow
-demonstrates that the framework achieves AUROC $0.996$ on static PE detection,
-AUROC $0.963$ on runtime behavioural detection, and AUROC $0.980$ under
-temporal holdout, while a Mondrian conformal prediction wrapper provides
-distribution-free coverage guarantees with $77\%$ of traffic auto-classified at
-$99\%$ coverage.
+verdict: it requires principled uncertainty estimation, heterogeneous evidence
+fusion, and uncertainty-driven triage that balances autonomous containment
+against analyst escalation. We present a three-agent framework addressing
+these requirements through four coupled contributions. First, a Semantic CNN
+on static PE embeddings, a Behavioural CNN on 16-dimensional hypervisor
+telemetry, and a Knowledge CNN on ATT\&CK tactic embeddings each employ Monte
+Carlo Dropout to produce per-sample predictive probabilities and epistemic
+uncertainties. Second, a Decision MLP learns a calibrated aggregate risk score
+from the six-dimensional score pool, reducing Expected Calibration Error from
+$0.094$ to $0.018$; Conditional Tabular GAN (CTGAN) augmentation addresses
+score-space imbalance without retraining base agents. Third, a four-threshold
+triage policy optimised via Bayesian TPE reduces
+the escalation rate from $85\%$ to $25\%$ while raising balanced accuracy from
+$0.525$ to $0.866$. Fourth, a Peer Consultation mechanism mitigates knowledge
+collapse under concurrent benign--ransomware execution, and an Expert Feedback
+Loop with Elastic Weight Consolidation enables continual adaptation to novel
+families with negligible catastrophic forgetting
+($\Delta\text{AUPRC}{=}0.001$). Evaluated across four generalisation axes
+over six independent seeds on RanSMAP, RDset, and RansKnow, the framework
+achieves AUROC $0.996$ on static PE detection, AUROC $0.963$ on runtime
+behavioural detection, and AUROC $0.980$ under temporal holdout. A Mondrian
+conformal prediction wrapper provides distribution-free coverage guarantees,
+auto-classifying $77\%$ of traffic at $99\%$ coverage.
 \end{abstract}
 
 \begin{IEEEkeywords}
