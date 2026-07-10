@@ -175,23 +175,23 @@ Figure~\ref{fig:cm_recall} shows per-class accuracy for all twelve classes
 \end{figure}
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Comparison with Hirano et al.}\label{sec:supp_hirano}
+\section{Comparison with Hirano and Kobayashi}\label{sec:supp_hirano}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The closest direct comparator is the RanSMAP detector of Hirano et al., which
+The closest direct comparator is the RanSMAP detector of Hirano and Kobayashi, which
 operates on the same hypervisor-level telemetry and is evaluated on the same
 dataset.
-Architectural differences limit strict metric comparisons: Hirano et al.\ use
+Architectural differences limit strict metric comparisons: Hirano and Kobayashi\ use
 a 1D-CNN+LSTM trained on 23D features ($\chi_s$ 5D storage $+$ $\chi_m$ 18D
 memory) with a $0.1$-second window aggregated over a $30$-second detection
 window and report F-score as their primary metric, while our Behavioural CNN
 uses 16D features ($5$D storage $+$ $11$D memory) with a $10$-second window
 and reports AUROC.
 
-On the hardware-holdout partition---the closest common ground---Hirano et al.\
+On the hardware-holdout partition---the closest common ground---Hirano and Kobayashi\
 report F-score $0.856$, while our Behavioural CNN achieves AUROC $0.939$ on
 the same split.
-On the Conti sub-variant partition, Hirano et al.\ report mean recall $0.56$
+On the Conti sub-variant partition, Hirano and Kobayashi\ report mean recall $0.56$
 on their full 23D feature set; our Behavioural CNN achieves mean recall
 $0.68$, despite using seven fewer input dimensions and no LSTM temporal
 integration.
@@ -200,7 +200,7 @@ without recurrent processing, at substantially lower architectural complexity.
 
 The primary qualitative advantage of the proposed framework is the uncertainty
 signal.
-Hirano et al.'s output is a binary classification without any measure of model
+Hirano and Kobayashi's output is a binary classification without any measure of model
 confidence.
 On the Conti sub-variants and concurrent-execution scenarios where both
 frameworks struggle, the proposed system escalates rather than silently

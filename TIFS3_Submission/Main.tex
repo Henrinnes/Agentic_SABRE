@@ -871,7 +871,7 @@ Inference latency: $500$ repetitions, $50$ warm-up passes, batch size $32$.
 
 We compare against:
 \begin{enumerate}
-  \item Hirano et al.~\cite{hirano2025ransmap}: 1D-CNN + LSTM baseline on
+  \item Hirano and Kobayashi~\cite{hirano2025ransmap}: 1D-CNN + LSTM baseline on
         RanSMAP (23D features, $T_{\text{window}}=0.1\,\text{s}$,
         $T_d=30\,\text{s}$) — direct dataset comparison.
   \item Mean fusion (equal-weight average of $\hat{p}_i$) without Decision
@@ -935,7 +935,7 @@ Decision MLP (ours)
   & $0.976 \pm 0.0002$ & $\mathbf{0.980} \pm 0.0002$
   & $0.676 \pm 0.0004$ & $\mathbf{0.962} \pm 0.0003$ \\
 \midrule
-Hirano et al.~\cite{hirano2025ransmap}
+Hirano and Kobayashi~\cite{hirano2025ransmap}
   (23D, $T_w{=}0.1$s)
   & $--$ & $--$ & $--$ & reported as F-score \\
 \bottomrule
@@ -1056,7 +1056,7 @@ Crucially, $\sigma_{\text{beh}}$ rises on unseen-family samples, routing
 them to \textsc{Escalate} rather than \textsc{Auto-Contain}---preserving
 analyst oversight precisely where the model is least reliable.
 
-Hirano et al.~\cite{hirano2025ransmap} report a hardware-holdout F-score of
+Hirano and Kobayashi~\cite{hirano2025ransmap} report a hardware-holdout F-score of
 $0.856$ (1D-CNN+LSTM, 23D features, $T_w{=}0.1\,\text{s}$,
 $T_d{=}30\,\text{s}$ detection window).
 Our Behavioural CNN achieves AUROC $0.939$ on the same hardware-holdout
@@ -1099,10 +1099,10 @@ The \texttt{variants} partition of RanSMAP provides $1{,}397$ windows from
 seven Conti sub-variants (Conti.A through Conti.G), none of which appear
 in the training split.
 Table~\ref{tab:ood_variants} compares per-variant recall with the baseline
-reported by Hirano et al.~\cite{hirano2025ransmap} (Table~14 of the
+reported by Hirano and Kobayashi~\cite{hirano2025ransmap} (Table~14 of the
 original paper).
 
-Hirano et al. report mean recall $0.56$ on the full 23D feature set ($\chi$),
+Hirano and Kobayashi report mean recall $0.56$ on the full 23D feature set ($\chi$),
 $0.62$ on storage-only features ($\chi_s$), and $0.71$ on memory-only
 features ($\chi_m$) for these Conti sub-variants.
 Our Behavioural CNN achieves mean recall $0.68$ on the same partition
@@ -1115,7 +1115,7 @@ escalation rate is highest ($\geq 32\%$): $\sigma_{\text{beh}}$ rises
 as the model encounters novel execution patterns, and the triage policy
 routes these samples to \textsc{Escalate} rather than autonomous
 containment.
-This contrasts with Hirano et al.'s detector, which produces no uncertainty
+This contrasts with Hirano and Kobayashi's detector, which produces no uncertainty
 signal and silently misclassifies low-recall variants as benign.
 
 \begin{table}[t]
@@ -1150,7 +1150,7 @@ Mean    & $0.56$ & $\mathbf{0.68}$ & $0.26$ \\
   \includegraphics[width=\columnwidth]{Figures/fig13_ood_variants.pdf}
   \caption{Per-variant recall on the RanSMAP \texttt{variants} partition
     (seven Conti sub-variants). Our Behavioural CNN (16D, $T_w{=}10\,\text{s}$)
-    outperforms Hirano et al.\ (23D) on six of seven variants; the secondary
+    outperforms Hirano and Kobayashi\ (23D) on six of seven variants; the secondary
     axis shows the escalation rate --- highest where recall is lowest,
     confirming uncertainty-conditioned graceful degradation.}
   \label{fig:ood_variants}
@@ -1182,7 +1182,7 @@ Although absolute concurrent-execution detection rates remain low,
 the escalation rate rises to $>60\%$ for all concurrent-execution scenarios
 under Bayesian TPE thresholds, ensuring that the system routes these
 uncertain cases to analyst review rather than autonomous containment.
-This compares favourably with Hirano et al.~\cite{hirano2025ransmap}, whose
+This compares favourably with Hirano and Kobayashi~\cite{hirano2025ransmap}, whose
 detector produces a binary output and has no mechanism to express the
 ambiguity introduced by concurrent benign processes.
 
@@ -1365,7 +1365,7 @@ $\hat{p}_{\text{beh}}$ and inflating $\sigma_{\text{beh}}$.
 For the most adversarial case---AESCrypt running concurrently with
 REvil---detection rate reaches only $1.5\%$ without Peer Consultation and
 $4.2\%$ with it (Section~\ref{sec:eval}).
-This limitation is shared with Hirano et al.~\cite{hirano2025ransmap}:
+This limitation is shared with Hirano and Kobayashi~\cite{hirano2025ransmap}:
 hypervisor-level telemetry without process-level attribution cannot
 cleanly separate concurrent execution traces.
 
@@ -1382,10 +1382,10 @@ The system therefore identifies the scenarios in which it is least reliable
 and defers to analyst review---a property absent from single-output
 detectors.
 
-\subsection{Comparison with Hirano et al.~\cite{hirano2025ransmap}}
+\subsection{Comparison with Hirano and Kobayashi~\cite{hirano2025ransmap}}
 
 The closest direct comparator operates on the same hypervisor-level telemetry.
-Hirano et al.\ use a 1D-CNN+LSTM on 23D features with a $30$-second window
+Hirano and Kobayashi\ use a 1D-CNN+LSTM on 23D features with a $30$-second window
 and report F-score; on the hardware-holdout split they achieve F-score $0.856$
 while our Behavioural CNN achieves AUROC $0.939$ (Table~\ref{tab:generalisation}).
 On the Conti sub-variant partition, our Behavioural CNN achieves mean recall
@@ -1450,7 +1450,7 @@ triage thresholds under concept drift.
 The behavioural feature extraction procedure (Algorithm~S1), the full
 Decision MLP training procedure with CTGAN augmentation and Bayesian TPE
 (Algorithm~S2), per-class confusion matrices for all evaluation splits,
-a detailed comparison with Hirano et al.~\cite{hirano2025ransmap}, adaptive
+a detailed comparison with Hirano and Kobayashi~\cite{hirano2025ransmap}, adaptive
 thresholding discussion, and full computational complexity derivations are
 provided in the supplementary material.
 
