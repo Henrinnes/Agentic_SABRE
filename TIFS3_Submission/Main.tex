@@ -1308,7 +1308,7 @@ and adding only $1.42\,\text{ms}$ overhead over a deterministic pass.
 $T{=}1$ degenerates the triage policy to two actions (no uncertainty signal).
 \textbf{(2) Feature ablation:} storage-only ($\chi_s$, 5D) achieves AUROC
 $0.851$; memory-only ($\chi_m$, 11D) achieves $0.903$; the combined 16D
-vector achieves $\mathbf{0.963}$, confirming complementarity.
+vector achieves $\mathbf{0.961}$, confirming complementarity.
 \textbf{(3) Decision MLP depth:} one hidden layer ($6{\to}32{\to}1$, ECE
 $0.021$) versus two ($6{\to}32{\to}16{\to}1$, ECE $0.018$) versus three
 ($6{\to}32{\to}16{\to}8{\to}1$, ECE $0.019$) are statistically equivalent
@@ -1414,7 +1414,7 @@ a GPU; the three agents parallelise before fusion, so end-to-end latency is
 bounded by the slowest agent rather than their sum.
 Per-sample complexity is $\mathcal{O}(T \cdot \max_i P_i)$; offline training
 (CTGAN, TPE, EWC) is incurred once at deployment.
-Full derivations are in Supplementary Section~S-VI.
+Full derivations are in Supplementary Section~S-VII.
 
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Conclusion}\label{sec:conclusion}
