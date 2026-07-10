@@ -82,7 +82,7 @@ Loop with Elastic Weight Consolidation enables continual adaptation to novel
 families with negligible catastrophic forgetting
 ($\Delta\text{AUPRC}{=}0.001$). Evaluated across four generalisation axes
 over six independent seeds on RanSMAP, RDset, and RansKnow, the framework
-achieves AUROC $0.996$ on static PE detection, AUROC $0.963$ on runtime
+achieves AUROC $0.996$ on static PE detection, AUROC $0.961$ on runtime
 behavioural detection, and AUROC $0.980$ under temporal holdout. A Mondrian
 conformal prediction wrapper provides distribution-free coverage guarantees,
 auto-classifying $77\%$ of traffic at $99\%$ coverage.
@@ -200,7 +200,7 @@ Dropout and deep ensembles are the most broadly applicable.
 Deep ensembles~\cite{lakshminarayanan_simple_2017} independently trained on
 random initialisations achieve better marginal calibration than MC Dropout
 but require retaining $M$ full model copies at inference.
-For distributional-freee guarantees, conformal prediction~\cite{papadopoulos_icp_2002}
+For distribution-free guarantees, conformal prediction~\cite{papadopoulos_icp_2002}
 and its class-conditional Mondrian variant~\cite{vovk_mondrian_2003} bound
 coverage probability without parametric assumptions; Angelopoulos and
 Bates~\cite{angelopoulos_conformal_risk_2022} generalise this to arbitrary
@@ -529,7 +529,7 @@ where $c$ is a conditional class label, $\mathbf{z}$ is a latent noise vector,
 $\hat{\mathbf{v}}$ is a linear interpolation between real and generated
 samples, and $\gamma$ is the gradient-penalty coefficient.
 
-Crucially, CTGAN operates on $\mathbf{v} \in [0,1]^8$, not on raw features:
+Crucially, CTGAN operates on $\mathbf{v} \in [0,1]^6$, not on raw features:
 this ensures that the generator cannot produce physically impossible score
 combinations and preserves the calibration structure of the base agents.
 
@@ -700,6 +700,8 @@ weighted combination of peer scores:
 \end{equation}
 where $w_{\text{sem}} + w_{\text{know}} = 1$ and weights are proportional to
 the inverse uncertainty of each peer: $w_i \propto 1/\sigma_i$.
+In practice $\kappa_{\text{PC}}$ is set equal to the triage threshold $\kappa$
+optimised by Bayesian TPE (Section~\ref{sec:triage}).
 \end{definition}
 
 Peer Consultation does not suppress $\sigma_{\text{beh}}$; rather, it routes
@@ -897,7 +899,7 @@ The Semantic Agent ($0.996$) is evaluated on RDset only; it is not directly
 comparable across RanSMAP splits because PE structure is not extracted
 from execution windows.
 The Behavioural Agent degrades substantially under family holdout
-(AUROC $0.706$), confirming that unseen ransomware families exhibit
+(AUROC $0.707$), confirming that unseen ransomware families exhibit
 distributional shift in I/O telemetry space.
 Decision MLP fusion improves on the Behavioural Agent in all splits where
 the Knowledge Agent provides complementary signal
@@ -1100,7 +1102,7 @@ Table~\ref{tab:ood_variants} compares per-variant recall with the baseline
 reported by Hirano et al.~\cite{hirano2025ransmap} (Table~14 of the
 original paper).
 
-Hirano et al. report mean recall $0.55$ on the full 23D feature set ($\chi$),
+Hirano et al. report mean recall $0.56$ on the full 23D feature set ($\chi$),
 $0.62$ on storage-only features ($\chi_s$), and $0.71$ on memory-only
 features ($\chi_m$) for these Conti sub-variants.
 Our Behavioural CNN achieves mean recall $0.68$ on the same partition
@@ -1311,7 +1313,7 @@ vector achieves $\mathbf{0.963}$, confirming complementarity.
 $0.021$) versus two ($6{\to}32{\to}16{\to}1$, ECE $0.018$) versus three
 ($6{\to}32{\to}16{\to}8{\to}1$, ECE $0.019$) are statistically equivalent
 on AUROC; the one-layer variant is used in all experiments to match the
-SABRE-II baseline.
+prior two-agent architecture~\cite{kabuye2025sabre_eswa}.
 \textbf{(4) CTGAN ratio:} varying $N_{\text{synth}} \in [500,5000]$ produces
 no statistically significant change in AUROC or ECE; we adopt
 $N_{\text{synth}}{=}2{,}000$ as a conservative default.
@@ -1362,7 +1364,7 @@ The Behavioural Agent observes superimposed signals, suppressing
 $\hat{p}_{\text{beh}}$ and inflating $\sigma_{\text{beh}}$.
 For the most adversarial case---AESCrypt running concurrently with
 REvil---detection rate reaches only $1.5\%$ without Peer Consultation and
-$4.2\%$ with it (Section~\ref{sec:results_agents}).
+$4.2\%$ with it (Section~\ref{sec:eval}).
 This limitation is shared with Hirano et al.~\cite{hirano2025ransmap}:
 hypervisor-level telemetry without process-level attribution cannot
 cleanly separate concurrent execution traces.
@@ -1425,7 +1427,7 @@ MLP fusion with CTGAN augmentation, Bayesian TPE triage policy optimisation,
 and Peer Consultation with EWC continual learning---collectively address the
 structural limitations of single-modality binary detectors. The framework
 achieves strong static-PE detection (AUROC $0.996$) and runtime behavioural
-detection (AUROC $0.963$), reduces unnecessary escalation by $70\%$ over
+detection (AUROC $0.961$), reduces unnecessary escalation by $70\%$ over
 fixed-threshold baselines, and maintains calibration (ECE $0.018$) sufficient
 for trustworthy autonomous containment decisions. When the system encounters
 novel families or concurrent execution patterns beyond its training
