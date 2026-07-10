@@ -146,21 +146,6 @@ Bayesian TPE policy optimisation.
 \end{algorithm}
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Confusion Matrices}\label{sec:supp_confusion}
-% ─────────────────────────────────────────────────────────────────────────────
-
-Full per-class confusion matrices for the Behavioural CNN and Decision MLP
-on the random-stratified, family-holdout, and hardware-holdout test splits
-are provided below.
-The 12-class matrix (six ransomware families $\times$ six benign applications)
-confirms that LockBit and Darkside are most reliably detected
-(recall $\geq 0.95$ in all splits), while WannaCry shows the greatest
-sensitivity to the evaluation split (random: $0.89$; family holdout: $0.28$).
-Misclassifications predominantly occur between WannaCry and AESCrypt,
-consistent with the known I/O-pattern similarity between WannaCry's
-encryption and AESCrypt's legitimate bulk-encryption workload.
-
-% ─────────────────────────────────────────────────────────────────────────────
 \section{Comparison with Hirano et al.}\label{sec:supp_hirano}
 % ─────────────────────────────────────────────────────────────────────────────
 

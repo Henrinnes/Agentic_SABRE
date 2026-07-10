@@ -403,7 +403,7 @@ conditions~\cite{gal2016dropout}.
 
 We use $T=10$ passes per agent, empirically verified to stabilise $\sigma_i$
 to within $1\%$ of the $T=50$ estimate (Section~\ref{sec:ablation}).
-Supplementary Section~S-VI quantifies this
+Supplementary Section~S-V quantifies this
 stability and the associated latency trade-off.
 
 
@@ -1328,7 +1328,7 @@ SABRE-II baseline.
 \textbf{(4) CTGAN ratio:} varying $N_{\text{synth}} \in [500,5000]$ produces
 no statistically significant change in AUROC or ECE; we adopt
 $N_{\text{synth}}{=}2{,}000$ as a conservative default.
-Full ablation figures and tables are provided in Supplementary Section~S-VI.
+Full ablation figures and tables are provided in Supplementary Section~S-V.
 
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Discussion}\label{sec:discussion}
@@ -1383,7 +1383,7 @@ cleanly separate concurrent execution traces.
 Critically, the uncertainty mechanism provides graceful degradation rather
 than silent failure in both scenarios.
 Under family holdout, $\sigma_{\text{beh}}$ rises on unseen families
-(Supplementary Section~S-VI), and the triage policy routes these samples to
+(Supplementary Section~S-V), and the triage policy routes these samples to
 \textsc{Escalate} with escalation rates of $32$--$38\%$ for the
 lowest-recall Conti sub-variants (Table~\ref{tab:ood_variants}).
 Under concurrent execution, escalation rate exceeds $60\%$ for all
@@ -1405,14 +1405,14 @@ More importantly, where both frameworks struggle, ours escalates rather than
 misclassifies: $\sigma_{\text{beh}}$ reliably identifies the most uncertain
 samples (Table~\ref{tab:ood_variants}), preserving analyst oversight precisely
 where the model is least reliable.
-An extended comparison is provided in Supplementary Section~S-IV.
+An extended comparison is provided in Supplementary Section~S-III.
 
 \subsection{Adaptive Thresholding}
 
 The Bayesian TPE policy sets thresholds $(\tau^*, \kappa^*)$ once on the
 calibration split; extending this to a Bayesian posterior updated online from
 rolling analyst feedback would allow thresholds to track distribution shift
-without retraining base agents (see Supplementary Section~S-V).
+without retraining base agents (see Supplementary Section~S-IV).
 We defer this extension to future work.
 
 \subsection{Runtime and Deployment}
@@ -1425,7 +1425,7 @@ a GPU; the three agents parallelise before fusion, so end-to-end latency is
 bounded by the slowest agent rather than their sum.
 Per-sample complexity is $\mathcal{O}(T \cdot \max_i P_i)$; offline training
 (CTGAN, TPE, EWC) is incurred once at deployment.
-Full derivations are in Supplementary Section~S-VI.
+Full derivations are in Supplementary Section~S-V.
 
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Conclusion}\label{sec:conclusion}
