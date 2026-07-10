@@ -55,7 +55,7 @@ Northumbria University, Newcastle, NE1~8ST, UK\@.
 E-mail: \{kabuyehenry2017, bissac, rahul.yumlembam, zahra.farzadpour, jeyamohan.neera\}@northumbria.ac.uk.}%
 \thanks{B.~Issac is the corresponding author.
 E-mail: bissac@ieee.org.}%
-\thanks{Manuscript received 2026.}}
+}
 
 % ── Abstract ──────────────────────────────────────────────────────────────────
 \begin{document}
@@ -75,7 +75,7 @@ from the six-dimensional score pool, reducing Expected Calibration Error from
 $0.094$ to $0.018$; Conditional Tabular GAN (CTGAN) augmentation addresses
 score-space imbalance without retraining base agents. Third, a four-threshold
 triage policy optimised via Bayesian TPE reduces
-the escalation rate from $85\%$ to $25\%$ while raising balanced accuracy from
+the escalation rate from $85.3\%$ to $24.7\%$ while raising balanced accuracy from
 $0.525$ to $0.866$. Fourth, a Peer Consultation mechanism mitigates knowledge
 collapse under concurrent benign--ransomware execution, and an Expert Feedback
 Loop with Elastic Weight Consolidation enables continual adaptation to novel
@@ -141,7 +141,7 @@ optimisation via Bayesian TPE. The framework treats uncertainty as a
         imbalance at the fusion layer.
   \item A \textbf{formal triage policy} over $(\hat{p}, \sigma_{\max})$ space
         with four jointly optimised thresholds via Bayesian TPE, reducing
-        escalation rate from $85\%$ to $25\%$ while improving balanced accuracy
+        escalation rate from $85.3\%$ to $24.7\%$ while improving balanced accuracy
         from $0.525$ to $0.866$.
   \item A \textbf{Peer Consultation} mechanism that prevents knowledge collapse
         under concurrent execution, and an \textbf{Expert Feedback Loop} with
@@ -246,8 +246,9 @@ outperforming SMOTE when the minority class is small and feature distributions
 are non-Gaussian.
 Our contribution applies CTGAN at the \emph{score space} output of the
 multi-agent detector: operating on bounded $[0,1]^6$ probability--uncertainty
-vectors ensures that synthetic samples preserve the calibration structure of
-the base agents and cannot encode physically impossible telemetry.
+vectors constrains synthetic samples to the agents' output range, reducing
+the risk of generating implausible score-uncertainty combinations and
+eliminating raw telemetry reconstruction artefacts.
 
 Catastrophic forgetting is the key barrier to continual adaptation: gradient
 updates for a new task systematically overwrite prior weight configurations~\cite{kirkpatrick_ewc_2017}.
@@ -260,6 +261,22 @@ via a diagonal Fisher penalty that protects parameters important to retained tas
 Our Expert Feedback Loop applies EWC to the Decision MLP, achieving
 $\Delta\text{AUPRC}{=}0.001$ on retained families after five correction
 iterations---enabling continual adaptation without retraining base agents.
+
+\subsection{Relationship to Prior Work}
+
+This paper extends the two-agent Agentic SABRE
+framework~\cite{kabuye2025sabre_eswa}, which combined a Semantic CNN and a
+Behavioural CNN with MC Dropout uncertainty and a fixed triage policy.
+The present work makes four technically distinct contributions absent from
+the prior system: (1) a third Knowledge CNN agent on ATT\&CK tactic
+embeddings, expanding the score pool from $[0,1]^4$ to $[0,1]^6$;
+(2) Bayesian TPE optimisation of four jointly tuned triage thresholds
+$(\tau_{\text{high}}, \tau, \kappa, \kappa_{\text{low}})$ replacing the
+fixed $(\tau{=}0.10, \kappa{=}0.10)$ pair; (3) CTGAN score-space
+augmentation at the fusion layer; and (4) EWC continual learning and
+Mondrian conformal prediction wrappers.
+All datasets, evaluation splits, experimental results, and figures are
+independent of~\cite{kabuye2025sabre_eswa}.
 
 \begin{figure*}[t]
   \centering
@@ -382,10 +399,12 @@ data generating process~\cite{kendall2017uncertainties}.
 
 \begin{proposition}[Epistemic Signal]\label{prop:epistemic}
 When a test sample $\mathbf{x}$ lies far from the training manifold of agent
-$i$ (i.e., a novel ransomware family), the variance $\sigma_i^2(\mathbf{x})$
-increases monotonically with the distributional shift
-$d(\mathbf{x}, \mathcal{D}_{\text{train}})$ under mild regularity
-conditions~\cite{gal2016dropout}.
+$i$ (i.e., a novel ransomware family), we hypothesise that the variance
+$\sigma_i^2(\mathbf{x})$ tends to increase with distributional shift
+$d(\mathbf{x}, \mathcal{D}_{\text{train}})$~\cite{gal2016dropout}.
+Approximate Bayesian methods do not provide a formal monotonicity guarantee
+in general; we verify this tendency empirically across family and hardware
+holdout splits (Supplementary Section~S-VI).
 \end{proposition}
 
 We use $T=10$ passes per agent, empirically verified to stabilise $\sigma_i$
@@ -556,7 +575,7 @@ logit $\ell = \log(\hat{p}/(1-\hat{p}))$ is divided by a learned scalar
 $T > 0$ before the final sigmoid:
 \begin{equation}\label{eq:temperature}
   \hat{p}_{\text{cal}} = \sigma(\ell / T),
-  \quad T^* = \argmin_T \; \ECE(\hat{p}_{\text{cal}}).
+  \quad T^* = \argmin_T \; \mathrm{NLL}_T(\mathcal{D}_{\text{cal}}).
 \end{equation}
 
 Expected Calibration Error is defined as:
@@ -646,7 +665,7 @@ Table~\ref{tab:policy_compare} summarises the triage outcome under the three
 policies on the random-stratified test split.
 Bayesian TPE halves the escalation rate relative to grid search ($24.7\%$
 vs $42.3\%$) while maintaining comparable balanced accuracy ($0.866$ vs
-$0.874$), and triples the auto-classify rate ($35.3\%$ vs $16.5\%$).
+$0.874$), and triples the auto-contain rate ($35.3\%$ vs $16.5\%$).
 Fixed thresholds ($\tau{=}0.10,\,\kappa{=}0.10$, inherited from a prior
 system~\cite{kabuye2025sabre_eswa}) are wholly unsuitable for autonomous
 deployment: the $85.3\%$ escalation rate saturates analyst capacity and
@@ -658,7 +677,7 @@ the $0.525$ balanced accuracy reflects near-random triage.
   (mean $\pm$ 95\% CI over $K{=}6$ seeds).
   Bal.~acc = balanced accuracy;
   Esc = escalation rate;
-  AC = auto-classify rate.
+  AC = auto-contain rate.
   $\uparrow$ = higher is better; $\downarrow$ = lower is better.
 }
 \label{tab:policy_compare}
@@ -667,7 +686,7 @@ the $0.525$ balanced accuracy reflects near-random triage.
 \toprule
 Policy & Bal.~acc $\uparrow$ & Esc (\%) $\downarrow$ & AC (\%) $\uparrow$ \\
 \midrule
-Fixed ($\tau{=}0.10$)~\cite{kabuye2025sabre_eswa}
+SABRE+ Fixed~\cite{kabuye2025sabre_eswa}
   & $0.525 \pm 0.001$ & $85.3 \pm 0.1$ & $12.2 \pm 0.1$ \\
 Grid search
   & $0.874 \pm 0.002$ & $42.3 \pm 0.6$ & $16.5 \pm 0.1$ \\
@@ -1039,7 +1058,7 @@ $(\tau^*, \kappa^*) \approx (0.35, 0.22)$ for the random-stratified split.
   \caption{Triage policy comparison: decision-rate breakdown (Escalate /
     Auto-Contain / Allow) and balanced accuracy for Fixed, Grid Search,
     and Bayesian TPE policies. TPE achieves the lowest escalation rate
-    ($24.7\%$) and highest auto-classify rate ($35.3\%$).}
+    ($24.7\%$) and highest auto-contain rate ($35.3\%$).}
   \label{fig:policy}
 \end{figure}
 
@@ -1047,9 +1066,9 @@ $(\tau^*, \kappa^*) \approx (0.35, 0.22)$ for the random-stratified split.
 
 Table~\ref{tab:generalisation} reports the Behavioural CNN and Decision MLP
 AUROC across the four evaluation splits over $K{=}6$ independent seeds.
-Temporal holdout ($0.980 \pm 0.000$) and hardware holdout
-($0.962 \pm 0.000$) match or exceed random-stratified performance
-($0.976 \pm 0.000$), confirming that the framework generalises across
+Temporal holdout ($0.980$) and hardware holdout
+($0.962$) match or exceed random-stratified performance
+($0.976$), with seed variability ${<}0.001$, confirming that the framework generalises across
 recording sessions and hardware configurations without retraining.
 Family holdout ($0.676 \pm 0.001$) reveals a meaningful generalisation gap:
 unseen families exhibit distributional shift in both modalities, and the
@@ -1069,8 +1088,7 @@ broader coverage while requiring no LSTM component.
 \centering
 \caption{Generalisation analysis: Behavioural CNN and Decision MLP AUROC
   across four evaluation splits (mean $\pm$ std over $K{=}6$ seeds).
-  ${}^*$Temporal and hardware CI are very tight ($<0.001$); std reported
-  as $\approx 0.000$.
+  Decision MLP seed variability is ${<}0.001$ across random, temporal, and hardware splits.
 }
 \label{tab:generalisation}
 \setlength{\tabcolsep}{4pt}
@@ -1078,10 +1096,10 @@ broader coverage while requiring no LSTM component.
 \toprule
 Split & Behavioural CNN & Decision MLP \\
 \midrule
-Random        & $0.961 \pm 0.003$ & $0.976 \pm 0.000$ \\
-Temporal      & $0.960 \pm 0.005$ & $0.980 \pm 0.000$ \\
+Random        & $0.961 \pm 0.003$ & $0.976 \pm {<}0.001$ \\
+Temporal      & $0.960 \pm 0.005$ & $0.980 \pm {<}0.001$ \\
 Family        & $0.707 \pm 0.010$ & $0.676 \pm 0.001$ \\
-Hardware      & $0.939 \pm 0.006$ & $0.962 \pm 0.000$ \\
+Hardware      & $0.939 \pm 0.006$ & $0.962 \pm {<}0.001$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1271,8 +1289,10 @@ EWC ($\lambda{=}300$) & $\mathbf{0.999}$ & $\mathbf{-0.001}$ & $0.827$ & $+0.827
 
 Table~\ref{tab:latency} reports end-to-end inference latency (NVIDIA GB10,
 $500$ repetitions, batch size $32$).
-Full pipeline median is $6.71\,\text{ms}$ (p95 $7.24\,\text{ms}$), supporting
-$\approx 1{,}490$ concurrent monitored streams at a $10$-second window.
+Full pipeline median is $6.71\,\text{ms}$ per batch of $32$ samples
+(p95 $7.24\,\text{ms}$), i.e.\ ${\approx}0.21\,\text{ms}$ per sample,
+supporting $\approx 47{,}000$ concurrent monitored streams at a $10$-second
+window under batch inference.
 MC Dropout ($T{=}10$) contributes $3.7\times$ overhead over a single
 deterministic pass; the Decision MLP adds $0.67\,\text{ms}$.
 
@@ -1329,8 +1349,8 @@ Full ablation figures and tables are provided in Supplementary Section~S-VI.
 
 Strongest performance occurs in three areas.
 First, the Semantic Agent achieves AUROC $0.996$ on RDset, confirming that
-sentence-transformer PE embeddings are near-perfect discriminators within
-the training family distribution.
+sentence-transformer PE embeddings are highly effective discriminators within
+the training family distribution (AUROC $0.996$ on RDset).
 Second, the Decision MLP generalises within distribution: temporal-holdout
 AUROC $0.980$ and hardware-holdout AUROC $0.962$ match or exceed
 random-stratified performance (Table~\ref{tab:generalisation}), indicating
@@ -1384,6 +1404,32 @@ The system therefore identifies the scenarios in which it is least reliable
 and defers to analyst review---a property absent from single-output
 detectors.
 
+\subsection{Additional Limitations}
+
+\textbf{Dataset scope.}
+All RanSMAP families range from WannaCry (2017) to Conti (2022); post-2022
+families (Cl0p, BlackCat/ALPHV, LockBit 3.0) are not represented.
+This is an acknowledged scope decision: RanSMAP is the only publicly
+available hypervisor-level telemetry dataset with family labels and
+multi-split evaluation protocols at time of writing.
+Extension to current-generation families is listed as future work.
+
+\textbf{Adversarial robustness.}
+An adaptive attacker aware of the triage policy could craft executions that
+suppress $\sigma_{\max}$ below $\kappa$ to avoid Escalation while keeping
+$\hat{p}$ below $\tau_{\text{high}}$ to avoid Auto-Contain.
+Adversarial attacks against MC Dropout uncertainty
+estimates~\cite{gal2016dropout} are a known open problem; we treat
+adversarial robustness as a direction for future work.
+
+\textbf{Knowledge Agent sample size.}
+The RansKnow corpus~\cite{kabuye2025ransknow} contains $307$
+threat-intelligence transcripts (${\approx}215$ training / $46$ validation /
+$46$ test after a 70/15/15 split), which is small for a CNN classifier.
+The Knowledge Agent's primary role is providing ATT\&CK-level complementary
+signal; generalisation metrics for this agent should be interpreted in light
+of this data limitation.
+
 \subsection{Comparison with Hirano and Kobayashi~\cite{hirano2025ransmap}}
 
 The closest direct comparator operates on the same hypervisor-level telemetry.
@@ -1408,9 +1454,10 @@ We defer this extension to future work.
 
 \subsection{Runtime and Deployment}
 
-End-to-end inference latency is $6.71\,\text{ms}$ median on an NVIDIA GB10
-GPU ($T{=}10$, p95 $7.24\,\text{ms}$; Table~\ref{tab:latency}), supporting
-$\approx 1{,}490$ concurrent streams per GPU at a $10$-second window.
+End-to-end inference latency is $6.71\,\text{ms}$ median per batch of $32$
+samples on an NVIDIA GB10 GPU ($T{=}10$, p95 $7.24\,\text{ms}$;
+Table~\ref{tab:latency}), supporting $\approx 47{,}000$ concurrent streams
+per GPU at a $10$-second window under batch inference.
 The Behavioural CNN ($8{,}385$ parameters, $32.8\,\text{KB}$) runs without
 a GPU; the three agents parallelise before fusion, so end-to-end latency is
 bounded by the slowest agent rather than their sum.
@@ -1462,8 +1509,7 @@ This research is supported by the UK Engineering and Physical Sciences
 Research Council (EPSRC) through the CRANE (Cyber Resilience Across the
 Nation's Economy) programme.
 The authors thank the RanSMAP dataset team at Okayama University of
-Science for making the hypervisor-level telemetry publicly available,
-and the anonymous reviewers for their constructive feedback.
+Science for making the hypervisor-level telemetry publicly available.
 
 % ── Bibliography ──────────────────────────────────────────────────────────────
 \bibliographystyle{IEEEtran}
