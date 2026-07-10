@@ -1,0 +1,336 @@
+%%  IEEE Transactions on Information Forensics and Security
+%%  Supplementary Material — Extended Agentic SABRE
+\documentclass[journal]{IEEEtran}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{microtype}
+
+\newcommand{\R}{\mathbb{R}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\title{Supplementary Material: Extended Agentic SABRE---Three-Agent
+Knowledge-Augmented Ransomware Detection with Peer Consultation
+and Continual Learning}
+
+\author{Henry~Kabuye,~Biju~Issac,~Jeyamohan~Neera,~Rahul~Yumlembam,~Zahra~Farzadpour}
+
+\maketitle
+
+This document provides supplementary material for the above paper.
+Section numbers use the prefix ``S-'' to distinguish them from the main
+manuscript.
+All equation, figure, and table numbers continue from the main paper.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Behavioural Feature Extraction Algorithm}\label{sec:supp_features}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Algorithm~\ref{alg:features} describes the 16-dimensional feature extraction
+procedure from the raw RanSMAP CSV telemetry files.
+Each CSV row corresponds to a single I/O or memory event captured by the
+BitVisor hypervisor~\cite{hirano2025ransmap}.
+Features are computed over non-overlapping $T_{\text{window}}{=}10\,\text{s}$ windows.
+
+\begin{algorithm}[h]
+\caption{16-dimensional behavioural feature extraction}
+\label{alg:features}
+\begin{algorithmic}[1]
+\Require CSV event stream $E = \{e_k\}_{k=1}^{n}$; window size
+  $T_w{=}10\,\text{s}$
+\Ensure Feature matrix $X \in \R^{W \times 16}$, one row per window
+
+\State Partition $E$ into $W$ non-overlapping windows of duration $T_w$
+\For{each window $w = 1, \ldots, W$}
+  \State $E_w \gets \{e_k : t(e_k) \in [(w{-}1)T_w,\, wT_w)\}$
+  \State \textit{// Storage features}
+  \State $\bar{T}_{s,r} \gets \sum_{\text{read}} \text{bytes}/T_w$;
+         $\bar{T}_{s,w} \gets \sum_{\text{write}} \text{bytes}/T_w$
+  \State $V_{s,r} \gets \text{Var}(\{\text{LBA}(e) : e \in E_w,\,
+         \text{type}(e){=}\text{read}\})$
+  \State $V_{s,w} \gets \text{Var}(\{\text{LBA}(e) : e \in E_w,\,
+         \text{type}(e){=}\text{write}\})$
+  \State $\bar{H}_{s,w} \gets \text{mean}_{e \in E_w,\,\text{type}(e){=}\text{write}}
+         H(\text{sector}(e))$
+  \State $\chi_s \gets [\bar{T}_{s,r},\, \bar{T}_{s,w},\, V_{s,r},\,
+         V_{s,w},\, \bar{H}_{s,w}]$ \Comment{5D storage}
+  \State \textit{// Memory features}
+  \State $H_{m,w} \gets H(\{\text{GPA}(e) : e \in E_w,\, o(e){=}w\})$
+  \State $H_{m,rw} \gets H(\{\text{GPA}(e) : e \in E_w,\,
+         o(e) \in \{r,w\}\})$
+  \State For each $(s, o) \in \{4K,2M,\text{MMIO}\} \times \{r,w,rw,x\}$:
+         compute $C_{s,o}$ as event count
+  \State $V_{m,w} \gets \text{Var}(\{\text{GPA}(e) : e \in E_w,\,
+         o(e){=}w\})$
+  \State $\chi_m \gets [H_{m,w},\, H_{m,rw},\, C_{4K,r},\, C_{4K,w},\,$
+  \Statex \hspace{3.2em}$C_{4K,rw},\, C_{4K,x},\, C_{2M,r},\, C_{2M,rw},$
+  \Statex \hspace{3.2em}$C_{\text{MMIO},r},\, C_{\text{MMIO},w},\, V_{m,w}]$
+         \Comment{11D}
+  \State $X[w, :] \gets [\chi_s \,;\, \chi_m]$
+         \hfill\Comment{16D feature row}
+\EndFor
+\State \Return $X$
+\end{algorithmic}
+\end{algorithm}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Decision MLP Training Procedure}\label{sec:supp_mlp}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Algorithm~\ref{alg:mlp_train} describes the full Decision MLP training
+procedure including CTGAN augmentation, temperature calibration, and
+Bayesian TPE policy optimisation.
+
+\begin{algorithm}[h]
+\caption{Decision MLP training with CTGAN augmentation and Bayesian TPE}
+\label{alg:mlp_train}
+\begin{algorithmic}[1]
+\Require Trained agents $\{f_i\}_{i=1}^{3}$;
+  labelled score-pool splits
+  $\mathcal{D}_{\text{tr}}, \mathcal{D}_{\text{val}}, \mathcal{D}_{\text{cal}},
+   \mathcal{D}_{\text{test}}$;
+  $N_{\text{synth}}{=}2{,}000$, $\lambda{=}0.3$
+
+\State \textit{// Stage 1: Score-pool construction}
+\For{each split $D \in \{\mathcal{D}_{\text{tr}}, \mathcal{D}_{\text{val}},
+    \mathcal{D}_{\text{cal}}, \mathcal{D}_{\text{test}}\}$}
+  \State Compute $\mathbf{v}_j = (p_{\text{sem},j}, \sigma_{\text{sem},j},
+    p_{\text{beh},j}, \sigma_{\text{beh},j}, p_{\text{know},j},
+    \sigma_{\text{know},j})$ for each sample $j$
+\EndFor
+
+\State \textit{// Stage 2: CTGAN augmentation (training split only)}
+\State Fit CTGAN$_1$ on $\{(\mathbf{v}_j, 1) : y_j{=}1,\, j \in D_{\text{tr}}\}$
+  for 50 epochs
+\State Fit CTGAN$_0$ on $\{(\mathbf{v}_j, 0) : y_j{=}0,\, j \in D_{\text{tr}}\}$
+  for 50 epochs
+\State $\mathcal{D}_{\text{syn}} \gets
+  \text{CTGAN}_1.\text{sample}(N_{\text{synth}}/2) \cup
+  \text{CTGAN}_0.\text{sample}(N_{\text{synth}}/2)$
+\State Clip $\mathcal{D}_{\text{syn}}$ to $[0,1]^6$; remove NaN rows
+\State $\mathcal{D}_{\text{aug}} \gets \mathcal{D}_{\text{tr}} \cup \mathcal{D}_{\text{syn}}$
+
+\State \textit{// Stage 3: Decision MLP training}
+\State Fit StandardScaler on $\mathcal{D}_{\text{aug}}$
+\State Initialise MLP $g_\phi$ ($6{\to}32{\to}1$, Dropout $p{=}0.2$)
+\State Train $g_\phi$ on $\mathcal{D}_{\text{aug}}$ with Adam $\eta{=}10^{-3}$,
+  early stopping on $\mathcal{D}_{\text{val}}$ loss (patience $= 6$)
+\State Restore best weights
+
+\State \textit{// Stage 4: Temperature calibration}
+\State $T^* \gets \argmin_{T>0} \text{ECE}(g_\phi(\mathbf{v}/T);\,
+  \mathcal{D}_{\text{val}})$ via L-BFGS
+\State $\hat{p}_{\text{cal}} \gets \sigma(g_\phi(\mathbf{v})/T^*)$
+
+\State \textit{// Stage 5: Bayesian TPE policy optimisation}
+\State Run $300$ Optuna TPE trials on $\mathcal{D}_{\text{cal}}$:
+  $\Theta^* \gets \argmax_\Theta J(\Theta) = \text{bal\_acc}(\Theta)
+  - \lambda \cdot \text{esc\_rate}(\Theta)$
+\State \Return $g_\phi$, $T^*$, $\Theta^*$
+\end{algorithmic}
+\end{algorithm}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Confusion Matrices}\label{sec:supp_confusion}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Full per-class confusion matrices for the Behavioural CNN and Decision MLP
+on the random-stratified, family-holdout, and hardware-holdout test splits
+are provided below.
+The 12-class matrix (six ransomware families $\times$ six benign applications)
+confirms that LockBit and Darkside are most reliably detected
+(recall $\geq 0.95$ in all splits), while WannaCry shows the greatest
+sensitivity to the evaluation split (random: $0.89$; family holdout: $0.28$).
+Misclassifications predominantly occur between WannaCry and AESCrypt,
+consistent with the known I/O-pattern similarity between WannaCry's
+encryption and AESCrypt's legitimate bulk-encryption workload.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Comparison with Hirano et al.}\label{sec:supp_hirano}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The closest direct comparator is the RanSMAP detector of Hirano et al., which
+operates on the same hypervisor-level telemetry and is evaluated on the same
+dataset.
+Architectural differences limit strict metric comparisons: Hirano et al.\ use
+a 1D-CNN+LSTM trained on 23D features ($\chi_s$ 5D storage $+$ $\chi_m$ 18D
+memory) with a $0.1$-second window aggregated over a $30$-second detection
+window and report F-score as their primary metric, while our Behavioural CNN
+uses 16D features ($5$D storage $+$ $11$D memory) with a $10$-second window
+and reports AUROC.
+
+On the hardware-holdout partition---the closest common ground---Hirano et al.\
+report F-score $0.856$, while our Behavioural CNN achieves AUROC $0.939$ on
+the same split.
+On the Conti sub-variant partition, Hirano et al.\ report mean recall $0.56$
+on their full 23D feature set; our Behavioural CNN achieves mean recall
+$0.68$, despite using seven fewer input dimensions and no LSTM temporal
+integration.
+This suggests that the $10$-second window captures sufficient temporal context
+without recurrent processing, at substantially lower architectural complexity.
+
+The primary qualitative advantage of the proposed framework is the uncertainty
+signal.
+Hirano et al.'s output is a binary classification without any measure of model
+confidence.
+On the Conti sub-variants and concurrent-execution scenarios where both
+frameworks struggle, the proposed system escalates rather than silently
+misclassifies: the inverse relationship between per-variant recall and
+escalation rate confirms that $\sigma_{\text{beh}}$ reliably identifies samples
+most likely to be misclassified, transforming undetected attacks into escalated
+events.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Adaptive Thresholding}\label{sec:supp_adaptive}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The Bayesian TPE policy optimisation sets thresholds $(\tau^*, \kappa^*)$ once
+on the calibration split and holds them fixed for the lifetime of the
+deployment.
+This is appropriate when the operational cost parameter $\lambda$ is stable
+and the threat distribution is stationary.
+In practice, neither assumption holds indefinitely: new ransomware families
+shift the empirical risk-score distribution, and organisational risk tolerance
+changes in response to operational conditions.
+
+A principled extension would treat $(\tau, \kappa)$ as parameters of a
+Bayesian posterior updated online from rolling analyst feedback.
+Each analyst-confirmed or analyst-corrected triage decision provides a noisy
+observation of whether the current threshold was appropriate; a
+sliding-window estimate of $J(\tau, \kappa)$ on recent confirmed labels would
+allow thresholds to recalibrate without retraining the underlying agents.
+The Expert Feedback Loop already provides the infrastructure for incremental
+Decision MLP updates; adaptive thresholding would operate at the policy layer
+above it, requiring no change to agent or fusion model weights.
+We defer this extension to future work.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Ablation Figures and Feature Analysis}\label{sec:supp_ablation}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig11_uncertainty.png}
+  \caption{$\sigma_{\mathrm{beh}}$ distribution per ransomware family and
+    benign class. Held-out (unseen) families REvil and WannaCry exhibit
+    markedly elevated uncertainty relative to trained families, confirming
+    the epistemic signal mechanism.}
+  \label{fig:uncertainty_dist}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig19_t_sensitivity.pdf}
+  \caption{MC Dropout pass count sensitivity. Left: $\sigma_{\mathrm{beh}}$
+    noise (as \% of mean) vs $T$ — stabilises below $1\%$ at $T{=}10$.
+    Right: inference latency vs $T$ on NVIDIA GB10. $T{=}10$ is the
+    chosen operating point.}
+  \label{fig:t_sensitivity}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig18_feature_ablation.pdf}
+  \caption{Behavioural feature subset ablation (random-stratified split,
+    $K{=}6$ seeds, mean $\pm$ 95\% CI). Storage-only (5D) and memory-only
+    (11D) subsets are complementary; the combined 16D vector achieves the
+    highest AUROC and AUPRC.}
+  \label{fig:feature_ablation}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig15_uncertainty_violin.pdf}
+  \caption{Violin plots of $\sigma_{\mathrm{beh}}$ per family. Held-out
+    families (marked *) exhibit elevated uncertainty; the dashed red line
+    marks the triage $\kappa$ threshold above which the system escalates.}
+  \label{fig:violin}
+\end{figure}
+
+\begin{table}[h]
+\centering
+\caption{Behavioural CNN AUROC by feature subset (random-stratified split,
+  mean $\pm$ 95\% CI over $K{=}6$ seeds).}
+\label{tab:feature_ablation}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcc}
+\toprule
+Feature set & Dim & AUROC \\
+\midrule
+Storage only ($\chi_s$)         & $5$  & $0.851 \pm 0.008$ \\
+Memory only ($\chi_m$)          & $11$ & $0.903 \pm 0.005$ \\
+Combined ($\chi_s \cup \chi_m$) & $16$ & $\mathbf{0.961 \pm 0.003}$ \\
+Hirano 23D (reported)~\cite{hirano2025ransmap}
+  & $23$ & (F-score; not directly comparable) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig8_feature_importance.pdf}
+  \caption{SHAP feature importance for the Behavioural CNN on the
+    random-stratified test split. Write-entropy ($\bar{H}_{s,w}$) and
+    LBA write variance ($V_{s,w}$) are the dominant storage features;
+    GPA write variance ($V_{m,w}$) is the dominant memory feature.}
+  \label{fig:feature_importance}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig6_feedback.pdf}
+  \caption{Feedback loop adaptation: false-negative count vs streaming step
+    for OOD Conti sub-variant detection. EWC-regularised Decision MLP
+    retraining converges to AUPRC $\geq 0.80$ by iteration 3.}
+  \label{fig:feedback}
+\end{figure}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Detailed Computational Complexity}\label{sec:supp_complexity}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Per-sample inference cost is dominated by MC Dropout: each agent performs $T$
+independent forward passes, giving $\mathcal{O}(T \cdot P_i)$ operations per
+agent for a fixed-dimensional input, where $P_i$ is the parameter count of
+agent $i$.
+Since the three agents execute in parallel, the effective inference cost is
+$\mathcal{O}(T \cdot \max_i P_i)$, with $T{=}10$ and the Semantic CNN
+(input $\mathbb{R}^{384}$) setting the bound.
+The Decision MLP contributes $\mathcal{O}(1)$ (fixed $6{\to}32{\to}1$
+architecture).
+Behavioural feature extraction costs $\mathcal{O}(|E_w|)$ per window, where
+$|E_w|$ is the number of hypervisor events in the $10$-second window ---
+linear in telemetry volume and independent of model size.
+
+Offline training costs are incurred once at deployment time.
+CTGAN fitting scales as $\mathcal{O}(E_{\text{CTGAN}} \cdot N_{\text{tr}}
+\cdot d_v)$ with $E_{\text{CTGAN}}{=}50$ epochs, $N_{\text{tr}}$ the
+training set size, and $d_v{=}6$ the score-pool dimension.
+Bayesian TPE optimisation is $\mathcal{O}(K_{\max}^{2} \log K_{\max})$
+over $K_{\max}{=}300$ trials, as each trial's density estimation evaluates
+the $\ell(x)$ and $g(x)$ Parzen estimators over all prior observations.
+The Expert Feedback Loop incurs an online cost of
+$\mathcal{O}(N_F \cdot |\phi|)$ per feedback iteration---computing the
+diagonal Fisher over $N_F{=}1{,}000$ calibration samples and updating
+$|\phi|$ MLP parameters---which completes in under one second on any
+modern GPU.
+
+\bibliographystyle{IEEEtran}
+\bibliography{Reference_Main}
+
+\end{document}
