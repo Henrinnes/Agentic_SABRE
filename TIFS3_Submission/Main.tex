@@ -83,9 +83,13 @@ families with negligible catastrophic forgetting
 ($\Delta\text{AUPRC}{=}0.001$). Evaluated across four generalisation axes
 over six independent seeds on RanSMAP, RDset, and RansKnow, the framework
 achieves AUROC $0.996$ on static PE detection, AUROC $0.961$ on runtime
-behavioural detection, and AUROC $0.980$ under temporal holdout. A Mondrian
-conformal prediction wrapper provides distribution-free coverage guarantees,
-auto-classifying $77\%$ of traffic at $99\%$ coverage.
+behavioural detection, and AUROC $0.980$ under temporal holdout.
+Under family holdout, Decision MLP AUROC falls to $0.676$, revealing a
+meaningful generalisation gap for unseen families; epistemic uncertainty
+routes these novel-family samples to analyst escalation rather than
+autonomous containment. A Mondrian conformal prediction wrapper provides
+distribution-free coverage guarantees, auto-classifying $77\%$ of traffic
+at $99\%$ coverage.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -711,23 +715,23 @@ suppressing $\hat{p}_{\text{beh}}$. To prevent \emph{knowledge collapse}
 introduce Peer Consultation (PC).
 
 \begin{definition}[Peer Consultation]\label{def:pc}
-When $\sigma_{\text{beh}}(\mathbf{x}) > \kappa_{\text{PC}}$ for a threshold
-$\kappa_{\text{PC}} > 0$, the behavioural agent's score is replaced by a
-weighted combination of peer scores:
+When agent $i$'s epistemic uncertainty $\sigma_i(\mathbf{x}) > \kappa_{\text{PC}}$
+for a threshold $\kappa_{\text{PC}} > 0$, agent $i$'s score is replaced by a
+weighted combination of its peer agents' scores:
 \begin{equation}\label{eq:peer_consultation}
-  \hat{p}_{\text{beh}}^{\text{PC}}(\mathbf{x}) =
-    w_{\text{sem}}\,\hat{p}_{\text{sem}}(\mathbf{x})
-    + w_{\text{know}}\,\hat{p}_{\text{know}}(\mathbf{x}),
+  \hat{p}_{i}^{\text{PC}}(\mathbf{x}) =
+    \sum_{j \neq i} w_j\,\hat{p}_{j}(\mathbf{x}),
 \end{equation}
-where $w_{\text{sem}} + w_{\text{know}} = 1$ and weights are proportional to
-the inverse uncertainty of each peer: $w_i \propto 1/\sigma_i$.
-In practice $\kappa_{\text{PC}}$ is set equal to the triage threshold $\kappa$
-optimised by Bayesian TPE (Section~\ref{sec:triage}).
+where weights are proportional to the inverse uncertainty of each peer,
+$w_j \propto 1/\sigma_j$, normalised so that $\sum_{j \neq i} w_j = 1$.
+Each agent maintains its own threshold $\kappa_{\text{PC}}^{(i)}$; in
+practice all are set equal to the triage threshold $\kappa$ optimised by
+Bayesian TPE (Section~\ref{sec:triage}).
 \end{definition}
 
-Peer Consultation does not suppress $\sigma_{\text{beh}}$; rather, it routes
-the sample to the \textsc{Escalate} action while ensuring the score pool
-reflects available evidence from more reliable modalities.
+Peer Consultation does not suppress the triggering agent's uncertainty;
+rather, it routes the sample to the \textsc{Escalate} action while ensuring
+the score pool reflects available evidence from the more reliable modalities.
 
 \subsection{Expert Feedback Loop with EWC}
 
@@ -794,11 +798,17 @@ Under exchangeability of calibration and test samples:
 \end{equation}
 \end{theorem}
 
-Mondrian conformal prediction conditions~\eqref{eq:cp_set} on the predicted
-class, providing class-conditional (rather than marginal) guarantees. At
-$\alpha = 0.01$ ($99\%$ coverage), $77\%$ of traffic is auto-classified with
-$99.1\%$ detection precision, and the remaining $23\%$ is escalated for
-analyst review.
+Mondrian conformal prediction stratifies the calibration non-conformity scores
+by predicted class, conditioning~\eqref{eq:cp_set} separately for each label.
+Theorem~\ref{thm:coverage} provides a formal \emph{marginal} coverage guarantee
+under exchangeability of calibration and test samples; Mondrian stratification
+yields class-conditional coverage empirically but does not carry a separate
+distribution-free guarantee beyond the marginal bound.
+The exchangeability assumption holds for the random-stratified split; under
+temporal and family holdout, the formal guarantee does not apply and coverage
+is verified empirically.
+At $\alpha = 0.01$ ($99\%$ coverage), $77\%$ of traffic is auto-classified with
+$99.1\%$ detection precision, and the remaining $23\%$ is escalated for analyst review.
 
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Experimental Evaluation}\label{sec:eval}
@@ -981,8 +991,9 @@ attributable to learned fusion rather than temperature scaling alone.
 \begin{table}[t]
 \centering
 \caption{Expected Calibration Error (ECE, 15-bin uniform) on random-stratified
-  test split. Pre-TS = raw output; Post-TS = after temperature scaling.
-  Decision MLP ECE measured after temperature scaling on validation set.
+  test split. Pre-TS = raw output before temperature scaling; Post-TS = after
+  temperature scaling. Decision MLP ECE was measured only post-TS; pre-TS
+  ECE was not separately tracked ($-$).
   Mean $\pm$ 95\% CI over $K{=}6$ seeds; single-seed entries marked ${}^\dagger$.
   $\downarrow$ = lower is better.
 }
@@ -994,7 +1005,7 @@ System & Pre-TS ECE $\downarrow$ & Post-TS ECE $\downarrow$ \\
 \midrule
 Behavioural CNN     & $0.043$ & $0.018$ \\
 Mean Fusion         & $0.094$ & $0.118$ \\
-Decision MLP (ours) & $0.094$ & $\mathbf{0.018 \pm 0.002}$ \\
+Decision MLP (ours) & $-$     & $\mathbf{0.018 \pm 0.002}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1083,6 +1094,9 @@ $T_d{=}30\,\text{s}$ detection window).
 Our Behavioural CNN achieves AUROC $0.939$ on the same hardware-holdout
 partition with a $10\,\text{s}$ window and $16$D features, providing
 broader coverage while requiring no LSTM component.
+Note that F-score is threshold-dependent whereas AUROC aggregates across
+all decision thresholds; this comparison is indicative of relative
+capability rather than a direct numerical claim of superiority.
 
 \begin{table}[t]
 \centering
@@ -1436,6 +1450,9 @@ The closest direct comparator operates on the same hypervisor-level telemetry.
 Hirano and Kobayashi\ use a 1D-CNN+LSTM on 23D features with a $30$-second window
 and report F-score; on the hardware-holdout split they achieve F-score $0.856$
 while our Behavioural CNN achieves AUROC $0.939$ (Table~\ref{tab:generalisation}).
+These are different metrics---F-score is threshold-dependent while AUROC
+is threshold-independent---so this comparison is indicative rather than a
+direct numerical claim of superiority.
 On the Conti sub-variant partition, our Behavioural CNN achieves mean recall
 $0.68$ versus their $0.56$, using seven fewer input dimensions and no LSTM.
 More importantly, where both frameworks struggle, ours escalates rather than
@@ -1510,6 +1527,15 @@ Research Council (EPSRC) through the CRANE (Cyber Resilience Across the
 Nation's Economy) programme.
 The authors thank the RanSMAP dataset team at Okayama University of
 Science for making the hypervisor-level telemetry publicly available.
+
+% ── Code and Data Availability ────────────────────────────────────────────────
+\section*{Code and Data Availability}
+The framework implementation and evaluation scripts will be made available at
+\url{https://github.com/Henrinnes/Agentic_SABRE} upon acceptance.
+The RanSMAP~\cite{hirano2025ransmap} and RDset~\cite{kabuye2025explainable}
+datasets are publicly available as cited.
+The RansKnow threat-intelligence corpus~\cite{kabuye2025ransknow} will be
+released on Kaggle upon acceptance.
 
 % ── Bibliography ──────────────────────────────────────────────────────────────
 \bibliographystyle{IEEEtran}
