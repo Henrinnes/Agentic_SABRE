@@ -146,6 +146,35 @@ Bayesian TPE policy optimisation.
 \end{algorithm}
 
 % ─────────────────────────────────────────────────────────────────────────────
+\section{Confusion Matrices and Per-Class Accuracy}\label{sec:supp_confusion}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Figure~\ref{fig:cm_binary} shows normalised binary confusion matrices for the
+Behavioural CNN on the random-stratified, family-holdout, and hardware-holdout
+test splits.
+Figure~\ref{fig:cm_recall} shows per-class accuracy for all twelve classes
+(six ransomware families, six benign applications) across the same three splits.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_cm_binary.pdf}
+  \caption{Normalised binary confusion matrices for the Behavioural CNN
+    (MC Dropout $T{=}10$) on three evaluation splits.
+    Cell values show row-normalised recall; raw counts in parentheses.}
+  \label{fig:cm_binary}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\columnwidth]{Figures/fig_cm_recall.pdf}
+  \caption{Per-class accuracy for all twelve classes across three evaluation
+    splits. The dashed line separates ransomware (top) from benign (bottom)
+    classes. Family-holdout degradation is concentrated in held-out Conti
+    sub-variants and REvil.}
+  \label{fig:cm_recall}
+\end{figure}
+
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Comparison with Hirano et al.}\label{sec:supp_hirano}
 % ─────────────────────────────────────────────────────────────────────────────
 
