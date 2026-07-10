@@ -318,7 +318,7 @@ $0 < \kappa_{\text{low}} \leq \kappa \leq 1$, the triage policy is:
     \textsc{Auto-Contain} & \hat{p} \geq \tau_{\text{high}}
                             \;\wedge\; \sigma_{\max} \leq \kappa_{\text{low}}, \\
     \textsc{Escalate}     & \hat{p} \geq \tau
-                            \;\wedge\; \sigma_{\max} > \kappa, \\
+                            \;\vee\; \sigma_{\max} > \kappa, \\
     \textsc{Allow}        & \text{otherwise.}
   \end{cases}
 \end{equation}
@@ -585,8 +585,10 @@ determine the action. The boundary conditions ensure that:
   \item \textsc{Auto-Contain} requires \emph{both} high risk \emph{and} low
         uncertainty---autonomous action is taken only when the system is
         jointly confident in detection and reliable;
-  \item \textsc{Escalate} captures the uncertain-but-suspicious region where
-        agent disagreement or novel-family signatures elevate $\sigma_{\max}$;
+  \item \textsc{Escalate} fires when \emph{either} the risk score is elevated
+        ($\hat{p} \geq \tau$) \emph{or} agent disagreement is high
+        ($\sigma_{\max} > \kappa$), routing borderline and uncertain samples to
+        an analyst rather than acting autonomously;
   \item \textsc{Allow} covers the confident-benign region.
 \end{itemize}
 
