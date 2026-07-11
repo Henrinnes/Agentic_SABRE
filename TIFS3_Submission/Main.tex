@@ -1127,6 +1127,123 @@ Hardware      & $0.939 \pm 0.006$ & $0.962 \pm {<}0.001$ \\
   \label{fig:multiseed}
 \end{figure}
 
+\subsection{Statistical Significance of Fusion Gain}\label{sec:results_significance}
+
+Table~\ref{tab:generalisation} reports mean AUROC but does not address whether
+the Decision MLP's improvement over the Behavioural CNN is statistically reliable.
+We assess this with two complementary tests.
+\textbf{(1) One-sample Wilcoxon signed-rank test:} for each split we treat the six
+per-seed Behavioural CNN AUROCs as samples and test whether their median is
+significantly below the Decision MLP reference AUROC (H$_1$: MLP $>$ B).
+\textbf{(2) McNemar's test} (continuity-corrected $\chi^2$) on per-window binary
+predictions (threshold $0.5$) for the random-stratified split.
+
+Results are shown in Fig.~\ref{fig:ea_significance}.
+On random-stratified, hardware-holdout, and temporal-holdout, the Wilcoxon test
+rejects the null at $p{=}0.016$: the Decision MLP ($0.976$, $0.962$, $0.980$)
+consistently outperforms the Behavioural CNN alone
+($0.961{\pm}0.003$, $0.939{\pm}0.006$, $0.960{\pm}0.005$) across all seeds.
+On family holdout, the result \emph{reverses}: the Behavioural CNN
+($0.707{\pm}0.010$) outperforms the Decision MLP ($0.676{\pm}0.001$, $p{=}1.00$).
+This confirms that fusion with the Knowledge Agent's corpus-mean fallback for
+unseen families \emph{degrades} rather than improves discrimination---a finding
+with direct operational implications: autonomous fusion should be gated on
+family recognition confidence.
+McNemar's test on random-stratified ($b{=}200$, $c{=}299$, $\chi^2{=}19.2$,
+$p{<}10^{-4}$) confirms that the MLP corrects significantly more window-level
+errors than it introduces at the per-sample level.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_ea_significance.pdf}
+  \caption{Statistical significance of the Decision MLP gain over the
+    Behavioural CNN. Boxplots show the per-seed Behavioural CNN AUROC
+    distribution ($K{=}6$); diamonds with error bars show the Decision MLP
+    mean ${\pm}$\,95\%\,CI from Table~\ref{tab:generalisation}.
+    One-sample Wilcoxon (H$_1$: MLP $>$ B): $*$ $p{=}0.016$;
+    `ns' = not significant ($p{=}1.00$ on family holdout, where B $>$ MLP).}
+  \label{fig:ea_significance}
+\end{figure}
+
+\subsection{Risk-Coverage Analysis}\label{sec:results_aurc}
+
+AUROC summarises discrimination across all thresholds, but in selective
+prediction the operator cares specifically about \emph{precision at a given
+coverage level}.
+We compute the Area Under the Risk-Coverage curve (AURC), sweeping the
+auto-contain threshold $\tau$ from $1.0$ to $0.0$: coverage is the fraction
+of windows assigned $\hat{p}_{\text{MLP}} \geq \tau$, and precision is the
+ransomware fraction among those auto-contained windows.
+
+Results are shown in Fig.~\ref{fig:eb_risk_coverage}.
+On random-stratified the Decision MLP achieves AURC $0.843$; hardware-holdout
+is nearly identical ($0.841$), confirming stable precision-at-coverage across
+recording platforms.
+Temporal holdout ($0.693$) and family holdout ($0.644$) are lower, reflecting
+the moderate and severe distribution shifts respectively.
+Notably, at zero coverage (all windows escalated) precision is
+$100\%$ by construction; the sharp precision drop as $\tau$ falls below $0.9$
+on family holdout signals that the MLP's confidence is less well-calibrated for
+novel families, consistent with the calibration findings of Section~\ref{sec:results_fusion}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_eb_risk_coverage.pdf}
+  \caption{Risk-coverage (selective prediction) curves for the Decision MLP
+    across all four evaluation splits.
+    Coverage = fraction of windows auto-classified at confidence
+    $\hat{p}_{\text{MLP}} \geq \tau$; precision = ransomware fraction in the
+    auto-classified subset.
+    The right panel compares AUROC and AURC per split; the gap between the
+    two metrics is smallest for random-stratified and largest for family holdout.}
+  \label{fig:eb_risk_coverage}
+\end{figure}
+
+\subsection{Session-Level Detection and Latency}\label{sec:results_session}
+
+Window-level metrics measure discrimination, but the operator's primary concern
+is per-session detection and time-to-first-alert.
+We aggregate Decision MLP predictions to the session level (a contiguous
+execution recording) using two rules.
+\textbf{Max-score:} a session is flagged if any window's
+$\hat{p}_{\text{MLP}} \geq 0.5$.
+\textbf{Majority-vote:} a session is flagged if $>50\%$ of its windows
+satisfy $\hat{p}_{\text{MLP}} \geq 0.5$.
+Latency to first detection is defined as the index of the first flagged window
+multiplied by the $10\,\text{s}$ window stride.
+
+Results are shown in Fig.~\ref{fig:ed_session_level}.
+On in-distribution splits, \textbf{majority-vote} achieves near-perfect
+session-level detection (random: $98.5\%$, hardware: $91.1\%$, temporal:
+$98.9\%$) at session FPR $0.0$ -- no benign session is misclassified.
+\textbf{Max-score} achieves $100\%$ detection across all in-distribution splits
+but at elevated FPR ($0.58$--$0.60$): a single high-probability window in any
+benign session suffices to trigger an alert.
+Majority-vote is therefore the preferred operating mode in practice.
+
+On family holdout, majority-vote detection falls to $45.9\%$ with FPR $3.8\%$,
+consistent with the window-level AUROC degradation on unseen families.
+Latency to first detection has \textbf{median $0\,\text{s}$} on all
+in-distribution splits (ransomware is identified in the very first $10\,\text{s}$
+window for the majority of sessions), rising to median $10\,\text{s}$ on
+family holdout where additional observational windows are needed.
+Full session-level balanced accuracy across all splits is provided in
+Fig.~\ref{fig:ed_session_level}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_ed_session_level.pdf}
+  \caption{Session-level aggregation of Decision MLP predictions across all four
+    evaluation splits.
+    Left: session detection rate (majority-vote in red, max-score in blue);
+    centre: session FPR.
+    Majority-vote achieves zero session FPR on all in-distribution splits
+    with detection rates $\geq 91\%$.
+    Right: latency-to-first-detection histogram for the random-stratified split
+    ($133$ ransomware sessions; median $0\,\text{s}$, p90 $18\,\text{s}$).}
+  \label{fig:ed_session_level}
+\end{figure}
+
 \subsection{OOD Ransomware Variants}\label{sec:ood_variants}
 
 The \texttt{variants} partition of RanSMAP provides $1{,}397$ windows from
@@ -1230,10 +1347,11 @@ ambiguity introduced by concurrent benign processes.
   \label{fig:mix}
 \end{figure}
 
-\subsection{Conformal Coverage}
+\subsection{Conformal Coverage}\label{sec:results_conformal}
 
 Table~\ref{tab:conformal} reports the coverage--efficiency trade-off for the
-Mondrian conformal wrapper across several miscoverage levels.
+Mondrian conformal wrapper across several miscoverage levels on the
+random-stratified split.
 At $\alpha = 0.01$ ($99\%$ coverage), $77\%$ of traffic is assigned a
 singleton prediction set (auto-classified) with $99.1\%$ detection precision
 on the ransomware class; the remaining $23\%$ receive a two-element set
@@ -1262,6 +1380,82 @@ $0.01$ & $99\%$ & $77.0$ & $99.1$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Coverage under distribution shift.}
+The formal marginal coverage guarantee of Mondrian conformal prediction holds
+under the exchangeability assumption between calibration and test samples.
+Table~\ref{tab:conformal_shift} reports empirical coverage and escalation rate
+across all four splits, with thresholds calibrated on the split-specific
+validation set and evaluated on the corresponding test set.
+
+On in-distribution splits, empirical coverage at $\alpha{=}0.01$ is
+$99.1\%$, $98.4\%$, and $99.3\%$ for random-stratified, hardware-holdout,
+and temporal-holdout respectively---within $0.7$ percentage points of the
+$99\%$ nominal target, consistent with the marginal guarantee under
+approximate exchangeability.
+
+Family holdout is the critical exception: empirical coverage at $\alpha{=}0.01$
+collapses to $\mathbf{75.0\%}$, a shortfall of $24$ percentage points from the
+nominal target, and falls further to $49.8\%$ and $35.4\%$ at $\alpha{=}0.05$
+and $\alpha{=}0.10$ respectively.
+This confirms that the exchangeability assumption is violated when test families
+are entirely absent from the calibration set---the conformal thresholds derived
+from known families cannot correctly account for the shifted score distribution
+of novel families.
+These results extend the observation in~\cite{angelopoulos2021uncertainty} that
+conformal guarantees degrade under covariate shift, and demonstrate empirically
+that family-level distributional shift constitutes a particularly severe violation
+in the ransomware domain.
+\emph{We therefore recommend treating Mondrian conformal coverage as an
+in-distribution validity certificate rather than a universal bound;} for unseen
+families, the escalation mechanism (via $\sigma_{\text{beh}}$ thresholding)
+provides a complementary, uncertainty-driven safety net.
+
+\begin{table}[t]
+\centering
+\caption{Mondrian conformal prediction empirical coverage and escalation rate
+  across four evaluation splits at three nominal miscoverage levels $\alpha$.
+  Thresholds calibrated on the split-specific validation set.
+  Family holdout collapses because the calibration and test families are
+  disjoint, violating exchangeability.
+}
+\label{tab:conformal_shift}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llcc}
+\toprule
+Split & $\alpha$ (nominal) & Emp.\ Coverage & Esc.\ Rate \\
+\midrule
+Random      & $0.01\ (99\%)$ & $99.1\%$ & $27.1\%$ \\
+            & $0.05\ (95\%)$ & $94.1\%$ & $\phantom{0}7.4\%$ \\
+            & $0.10\ (90\%)$ & $88.8\%$ & $\phantom{0}0.0\%$ \\
+\midrule
+Hardware    & $0.01\ (99\%)$ & $98.4\%$ & $30.2\%$ \\
+            & $0.05\ (95\%)$ & $93.5\%$ & $11.4\%$ \\
+            & $0.10\ (90\%)$ & $87.0\%$ & $\phantom{0}0.0\%$ \\
+\midrule
+Temporal    & $0.01\ (99\%)$ & $99.3\%$ & $34.5\%$ \\
+            & $0.05\ (95\%)$ & $94.4\%$ & $12.1\%$ \\
+            & $0.10\ (90\%)$ & $88.6\%$ & $\phantom{0}0.0\%$ \\
+\midrule
+Family      & $0.01\ (99\%)$ & $\mathbf{75.0\%}$ & $29.8\%$ \\
+(unseen)    & $0.05\ (95\%)$ & $\mathbf{49.8\%}$ & $\phantom{0}0.0\%$ \\
+            & $0.10\ (90\%)$ & $\mathbf{35.4\%}$ & $\phantom{0}0.0\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_ec_conformal_shift.pdf}
+  \caption{Mondrian conformal prediction: empirical coverage (left) and
+    escalation rate (right) across four evaluation splits at three nominal
+    levels.
+    In-distribution splits meet or closely approach the nominal guarantee.
+    Family holdout collapses to $75.0\%$ empirical coverage at $\alpha{=}0.01$
+    and $35.4\%$ at $\alpha{=}0.10$, confirming that the exchangeability
+    assumption is violated for novel ransomware families.}
+  \label{fig:ec_conformal_shift}
+\end{figure}
 
 \subsection{Expert Feedback Loop}\label{sec:results_ewc}
 
@@ -1361,19 +1555,25 @@ Full ablation figures and tables are provided in Supplementary Section~S-VI.
 
 \subsection{Where the Framework Excels}
 
-Strongest performance occurs in three areas.
+Strongest performance occurs in four areas.
 First, the Semantic Agent achieves AUROC $0.996$ on RDset, confirming that
 sentence-transformer PE embeddings are highly effective discriminators within
 the training family distribution (AUROC $0.996$ on RDset).
 Second, the Decision MLP generalises within distribution: temporal-holdout
 AUROC $0.980$ and hardware-holdout AUROC $0.962$ match or exceed
-random-stratified performance (Table~\ref{tab:generalisation}), indicating
-that $10$-second I/O signatures are stable across recording sessions and
-hardware configurations.
+random-stratified performance (Table~\ref{tab:generalisation}), with the
+fusion gain over the Behavioural CNN alone confirmed as statistically significant
+($p{=}0.016$, one-sample Wilcoxon, Section~\ref{sec:results_significance}).
 Third, the Decision MLP reduces calibration error $5.2\times$ over mean
 fusion ($\text{ECE}=0.018$ vs.\ $0.094$), enabling $35.3\%$ autonomous
 classification at the TPE-optimised operating point versus $0\%$ under
-fixed-threshold baselines.
+fixed-threshold baselines, with risk-coverage AURC $0.843$ on the
+random-stratified split (Section~\ref{sec:results_aurc}).
+Fourth, at the session level, majority-vote aggregation achieves zero session
+FPR with $\geq 91\%$ detection rate across all in-distribution splits, and
+median latency to first detection is $0\,\text{s}$---ransomware is identified
+in the very first $10\,\text{s}$ window for most sessions
+(Section~\ref{sec:results_session}).
 EWC limits catastrophic forgetting to $\Delta\text{AUPRC}=0.001$ across
 five feedback iterations (Table~\ref{tab:ewc_feedback}), permitting
 incremental operational adaptation.
@@ -1405,8 +1605,20 @@ This limitation is shared with Hirano and Kobayashi~\cite{hirano2025ransmap}:
 hypervisor-level telemetry without process-level attribution cannot
 cleanly separate concurrent execution traces.
 
+The session-level analysis (Section~\ref{sec:results_session}) and
+risk-coverage curves (Section~\ref{sec:results_aurc}) quantify this degradation
+in deployment-relevant terms.
+On family holdout, majority-vote session detection falls to $45.9\%$ (vs.\
+$98.5\%$ on random-stratified) and AURC drops to $0.644$ (vs.\ $0.843$),
+meaning that when the model \emph{does} auto-contain, precision is lower and
+coverage requires a much higher confidence threshold.
+The conformal coverage analysis (Section~\ref{sec:results_conformal}) further
+confirms that the formal exchangeability guarantee is violated under family shift:
+empirical coverage collapses from $99.1\%$ to $75.0\%$ at $\alpha{=}0.01$,
+so the conformal wrapper's safety certificate no longer holds for novel families.
+
 Critically, the uncertainty mechanism provides graceful degradation rather
-than silent failure in both scenarios.
+than silent failure in all three scenarios.
 Under family holdout, $\sigma_{\text{beh}}$ rises on unseen families
 (Supplementary Section~S-VI), and the triage policy routes these samples to
 \textsc{Escalate} with escalation rates of $32$--$38\%$ for the
