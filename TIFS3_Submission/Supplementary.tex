@@ -356,6 +356,286 @@ diagonal Fisher over $N_F{=}1{,}000$ calibration samples and updating
 $|\phi|$ MLP parameters---which completes in under one second on any
 modern GPU.
 
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Extended Post-Hoc Experiment Figures (E-A--E-G)}\label{sec:supp_eaeg}
+% ─────────────────────────────────────────────────────────────────────────────
+
+This section provides the figures supporting the seven post-hoc experiments
+(Statistical Significance, Risk-Coverage, Conformal Coverage Under Shift,
+Session-Level Detection, Fusion Method Comparison, Score-Space Augmentation
+Under Class Imbalance, and Leave-One-Family-Out Robustness) reported in
+Section~VIII of the main paper. Numerical results are given in the main-paper
+tables; the figures below provide the corresponding visual summaries.
+
+Table~\ref{tab:ood_variants} and Fig.~\ref{fig:ood_variants} give the full
+per-variant breakdown for the OOD Ransomware Variants analysis summarised in
+the main paper (Section~VIII).
+
+\begin{table}[h]
+\centering
+\caption{Per-variant recall and escalation rate on RanSMAP
+  \texttt{variants} partition (seven Conti sub-variants; $1{,}397$ windows).
+  Hirano recall from Table~14 of~\cite{hirano2025ransmap} ($\chi$, full 23D).
+  Our recall: Behavioural CNN (16D, $T_w{=}10\,\text{s}$, single seed).
+  Esc = fraction routed to \textsc{Escalate} by Bayesian TPE policy.}
+\label{tab:ood_variants}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Variant & Hirano Recall & Ours Recall & Esc Rate \\
+\midrule
+Conti.A & $0.52$ & $0.65$ & $0.29$ \\
+Conti.B & $0.57$ & $0.70$ & $0.24$ \\
+Conti.C & $0.61$ & $0.78$ & $0.18$ \\
+Conti.D & $0.64$ & $0.79$ & $0.17$ \\
+Conti.E & $0.53$ & $0.63$ & $0.31$ \\
+Conti.F & $0.48$ & $0.51$ & $0.38$ \\
+Conti.G & $0.55$ & $0.72$ & $0.22$ \\
+\midrule
+Mean    & $0.56$ & $\mathbf{0.68}$ & $0.26$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig13_ood_variants.pdf}
+  \caption{Per-variant recall on the RanSMAP \texttt{variants} partition
+    (seven Conti sub-variants). Our Behavioural CNN (16D, $T_w{=}10\,\text{s}$)
+    outperforms Hirano and Kobayashi\ (23D) on six of seven variants; the secondary
+    axis shows the escalation rate --- highest where recall is lowest,
+    confirming uncertainty-conditioned graceful degradation.}
+  \label{fig:ood_variants}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig9_mix_partition.pdf}
+  \caption{Detection performance on the RanSMAP \texttt{mix} partition
+    (concurrent benign + ransomware execution). Peer Consultation partially
+    recovers detection rate; the escalation rate rises to $>60\%$ for all
+    concurrent scenarios, ensuring analyst oversight is preserved.}
+  \label{fig:mix}
+\end{figure}
+
+This section provides the full statistical-significance, risk-coverage, and
+session-level analysis summarised in the main paper (Section~VIII).
+
+\textbf{Statistical significance.} The generalisation-analysis table of the
+main paper reports mean AUROC but does not establish statistical
+reliability. We
+assess this with two complementary tests. (1) A one-sample Wilcoxon
+signed-rank test: for each split we treat the six per-seed Behavioural CNN
+AUROCs as samples and test whether their median is significantly below the
+Decision MLP reference AUROC (H$_1$: MLP $>$ B). (2) McNemar's test
+(continuity-corrected $\chi^2$) on per-window binary predictions
+(threshold $0.5$) for the random-stratified split.
+On random-stratified, hardware-holdout, and temporal-holdout, the Wilcoxon
+test rejects the null at $p{=}0.016$: the Decision MLP consistently
+outperforms the Behavioural CNN alone across all seeds. On family holdout,
+the result reverses: the Behavioural CNN ($0.707{\pm}0.010$) outperforms the
+Decision MLP ($0.676{\pm}0.001$, $p{=}1.00$), confirming that fusion with the
+Knowledge Agent's corpus-mean fallback for unseen families degrades rather
+than improves discrimination. McNemar's test on random-stratified
+($b{=}200$, $c{=}299$, $\chi^2{=}19.2$, $p{<}10^{-4}$) confirms that the MLP
+corrects significantly more window-level errors than it introduces.
+
+\textbf{Risk-coverage.} AUROC summarises discrimination across all
+thresholds, but in selective prediction the operator cares specifically
+about precision at a given coverage level. We compute the Area Under the
+Risk-Coverage curve (AURC), sweeping the auto-contain threshold $\tau$ from
+$1.0$ to $0.0$. On random-stratified the Decision MLP achieves AURC
+$0.843$; hardware-holdout is nearly identical ($0.841$). Temporal holdout
+($0.693$) and family holdout ($0.644$) are lower, reflecting the moderate
+and severe distribution shifts respectively; the sharp precision drop as
+$\tau$ falls below $0.9$ on family holdout signals that the MLP's confidence
+is less well-calibrated for novel families.
+
+\textbf{Session-level detection and latency.} We aggregate Decision MLP
+predictions to the session level (a contiguous execution recording) using
+two rules. Max-score: a session is flagged if any window's
+$\hat{p}_{\text{MLP}} \geq 0.5$. Majority-vote: a session is flagged if
+$>50\%$ of its windows satisfy $\hat{p}_{\text{MLP}} \geq 0.5$. On
+in-distribution splits, majority-vote achieves near-perfect session-level
+detection (random $98.5\%$, hardware $91.1\%$, temporal $98.9\%$) at session
+FPR $0.0$; max-score achieves $100\%$ detection but at elevated FPR
+($0.58$--$0.60$). On family holdout, majority-vote detection falls to
+$45.9\%$ with FPR $3.8\%$. Latency to first detection has median
+$0\,\text{s}$ on all in-distribution splits, rising to median $10\,\text{s}$
+on family holdout.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_ea_significance.pdf}
+  \caption{Statistical significance of the Decision MLP gain over the
+    Behavioural CNN. Boxplots show the per-seed Behavioural CNN AUROC
+    distribution ($K{=}6$); diamonds with error bars show the Decision MLP
+    mean ${\pm}$\,95\%\,CI. One-sample Wilcoxon (H$_1$: MLP $>$ B): $*$
+    $p{=}0.016$; `ns' = not significant ($p{=}1.00$ on family holdout, where
+    B $>$ MLP).}
+  \label{fig:ea_significance}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_eb_risk_coverage.pdf}
+  \caption{Risk-coverage (selective prediction) curves for the Decision MLP
+    across all four evaluation splits. Coverage = fraction of windows
+    auto-classified at confidence $\hat{p}_{\text{MLP}} \geq \tau$; precision
+    = ransomware fraction in the auto-classified subset. The right panel
+    compares AUROC and AURC per split; the gap is smallest for
+    random-stratified and largest for family holdout.}
+  \label{fig:eb_risk_coverage}
+\end{figure}
+
+Table~\ref{tab:conformal_shift_full} reports the escalation rate accompanying
+each coverage figure in the conformal-coverage-under-shift table of the main
+paper (Section~VIII).
+
+\begin{table}[h]
+\centering
+\caption{Mondrian conformal prediction empirical coverage and escalation rate
+  across four evaluation splits at three nominal miscoverage levels $\alpha$
+  (extends the corresponding table in the main paper).}
+\label{tab:conformal_shift_full}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llcc}
+\toprule
+Split & $\alpha$ (nominal) & Emp.\ Coverage & Esc.\ Rate \\
+\midrule
+Random      & $0.01\ (99\%)$ & $99.1\%$ & $27.1\%$ \\
+            & $0.05\ (95\%)$ & $94.1\%$ & $\phantom{0}7.4\%$ \\
+            & $0.10\ (90\%)$ & $88.8\%$ & $\phantom{0}0.0\%$ \\
+\midrule
+Hardware    & $0.01\ (99\%)$ & $98.4\%$ & $30.2\%$ \\
+            & $0.05\ (95\%)$ & $93.5\%$ & $11.4\%$ \\
+            & $0.10\ (90\%)$ & $87.0\%$ & $\phantom{0}0.0\%$ \\
+\midrule
+Temporal    & $0.01\ (99\%)$ & $99.3\%$ & $34.5\%$ \\
+            & $0.05\ (95\%)$ & $94.4\%$ & $12.1\%$ \\
+            & $0.10\ (90\%)$ & $88.6\%$ & $\phantom{0}0.0\%$ \\
+\midrule
+Family      & $0.01\ (99\%)$ & $\mathbf{75.0\%}$ & $29.8\%$ \\
+(unseen)    & $0.05\ (95\%)$ & $\mathbf{49.8\%}$ & $\phantom{0}0.0\%$ \\
+            & $0.10\ (90\%)$ & $\mathbf{35.4\%}$ & $\phantom{0}0.0\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_ec_conformal_shift.pdf}
+  \caption{Mondrian conformal prediction: empirical coverage (left) and
+    escalation rate (right) across four evaluation splits at three nominal
+    levels. In-distribution splits meet or closely approach the nominal
+    guarantee. Family holdout collapses to $75.0\%$ empirical coverage at
+    $\alpha{=}0.01$ and $35.4\%$ at $\alpha{=}0.10$, confirming that the
+    exchangeability assumption is violated for novel ransomware families.}
+  \label{fig:ec_conformal_shift}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_ed_session_level.pdf}
+  \caption{Session-level aggregation of Decision MLP predictions across all
+    four evaluation splits. Left: session detection rate (majority-vote in
+    red, max-score in blue); centre: session FPR. Majority-vote achieves
+    zero session FPR on all in-distribution splits with detection rates
+    $\geq 91\%$. Right: latency-to-first-detection histogram for the
+    random-stratified split ($133$ ransomware sessions; median $0\,\text{s}$,
+    p90 $18\,\text{s}$).}
+  \label{fig:ed_session_level}
+\end{figure}
+
+Table~\ref{tab:fusion_compare} reports the full per-split fusion method
+comparison summarised in the main paper (Section~VIII).
+
+\begin{table}[h]
+\centering
+\caption{Fusion method comparison across four evaluation splits.
+  All methods trained on the random-stratified training score pool without
+  augmentation. ECE reported on the random-stratified test split.
+  GBT = gradient boosting; MLP-1L = Decision MLP $6{\to}32{\to}1$
+  (\textbf{ours}). Bold = best per column.}
+\label{tab:fusion_compare}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccccc}
+\toprule
+Method & \multicolumn{4}{c}{AUROC} & ECE \\
+\cmidrule(lr){2-5}
+ & Random & Family & Hardware & Temporal & (Random) \\
+\midrule
+BK Mean       & $0.894$ & $0.649$ & $0.857$ & $0.900$ & $0.089$ \\
+RF            & $0.976$ & $0.684$ & $0.962$ & $0.984$ & $0.019$ \\
+GBT           & $\mathbf{0.979}$ & $\mathbf{0.690}$ & $\mathbf{0.965}$ & $\mathbf{0.986}$ & $0.016$ \\
+MLP-2L        & $0.977$ & $0.681$ & $0.963$ & $0.982$ & $\mathbf{0.010}$ \\
+MLP-1L (ours) & $0.976$ & $0.679$ & $0.961$ & $0.981$ & $0.013$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_ee_baselines.pdf}
+  \caption{Fusion method comparison: AUROC (left) and ECE (right) across all
+    four evaluation splits. All methods are trained on the same score pool.
+    The one-layer Decision MLP achieves calibration competitive with MLP-2L
+    and substantially better than tree-based methods, while matching their
+    AUROC on in-distribution splits.}
+  \label{fig:ee_baselines}
+\end{figure}
+
+Table~\ref{tab:imbalance} reports the full per-prevalence AUROC and ECE
+values summarised in the main paper (Section~VIII).
+
+\begin{table}[h]
+\centering
+\caption{Decision MLP AUROC and ECE under induced class imbalance
+  (random-stratified test split). Ransomware prevalence is reduced by
+  subsampling; benign count fixed at $12{,}225$. SMOTE = linear interpolation
+  in score space; CTGAN = generative oversampling. Baseline ($51.3\%$) is the
+  standard training condition. Bold = best per row per metric.}
+\label{tab:imbalance}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{AUROC} & \multicolumn{3}{c}{ECE (lower = better)} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Prevalence & None & SMOTE & CTGAN & None & SMOTE & CTGAN \\
+\midrule
+$10\%$          & $0.974$ & $\mathbf{0.975}$ & $0.971$ & $0.122$ & $0.060$ & $\mathbf{0.025}$ \\
+$5\%$           & $0.974$ & $\mathbf{0.975}$ & $0.970$ & $0.162$ & $0.070$ & $\mathbf{0.050}$ \\
+$1\%$           & $0.969$ & $\mathbf{0.974}$ & $0.965$ & $0.261$ & $\mathbf{0.076}$ & $0.085$ \\
+\midrule
+Baseline ($51.3\%$) & $0.976$ & --- & --- & $0.013$ & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_ef_ctgan_ablation.pdf}
+  \caption{Decision MLP AUROC (left) and AUPRC (right) under induced class
+    imbalance at $10\%$, $5\%$, and $1\%$ ransomware prevalence across three
+    augmentation conditions. AUROC is robust across all conditions; CTGAN
+    provides the strongest calibration recovery at $10\%$ and $5\%$
+    prevalence.}
+  \label{fig:ef_ctgan_ablation}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_eg_lofo.pdf}
+  \caption{Leave-one-family-out evaluation. \emph{Left}: Overall AUROC (all
+    test windows) when each ransomware family is excluded from MLP
+    training---stable at ${\approx}0.976$ across all holdouts (dashed
+    reference). \emph{Right}: Per-family detection rate, auto-contain rate,
+    and escalation rate for the held-out family's test windows. Conti and
+    Ryuk transfer perfectly; WannaCry and REvil require direct training
+    examples for reliable detection.}
+  \label{fig:eg_lofo}
+\end{figure}
+
 \bibliographystyle{IEEEtran}
 \bibliography{Reference_Main}
 
