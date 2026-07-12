@@ -1108,23 +1108,24 @@ Hardware      & $0.939 \pm 0.006$ & $0.962 \pm {<}0.001$ \\
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{Figures/fig7_multiseed.pdf}
-  \caption{AUROC distribution over $K{=}6$ seeds across four evaluation
-    splits. Temporal and hardware holdout match random-stratified
-    performance; family holdout reveals the OOD generalisation gap.}
-  \label{fig:multiseed}
+  \includegraphics[width=\columnwidth]{Figures/fig_radar_splits.pdf}
+  \caption{Generalisation profile across the four evaluation splits: AUROC,
+    risk-coverage (AURC), session-level detection rate, and Mondrian
+    conformal coverage at $\alpha{=}0.01$. Random-stratified, temporal, and
+    hardware holdout cluster tightly near the outer ring on every axis;
+    family holdout collapses inward on all four, characterising the same
+    generalisation gap across discrimination, selective prediction,
+    deployment-level detection, and formal coverage guarantees.}
+  \label{fig:radar_splits}
 \end{figure}
 
 \label{sec:results_significance}
-The Decision MLP's fusion gain over the Behavioural CNN is statistically
-significant on in-distribution splits (one-sample Wilcoxon, $p{=}0.016$) and
-\emph{reverses} on family holdout ($p{=}1.00$), confirming that fusion
-should be gated on family recognition confidence; risk-coverage
-(AURC $0.843$ random-stratified vs.\ $0.644$ family holdout) and
-session-level detection (majority-vote: zero FPR, $\geq 91\%$ detection
-in-distribution, falling to $45.9\%$ on family holdout, median $0\,\text{s}$
-latency to first detection) are reported in full, with McNemar's test and
-the latency histogram, in Supplementary Section~S-VIII.
+This profile is also statistically reliable: the Decision MLP's fusion gain
+over the Behavioural CNN is significant on in-distribution splits
+(one-sample Wilcoxon, $p{=}0.016$) and \emph{reverses} on family holdout
+($p{=}1.00$), confirming that fusion should be gated on family recognition
+confidence. Full statistics (McNemar's test, per-split AURC and session
+curves, latency histogram) are provided in Supplementary Section~S-VIII.
 
 \subsection{OOD Ransomware Variants}\label{sec:ood_variants}
 
@@ -1216,11 +1217,11 @@ only under exchangeability between calibration and test samples.
 Table~\ref{tab:conformal_shift} reports empirical coverage across all four
 splits (thresholds calibrated on the split-specific validation set).
 On in-distribution splits, empirical coverage at $\alpha{=}0.01$ is within
-$0.7$ points of the $99\%$ nominal target, consistent with the guarantee
-under approximate exchangeability. Family holdout is the critical exception:
-coverage collapses to $\mathbf{75.0\%}$ at $\alpha{=}0.01$ and $35.4\%$ at
-$\alpha{=}0.10$, confirming that the exchangeability assumption is violated
-when test families are entirely absent from calibration---consistent
+$0.7$ points of the $99\%$ nominal target; family holdout is the critical
+exception, collapsing to $\mathbf{75.0\%}$ at $\alpha{=}0.01$ and $35.4\%$
+at $\alpha{=}0.10$ (Fig.~\ref{fig:radar_splits}), confirming that
+exchangeability is violated when test families are entirely absent from
+calibration---consistent
 with~\cite{angelopoulos_conformal_risk_2022}'s observation that conformal
 guarantees degrade under covariate shift.
 \emph{We therefore recommend treating Mondrian conformal coverage as an
@@ -1464,13 +1465,11 @@ random-stratified performance. Fusion does not recover this gap: the
 Knowledge Agent's corpus-mean fallback for unseen families injects noise
 into the score pool, so the framework is not suitable for autonomous
 containment on families entirely absent from training without prior
-operator review. This degradation is deployment-relevant and non-uniform:
-majority-vote session detection falls to $45.9\%$ (vs.\ $98.5\%$
-in-distribution) and AURC drops to $0.644$ (vs.\ $0.843$;
-Section~\ref{sec:results_significance}); the conformal wrapper's formal
-guarantee also breaks down, with empirical coverage collapsing from
-$99.1\%$ to $75.0\%$ at $\alpha{=}0.01$ (Section~\ref{sec:results_conformal}).
-The leave-one-family-out analysis (Section~\ref{sec:results_lofo}) reveals,
+operator review. As Fig.~\ref{fig:radar_splits} shows, this degradation is
+deployment-relevant and consistent across every axis---discrimination,
+selective prediction, session-level detection, and the conformal
+guarantee alike collapse together, rather than any single metric being an
+outlier. The leave-one-family-out analysis (Section~\ref{sec:results_lofo}) reveals,
 however, that the gap is driven by a subset of families with score-pool
 profiles distinct from all training families: Conti and Ryuk transfer
 perfectly ($100\%$ detection unseen) while WannaCry and REvil drop to
