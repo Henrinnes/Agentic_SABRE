@@ -421,6 +421,17 @@ Mean    & $0.56$ & $\mathbf{0.68}$ & $0.26$ \\
 This section provides the full statistical-significance, risk-coverage, and
 session-level analysis summarised in the main paper (Section~VIII).
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig7_multiseed.pdf}
+  \caption{AUROC distribution over $K{=}6$ seeds across four evaluation
+    splits. Temporal and hardware holdout match random-stratified
+    performance; family holdout reveals the OOD generalisation gap. This
+    per-seed view underlies the generalisation-profile radar in the main
+    paper.}
+  \label{fig:multiseed}
+\end{figure}
+
 \textbf{Statistical significance.} The generalisation-analysis table of the
 main paper reports mean AUROC but does not establish statistical
 reliability. We

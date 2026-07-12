@@ -101,6 +101,70 @@ def fig_radar():
 
 
 # ════════════════════════════════════════════════════════════════════════════
+# Fig radar_splits — Generalisation profile across evaluation splits
+# ════════════════════════════════════════════════════════════════════════════
+def fig_radar_splits():
+    categories = [
+        "AUROC", "AURC", "Session\nDetection", "Conformal\nCoverage",
+    ]
+    N = len(categories)
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]
+
+    splits = {
+        "Random-Stratified": {
+            "values": [0.976, 0.843, 0.985, 0.991],
+            "color": BLUE, "lw": 2.0, "ls": "-", "alpha": 0.10,
+        },
+        "Temporal Holdout": {
+            "values": [0.980, 0.693, 0.989, 0.993],
+            "color": TEAL, "lw": 1.8, "ls": "--", "alpha": 0.08,
+        },
+        "Hardware Holdout": {
+            "values": [0.962, 0.841, 0.911, 0.984],
+            "color": PURPLE, "lw": 1.8, "ls": "-.", "alpha": 0.08,
+        },
+        "Family Holdout (unseen)": {
+            "values": [0.676, 0.644, 0.459, 0.750],
+            "color": RED, "lw": 2.5, "ls": ":", "alpha": 0.22,
+        },
+    }
+
+    fig, ax = plt.subplots(figsize=(5.2, 4.0),
+                           subplot_kw=dict(polar=True))
+    fig.subplots_adjust(left=0.10, right=0.62)
+
+    ax.set_theta_offset(np.pi / 2)
+    ax.set_theta_direction(-1)
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories, size=9)
+    ax.set_ylim(0.35, 1.0)
+    ax.set_yticks([0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    ax.set_yticklabels(["0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1.0"],
+                       size=7.5, color=GREY)
+    ax.yaxis.set_tick_params(labelcolor=GREY)
+    ax.spines["polar"].set_color(LGREY)
+    ax.grid(color=LGREY, linewidth=0.8)
+
+    for name, cfg in splits.items():
+        vals = cfg["values"] + cfg["values"][:1]
+        ax.plot(angles, vals, color=cfg["color"], lw=cfg["lw"],
+                ls=cfg["ls"], label=name, zorder=3,
+                marker="o", markersize=4)
+        ax.fill(angles, vals, color=cfg["color"], alpha=cfg["alpha"])
+
+    ax.legend(loc="center left", bbox_to_anchor=(1.25, 0.5),
+              framealpha=0.9, edgecolor=LGREY, fontsize=8.5)
+
+    fig.savefig(f"{OUT}/fig_radar_splits.pdf", bbox_inches="tight",
+                pad_inches=0.03)
+    fig.savefig(f"{OUT}/fig_radar_splits.png", bbox_inches="tight",
+                pad_inches=0.03)
+    plt.close(fig)
+    print("  fig_radar_splits done")
+
+
+# ════════════════════════════════════════════════════════════════════════════
 # Fig 13 — OOD Conti variants bar chart (ours vs Hirano)
 # ════════════════════════════════════════════════════════════════════════════
 def fig_ood_variants():
@@ -503,6 +567,7 @@ if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     print("Generating figures...")
     fig_radar()
+    fig_radar_splits()
     fig_ood_variants()
     fig_triage_space()
     fig_uncertainty_violin()
