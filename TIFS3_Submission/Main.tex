@@ -253,7 +253,7 @@ base agents.
 \subsection{Relationship to Prior Work}
 
 This paper extends the two-agent Agentic SABRE
-framework~\cite{kabuye2025sabre_eswa} (Semantic + Behavioural CNN, MC
+framework~\cite{kabuye2026sabre} (Semantic + Behavioural CNN, MC
 Dropout, fixed triage policy) with four technically distinct
 contributions: (1) a third Knowledge CNN agent on ATT\&CK tactic
 embeddings, expanding the score pool from $[0,1]^4$ to $[0,1]^6$;
@@ -262,7 +262,7 @@ $(\tau_{\text{high}}, \tau, \kappa, \kappa_{\text{low}})$ replacing the
 fixed $(\tau{=}0.10, \kappa{=}0.10)$ pair; (3) CTGAN score-space
 augmentation at the fusion layer; and (4) EWC continual learning and
 Mondrian conformal prediction wrappers. All datasets, splits, results, and
-figures are independent of~\cite{kabuye2025sabre_eswa}.
+figures are independent of~\cite{kabuye2026sabre}.
 
 \begin{figure*}[t]
   \centering
@@ -650,7 +650,7 @@ three policies on the random-stratified test split. Bayesian TPE halves
 the escalation rate relative to grid search ($24.7\%$ vs $42.3\%$) at
 comparable balanced accuracy ($0.866$ vs $0.874$), and triples the
 auto-contain rate ($35.3\%$ vs $16.5\%$). Fixed thresholds
-($\tau{=}0.10,\,\kappa{=}0.10$, inherited from~\cite{kabuye2025sabre_eswa})
+($\tau{=}0.10,\,\kappa{=}0.10$, inherited from~\cite{kabuye2026sabre})
 are wholly unsuitable for autonomous deployment: $85.3\%$ escalation
 saturates analyst capacity, and $0.525$ balanced accuracy reflects
 near-random triage.
@@ -671,7 +671,7 @@ near-random triage.
 \toprule
 Policy & Bal.~acc $\uparrow$ & Esc (\%) $\downarrow$ & AC (\%) $\uparrow$ \\
 \midrule
-SABRE+ Fixed~\cite{kabuye2025sabre_eswa}
+SABRE+ Fixed~\cite{kabuye2026sabre}
   & $0.525 \pm 0.001$ & $85.3 \pm 0.1$ & $12.2 \pm 0.1$ \\
 Grid search
   & $0.874 \pm 0.002$ & $42.3 \pm 0.6$ & $16.5 \pm 0.1$ \\
@@ -1278,7 +1278,7 @@ confirming complementarity.
 \textbf{(3) Decision MLP depth:} one ($6{\to}32{\to}1$, ECE $0.021$), two
 ($0.018$), and three ($0.019$) hidden layers are statistically equivalent
 on AUROC; the one-layer variant matches the prior two-agent
-architecture~\cite{kabuye2025sabre_eswa}.
+architecture~\cite{kabuye2026sabre}.
 \textbf{(4) CTGAN ratio:} $N_{\text{synth}} \in [500,5000]$ produces no
 significant AUROC/ECE change; we adopt $N_{\text{synth}}{=}2{,}000$.
 Full figures and tables are in Supplementary Section~S-VI.

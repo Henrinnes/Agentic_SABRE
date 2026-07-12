@@ -214,7 +214,7 @@ All three agents are evaluated on independent modality-specific datasets. RDset 
 
 \subsection{Baselines}
 
-Results are compared against: (i) the original two-agent SABRE \cite{kabuye2025sabre_eswa}; (ii) the single-agent uncertainty-aware detector \cite{kabuye2025explainable}; (iii) LLM-LADE \cite{ZhangLZYHY25}; (iv) FeSAD \cite{Fernando2024FeSAD}; and (v) the multi-agent adaptive detection system of \cite{MultiAgentAdaptiveDetection2023}.
+Results are compared against: (i) the original two-agent SABRE \cite{kabuye2026sabre}; (ii) the single-agent uncertainty-aware detector \cite{kabuye2025explainable}; (iii) LLM-LADE \cite{ZhangLZYHY25}; (iv) FeSAD \cite{Fernando2024FeSAD}; and (v) the multi-agent adaptive detection system of \cite{MultiAgentAdaptiveDetection2023}.
 
 \subsection{Evaluation Metrics}
 
@@ -243,7 +243,7 @@ Knowledge CNN  & RansKnow & 200  & 0.9550 & 0.9950 & 0.9550 & 0.0499 \\
 \end{tabular}
 \end{table}
 
-The Semantic CNN achieves perfect discrimination, consistent with prior findings \cite{kabuye2025sabre_eswa} that PE-header embeddings form near-disjoint class clusters. The Behavioural CNN attains 0.9967 AUC on balanced evaluation; the 0.6030 AUC on the full imbalanced distribution reflects the difficulty of ranking under a 598:1 class ratio. The Knowledge CNN achieves 0.9550 accuracy and 0.9950 AUC despite operating on only 23 features and 307 total training samples, confirming the discriminative power of structured ATT\&CK/tool features. The increasing $\bar{\sigma}$ sequence ($\approx 0 \to 0.0138 \to 0.0499$) reflects decreasing distributional separation across modalities, consistent with the semantic $>$ behavioural $>$ discourse hierarchy of signal quality.
+The Semantic CNN achieves perfect discrimination, consistent with prior findings \cite{kabuye2026sabre} that PE-header embeddings form near-disjoint class clusters. The Behavioural CNN attains 0.9967 AUC on balanced evaluation; the 0.6030 AUC on the full imbalanced distribution reflects the difficulty of ranking under a 598:1 class ratio. The Knowledge CNN achieves 0.9550 accuracy and 0.9950 AUC despite operating on only 23 features and 307 total training samples, confirming the discriminative power of structured ATT\&CK/tool features. The increasing $\bar{\sigma}$ sequence ($\approx 0 \to 0.0138 \to 0.0499$) reflects decreasing distributional separation across modalities, consistent with the semantic $>$ behavioural $>$ discourse hierarchy of signal quality.
 
 \subsection{ROC Curves for All Three Agents}
 
@@ -258,7 +258,7 @@ Figure~\ref{fig:tifs_roc} shows the ROC curves for all three agents on their res
 
 \subsection{Three-Agent Fusion and Triage}
 
-Table~\ref{tab:tifs_fusion} reports the three-agent fusion behaviour on a 200-sample cross-modality evaluation. The fused classifier achieves perfect accuracy and AUC (1.0000), driven by the Semantic Agent's dominance on this split. More importantly, the 9.0\% escalation rate is substantially lower than the two-agent SABRE baseline, which reported escalation rates up to 22\% under the same $\lambda = 0.5$ objective \cite{kabuye2025sabre_eswa}. The Knowledge Agent's additional confidence signal lowers $\sigma_\text{max}$ for samples where discourse features are unambiguous, enabling more AUTO-CONTAIN decisions without degrading recall.
+Table~\ref{tab:tifs_fusion} reports the three-agent fusion behaviour on a 200-sample cross-modality evaluation. The fused classifier achieves perfect accuracy and AUC (1.0000), driven by the Semantic Agent's dominance on this split. More importantly, the 9.0\% escalation rate is substantially lower than the two-agent SABRE baseline, which reported escalation rates up to 22\% under the same $\lambda = 0.5$ objective \cite{kabuye2026sabre}. The Knowledge Agent's additional confidence signal lowers $\sigma_\text{max}$ for samples where discourse features are unambiguous, enabling more AUTO-CONTAIN decisions without degrading recall.
 
 \begin{table}[h]
 \centering
