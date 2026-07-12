@@ -298,7 +298,7 @@ combined~\cite{MultiAgentAdaptiveDetection2023}.
 Soltani et al.~\cite{MultiAgentAdaptiveDetection2023} propose an
 adaptive multi-agent intrusion detection system but do not equip
 agents with uncertainty estimates or inter-agent communication.
-The two-agent SABRE baseline~\cite{kabuye2025sabre_eswa} demonstrated
+The two-agent SABRE baseline~\cite{kabuye2026sabre} demonstrated
 the benefit of modality-specific agents with uncertainty-aware fusion,
 but agents remain isolated.
 SABRE+ adds a third modality and a formal peer consultation protocol.
@@ -425,12 +425,12 @@ At inference, $T=10$ MC Dropout passes yield $(\bar{p}_\sem, \sigma_\sem)$.
 From the trained scaler statistics, $\bar{\sigma}_\sem \approx 2.75
 \times 10^{-8}$, confirming near-deterministic confidence on the
 RDset distribution---a consequence of the well-separated class-conditional
-embedding clusters documented in~\cite{kabuye2025sabre_eswa}.
+embedding clusters documented in~\cite{kabuye2026sabre}.
 
 \subsection{Behavioural Agent}
 
 The Behavioural Agent operates on 16-dimensional runtime telemetry
-features extracted from the RanSMAP dataset~\cite{kabuye2025sabre_eswa},
+features extracted from the RanSMAP dataset~\cite{kabuye2026sabre},
 capturing LBA/GPA variance, memory operation counts, and I/O entropy
 statistics.
 The architecture mirrors the Semantic CNN with a 1D-CNN backbone and
@@ -442,7 +442,7 @@ static embedding space.
 On balanced held-out evaluation (1000 samples per class) the agent
 achieves accuracy 0.9945 and AUC 0.9967; the imbalanced evaluation
 on the full RanSMAP class distribution (598:1 malicious:benign ratio)
-yields AUC~0.6030~\cite{kabuye2025sabre_eswa}, confirming that rank-based
+yields AUC~0.6030~\cite{kabuye2026sabre}, confirming that rank-based
 separation is substantially harder under extreme class imbalance.
 
 \subsection{Knowledge Agent and RansKnow Dataset}
@@ -1327,7 +1327,7 @@ Fig.~\ref{fig:feat_imp} shows permutation-based feature importance for the Behav
 agent.
 LBA and GPA variance features dominate, confirming that spatial dispersion of memory and
 storage access---the principal I/O signature of active encryption---drives classification.
-This is consistent with counterfactual analysis in~\cite{kabuye2025sabre_eswa}, where
+This is consistent with counterfactual analysis in~\cite{kabuye2026sabre}, where
 minimal relative changes to LBA and GPA variance sufficed to flip the agent's prediction.
 
 \begin{figure}[!t]
@@ -1372,7 +1372,7 @@ Razaulla et al.~\cite{razaulla2023age}            & $\times$ & $\times$ & $\time
 Soltani et al.~\cite{MultiAgentAdaptiveDetection2023} & \checkmark & $\times$ & $\times$ & $\times$ & $\times$ & $\circ$ & 0.96 \\
 LLM-LADE~\cite{ZhangLZYHY25}                     & $\times$ & $\times$ & $\times$ & $\circ$  & $\times$ & $\times$ & --- \\
 Kabuye et al.~\cite{kabuye2025explainable}        & $\times$ & \checkmark & $\times$ & $\times$ & $\times$ & $\times$ & 1.00 \\
-2-Agent SABRE~\cite{kabuye2025sabre_eswa}         & \checkmark & \checkmark & $\times$ & $\times$ & \checkmark & $\times$ & 1.00 \\
+2-Agent SABRE~\cite{kabuye2026sabre}         & \checkmark & \checkmark & $\times$ & $\times$ & \checkmark & $\times$ & 1.00 \\
 \midrule
 \textbf{SABRE+ (ours)} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \textbf{0.984} \\
 \bottomrule
@@ -1385,7 +1385,7 @@ Kabuye et al.~\cite{kabuye2025explainable}        & $\times$ & \checkmark & $\ti
 \label{sec:security}
 
 \subsection{Adversarial Robustness of the Semantic Agent}
-Counterfactual analysis on RDset~\cite{kabuye2025sabre_eswa}
+Counterfactual analysis on RDset~\cite{kabuye2026sabre}
 shows that flipping the Semantic Agent's prediction requires a mean
 $\ell_2$ perturbation of $\|\Delta\mathbf{z}\|_2 = 3.27$ in
 embedding space (100\% flip success rate), with low variance.
@@ -1397,7 +1397,7 @@ not raw bytes.
 \subsection{Adversarial Robustness of the Behavioural Agent}
 For the Behavioural Agent, the minimal counterfactual perturbation
 to LBA and GPA variance features is 0.9\%--2.5\% relative
-change~\cite{kabuye2025sabre_eswa}.
+change~\cite{kabuye2026sabre}.
 Although individually small, achieving such precision during active
 encryption requires the attacker to implement a memory-access
 throttling mechanism that suppresses the statistical signature of
