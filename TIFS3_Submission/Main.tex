@@ -1076,13 +1076,41 @@ Hardware      & $0.939 \pm 0.006$ & $0.962 \pm {<}0.001$ \\
   \label{fig:radar_splits}
 \end{figure}
 
-\label{sec:results_significance}
-This profile is also statistically reliable: the Decision MLP's fusion gain
-over the Behavioural CNN is significant on in-distribution splits
-(one-sample Wilcoxon, $p{=}0.016$) and \emph{reverses} on family holdout
-($p{=}1.00$), confirming that fusion should be gated on family recognition
-confidence. Full statistics (McNemar's test, per-split AURC and session
-curves, latency histogram) are provided in Supplementary Section~S-VIII.
+\subsection{Statistical Significance, Risk-Coverage, and Session-Level Analysis}\label{sec:results_significance}
+
+This profile is also statistically reliable. \textbf{Significance:} we
+assess the reliability of the Decision MLP's AUROC gain over the
+Behavioural CNN with a one-sample Wilcoxon signed-rank test (six per-seed
+Behavioural CNN AUROCs vs.\ the Decision MLP reference, H$_1$: MLP $>$ B)
+and McNemar's test (continuity-corrected $\chi^2$) on per-window binary
+predictions (threshold $0.5$, random-stratified). On random-stratified,
+hardware, and temporal holdout, Wilcoxon rejects the null at $p{=}0.016$:
+the MLP consistently outperforms the Behavioural CNN alone. On family
+holdout the result \emph{reverses} ($0.707{\pm}0.010$ vs.\
+$0.676{\pm}0.001$, $p{=}1.00$), confirming fusion with the Knowledge
+Agent's corpus-mean fallback degrades rather than improves discrimination
+for unseen families---fusion should therefore be gated on family
+recognition confidence. McNemar's test on random-stratified ($b{=}200$,
+$c{=}299$, $\chi^2{=}19.2$, $p{<}10^{-4}$) confirms the MLP corrects more
+errors than it introduces.
+
+\textbf{Risk-coverage:} sweeping the auto-contain threshold $\tau$ from
+$1.0$ to $0.0$, the Area Under the Risk-Coverage curve (AURC) is $0.843$
+on random-stratified and $0.841$ on hardware holdout; temporal ($0.693$)
+and family ($0.644$) holdout are lower, reflecting moderate and severe
+shift respectively. The sharp precision drop below $\tau{=}0.9$ on family
+holdout signals poorer confidence calibration for novel families.
+
+\textbf{Session-level detection and latency:} aggregating Decision MLP
+predictions to the session level, majority-vote (flag if $>50\%$ of
+windows exceed $\hat{p}_{\text{MLP}}{\geq}0.5$) achieves near-perfect
+in-distribution detection (random $98.5\%$, hardware $91.1\%$, temporal
+$98.9\%$) at zero session FPR, falling to $45.9\%$ (FPR $3.8\%$) on family
+holdout; max-score (flag if any window exceeds threshold) reaches $100\%$
+detection but at elevated FPR ($0.58$--$0.60$). Median latency to first
+detection is $0\,\text{s}$ in-distribution, rising to $10\,\text{s}$ on
+family holdout. Full McNemar and session-detection curves are provided in
+Supplementary Section~S-VIII.
 
 \subsection{OOD Ransomware Variants}\label{sec:ood_variants}
 
@@ -1440,16 +1468,25 @@ single-output detectors.
 
 \subsection{Additional Limitations}
 
-Three further limitations are acknowledged and discussed in full in
-Supplementary Section~S-IX: (1) \emph{dataset scope}---RanSMAP covers
-families from WannaCry (2017) to Conti (2022) only, with post-2022 families
-left to future work; (2) \emph{adversarial robustness}---an adaptive
-attacker aware of the triage policy could in principle craft executions
-that evade both Escalation and Auto-Contain, an open problem for MC
-Dropout-based uncertainty~\cite{gal2016dropout}; and (3) \emph{Knowledge
-Agent sample size}---the RansKnow corpus~\cite{ransknow_2026} contains only
-$307$ transcripts, small for a CNN classifier, so its generalisation
-metrics should be read accordingly.
+\textbf{Dataset scope.} RanSMAP families range from WannaCry (2017) to
+Conti (2022); post-2022 families (Cl0p, BlackCat/ALPHV, LockBit 3.0) are
+not represented, since RanSMAP is the only publicly available
+hypervisor-level telemetry dataset with family labels and multi-split
+protocols at time of writing. Extension to current-generation families is
+future work.
+
+\textbf{Adversarial robustness.} An adaptive attacker aware of the triage
+policy could craft executions suppressing $\sigma_{\max}$ below $\kappa$
+while keeping $\hat{p}$ below $\tau_{\text{high}}$, avoiding both
+Escalation and Auto-Contain. Adversarial attacks against MC Dropout
+uncertainty estimates~\cite{gal2016dropout} remain an open problem we
+defer to future work.
+
+\textbf{Knowledge Agent sample size.} The RansKnow corpus~\cite{ransknow_2026}
+contains only $307$ transcripts (${\approx}215$/$46$/$46$
+train/val/test), small for a CNN classifier; since its role is
+complementary ATT\&CK-level signal, its generalisation metrics should be
+read accordingly.
 
 \subsection{Comparison with Hirano and Kobayashi, Adaptive Thresholding, and Deployment}
 
