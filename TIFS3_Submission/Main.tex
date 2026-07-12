@@ -904,11 +904,11 @@ System & Random & Temporal & Family & Hardware \\
 Semantic CNN (RDset)
   & $\mathbf{0.996}$ & $--$ & $--$ & $--$ \\
 Behavioural CNN
-  & $0.961 \pm 0.003$ & $0.960 \pm 0.005$ & $0.707 \pm 0.010$ & $0.939 \pm 0.006$ \\
+  & $0.961 \pm 0.003$ & $0.960 \pm 0.005$ & $\mathbf{0.707} \pm 0.010$ & $0.939 \pm 0.006$ \\
 Mean Fusion ($\hat{p}$ avg.)
   & $0.899$ & $0.895$ & $0.645$ & $0.858$ \\
 Decision MLP (ours)
-  & $0.976 \pm 0.0002$ & $\mathbf{0.980} \pm 0.0002$
+  & $\mathbf{0.976} \pm 0.0002$ & $\mathbf{0.980} \pm 0.0002$
   & $0.676 \pm 0.0004$ & $\mathbf{0.962} \pm 0.0003$ \\
 \midrule
 Hirano and Kobayashi~\cite{hirano2025ransmap}
@@ -1021,47 +1021,19 @@ $(\tau^*, \kappa^*) \approx (0.35, 0.22)$ for the random-stratified split.
 
 \subsection{Generalisation Analysis}
 
-Table~\ref{tab:generalisation} reports the Behavioural CNN and Decision
-MLP AUROC across the four evaluation splits over $K{=}6$ seeds. Temporal
-($0.980$) and hardware ($0.962$) holdout match or exceed random-stratified
-performance ($0.976$, seed variability ${<}0.001$), confirming the
-framework generalises across sessions and hardware without retraining.
-Family holdout ($0.676 \pm 0.001$) reveals a meaningful gap: unseen
-families exhibit distributional shift in both modalities and the
-Knowledge Agent's corpus-mean fallback degrades the fused score, but
-$\sigma_{\text{beh}}$ correctly rises, routing these samples to
-\textsc{Escalate} rather than \textsc{Auto-Contain}.
-
-Hirano and Kobayashi~\cite{hirano2025ransmap} report a hardware-holdout F-score of
-$0.856$ (1D-CNN+LSTM, 23D features, $T_w{=}0.1\,\text{s}$,
-$T_d{=}30\,\text{s}$ detection window).
-Our Behavioural CNN achieves AUROC $0.939$ on the same hardware-holdout
-partition with a $10\,\text{s}$ window and $16$D features, providing
-broader coverage while requiring no LSTM component.
-Note that F-score is threshold-dependent whereas AUROC aggregates across
-all decision thresholds; this comparison is indicative of relative
-capability rather than a direct numerical claim of superiority.
-
-\begin{table}[t]
-\centering
-\footnotesize
-\caption{Generalisation analysis: Behavioural CNN and Decision MLP AUROC
-  across four evaluation splits (mean $\pm$ std over $K{=}6$ seeds).
-  Decision MLP seed variability is ${<}0.001$ across random, temporal, and hardware splits.
-}
-\label{tab:generalisation}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lcc}
-\toprule
-Split & Behavioural CNN & Decision MLP \\
-\midrule
-Random        & $0.961 \pm 0.003$ & $0.976 \pm {<}0.001$ \\
-Temporal      & $0.960 \pm 0.005$ & $0.980 \pm {<}0.001$ \\
-Family        & $0.707 \pm 0.010$ & $0.676 \pm 0.001$ \\
-Hardware      & $0.939 \pm 0.006$ & $0.962 \pm {<}0.001$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+Table~\ref{tab:auroc_splits} reports the Behavioural CNN and Decision MLP
+AUROC across the four evaluation splits over $K{=}6$ seeds (seed
+variability ${<}0.001$ for the Decision MLP on random, temporal, and
+hardware). Temporal ($0.980$) and hardware ($0.962$) holdout match or
+exceed random-stratified performance ($0.976$), confirming the framework
+generalises across sessions and hardware without retraining. Family
+holdout ($0.676 \pm 0.001$) reveals a meaningful gap: unseen families
+exhibit distributional shift in both modalities and the Knowledge Agent's
+corpus-mean fallback degrades the fused score, but $\sigma_{\text{beh}}$
+correctly rises, routing these samples to \textsc{Escalate} rather than
+\textsc{Auto-Contain}. A direct comparison with Hirano and
+Kobayashi~\cite{hirano2025ransmap}'s detector on the same hardware-holdout
+partition is provided in Section~\ref{sec:discussion_hirano}.
 
 \begin{figure}[t]
   \centering
@@ -1405,7 +1377,7 @@ achieves AUROC $0.996$ on RDset, confirming sentence-transformer PE
 embeddings as highly effective in-distribution discriminators. Second, the
 Decision MLP generalises within distribution: temporal ($0.980$) and
 hardware ($0.962$) holdout match or exceed random-stratified performance
-(Table~\ref{tab:generalisation}), with a statistically significant fusion
+(Table~\ref{tab:auroc_splits}), with a statistically significant fusion
 gain over the Behavioural CNN alone ($p{=}0.016$). Third, calibration
 error falls $5.2\times$ over mean fusion (ECE $0.018$ vs.\ $0.094$),
 enabling $35.3\%$ autonomous classification versus $0\%$ under fixed
@@ -1482,12 +1454,12 @@ train/val/test), small for a CNN classifier; since its role is
 complementary ATT\&CK-level signal, its generalisation metrics should be
 read accordingly.
 
-\subsection{Comparison with Hirano and Kobayashi, Adaptive Thresholding, and Deployment}
+\subsection{Comparison with Hirano and Kobayashi, Adaptive Thresholding, and Deployment}\label{sec:discussion_hirano}
 
 The closest direct comparator, Hirano and Kobayashi's~\cite{hirano2025ransmap}
 1D-CNN+LSTM (23D features, $30$-second window), reports F-score $0.856$ on
 hardware-holdout versus our Behavioural CNN's AUROC $0.939$
-(Table~\ref{tab:generalisation}) and mean recall $0.68$ versus their $0.56$
+(Table~\ref{tab:auroc_splits}) and mean recall $0.68$ versus their $0.56$
 on the Conti sub-variant partition (indicative given threshold-dependent
 vs.\ threshold-independent metrics); more importantly, where both
 frameworks struggle, ours escalates rather than misclassifies via
