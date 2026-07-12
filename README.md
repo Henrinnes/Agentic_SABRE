@@ -2,7 +2,8 @@
 
 **Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent Framework for Adaptive Ransomware Detection**
 
-> *Submitted to Expert Systems with Applications (Elsevier), under review*
+> *Published in Expert Systems with Applications (Elsevier), 2026, Article 133558*
+> [Read the paper on ScienceDirect](https://doi.org/10.1016/j.eswa.2026.133558)
 
 **Author:** Henry Kabuye — henrinnes@yahoo.co.uk
 
@@ -383,14 +384,21 @@ This framework builds on the following peer-reviewed work:
 
 If you use Agentic SABRE, please cite:
 
+> **Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent Framework for Adaptive Ransomware Detection**
+> Henry Kabuye, Biju Issac, Jeyamohan Neera
+> *Expert Systems with Applications*, Elsevier, 2026, Article 133558
+> DOI: [10.1016/j.eswa.2026.133558](https://doi.org/10.1016/j.eswa.2026.133558)
+
 ```bibtex
-@article{kabuye2025agenticsabre,
-  title   = {Agentic SABRE: An Uncertainty-Aware Neuro-Symbolic Multi-Agent
+@article{kabuye2026agenticsabre,
+  author  = {Henry Kabuye and Biju Issac and Jeyamohan Neera},
+  title   = {Agentic {SABRE}: An Uncertainty-Aware Neuro-Symbolic Multi-Agent
              Framework for Adaptive Ransomware Detection},
-  author  = {Kabuye, Henry},
   journal = {Expert Systems with Applications},
-  year    = {2025},
-  note    = {Under review}
+  year    = {2026},
+  articleno = {133558},
+  doi     = {10.1016/j.eswa.2026.133558},
+  url     = {https://doi.org/10.1016/j.eswa.2026.133558}
 }
 ```
 
