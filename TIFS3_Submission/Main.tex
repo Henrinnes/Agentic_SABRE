@@ -1078,39 +1078,33 @@ Hardware      & $0.939 \pm 0.006$ & $0.962 \pm {<}0.001$ \\
 
 \subsection{Statistical Significance, Risk-Coverage, and Session-Level Analysis}\label{sec:results_significance}
 
-This profile is also statistically reliable. \textbf{Significance:} we
-assess the reliability of the Decision MLP's AUROC gain over the
-Behavioural CNN with a one-sample Wilcoxon signed-rank test (six per-seed
-Behavioural CNN AUROCs vs.\ the Decision MLP reference, H$_1$: MLP $>$ B)
-and McNemar's test (continuity-corrected $\chi^2$) on per-window binary
-predictions (threshold $0.5$, random-stratified). On random-stratified,
-hardware, and temporal holdout, Wilcoxon rejects the null at $p{=}0.016$:
+This profile is also statistically reliable. \textbf{Significance:} a
+one-sample Wilcoxon signed-rank test (six per-seed Behavioural CNN AUROCs
+vs.\ the Decision MLP reference, H$_1$: MLP $>$ B) rejects the null at
+$p{=}0.016$ on random-stratified, hardware, and temporal holdout, showing
 the MLP consistently outperforms the Behavioural CNN alone. On family
 holdout the result \emph{reverses} ($0.707{\pm}0.010$ vs.\
 $0.676{\pm}0.001$, $p{=}1.00$), confirming fusion with the Knowledge
-Agent's corpus-mean fallback degrades rather than improves discrimination
-for unseen families---fusion should therefore be gated on family
-recognition confidence. McNemar's test on random-stratified ($b{=}200$,
-$c{=}299$, $\chi^2{=}19.2$, $p{<}10^{-4}$) confirms the MLP corrects more
-errors than it introduces.
+Agent's corpus-mean fallback degrades discrimination for unseen
+families---fusion should therefore be gated on family recognition
+confidence. McNemar's test on random-stratified ($\chi^2{=}19.2$,
+$p{<}10^{-4}$) confirms the MLP corrects more errors than it introduces.
 
-\textbf{Risk-coverage:} sweeping the auto-contain threshold $\tau$ from
-$1.0$ to $0.0$, the Area Under the Risk-Coverage curve (AURC) is $0.843$
-on random-stratified and $0.841$ on hardware holdout; temporal ($0.693$)
-and family ($0.644$) holdout are lower, reflecting moderate and severe
-shift respectively. The sharp precision drop below $\tau{=}0.9$ on family
-holdout signals poorer confidence calibration for novel families.
+\textbf{Risk-coverage:} sweeping the auto-contain threshold $\tau$, the
+Area Under the Risk-Coverage curve (AURC) is $0.843$ on random-stratified
+and $0.841$ on hardware holdout; temporal ($0.693$) and family ($0.644$)
+holdout are lower, reflecting moderate and severe shift, with the sharp
+precision drop below $\tau{=}0.9$ on family holdout signalling poorer
+calibration for novel families.
 
-\textbf{Session-level detection and latency:} aggregating Decision MLP
-predictions to the session level, majority-vote (flag if $>50\%$ of
-windows exceed $\hat{p}_{\text{MLP}}{\geq}0.5$) achieves near-perfect
-in-distribution detection (random $98.5\%$, hardware $91.1\%$, temporal
-$98.9\%$) at zero session FPR, falling to $45.9\%$ (FPR $3.8\%$) on family
-holdout; max-score (flag if any window exceeds threshold) reaches $100\%$
-detection but at elevated FPR ($0.58$--$0.60$). Median latency to first
-detection is $0\,\text{s}$ in-distribution, rising to $10\,\text{s}$ on
-family holdout. Full McNemar and session-detection curves are provided in
-Supplementary Section~S-VIII.
+\textbf{Session-level detection and latency:} majority-vote aggregation
+(flag if $>50\%$ of windows exceed $\hat{p}_{\text{MLP}}{\geq}0.5$)
+achieves near-perfect in-distribution detection (random $98.5\%$, hardware
+$91.1\%$, temporal $98.9\%$) at zero session FPR, falling to $45.9\%$
+(FPR $3.8\%$) on family holdout; max-score reaches $100\%$ detection but
+at elevated FPR ($0.58$--$0.60$). Median latency to first detection is
+$0\,\text{s}$ in-distribution, rising to $10\,\text{s}$ on family holdout.
+Full statistics are in Supplementary Section~S-VIII.
 
 \subsection{OOD Ransomware Variants}\label{sec:ood_variants}
 
