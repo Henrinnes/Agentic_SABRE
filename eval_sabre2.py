@@ -183,22 +183,47 @@ def load_beh_split(split: str, subset: str):
            else np.array(["unknown"]*len(sub))
     return X, y, fam
 
+def build_oof_behavioural_scores(n_folds=5):
+    """Out-of-fold Behavioural MC-Dropout scores for random_stratified's full
+    train set, used to build the Decision MLP's training features.
+
+    Scoring the training data with the same checkpoint trained on it (in-sample)
+    is stacking leakage: the MLP would learn from an optimistically confident
+    base-agent score it will never see again at inference. splits/cv_fold_{k}
+    partition random_stratified's train sessions into 5 disjoint session-level
+    folds (generate_cv_lofo_splits.py); checkpoints/behavioral_cnn_cv_fold_{k}.pt
+    is trained on the other 4 folds only, so scoring fold k's held-out sessions
+    with it is a genuine out-of-fold prediction. Concatenating all 5 folds
+    covers the entire train set without any sample being scored by a model that
+    trained on it.
+    """
+    y_all, fam_all, p_all, sig_all = [], [], [], []
+    for k in range(n_folds):
+        beh_m_k, beh_sc_k = load_behavioral(f"cv_fold_{k}")
+        X_k, y_k, fam_k   = load_beh_split(f"cv_fold_{k}", "test")
+        Xs_k              = beh_sc_k.transform(X_k).astype(np.float32)
+        p_k, sig_k        = mc_infer_batched(beh_m_k, Xs_k)
+        y_all.append(y_k); fam_all.append(fam_k)
+        p_all.append(p_k); sig_all.append(sig_k)
+    return (np.concatenate(p_all), np.concatenate(sig_all),
+            np.concatenate(y_all).astype(int), np.concatenate(fam_all))
+
 def build_knowledge_lookup(km, ksc):
+    """Return a label-independent corpus-mean Knowledge vector for every RanSMAP
+    sample, regardless of its family.
+
+    RansKnow and RanSMAP share no real per-sample pairing (a RanSMAP execution
+    window has no corresponding threat-intelligence transcript). A per-family
+    lookup keyed by the sample's own true family label would leak the label
+    being predicted into the Knowledge Agent's input, so we deliberately do not
+    condition on `cn` at all — this mirrors how the Semantic Agent's
+    `build_semantic_fill` is already a single label-independent constant.
+    """
     df  = pd.read_csv(RANSKNOW)
     fc  = META["knowledge_features"]
     Xrk = ksc.transform(df[fc].fillna(0).to_numpy(dtype=np.float32)).astype(np.float32)
-    fm  = {}
-    for i, row in df.iterrows():
-        for f in [x.strip() for x in str(row.get("Family_List","")).split(",")]:
-            if f and f != "nan":
-                fm.setdefault(f, []).append(Xrk[i])
-    fm          = {f: np.mean(np.stack(v), 0) for f, v in fm.items()}
     corpus_mean = Xrk.mean(0)
     def lookup(cn: str):
-        if cn in fm: return fm[cn]
-        for k in fm:
-            if k.lower() in cn.lower() or cn.lower() in k.lower():
-                return fm[k]
         return corpus_mean
     return lookup
 
@@ -430,11 +455,9 @@ def main():
         beh_models[s] = load_behavioral(s)
     beh_m_rs, beh_sc_rs = beh_models["random_stratified"]
 
-    # ── Build 6-D MLP training score space (deterministic) ───────────────
-    print("\nBuilding 6-D training score space (random_stratified) …")
-    X_beh_tr, y_tr, fam_tr = load_beh_split("random_stratified","train")
-    Xs_tr    = beh_sc_rs.transform(X_beh_tr).astype(np.float32)
-    p_b_tr, sig_b_tr = mc_infer_batched(beh_m_rs, Xs_tr)
+    # ── Build 6-D MLP training score space (out-of-fold, no stacking leak) ─
+    print("\nBuilding 6-D training score space (random_stratified, out-of-fold) …")
+    p_b_tr, sig_b_tr, y_tr, fam_tr = build_oof_behavioural_scores()
     Xk_tr    = np.stack([know_lookup(f) for f in fam_tr]).astype(np.float32)
     p_k_tr, sig_k_tr = mc_infer_batched(know_m, Xk_tr)
     n_tr     = len(p_b_tr)
@@ -633,6 +656,11 @@ def main():
             "BK_mlp": {
                 "auroc": ci95([sr["e1_mlp"][split][0] for sr in seed_results]),
                 "auprc": ci95([sr["e1_mlp"][split][1] for sr in seed_results]),
+                # Raw per-seed AUROC (paired with the fixed, single-checkpoint
+                # Behavioural AUROC in split_data[split]["B"]["auroc"] for a
+                # genuine one-sample Wilcoxon on the MLP's own training
+                # randomness against the deployed B checkpoint).
+                "auroc_seeds": [round(sr["e1_mlp"][split][0], 4) for sr in seed_results],
             },
         }
 

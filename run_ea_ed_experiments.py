@@ -252,22 +252,34 @@ def load_ransmap(split: str, subset: str):
     sess_col = sub["session"].values
     return X, y, fam, sess_col
 
+def build_oof_behavioural_scores(n_folds=5):
+    """Out-of-fold Behavioural MC-Dropout scores for random_stratified's full
+    train set (see eval_sabre2.py's build_oof_behavioural_scores for the full
+    rationale — in-sample scoring is Decision-MLP stacking leakage).
+    splits/cv_fold_{k} partition the train sessions into 5 disjoint
+    session-level folds; checkpoints/behavioral_cnn_cv_fold_{k}.pt is trained
+    on the other 4 folds only."""
+    y_all, fam_all, p_all, sig_all = [], [], [], []
+    for k in range(n_folds):
+        beh_m_k, beh_sc_k = load_behavioral_canonical(f"cv_fold_{k}")
+        X_k, y_k, fam_k, _ = load_ransmap(f"cv_fold_{k}", "test")
+        Xs_k = beh_sc_k.transform(X_k).astype(np.float32)
+        p_k, sig_k = mc_infer_batched(beh_m_k, Xs_k)
+        y_all.append(y_k); fam_all.append(fam_k)
+        p_all.append(p_k); sig_all.append(sig_k)
+    return (np.concatenate(p_all), np.concatenate(sig_all),
+            np.concatenate(y_all).astype(int), np.concatenate(fam_all))
+
 def build_knowledge_lookup(know_m, know_sc):
+    """Return a label-independent corpus-mean Knowledge vector for every RanSMAP
+    sample, regardless of its family (see eval_sabre2.py's build_knowledge_lookup
+    for the full rationale: no real per-sample RansKnow/RanSMAP pairing exists,
+    so a per-family lookup keyed by the sample's own true label would leak it)."""
     df   = pd.read_csv(RANSKNOW)
     fc   = META["knowledge_features"]
     Xrk  = know_sc.transform(df[fc].fillna(0).to_numpy(dtype=np.float32)).astype(np.float32)
-    fm   = {}
-    for i, row in df.iterrows():
-        for f in [x.strip() for x in str(row.get("Family_List", "")).split(",")]:
-            if f and f != "nan":
-                fm.setdefault(f, []).append(Xrk[i])
-    fm   = {f: np.mean(np.stack(v), 0) for f, v in fm.items()}
     corp = Xrk.mean(0)
     def lookup(cn: str):
-        if cn in fm: return fm[cn]
-        for k in fm:
-            if k.lower() in cn.lower() or cn.lower() in k.lower():
-                return fm[k]
         return corp
     return lookup
 
@@ -349,12 +361,10 @@ print("  Building semantic fill …")
 sem_fill = build_semantic_fill(sem_m, _sc_ref)
 print(f"  Semantic fill: p_s={sem_fill[0]:.4f}  σ_s={sem_fill[1]:.2e}")
 
-# Build 6D training score features (replicates eval_sabre2.py lines 435-446)
-print("\nBuilding 6D training score features (random_stratified train split) …")
-_beh_m_rs, _beh_sc_rs = load_behavioral_canonical("random_stratified")
-X_beh_tr, y_tr_raw, fam_tr, _ = load_ransmap("random_stratified", "train")
-Xs_tr = _beh_sc_rs.transform(X_beh_tr).astype(np.float32)
-p_b_tr, sig_b_tr = mc_infer_batched(_beh_m_rs, Xs_tr)
+# Build 6D training score features, out-of-fold (no stacking leak) —
+# mirrors eval_sabre2.py's build_oof_behavioural_scores
+print("\nBuilding 6D training score features (random_stratified train split, out-of-fold) …")
+p_b_tr, sig_b_tr, y_tr_raw, fam_tr = build_oof_behavioural_scores()
 Xk_tr   = np.stack([know_lookup(f) for f in fam_tr]).astype(np.float32)
 p_k_tr, sig_k_tr = mc_infer_batched(know_m, Xk_tr)
 n_tr    = len(p_b_tr)
@@ -402,33 +412,65 @@ for row in _ms["per_run"]:
     seed_b_by_split[row["split"]].append(row["test_auroc"])
 
 ea_results = {}
-print("\n  One-sample Wilcoxon (B per-seed vs MLP ref, H1: MLP > B):")
+# PRIMARY test: B is a single fixed checkpoint at deployment (it is not
+# retrained per seed), so the only genuine source of paired randomness is
+# the Decision MLP's own training (data shuffling, weight init, CTGAN
+# sampling) across K=6 seeds. We therefore run a one-sample Wilcoxon of the
+# 6 per-seed MLP AUROCs against the single, fixed, deployed B AUROC --
+# this is the correct one-sample design (previously the roles were
+# reversed: a single MLP reference value was compared against B's
+# unrelated multiseed *retraining* noise, which is not what either agent
+# actually varies over at deployment).
+print("\n  One-sample Wilcoxon (MLP per-seed vs fixed deployed B, H1: MLP > B):")
 for sp in SPLIT_NAMES:
-    b_arr   = np.array(seed_b_by_split[sp])
-    mlp_ref = _sabre["E1_main"][sp]["BK_mlp"]["auroc"]["mean"]
-    ci_lo   = _sabre["E1_main"][sp]["BK_mlp"]["auroc"]["ci95_lo"]
-    ci_hi   = _sabre["E1_main"][sp]["BK_mlp"]["auroc"]["ci95_hi"]
-    diff    = mlp_ref - b_arr  # positive where MLP > B
+    mlp_seeds = np.array(_sabre["E1_main"][sp]["BK_mlp"]["auroc_seeds"])
+    b_fixed   = _sabre["E1_main"][sp]["B"]["auroc"]
+    diff      = mlp_seeds - b_fixed  # positive where MLP > fixed B
     try:
         stat, pval = wilcoxon(diff, alternative="greater")
     except Exception:
         stat, pval = float("nan"), 1.0  # all zeros → indeterminate
+
+    # SECONDARY robustness check: does the same conclusion hold if we
+    # instead account for B's own retraining variance (6 independently
+    # retrained Behavioural checkpoints from multiseed.json), paired
+    # index-for-index against the 6 MLP seeds? Retraining seed and MLP
+    # seed are not causally linked, so this is a robustness check, not the
+    # primary test.
+    b_multiseed = np.array(seed_b_by_split[sp])
+    n_pair = min(len(mlp_seeds), len(b_multiseed))
+    diff_paired = mlp_seeds[:n_pair] - b_multiseed[:n_pair]
+    try:
+        stat_p, pval_p = wilcoxon(diff_paired, alternative="greater")
+    except Exception:
+        stat_p, pval_p = float("nan"), 1.0
+
     ea_results[sp] = {
-        "B_mean":   float(b_arr.mean()),
-        "B_std":    float(b_arr.std(ddof=1)),
-        "MLP_ref":  mlp_ref,
-        "MLP_ci95_lo": ci_lo,
-        "MLP_ci95_hi": ci_hi,
+        "B_fixed_auroc": b_fixed,
+        "MLP_seeds": mlp_seeds.round(4).tolist(),
+        "MLP_mean":  float(mlp_seeds.mean()),
+        "MLP_ci95_lo": _sabre["E1_main"][sp]["BK_mlp"]["auroc"]["ci95_lo"],
+        "MLP_ci95_hi": _sabre["E1_main"][sp]["BK_mlp"]["auroc"]["ci95_hi"],
         "mean_diff": float(diff.mean()),
         "wilcoxon_stat": float(stat) if not np.isnan(stat) else None,
         "wilcoxon_p":    float(pval),
-        "B_seeds":  [round(v, 4) for v in b_arr.tolist()],
-        "note": "one-sample: diff = MLP_ref - B_seed_i; H1: median diff > 0",
+        "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+        "robustness_check_vs_B_retraining_noise": {
+            "B_multiseed_mean": float(b_multiseed[:n_pair].mean()),
+            "B_multiseed_std":  float(b_multiseed[:n_pair].std(ddof=1)),
+            "B_multiseed_seeds": [round(v, 4) for v in b_multiseed[:n_pair].tolist()],
+            "wilcoxon_stat": float(stat_p) if not np.isnan(stat_p) else None,
+            "wilcoxon_p":    float(pval_p),
+            "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)",
+        },
     }
-    print(f"  {sp:25s}  B={b_arr.mean():.4f}±{b_arr.std(ddof=1):.4f}  "
-          f"MLP_ref={mlp_ref:.4f}  Δ={diff.mean():.4f}  p={pval:.4f}")
+    print(f"  {sp:25s}  B_fixed={b_fixed:.4f}  MLP={mlp_seeds.mean():.4f}±{mlp_seeds.std(ddof=1):.4f}  "
+          f"Δ={diff.mean():.4f}  p={pval:.4f}  (robustness p={pval_p:.4f})")
 
-# McNemar on random_stratified (per-sample level)
+# McNemar on random_stratified, WINDOW level. Windows from the same session
+# are correlated (they share one execution's telemetry characteristics), so
+# this violates McNemar's independence assumption and is reported only for
+# continuity with earlier drafts -- the session-level test below is primary.
 d_rs      = canonical["random_stratified"]
 preds_b   = (d_rs["p_b"]       >= 0.5).astype(int)
 preds_mlp = (d_rs["probs_mlp"] >= 0.5).astype(int)
@@ -438,46 +480,74 @@ b_wrong_mlp_right = int(((preds_b != y_rs) & (preds_mlp == y_rs)).sum())
 b_mc, c_mc = b_right_mlp_wrong, b_wrong_mlp_right
 mc_chi2 = (abs(b_mc - c_mc) - 1) ** 2 / (b_mc + c_mc + 1e-9)
 mc_pval = float(chi2.sf(mc_chi2, df=1))
-ea_results["mcnemar_random_stratified"] = {
+ea_results["mcnemar_window_level_random_stratified"] = {
+    "note": "NOT independent -- windows within a session are correlated; see mcnemar_session_level below",
     "B_right_MLP_wrong": b_mc,
     "B_wrong_MLP_right": c_mc,
     "chi2":   round(float(mc_chi2), 4),
     "pvalue": round(mc_pval, 6),
 }
-print(f"\n  McNemar (random_stratified): B_right/MLP_wrong={b_mc}  "
-      f"B_wrong/MLP_right={c_mc}  p={mc_pval:.4f}")
+print(f"\n  McNemar, window-level, NOT independent (random_stratified): "
+      f"B_right/MLP_wrong={b_mc}  B_wrong/MLP_right={c_mc}  p={mc_pval:.4f}")
+
+# McNemar on random_stratified, SESSION level (majority-vote aggregation,
+# same rule as E-D) -- this is the independence-respecting test.
+sessions_rs = d_rs["sessions"]
+uniq_sessions = np.unique(sessions_rs)
+sess_y, sess_pred_b, sess_pred_mlp = [], [], []
+for s in uniq_sessions:
+    m = sessions_rs == s
+    sess_y.append(int(y_rs[m][0]))
+    sess_pred_b.append(int(preds_b[m].mean() > 0.5))
+    sess_pred_mlp.append(int(preds_mlp[m].mean() > 0.5))
+sess_y        = np.array(sess_y)
+sess_pred_b   = np.array(sess_pred_b)
+sess_pred_mlp = np.array(sess_pred_mlp)
+b_right_mlp_wrong_sess = int(((sess_pred_b == sess_y) & (sess_pred_mlp != sess_y)).sum())
+b_wrong_mlp_right_sess = int(((sess_pred_b != sess_y) & (sess_pred_mlp == sess_y)).sum())
+b_s, c_s = b_right_mlp_wrong_sess, b_wrong_mlp_right_sess
+mc_chi2_sess = (abs(b_s - c_s) - 1) ** 2 / (b_s + c_s + 1e-9)
+mc_pval_sess = float(chi2.sf(mc_chi2_sess, df=1))
+ea_results["mcnemar_session_level_random_stratified"] = {
+    "n_sessions": int(len(uniq_sessions)),
+    "B_right_MLP_wrong": b_s,
+    "B_wrong_MLP_right": c_s,
+    "chi2":   round(float(mc_chi2_sess), 4),
+    "pvalue": round(mc_pval_sess, 6),
+}
+print(f"  McNemar, session-level (n={len(uniq_sessions)}, random_stratified): "
+      f"B_right/MLP_wrong={b_s}  B_wrong/MLP_right={c_s}  p={mc_pval_sess:.4f}")
 
 results["E_A"] = ea_results
 
-# Figure: per-split B (boxplot, 6 seeds) vs MLP ref (error bar)
+# Figure: per-split Decision MLP (boxplot, 6 seeds -- the actual paired
+# randomness) vs the single fixed, deployed Behavioural CNN (point, no CI
+# since it is deterministic at deployment).
 from matplotlib.patches import Patch
 fig, ax = plt.subplots(figsize=(6.0, 3.2))
 x = np.arange(len(SPLIT_NAMES))
 w = 0.30
 c_b = "#2c7bb6"; c_m = "#d7191c"
-bp_b = ax.boxplot([seed_b_by_split[sp] for sp in SPLIT_NAMES],
-                   positions=x - w/2, widths=w*0.9,
-                   patch_artist=True, boxprops=dict(facecolor=c_b, alpha=0.6),
-                   medianprops=dict(color="navy", lw=1.5),
+bp_m = ax.boxplot([ea_results[sp]["MLP_seeds"] for sp in SPLIT_NAMES],
+                   positions=x + w/2, widths=w*0.9,
+                   patch_artist=True, boxprops=dict(facecolor=c_m, alpha=0.6),
+                   medianprops=dict(color="darkred", lw=1.5),
                    whiskerprops=dict(lw=1), capprops=dict(lw=1),
                    flierprops=dict(marker="x", markersize=4))
 for i, sp in enumerate(SPLIT_NAMES):
-    r   = ea_results[sp]
-    ax.errorbar(x[i] + w/2, r["MLP_ref"],
-                yerr=[[r["MLP_ref"] - r["MLP_ci95_lo"]],
-                      [r["MLP_ci95_hi"] - r["MLP_ref"]]],
-                fmt="D", color=c_m, markersize=5, capsize=3, lw=1.4)
+    r = ea_results[sp]
+    ax.plot(x[i] - w/2, r["B_fixed_auroc"], marker="D", color=c_b, markersize=6)
     pval = r["wilcoxon_p"]
     sig  = "***" if pval < 0.001 else ("**" if pval < 0.01 else ("*" if pval < 0.05 else "ns"))
-    ymax = max(max(seed_b_by_split[sp]), r["MLP_ref"]) + 0.012
+    ymax = max(max(r["MLP_seeds"]), r["B_fixed_auroc"]) + 0.012
     ax.text(i, ymax, sig, ha="center", va="bottom", fontsize=8)
 ax.set_xticks(x); ax.set_xticklabels(SPLIT_LABELS)
 ax.set_ylabel("AUROC")
-ax.set_title("Behavioural CNN (boxplot, 6 seeds) vs Decision MLP (reported mean±CI95)\n"
-             "One-sample Wilcoxon: * p<0.05  ** p<0.01  *** p<0.001  ns = not significant",
+ax.set_title("Decision MLP (boxplot, 6 training seeds) vs fixed, deployed Behavioural CNN (point)\n"
+             "One-sample Wilcoxon (H1: MLP > B): * p<0.05  ** p<0.01  *** p<0.001  ns = not significant",
              fontsize=7.5)
-ax.legend(handles=[Patch(facecolor=c_b, alpha=0.6, label="Behavioural CNN (6 seeds)"),
-                   Patch(facecolor=c_m, alpha=0.8, label="Decision MLP (ref, CI95)")],
+ax.legend(handles=[Patch(facecolor=c_m, alpha=0.6, label="Decision MLP (6 training seeds)"),
+                   Patch(facecolor=c_b, alpha=0.8, label="Behavioural CNN (fixed, deployed)")],
           fontsize=7, loc="lower left")
 ax.set_ylim(0.55, 1.04)
 plt.tight_layout(pad=0.6)

@@ -1,163 +1,227 @@
 {
   "E_A": {
     "random_stratified": {
-      "B_mean": 0.9604666666666667,
-      "B_std": 0.003042148363684241,
-      "MLP_ref": 0.9755,
-      "MLP_ci95_lo": 0.9753,
-      "MLP_ci95_hi": 0.9758,
-      "mean_diff": 0.01503333333333338,
-      "wilcoxon_stat": 21.0,
-      "wilcoxon_p": 0.015625,
-      "B_seeds": [
-        0.9646,
-        0.9588,
-        0.9617,
-        0.9621,
-        0.9558,
-        0.9598
+      "B_fixed_auroc": 0.9629,
+      "MLP_seeds": [
+        0.9511,
+        0.9521,
+        0.9524,
+        0.9519,
+        0.9522,
+        0.9522
       ],
-      "note": "one-sample: diff = MLP_ref - B_seed_i; H1: median diff > 0"
-    },
-    "family_holdout": {
-      "B_mean": 0.7068666666666666,
-      "B_std": 0.010415501268141955,
-      "MLP_ref": 0.676,
-      "MLP_ci95_lo": 0.6754,
-      "MLP_ci95_hi": 0.6766,
-      "mean_diff": -0.030866666666666615,
+      "MLP_mean": 0.9519833333333335,
+      "MLP_ci95_lo": 0.9515,
+      "MLP_ci95_hi": 0.9525,
+      "mean_diff": -0.01091666666666665,
       "wilcoxon_stat": 0.0,
       "wilcoxon_p": 1.0,
-      "B_seeds": [
-        0.6977,
-        0.719,
-        0.7007,
-        0.6955,
-        0.7098,
-        0.7185
+      "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+      "robustness_check_vs_B_retraining_noise": {
+        "B_multiseed_mean": 0.9604666666666667,
+        "B_multiseed_std": 0.003042148363684241,
+        "B_multiseed_seeds": [
+          0.9646,
+          0.9588,
+          0.9617,
+          0.9621,
+          0.9558,
+          0.9598
+        ],
+        "wilcoxon_stat": 0.0,
+        "wilcoxon_p": 1.0,
+        "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)"
+      }
+    },
+    "family_holdout": {
+      "B_fixed_auroc": 0.7055,
+      "MLP_seeds": [
+        0.6761,
+        0.6754,
+        0.6747,
+        0.6759,
+        0.6758,
+        0.6768
       ],
-      "note": "one-sample: diff = MLP_ref - B_seed_i; H1: median diff > 0"
+      "MLP_mean": 0.6757833333333334,
+      "MLP_ci95_lo": 0.675,
+      "MLP_ci95_hi": 0.6765,
+      "mean_diff": -0.029716666666666707,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0,
+      "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+      "robustness_check_vs_B_retraining_noise": {
+        "B_multiseed_mean": 0.7068666666666666,
+        "B_multiseed_std": 0.010415501268141955,
+        "B_multiseed_seeds": [
+          0.6977,
+          0.719,
+          0.7007,
+          0.6955,
+          0.7098,
+          0.7185
+        ],
+        "wilcoxon_stat": 0.0,
+        "wilcoxon_p": 1.0,
+        "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)"
+      }
     },
     "hardware_holdout": {
-      "B_mean": 0.9386833333333332,
-      "B_std": 0.005751318689367374,
-      "MLP_ref": 0.9618,
-      "MLP_ci95_lo": 0.9614,
-      "MLP_ci95_hi": 0.9623,
-      "mean_diff": 0.023116666666666636,
-      "wilcoxon_stat": 21.0,
-      "wilcoxon_p": 0.015625,
-      "B_seeds": [
-        0.9464,
-        0.9352,
-        0.9393,
-        0.9429,
-        0.93,
-        0.9383
+      "B_fixed_auroc": 0.9435,
+      "MLP_seeds": [
+        0.9327,
+        0.9331,
+        0.9331,
+        0.9325,
+        0.9331,
+        0.9327
       ],
-      "note": "one-sample: diff = MLP_ref - B_seed_i; H1: median diff > 0"
+      "MLP_mean": 0.9328666666666666,
+      "MLP_ci95_lo": 0.9326,
+      "MLP_ci95_hi": 0.9331,
+      "mean_diff": -0.010633333333333328,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0,
+      "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+      "robustness_check_vs_B_retraining_noise": {
+        "B_multiseed_mean": 0.9386833333333332,
+        "B_multiseed_std": 0.005751318689367374,
+        "B_multiseed_seeds": [
+          0.9464,
+          0.9352,
+          0.9393,
+          0.9429,
+          0.93,
+          0.9383
+        ],
+        "wilcoxon_stat": 2.0,
+        "wilcoxon_p": 0.96875,
+        "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)"
+      }
     },
     "temporal_holdout": {
-      "B_mean": 0.9602666666666667,
-      "B_std": 0.00543274025392958,
-      "MLP_ref": 0.9802,
-      "MLP_ci95_lo": 0.9799,
-      "MLP_ci95_hi": 0.9805,
-      "mean_diff": 0.019933333333333286,
-      "wilcoxon_stat": 21.0,
-      "wilcoxon_p": 0.015625,
-      "B_seeds": [
-        0.9673,
-        0.9605,
-        0.9611,
-        0.9645,
-        0.9528,
-        0.9554
+      "B_fixed_auroc": 0.9664,
+      "MLP_seeds": [
+        0.9571,
+        0.9572,
+        0.9575,
+        0.9572,
+        0.9574,
+        0.9574
       ],
-      "note": "one-sample: diff = MLP_ref - B_seed_i; H1: median diff > 0"
+      "MLP_mean": 0.9572999999999999,
+      "MLP_ci95_lo": 0.9571,
+      "MLP_ci95_hi": 0.9575,
+      "mean_diff": -0.009100000000000016,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0,
+      "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+      "robustness_check_vs_B_retraining_noise": {
+        "B_multiseed_mean": 0.9602666666666667,
+        "B_multiseed_std": 0.00543274025392958,
+        "B_multiseed_seeds": [
+          0.9673,
+          0.9605,
+          0.9611,
+          0.9645,
+          0.9528,
+          0.9554
+        ],
+        "wilcoxon_stat": 5.0,
+        "wilcoxon_p": 0.890625,
+        "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)"
+      }
     },
-    "mcnemar_random_stratified": {
-      "B_right_MLP_wrong": 200,
-      "B_wrong_MLP_right": 299,
-      "chi2": 19.2465,
-      "pvalue": 1.1e-05
+    "mcnemar_window_level_random_stratified": {
+      "note": "NOT independent -- windows within a session are correlated; see mcnemar_session_level below",
+      "B_right_MLP_wrong": 261,
+      "B_wrong_MLP_right": 112,
+      "chi2": 58.7239,
+      "pvalue": 0.0
+    },
+    "mcnemar_session_level_random_stratified": {
+      "n_sessions": 267,
+      "B_right_MLP_wrong": 1,
+      "B_wrong_MLP_right": 0,
+      "chi2": 0.0,
+      "pvalue": 1.0
     }
   },
   "E_B": {
     "random_stratified": {
-      "aurc": 0.8432
+      "aurc": 0.8291
     },
     "family_holdout": {
-      "aurc": 0.6443
+      "aurc": 0.6494
     },
     "hardware_holdout": {
-      "aurc": 0.8411
+      "aurc": 0.8229
     },
     "temporal_holdout": {
-      "aurc": 0.693
+      "aurc": 0.6747
     }
   },
   "E_C": {
     "random_stratified": {
       "alpha_0.01": {
-        "empirical_coverage": 0.990550305725403,
-        "detect_rate": 0.3885491939966648,
-        "benign_rate": 0.34037428200852327,
-        "escalate_rate": 0.2710765239948119,
-        "auto_classify_rate": 0.728923476005188,
-        "detect_precision": 0.9904625655698617,
+        "empirical_coverage": 0.9922178988326849,
+        "detect_rate": 0.2625532703353715,
+        "benign_rate": 0.2775616083009079,
+        "escalate_rate": 0.45988512136372056,
+        "auto_classify_rate": 0.5401148786362794,
+        "detect_precision": 0.9865913902611151,
         "nominal_coverage": 0.99,
         "alpha": 0.01
       },
       "alpha_0.05": {
-        "empirical_coverage": 0.9407078006299796,
-        "detect_rate": 0.4754493236983509,
-        "benign_rate": 0.4502501389660923,
-        "escalate_rate": 0.07430053733555679,
-        "auto_classify_rate": 0.9256994626644433,
-        "detect_precision": 0.9438815276695246,
+        "empirical_coverage": 0.9392254956457291,
+        "detect_rate": 0.4209746155271447,
+        "benign_rate": 0.41726885306651845,
+        "escalate_rate": 0.16175653140633686,
+        "auto_classify_rate": 0.8382434685936632,
+        "detect_precision": 0.9375,
         "nominal_coverage": 0.95,
         "alpha": 0.05
       },
       "alpha_0.1": {
-        "empirical_coverage": 0.8879006855660552,
-        "detect_rate": 0.4932369835093571,
-        "benign_rate": 0.47007596813044283,
-        "escalate_rate": 0.0,
-        "auto_classify_rate": 0.9633129516397999,
-        "detect_precision": 0.9267468069120962,
+        "empirical_coverage": 0.8819714656290532,
+        "detect_rate": 0.48526959421901056,
+        "benign_rate": 0.4735964424680378,
+        "escalate_rate": 0.04113396331295164,
+        "auto_classify_rate": 0.9588660366870484,
+        "detect_precision": 0.8843069873997709,
         "nominal_coverage": 0.9,
         "alpha": 0.1
       }
     },
     "family_holdout": {
       "alpha_0.01": {
-        "empirical_coverage": 0.75,
-        "detect_rate": 0.177007928300586,
-        "benign_rate": 0.5253360910031024,
-        "escalate_rate": 0.2976559806963116,
-        "auto_classify_rate": 0.7023440193036884,
-        "detect_precision": 0.762414800389484,
+        "empirical_coverage": 0.881247845570493,
+        "detect_rate": 0.20579110651499483,
+        "benign_rate": 0.229145122371596,
+        "escalate_rate": 0.5650637711134092,
+        "auto_classify_rate": 0.43493622888659084,
+        "detect_precision": 0.7504187604690117,
         "nominal_coverage": 0.99,
         "alpha": 0.01
       },
       "alpha_0.05": {
-        "empirical_coverage": 0.49767321613236815,
-        "detect_rate": 0.15029300241296104,
-        "benign_rate": 0.6477938641847639,
-        "escalate_rate": 0.0,
-        "auto_classify_rate": 0.7980868665977249,
-        "detect_precision": 0.7746559633027523,
+        "empirical_coverage": 0.7274215787659428,
+        "detect_rate": 0.35108583247156155,
+        "benign_rate": 0.41847638745260257,
+        "escalate_rate": 0.23043778007583593,
+        "auto_classify_rate": 0.7695622199241641,
+        "detect_precision": 0.6701030927835051,
         "nominal_coverage": 0.95,
         "alpha": 0.05
       },
       "alpha_0.1": {
-        "empirical_coverage": 0.35427438814202,
-        "detect_rate": 0.0479145122371596,
-        "benign_rate": 0.5217166494312306,
+        "empirical_coverage": 0.59358841778697,
+        "detect_rate": 0.42209582902447434,
+        "benign_rate": 0.5449844881075491,
         "escalate_rate": 0.0,
-        "auto_classify_rate": 0.5696311616683902,
-        "detect_precision": 0.8201438848920863,
+        "auto_classify_rate": 0.9670803171320235,
+        "detect_precision": 0.6349530420579829,
         "nominal_coverage": 0.9,
         "alpha": 0.1
       }
@@ -165,63 +229,63 @@
     "hardware_holdout": {
       "alpha_0.01": {
         "empirical_coverage": 0.98379788548675,
-        "detect_rate": 0.37978854867499656,
-        "benign_rate": 0.31841274200192227,
-        "escalate_rate": 0.30179870932308117,
-        "auto_classify_rate": 0.6982012906769188,
-        "detect_precision": 0.9819233550253073,
+        "detect_rate": 0.2552519566112866,
+        "benign_rate": 0.29671838528079086,
+        "escalate_rate": 0.44802965810792256,
+        "auto_classify_rate": 0.5519703418920774,
+        "detect_precision": 0.9741796664873588,
         "nominal_coverage": 0.99,
         "alpha": 0.01
       },
       "alpha_0.05": {
-        "empirical_coverage": 0.9347796237814088,
-        "detect_rate": 0.4522861458190306,
-        "benign_rate": 0.4341617465330221,
-        "escalate_rate": 0.11355210764794728,
-        "auto_classify_rate": 0.8864478923520527,
-        "detect_precision": 0.945658773527626,
+        "empirical_coverage": 0.9335438692846354,
+        "detect_rate": 0.3744336125223122,
+        "benign_rate": 0.4068378415488123,
+        "escalate_rate": 0.21872854592887547,
+        "auto_classify_rate": 0.7812714540711245,
+        "detect_precision": 0.9391272460579392,
         "nominal_coverage": 0.95,
         "alpha": 0.05
       },
       "alpha_0.1": {
-        "empirical_coverage": 0.8695592475628175,
-        "detect_rate": 0.4743924207057531,
-        "benign_rate": 0.49169298366057945,
-        "escalate_rate": 0.0,
-        "auto_classify_rate": 0.9660854043663325,
-        "detect_precision": 0.9270622286541245,
+        "empirical_coverage": 0.8694219415076205,
+        "detect_rate": 0.4433612522312234,
+        "benign_rate": 0.49128106549498834,
+        "escalate_rate": 0.06535768227378827,
+        "auto_classify_rate": 0.9346423177262118,
+        "detect_precision": 0.8981108702384639,
         "nominal_coverage": 0.9,
         "alpha": 0.1
       }
     },
     "temporal_holdout": {
       "alpha_0.01": {
-        "empirical_coverage": 0.993202416918429,
-        "detect_rate": 0.26907099697885195,
-        "benign_rate": 0.38557401812688824,
-        "escalate_rate": 0.3453549848942598,
-        "auto_classify_rate": 0.6546450151057401,
-        "detect_precision": 0.9810526315789474,
+        "empirical_coverage": 0.9911253776435045,
+        "detect_rate": 0.20562688821752265,
+        "benign_rate": 0.3434667673716012,
+        "escalate_rate": 0.4509063444108761,
+        "auto_classify_rate": 0.5490936555891238,
+        "detect_precision": 0.9623507805325987,
         "nominal_coverage": 0.99,
         "alpha": 0.01
       },
       "alpha_0.05": {
-        "empirical_coverage": 0.9441087613293051,
-        "detect_rate": 0.35970543806646527,
-        "benign_rate": 0.5196374622356495,
-        "escalate_rate": 0.1206570996978852,
-        "auto_classify_rate": 0.8793429003021148,
-        "detect_precision": 0.8640419947506561,
+        "empirical_coverage": 0.9433534743202417,
+        "detect_rate": 0.32968277945619334,
+        "benign_rate": 0.47507552870090636,
+        "escalate_rate": 0.1952416918429003,
+        "auto_classify_rate": 0.8047583081570997,
+        "detect_precision": 0.8528064146620847,
         "nominal_coverage": 0.95,
         "alpha": 0.05
       },
       "alpha_0.1": {
-        "empirical_coverage": 0.8863293051359517,
-        "detect_rate": 0.40181268882175225,
-        "benign_rate": 0.5819486404833837,
-        "escalate_rate": 0.0,
-        "auto_classify_rate": 0.9837613293051359,
-        "detect_precision": 0.7955827067669173,
+        "empirical_coverage": 0.8829305135951662,
+        "detect_rate": 0.39916918429003023,
+        "benign_rate": 0.5385196374622356,
+        "escalate_rate": 0.06231117824773414,
+        "auto_classify_rate": 0.9376888217522659,
+        "detect_precision": 0.7530747398297067,
         "nominal_coverage": 0.9,
         "alpha": 0.1
       }
@@ -231,15 +295,15 @@
     "random_stratified": {
       "max_score": {
         "detection_rate": 1.0,
-        "false_positive_rate": 0.5821,
-        "balanced_accuracy": 0.709,
+        "false_positive_rate": 0.8582,
+        "balanced_accuracy": 0.5709,
         "n_sessions": 267,
         "n_ransomware_sessions": 133,
         "n_benign_sessions": 134
       },
       "majority_vote": {
-        "detection_rate": 0.985,
-        "false_positive_rate": 0.0,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0149,
         "balanced_accuracy": 0.9925,
         "n_sessions": 267,
         "n_ransomware_sessions": 133,
@@ -248,49 +312,49 @@
       "latency_to_first_detection_s": {
         "n_detected": 133,
         "median": 0.0,
-        "mean": 5.488721804511278,
+        "mean": 4.661654135338346,
         "p10": 0.0,
-        "p90": 17.99999999999997
+        "p90": 20.0
       }
     },
     "family_holdout": {
       "max_score": {
-        "detection_rate": 0.9621,
-        "false_positive_rate": 0.9069,
-        "balanced_accuracy": 0.5276,
+        "detection_rate": 0.9966,
+        "false_positive_rate": 0.9759,
+        "balanced_accuracy": 0.5103,
         "n_sessions": 580,
         "n_ransomware_sessions": 290,
         "n_benign_sessions": 290
       },
       "majority_vote": {
-        "detection_rate": 0.4586,
-        "false_positive_rate": 0.0379,
-        "balanced_accuracy": 0.7103,
+        "detection_rate": 0.6586,
+        "false_positive_rate": 0.1552,
+        "balanced_accuracy": 0.7517,
         "n_sessions": 580,
         "n_ransomware_sessions": 290,
         "n_benign_sessions": 290
       },
       "latency_to_first_detection_s": {
-        "n_detected": 279,
-        "median": 10.0,
-        "mean": 22.043010752688172,
+        "n_detected": 289,
+        "median": 0.0,
+        "mean": 6.159169550173011,
         "p10": 0.0,
-        "p90": 70.0
+        "p90": 20.0
       }
     },
     "hardware_holdout": {
       "max_score": {
         "detection_rate": 1.0,
-        "false_positive_rate": 0.5833,
-        "balanced_accuracy": 0.7083,
+        "false_positive_rate": 0.8,
+        "balanced_accuracy": 0.6,
         "n_sessions": 360,
         "n_ransomware_sessions": 180,
         "n_benign_sessions": 180
       },
       "majority_vote": {
-        "detection_rate": 0.9111,
-        "false_positive_rate": 0.0,
-        "balanced_accuracy": 0.9556,
+        "detection_rate": 0.9889,
+        "false_positive_rate": 0.0556,
+        "balanced_accuracy": 0.9667,
         "n_sessions": 360,
         "n_ransomware_sessions": 180,
         "n_benign_sessions": 180
@@ -298,24 +362,24 @@
       "latency_to_first_detection_s": {
         "n_detected": 180,
         "median": 0.0,
-        "mean": 4.388888888888889,
+        "mean": 5.166666666666667,
         "p10": 0.0,
-        "p90": 10.0
+        "p90": 10.999999999999943
       }
     },
     "temporal_holdout": {
       "max_score": {
         "detection_rate": 1.0,
-        "false_positive_rate": 0.5944,
-        "balanced_accuracy": 0.7028,
+        "false_positive_rate": 0.8278,
+        "balanced_accuracy": 0.5861,
         "n_sessions": 267,
         "n_ransomware_sessions": 87,
         "n_benign_sessions": 180
       },
       "majority_vote": {
-        "detection_rate": 0.9885,
-        "false_positive_rate": 0.0,
-        "balanced_accuracy": 0.9943,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0389,
+        "balanced_accuracy": 0.9806,
         "n_sessions": 267,
         "n_ransomware_sessions": 87,
         "n_benign_sessions": 180
@@ -323,9 +387,9 @@
       "latency_to_first_detection_s": {
         "n_detected": 87,
         "median": 0.0,
-        "mean": 2.7586206896551726,
+        "mean": 4.022988505747127,
         "p10": 0.0,
-        "p90": 10.0
+        "p90": 14.000000000000057
       }
     }
   }

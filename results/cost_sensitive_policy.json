@@ -1,0 +1,57 @@
+{
+  "balanced_accuracy_policy": {
+    "n": 5397,
+    "ransomware_incorrectly_allowed": 322,
+    "ransomware_incorrectly_allowed_rate": 0.0597,
+    "benign_incorrectly_autocontained": 259,
+    "benign_incorrectly_autocontained_rate": 0.048,
+    "ransomware_escalated": 13,
+    "ransomware_escalated_rate": 0.0024,
+    "benign_escalated": 17,
+    "benign_escalated_rate": 0.0031,
+    "ransomware_correctly_autocontained": 2429,
+    "benign_correctly_allowed": 2357,
+    "auto_contain_rate": 0.4981,
+    "escalate_rate": 0.0056,
+    "allow_rate": 0.4964,
+    "analyst_workload_rate": 0.0056,
+    "thresholds": {
+      "tau_high": 0.5244667352134548,
+      "tau": 0.5118086394080611,
+      "kappa": 0.4640393410726023,
+      "kappa_low": 0.44027565724375567
+    },
+    "balanced_accuracy": 0.8893,
+    "cost_objective_value": -0.8421
+  },
+  "cost_sensitive_policy": {
+    "n": 5397,
+    "ransomware_incorrectly_allowed": 46,
+    "ransomware_incorrectly_allowed_rate": 0.0085,
+    "benign_incorrectly_autocontained": 131,
+    "benign_incorrectly_autocontained_rate": 0.0243,
+    "ransomware_escalated": 509,
+    "ransomware_escalated_rate": 0.0943,
+    "benign_escalated": 701,
+    "benign_escalated_rate": 0.1299,
+    "ransomware_correctly_autocontained": 2209,
+    "benign_correctly_allowed": 1801,
+    "auto_contain_rate": 0.4336,
+    "escalate_rate": 0.2242,
+    "allow_rate": 0.3422,
+    "analyst_workload_rate": 0.2242,
+    "thresholds": {
+      "tau_high": 0.6860256372584868,
+      "tau": 0.10576782843352757,
+      "kappa": 0.44711193077129696,
+      "kappa_low": 0.4278260129286392
+    },
+    "balanced_accuracy": 0.8337,
+    "cost_objective_value": -0.4308
+  },
+  "cost_weights": {
+    "w_fn_ransomware_allowed": 10.0,
+    "w_fp_benign_autocontained": 5.0,
+    "w_esc_escalation": 1.0
+  }
+}
