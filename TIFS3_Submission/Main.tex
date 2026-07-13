@@ -981,11 +981,17 @@ We compare against:
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{Figures/fig2_roc.pdf}
-  \caption{ROC curves for Behavioural CNN, Mean Fusion, and Decision MLP
-    across the four evaluation splits. The Decision MLP consistently outperforms
-    mean fusion; the family-holdout split (bottom-left) reveals the OOD
-    generalisation gap, which is correctly signalled by elevated
-    $\sigma_{\mathrm{beh}}$ routed to \textsc{Escalate}.}
+  \caption{ROC curves across the four evaluation splits for [B] (Behavioural
+    Agent alone), [B+K] Mean (equal-weight mean of Behavioural and
+    Knowledge, Semantic excluded), and [S+B+K] MLP (the full Decision MLP
+    on the six-dimensional score pool, including the Semantic and Knowledge
+    Agents' fixed corpus-mean contributions; Remark~\ref{rem:corpus_mean}).
+    The Decision MLP consistently outperforms [B+K] Mean fusion, but---since
+    Semantic and Knowledge carry no per-sample signal in this setting---does
+    not exceed [B] alone (Section~\ref{sec:results_agents}); the
+    family-holdout split (bottom-left) reveals the OOD generalisation gap,
+    which is correctly signalled by elevated $\sigma_{\mathrm{beh}}$ routed
+    to \textsc{Escalate}.}
   \label{fig:roc}
 \end{figure*}
 
@@ -1086,8 +1092,9 @@ Decision MLP (ours) & $-$     & $\mathbf{0.025 \pm 0.001}$ \\
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{Figures/fig3_calibration.pdf}
-  \caption{Reliability diagrams (15-bin) for Mean Fusion (pre- and
-    post-temperature scaling) and the Decision MLP.
+  \caption{Reliability diagrams (15-bin) for [B] (Behavioural Agent alone),
+    [B+K] Mean fusion (pre- and post-temperature scaling), and [S+B+K] MLP
+    (the full Decision MLP; Remark~\ref{rem:corpus_mean}).
     The Decision MLP achieves ECE $0.025$, a $4.0\times$ reduction over
     pre-TS mean fusion (ECE $0.100$).}
   \label{fig:calibration}
