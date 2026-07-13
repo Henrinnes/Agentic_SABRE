@@ -2,9 +2,21 @@
 """
 run_ee_eg_experiments.py
 ========================
-E-E  Stronger fusion baselines   RF, GBT (XGBoost substitute), MLP-2L
-E-F  CTGAN ablation under severe imbalance   1%, 5%, 10% ransomware prevalence
-E-G  Repeated leave-one-family-out   6 ransomware families
+Uses the same out-of-fold Behavioural + corpus-mean Semantic/Knowledge
+[S+B+K] score-pool construction as eval_sabre2.py (see its module
+docstring for the full design note) -- no stacking or label leakage.
+
+E-E  Stronger fusion architectures on the identical [S+B+K] score pool:
+     [B+K] mean fusion (baseline, Semantic excluded), RF, GBT (XGBoost
+     substitute), MLP-2L, and MLP-1L (Decision MLP, ours)
+E-F  CTGAN ablation on the [S+B+K] Decision MLP under severe induced
+     imbalance   1%, 5%, 10% ransomware prevalence
+E-G  Repeated leave-one-family-out, 6 ransomware families: each held-out
+     family is excluded from BOTH the Behavioural Agent's training data
+     (checkpoints/behavioral_cnn_lofo_exclude_{family}*.pt) AND the
+     [S+B+K] Decision MLP's out-of-fold training features -- not only from
+     the Decision MLP as in earlier drafts, which was not genuine zero-shot
+     evaluation
 
 Outputs
 -------
