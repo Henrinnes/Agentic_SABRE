@@ -1,0 +1,33 @@
+{
+  "E_J1": {
+    "behavioural_only": {
+      "auroc": 0.9628,
+      "auprc": 0.9647,
+      "ece": 0.0404
+    },
+    "behavioural_plus_knowledge_2agent": {
+      "auroc": 0.9622,
+      "auprc": 0.9638,
+      "ece": 0.018
+    },
+    "note": "Knowledge is the fixed corpus-mean constant in both training and test (Remark 1); since it carries no per-sample signal, any AUROC difference here reflects training noise/regularisation effects of the extra (constant) input dimension, not genuine Knowledge-agent information."
+  },
+  "E_J2": {
+    "corpus_mean_default": {
+      "auroc": 0.9623,
+      "auprc": 0.9639,
+      "ece": 0.015
+    },
+    "masked_missing": {
+      "auroc": 0.9622,
+      "auprc": 0.9638,
+      "ece": 0.0214
+    },
+    "adversarial_inverted": {
+      "auroc": 0.9622,
+      "auprc": 0.9638,
+      "ece": 0.0226
+    },
+    "note": "A 3-agent Decision MLP trained fresh (seed=0, out-of-fold Behavioural, corpus-mean Knowledge, neutral-placeholder Semantic held identical at train and test time) with only the Knowledge input dimension swapped at inference time, holding Behavioural and Semantic fixed. Quantifies how much the model's output is perturbed by a corrupted or adversarial Knowledge score, since Peer Consultation only helps if sigma_know is itself elevated -- an adversarial low-sigma input is not caught by uncertainty-gating."
+  }
+}
