@@ -433,9 +433,15 @@ Mean    & $0.56$ & $\mathbf{0.68}$ & $0.26$ \\
   \centering
   \includegraphics[width=\columnwidth]{Figures/fig9_mix_partition.pdf}
   \caption{Detection performance on the RanSMAP \texttt{mix} partition
-    (concurrent benign + ransomware execution). Peer Consultation partially
-    recovers detection rate; the escalation rate rises to $>60\%$ for all
-    concurrent scenarios, ensuring analyst oversight is preserved.}
+    (concurrent benign + ransomware execution), naive $\hat{p}{\geq}0.5$
+    detection rate. Peer Consultation partially recovers detection rate on
+    the hardest combinations (SDelete+REvil, SDelete+Conti); the other
+    eight combinations are detected $84$--$99\%$ of the time regardless.
+    Under the Bayesian TPE triage policy, \textsc{Auto-Contain} never fires
+    on this partition and \textsc{Escalate} fires on $47$--$100\%$ of
+    windows per combination, ensuring analyst oversight is preserved except
+    for a residual coverage gap on SDelete+REvil (Section~VI-F of the main
+    paper).}
   \label{fig:mix}
 \end{figure}
 

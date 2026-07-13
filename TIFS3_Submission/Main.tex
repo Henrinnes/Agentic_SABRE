@@ -1254,29 +1254,40 @@ provided in Supplementary Section~S-VIII.
 
 \subsection{Simultaneous Execution}
 
-The \texttt{mix} partition of RanSMAP provides $600$ windows from ten
+The \texttt{mix} partition of RanSMAP provides $1{,}944$ windows from ten
 concurrent-execution combinations (ransomware + benign application running
 simultaneously), the hardest generalisation challenge in the benchmark.
 Under concurrent execution, the Behavioural Agent observes superimposed
 I/O and memory patterns, inflating $\sigma_{\text{beh}}$ and suppressing
-$\hat{p}_{\text{beh}}$: the most adversarial scenario (AESCrypt+REvil)
-detects only $1.5\%$ of the time without Peer Consultation, as AESCrypt's
-legitimate bulk encryption overwhelms REvil's signal in the [B+K] mean
-fusion baseline, whose fixed corpus-mean Knowledge component
-(Remark~\ref{rem:corpus_mean}) provides no scenario-specific correction.
+$\hat{p}_{\text{beh}}$ for some, though not all, combinations: the most
+adversarial scenario is SDelete+REvil, detecting only $27.1\%$ of the time
+at the Behavioural Agent alone and $30.2\%$ in the [B+K] mean fusion
+baseline (Remark~\ref{rem:corpus_mean}), as SDelete's legitimate file
+deletion I/O overwhelms REvil's signal; SDelete+Conti is the second
+hardest ($58.4\%$/$66.5\%$). The remaining eight combinations are detected
+$84$--$99\%$ of the time even without Peer Consultation.
 
-Since it is $\sigma_{\text{beh}}$ that is elevated here, Peer Consultation
-(Definition~\ref{def:pc}) triggers on the \emph{Behavioural} Agent: with PC
-active, $\hat{p}_{\text{beh}}$ is replaced by the inverse-uncertainty-weighted
-average of $\hat{p}_{\text{sem}}$ and $\hat{p}_{\text{know}}$, recovering the
-Semantic Agent's partial signal: detection improves to $4.2\%$ for
-AESCrypt+REvil and $27.1\%\to31.8\%$ for SDelete+REvil. Although absolute detection rates
-remain low, escalation rises to $>60\%$ for all concurrent scenarios under
-Bayesian TPE thresholds, routing these to analyst review rather than
-autonomous containment---unlike Hirano and
+Since it is $\sigma_{\text{beh}}$ that is elevated on the hard cases, Peer
+Consultation (Definition~\ref{def:pc}) triggers on the \emph{Behavioural}
+Agent: with PC active, $\hat{p}_{\text{beh}}$ is replaced by the
+inverse-uncertainty-weighted average of $\hat{p}_{\text{sem}}$ and
+$\hat{p}_{\text{know}}$, recovering the Semantic Agent's partial signal:
+detection improves to $42.7\%$ for SDelete+REvil and $86.8\%$ for
+SDelete+Conti (from $30.2\%$ and $66.5\%$ without PC). Under the
+Bayesian TPE-optimised triage policy, \textsc{Auto-Contain} never fires on
+this partition ($0\%$ across every combination, with or without PC): the
+fixed corpus-mean Semantic and Knowledge scores mean the mean-fused
+probability cannot clear the strict $\tau_{\text{high}}{=}0.90$ threshold
+regardless of how confident the Behavioural Agent is. \textsc{Escalate}
+fires on $47$--$100\%$ of windows per combination ($93.0\%$ overall
+without PC, $93.5\%$ with PC), correctly routing the ambiguous cases to
+analyst review rather than autonomous containment---unlike Hirano and
 Kobayashi~\cite{hirano2025ransmap}'s binary-output detector, which has no
-mechanism to express this ambiguity. Per-scenario rates are plotted in
-Supplementary Section~S-VIII.
+mechanism to express this ambiguity. The SDelete combinations remain the
+exception: even under the triage policy, roughly half of SDelete+REvil's
+windows are neither escalated nor auto-contained but silently
+\textsc{Allow}ed, a genuine coverage gap for this specific concurrent
+scenario. Per-scenario rates are plotted in Supplementary Section~S-VIII.
 
 \subsection{Conformal Coverage}\label{sec:results_conformal}
 
@@ -1395,23 +1406,30 @@ EWC ($\lambda{=}300$) & $\mathbf{0.999}$ & $\mathbf{-0.001}$ & $0.827$ & $+0.827
 \subsection{Runtime Performance}
 
 Table~\ref{tab:latency} reports \emph{model-inference} latency (NVIDIA
-GB10, $500$ repetitions, batch size $32$): the three agents' MC Dropout
-forward passes plus the Decision MLP, given already-extracted feature
-vectors. It does not include PE parsing, sentence-transformer embedding
-generation, hypervisor telemetry feature extraction, ATT\&CK transcript
-generation, or data transfer, each of which would add to true end-to-end
-deployment latency and is not benchmarked here.
-Full pipeline median is $6.71\,\text{ms}$ per batch of $32$ samples
-(p95 $7.24\,\text{ms}$), i.e.\ ${\approx}0.21\,\text{ms}$ per sample,
-supporting $\approx 47{,}000$ concurrent monitored streams at a $10$-second
-window under batch inference \emph{once features are available}.
-MC Dropout ($T{=}10$) contributes $3.7\times$ overhead over a single
-deterministic pass; the Decision MLP adds $0.67\,\text{ms}$.
+GB10, single-sample requests, $N{=}500$ repetitions, $50$ warm-up):
+the three agents' MC Dropout forward passes plus the Decision MLP, given
+already-extracted feature vectors, genuinely measured running in sequence
+end-to-end (an earlier version of this benchmark measured Semantic and the
+Decision MLP separately from the reported ``full pipeline'' figure, which
+in fact only ever timed Behavioural+Knowledge mean fusion; both are now
+measured together). It does not include PE parsing, sentence-transformer
+embedding generation, hypervisor telemetry feature extraction, ATT\&CK
+transcript generation, or data transfer, each of which would add to true
+end-to-end deployment latency and is not benchmarked here.
+Full pipeline median is $6.99\,\text{ms}$ per sample
+(p95 $7.09\,\text{ms}$); batching multiple concurrent windows together
+(the realistic deployment pattern for periodic telemetry scoring) raises
+throughput to $3{,}031$ samples/s at batch size $1{,}024$, supporting
+$\approx 30{,}000$ concurrent monitored streams at a $10$-second window
+under batch inference \emph{once features are available}.
+MC Dropout ($T{=}10$) contributes $3.8\times$ overhead over a single
+deterministic pass (measured on the Behavioural Agent); the Decision MLP
+adds $0.45\,\text{ms}$.
 
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{End-to-end inference latency (NVIDIA GB10, batch=$32$,
+\caption{End-to-end inference latency (NVIDIA GB10, single-sample,
   $N{=}500$ repetitions, $50$ warm-up, PyTorch 2.2).
   MC Dropout $T{=}10$ passes included.
 }
@@ -1421,15 +1439,15 @@ deterministic pass; the Decision MLP adds $0.67\,\text{ms}$.
 \toprule
 Component & Median (ms) & p95 (ms) \\
 \midrule
-Semantic CNN ($T{=}10$)         & $1.77$ & $1.89$ \\
-Behavioural CNN ($T{=}10$)      & $1.94$ & $2.12$ \\
-Knowledge CNN ($T{=}10$)        & $1.83$ & $2.01$ \\
-Decision MLP (single pass)      & $0.67$ & $0.81$ \\
+Semantic CNN ($T{=}10$)         & $1.73$ & $1.76$ \\
+Behavioural CNN ($T{=}10$)      & $1.94$ & $2.24$ \\
+Knowledge CNN ($T{=}10$)        & $2.95$ & $3.04$ \\
+Decision MLP (single pass)      & $0.31$ & $0.32$ \\
 \midrule
-Full pipeline (3 agents + MLP)  & $6.71$ & $7.24$ \\
+Full pipeline (3 agents + MLP)  & $6.99$ & $7.09$ \\
 \midrule
-$\Delta$ vs agent-only (no MLP) & $+0.67$ & $--$ \\
-Overhead vs deterministic pass  & $3.7\times$ & $--$ \\
+$\Delta$ vs agent-only (no MLP) & $+0.45$ & $--$ \\
+Overhead vs deterministic pass  & $3.8\times$ & $--$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1643,10 +1661,12 @@ honest, genuinely family-excluded evaluation.
 A more fundamental limitation arises under concurrent execution: when
 ransomware and a benign application run simultaneously, hypervisor-level
 telemetry aggregates both processes' I/O and memory events, suppressing
-$\hat{p}_{\text{beh}}$ and inflating $\sigma_{\text{beh}}$. For the most
-adversarial case (AESCrypt with REvil), detection reaches only $1.5\%$
-without Peer Consultation and $4.2\%$ with it (Section~\ref{sec:eval})---a
-limitation shared with Hirano and Kobayashi~\cite{hirano2025ransmap}, whose
+$\hat{p}_{\text{beh}}$ and inflating $\sigma_{\text{beh}}$ for some
+combinations. For the most adversarial case (SDelete with REvil), detection
+reaches only $30.2\%$ without Peer Consultation and $42.7\%$ with it
+(Section~\ref{sec:eval}), and roughly half of its windows are neither
+escalated nor auto-contained under the triage policy---a limitation shared
+with Hirano and Kobayashi~\cite{hirano2025ransmap}, whose
 telemetry likewise cannot separate concurrent execution traces without
 process-level attribution.
 
@@ -1713,9 +1733,9 @@ analyst feedback would let thresholds track distribution shift without
 retraining base agents (Supplementary Section~S-V), an extension we defer
 to future work.
 
-End-to-end inference latency is $6.71\,\text{ms}$ median per batch of $32$
-samples on an NVIDIA GB10 GPU ($T{=}10$, p95 $7.24\,\text{ms}$;
-Table~\ref{tab:latency}), supporting $\approx 47{,}000$ concurrent streams
+End-to-end inference latency is $6.99\,\text{ms}$ median per sample
+on an NVIDIA GB10 GPU ($T{=}10$, p95 $7.09\,\text{ms}$;
+Table~\ref{tab:latency}), supporting $\approx 30{,}000$ concurrent streams
 per GPU at a $10$-second window under batch inference. The Behavioural CNN
 ($8{,}385$ parameters, $32.8\,\text{KB}$) runs without a GPU. This figure is
 the honest cost of running the three agents \emph{sequentially} followed by
