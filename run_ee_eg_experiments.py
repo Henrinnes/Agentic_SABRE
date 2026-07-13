@@ -200,21 +200,17 @@ def load_ransmap(split: str, subset: str):
     return X, y, fam
 
 def build_knowledge_lookup(know_m, know_sc):
+    """Return a label-independent corpus-mean Knowledge vector for every RanSMAP
+    sample, regardless of its family (see eval_sabre2.py's build_knowledge_lookup
+    for the full rationale: no real per-sample RansKnow/RanSMAP pairing exists,
+    so a per-family lookup keyed by the sample's own true label would leak it —
+    this also removes the LOFO E-G leak, since the "held-out" family no longer
+    gets a family-specific Knowledge score at all)."""
     df  = pd.read_csv(RANSKNOW)
     fc  = META["knowledge_features"]
     Xrk = know_sc.transform(df[fc].fillna(0).to_numpy(dtype=np.float32)).astype(np.float32)
-    fm  = {}
-    for i, row in df.iterrows():
-        for f in [x.strip() for x in str(row.get("Family_List", "")).split(",")]:
-            if f and f != "nan":
-                fm.setdefault(f, []).append(Xrk[i])
-    fm  = {f: np.mean(np.stack(v), 0) for f, v in fm.items()}
     corp = Xrk.mean(0)
     def lookup(cn: str):
-        if cn in fm: return fm[cn]
-        for k in fm:
-            if k.lower() in cn.lower() or cn.lower() in k.lower():
-                return fm[k]
         return corp
     return lookup
 
@@ -237,6 +233,22 @@ def score_features(X_beh, fam, beh_m, beh_sc, know_m, know_lookup, sem_fill):
     p_s_pc, p_b_pc, p_k_pc = peer_consult(p_s, p_b, p_k, sig_s, sig_b, sig_k)
     feat = np.stack([p_s_pc, p_b_pc, p_k_pc, sig_s, sig_b, sig_k], axis=1).astype(np.float32)
     return feat
+
+def build_oof_train_score_features(know_m, know_lookup, sem_fill, n_folds=5):
+    """Out-of-fold 6D training score features for random_stratified's full
+    train set (see eval_sabre2.py's build_oof_behavioural_scores for the full
+    rationale: scoring a Behavioural checkpoint on its own training data is
+    Decision-MLP stacking leakage). splits/cv_fold_{k} partition the train
+    sessions into 5 disjoint session-level folds; checkpoints for fold k are
+    trained on the other 4 folds only. Knowledge/Semantic are already
+    family-agnostic constants, so reusing them across folds adds no leakage."""
+    feats, ys, fams = [], [], []
+    for k in range(n_folds):
+        beh_m_k, beh_sc_k = load_behavioral_canonical(f"cv_fold_{k}")
+        X_k, y_k, fam_k = load_ransmap(f"cv_fold_{k}", "test")
+        feat_k = score_features(X_k, fam_k, beh_m_k, beh_sc_k, know_m, know_lookup, sem_fill)
+        feats.append(feat_k); ys.append(y_k); fams.append(fam_k)
+    return np.concatenate(feats), np.concatenate(ys).astype(int), np.concatenate(fams)
 
 # ── MLP training ──────────────────────────────────────────────────────────────
 def _train_net(net, X_tr, y_tr, seed=0, epochs=40, patience=6):
@@ -367,12 +379,9 @@ print("  Building semantic fill …")
 sem_fill = build_semantic_fill(sem_m, _sc_ref)
 print(f"  Semantic fill: p_s={sem_fill[0]:.4f}  σ_s={sem_fill[1]:.2e}")
 
-# Build 6D training score features (random_stratified train)
-print("\nBuilding 6D training score features …")
-_beh_m_rs, _beh_sc_rs = load_behavioral_canonical("random_stratified")
-X_beh_tr, y_tr, fam_tr = load_ransmap("random_stratified", "train")
-X_tr_score = score_features(X_beh_tr, fam_tr, _beh_m_rs, _beh_sc_rs,
-                             know_m, know_lookup, sem_fill)
+# Build 6D training score features, out-of-fold (no stacking leak)
+print("\nBuilding 6D training score features (out-of-fold) …")
+X_tr_score, y_tr, fam_tr = build_oof_train_score_features(know_m, know_lookup, sem_fill)
 print(f"  X_tr_score: {X_tr_score.shape}  ransomware prev={y_tr.mean():.3f}")
 
 # Build 6D test score features for all 4 splits
@@ -600,27 +609,47 @@ print("\n" + "="*65)
 print("  E-G  Leave-One-Family-Out")
 print("="*65)
 
-# Use random_stratified test features for evaluation
-Xte_rs  = X_te["random_stratified"]
-yte_rs  = y_te["random_stratified"]
-famte_rs = fam_te["random_stratified"]
-sig_max_te = np.maximum(Xte_rs[:, 4], Xte_rs[:, 5])  # max(sig_b, sig_k)
+# Raw (unscored) random_stratified test windows — re-scored per LOFO
+# iteration below with that iteration's own family-excluded checkpoint.
+X_beh_te_rs, yte_rs, famte_rs = load_ransmap("random_stratified", "test")
 
 eg_results = {}
 
 for fam_held in RANSOM_FAMILIES:
     print(f"\n  Holding out: {fam_held} …")
-    # Remove held-out family from training
-    keep_mask = fam_tr != fam_held
-    X_tr_lofo = X_tr_score[keep_mask]
-    y_tr_lofo = y_tr[keep_mask].astype(np.float32)
-    n_rem = int((~keep_mask).sum())
-    print(f"    removed {n_rem} windows  remaining {len(y_tr_lofo)} "
-          f"(ransom prev={y_tr_lofo.mean():.3f})")
+
+    # Out-of-fold Decision-MLP training features from the family-excluded pool.
+    # splits/lofo_exclude_{fam_held} already has fam_held's sessions removed
+    # entirely; splits/lofo_exclude_{fam_held}_fold_{k} 5-fold cross-fits
+    # *within* that reduced pool so these training features are genuinely
+    # out-of-fold (no stacking leak), not just family-excluded.
+    feats_g, ys_g = [], []
+    for k in range(5):
+        beh_m_k, beh_sc_k = load_behavioral_canonical(f"lofo_exclude_{fam_held}_fold_{k}")
+        X_k, y_k, fam_k = load_ransmap(f"lofo_exclude_{fam_held}_fold_{k}", "test")
+        feats_g.append(score_features(X_k, fam_k, beh_m_k, beh_sc_k,
+                                       know_m, know_lookup, sem_fill))
+        ys_g.append(y_k)
+    X_tr_lofo = np.concatenate(feats_g)
+    y_tr_lofo = np.concatenate(ys_g).astype(np.float32)
+    n_rem = int((fam_tr == fam_held).sum())
+    print(f"    LOFO train (out-of-fold): {len(y_tr_lofo)} windows across 5 folds "
+          f"(ransom prev={y_tr_lofo.mean():.3f}); {fam_held} windows excluded "
+          f"from main train: {n_rem}")
 
     # Retrain Decision MLP-1L
     net_g, sc_g = train_mlp1l(X_tr_lofo, y_tr_lofo, seed=0)
-    probs_g = predict_mlp(net_g, sc_g, Xte_rs)
+
+    # Test-time scoring uses the checkpoint trained on the FULL
+    # family-excluded pool (never saw fam_held at all) — using the canonical
+    # random_stratified checkpoint here would leak the Behavioural agent's own
+    # exposure to the "held-out" family into a supposedly zero-shot result.
+    beh_m_g, beh_sc_g = load_behavioral_canonical(f"lofo_exclude_{fam_held}")
+    Xte_g = score_features(X_beh_te_rs, famte_rs, beh_m_g, beh_sc_g,
+                            know_m, know_lookup, sem_fill)
+    sig_max_te_g = np.maximum(Xte_g[:, 4], Xte_g[:, 5])  # max(sig_b, sig_k)
+
+    probs_g = predict_mlp(net_g, sc_g, Xte_g)
 
     # Overall AUROC on all test windows
     overall_auroc = float(roc_auc_score(yte_rs, probs_g))
@@ -639,7 +668,7 @@ for fam_held in RANSOM_FAMILIES:
         continue
 
     probs_fam  = probs_g[fam_mask]
-    sig_max_fam = sig_max_te[fam_mask]
+    sig_max_fam = sig_max_te_g[fam_mask]
 
     # Detection rate: fraction of held-out family windows classified as ransomware
     det_rate = float((probs_fam >= 0.5).mean())

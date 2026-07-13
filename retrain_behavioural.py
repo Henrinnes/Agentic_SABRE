@@ -153,7 +153,7 @@ def main(split_name: str) -> None:
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train).astype(np.float32)
     X_val   = scaler.transform(X_val).astype(np.float32)
-    X_test  = scaler.transform(X_test).astype(np.float32)
+    X_test  = scaler.transform(X_test).astype(np.float32) if len(X_test) else X_test
 
     print(f"\n  Scaler fitted on train: mean[0]={scaler.mean_[0]:.4e}  scale[0]={scaler.scale_[0]:.4e}")
 
@@ -235,28 +235,37 @@ def main(split_name: str) -> None:
     # ------------------------------------------------------------------ #
     model.load_state_dict(best_state)
     _, val_acc_best, val_auc_best = evaluate(model, val_loader, device)
-    test_loss, test_acc, test_auc = evaluate(model, test_loader, device)
 
-    # Full classification report on test
-    model.eval()
-    test_probs, test_preds, test_labels = [], [], []
-    with torch.no_grad():
-        for xb, yb in test_loader:
-            p = model(xb.to(device)).cpu().numpy()
-            test_probs.extend(p)
-            test_preds.extend((p >= 0.5).astype(int))
-            test_labels.extend(yb.int().numpy())
+    has_test = len(df_test) > 0
+    if has_test:
+        test_loss, test_acc, test_auc = evaluate(model, test_loader, device)
 
-    print(f"\n{'='*55}")
-    print(f"  Final results — {split_name}")
-    print(f"{'='*55}")
-    print(f"  Best val AUC   : {val_auc_best:.4f}")
-    print(f"  Test AUC-ROC   : {test_auc:.4f}")
-    print(f"  Test Accuracy  : {test_acc:.4f}")
-    print(classification_report(
-        test_labels, test_preds,
-        target_names=["benign", "ransomware"], digits=4,
-    ))
+        # Full classification report on test
+        model.eval()
+        test_probs, test_preds, test_labels = [], [], []
+        with torch.no_grad():
+            for xb, yb in test_loader:
+                p = model(xb.to(device)).cpu().numpy()
+                test_probs.extend(p)
+                test_preds.extend((p >= 0.5).astype(int))
+                test_labels.extend(yb.int().numpy())
+
+        print(f"\n{'='*55}")
+        print(f"  Final results — {split_name}")
+        print(f"{'='*55}")
+        print(f"  Best val AUC   : {val_auc_best:.4f}")
+        print(f"  Test AUC-ROC   : {test_auc:.4f}")
+        print(f"  Test Accuracy  : {test_acc:.4f}")
+        print(classification_report(
+            test_labels, test_preds,
+            target_names=["benign", "ransomware"], digits=4,
+        ))
+    else:
+        test_acc = test_auc = None
+        print(f"\n{'='*55}")
+        print(f"  Final results — {split_name}  (no held-out test set for this split)")
+        print(f"{'='*55}")
+        print(f"  Best val AUC   : {val_auc_best:.4f}")
 
     # ------------------------------------------------------------------ #
     # Save checkpoints
@@ -288,8 +297,8 @@ def main(split_name: str) -> None:
         "n_configs":          int(df.groupby(["partition","cpu","mem"]).ngroups),
         "epochs_run":         len(train_log),
         "best_val_auc":       round(val_auc_best, 4),
-        "test_auc":           round(test_auc, 4),
-        "test_accuracy":      round(test_acc, 4),
+        "test_auc":           round(test_auc, 4) if test_auc is not None else None,
+        "test_accuracy":      round(test_acc, 4) if test_acc is not None else None,
         "features":           FEATURE_COLS,
         "checkpoint":         str(ckpt_pt),
         "scaler":             str(ckpt_scl),
@@ -301,10 +310,18 @@ def main(split_name: str) -> None:
     print(f"  Saved: {ckpt_log}")
 
 
+def _existing_split(name: str) -> str:
+    if not (SPLITS_DIR / name / "train_sessions.txt").exists():
+        raise argparse.ArgumentTypeError(
+            f"no splits/{name}/train_sessions.txt found")
+    return name
+
+
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--split", default="random_stratified",
-                   choices=["random_stratified", "family_holdout",
-                            "hardware_holdout", "temporal_holdout"])
+    p.add_argument("--split", default="random_stratified", type=_existing_split,
+                   help="Any split name with a splits/<name>/ directory "
+                        "(train_sessions.txt, val_sessions.txt, "
+                        "test_sessions.txt — test may be empty).")
     args = p.parse_args()
     main(args.split)

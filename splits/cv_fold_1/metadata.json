@@ -1,0 +1,7 @@
+{
+  "n_train": 894,
+  "n_val": 100,
+  "n_test": 248,
+  "seed": 42,
+  "generator": "generate_cv_lofo_splits.py"
+}

@@ -1,0 +1,76 @@
+{
+  "E_H": {
+    "logistic_regression": {
+      "auroc": 0.8506,
+      "auprc": 0.8225,
+      "ece": 0.0429,
+      "train_seconds": 0.6
+    },
+    "random_forest": {
+      "auroc": 0.9889,
+      "auprc": 0.9897,
+      "ece": 0.0488,
+      "train_seconds": 3.9
+    },
+    "gradient_boosting": {
+      "auroc": 0.9745,
+      "auprc": 0.9761,
+      "ece": 0.0466,
+      "train_seconds": 24.6
+    },
+    "mlp_ordinary": {
+      "auroc": 0.9676,
+      "auprc": 0.9661,
+      "ece": 0.014,
+      "train_seconds": 5.7
+    },
+    "svm_rbf": {
+      "auroc": 0.9529,
+      "auprc": 0.9541,
+      "ece": 0.0195,
+      "train_seconds": 83.0
+    },
+    "behavioural_cnn_mc_dropout": {
+      "auroc": 0.9629,
+      "auprc": 0.9654,
+      "ece": 0.0421
+    }
+  },
+  "E_I": {
+    "mc_dropout": {
+      "auroc": 0.9629,
+      "auprc": 0.9654,
+      "ece": 0.0421,
+      "error_rate_by_uncertainty_decile": [
+        0.0019,
+        0.0,
+        0.0074,
+        0.0222,
+        0.0593,
+        0.0926,
+        0.1574,
+        0.2208,
+        0.243,
+        0.282
+      ]
+    },
+    "deep_ensemble": {
+      "n_members": 6,
+      "auroc": 0.9628,
+      "auprc": 0.9652,
+      "ece": 0.027,
+      "error_rate_by_uncertainty_decile": [
+        0.0,
+        0.0,
+        0.0037,
+        0.0167,
+        0.0463,
+        0.0667,
+        0.1352,
+        0.2245,
+        0.2727,
+        0.2857
+      ]
+    }
+  }
+}
