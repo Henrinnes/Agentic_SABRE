@@ -20,7 +20,14 @@ Metrics reported
   Batch sizes  : {1, 8, 32, 128, 256, 1024}  →  p50 latency + throughput
   MC-Dropout   : T=1 vs T=10 overhead ratio
   Model sizes  : parameter count + weight bytes
-  Pipeline     : [B+K] end-to-end single-sample (incl. knowledge lookup)
+  Pipeline     : [S+B+K+MLP] end-to-end single-sample -- Semantic CNN
+                 (T=10) -> Behavioural CNN (T=10) -> Knowledge CNN (T=10)
+                 -> Decision MLP (single deterministic pass), genuinely
+                 measured together. An earlier version of this script only
+                 timed a [B+K]-mean-fusion pipeline that never called the
+                 Semantic agent or the Decision MLP at all, which did not
+                 match what the main paper's runtime table (tab:latency)
+                 describes as "Full pipeline (3 agents + MLP)".
 
 Outputs
 -------
@@ -134,6 +141,13 @@ def rss_mb() -> float:
 # ---------------------------------------------------------------------------
 
 def build_knowledge_lookup():
+    """Corpus-mean-always: identical vector regardless of family name, same
+    fix as eval_sabre2.py's build_knowledge_lookup(). A per-family lookup
+    keyed by the sample's true family leaks that label; it also had a
+    zero-vector fallback for families absent from RansKnow's Family_List
+    (e.g. REvil), which this benchmark's timing loop used for a fixed
+    "Conti" lookup anyway and so was not itself latency-relevant, but is
+    removed here for consistency with the rest of the codebase."""
     import pandas as pd
     df_rk = pd.read_csv(RANSKNOW)
     feat_cols = (
@@ -142,22 +156,11 @@ def build_knowledge_lookup():
              .columns.tolist()
     )
     X_rk = df_rk[feat_cols].fillna(0).to_numpy(dtype=np.float32)
-    family_feats: dict = {}
-    for i, row in df_rk.iterrows():
-        for fam in [f.strip() for f in str(row.get("Family_List", "")).split(",")]:
-            if fam and fam != "nan":
-                family_feats.setdefault(fam, []).append(X_rk[i])
-    family_mean = {f: np.mean(np.stack(v), axis=0) for f, v in family_feats.items()}
-    zero_vec = np.zeros(X_rk.shape[1], dtype=np.float32)
+    corpus_mean = X_rk.mean(axis=0)
     n_feat = X_rk.shape[1]
 
     def lookup(cn: str) -> np.ndarray:
-        if cn in family_mean:
-            return family_mean[cn]
-        for k in family_mean:
-            if k.lower() in cn.lower() or cn.lower() in k.lower():
-                return family_mean[k]
-        return zero_vec
+        return corpus_mean
 
     return lookup, n_feat
 
@@ -367,83 +370,122 @@ def main() -> None:
     }
 
     # -----------------------------------------------------------------------
-    # E. Full [B+K] pipeline (single-sample, end-to-end)
+    # E1. Decision MLP alone (single deterministic pass, no MC Dropout)
     # -----------------------------------------------------------------------
-    print("\n=== E. Full [B+K] pipeline (end-to-end single sample) ===")
-    print("  Sequence: knowledge lookup → K-agent CNN → B-agent CNN → mean fusion")
+    print("\n=== E1. Decision MLP [S+B+K -> MLP] (single deterministic pass) ===")
+    from Agentic_SABRE.agents.decision import DecisionAgent
+    d_agent = DecisionAgent(
+        artifact_path=str(CKPT_DIR / "decision_fuser_3agent.json"),
+        use_uncertainties=True,
+    )
+    mlp_input = {"p_sem": 0.5, "p_beh": 0.5, "p_know": 0.5,
+                 "σ_sem": 0.01, "σ_beh": 0.05, "σ_know": 0.01}
+
+    def mlp_single():
+        d_agent.score(mlp_input)
+
+    lat_mlp = timed_single(mlp_single, N_REPS, WARMUP)
+    print(f"  Single pass: p50={lat_mlp['p50_ms']:.3f} ms  p95={lat_mlp['p95_ms']:.3f} ms  "
+          f"throughput={lat_mlp['throughput_sps']:.0f} sps")
+    results["decision_mlp"] = {"single_pass": lat_mlp}
+
+    # -----------------------------------------------------------------------
+    # E2. Full [S+B+K+MLP] pipeline (single-sample, end-to-end, genuinely
+    #     measured together -- Semantic + Behavioural + Knowledge (each
+    #     T=10 MC Dropout) followed by the Decision MLP (single pass))
+    # -----------------------------------------------------------------------
+    print("\n=== E2. Full [S+B+K+MLP] pipeline (end-to-end single sample) ===")
+    print("  Sequence: S-agent CNN (T=10) -> B-agent CNN (T=10) -> "
+          "K-agent CNN (T=10) -> Decision MLP (single pass)")
 
     x_beh_s  = x_beh_1[0]
-    x_know_s = x_know_1[0]
+    x_sem_s  = x_sem_1[0]
 
-    def pipeline_bk():
-        # 1. Knowledge lookup (O(1) dict)
+    def pipeline_full():
         kv = kn_lookup("Conti")
-        # 2. Knowledge CNN
-        k_out = k_agent.score_batch([{"features": kv}])[0]
-        # 3. Behavioral CNN
+        s_out = s_agent.score_batch([{"embedding": x_sem_s}])[0]
         b_out = b_agent.score_batch([{"features": x_beh_s}])[0]
-        # 4. Mean fusion + triage decision
-        fused = (b_out.prob + k_out.prob) / 2.0
-        uncert = b_out.uncert
-        if fused >= 0.5:
-            decision = "DETECT"
-        elif uncert >= 0.10:
-            decision = "ESCALATE"
-        else:
-            decision = "BENIGN"
-        return decision
+        k_out = k_agent.score_batch([{"features": kv}])[0]
+        fused = d_agent.score({
+            "p_sem": s_out.prob, "p_beh": b_out.prob, "p_know": k_out.prob,
+            "σ_sem": s_out.uncert, "σ_beh": b_out.uncert, "σ_know": k_out.uncert,
+        })
+        return fused.prob
 
-    lat_bk = timed_single(pipeline_bk, N_REPS, WARMUP)
-    print(f"  [B+K] pipeline: p50={lat_bk['p50_ms']:.3f} ms  "
-          f"p95={lat_bk['p95_ms']:.3f} ms  p99={lat_bk['p99_ms']:.3f} ms  "
-          f"throughput={lat_bk['throughput_sps']:.0f} sps")
+    lat_full = timed_single(pipeline_full, N_REPS, WARMUP)
+    print(f"  [S+B+K+MLP] pipeline: p50={lat_full['p50_ms']:.3f} ms  "
+          f"p95={lat_full['p95_ms']:.3f} ms  p99={lat_full['p99_ms']:.3f} ms  "
+          f"throughput={lat_full['throughput_sps']:.0f} sps")
+
+    # Agent-only reference (same sequence, no Decision MLP call at the end)
+    def pipeline_agents_only():
+        kv = kn_lookup("Conti")
+        s_agent.score_batch([{"embedding": x_sem_s}])
+        b_agent.score_batch([{"features": x_beh_s}])
+        k_agent.score_batch([{"features": kv}])
+
+    lat_agents_only = timed_single(pipeline_agents_only, N_REPS, WARMUP)
+    print(f"  Agent-only (no MLP): p50={lat_agents_only['p50_ms']:.3f} ms")
+    delta_mlp_ms = lat_full["p50_ms"] - lat_agents_only["p50_ms"]
+    print(f"  Delta vs agent-only (no MLP): +{delta_mlp_ms:.3f} ms")
 
     # Batch pipeline sweep
-    print("  Batch [B+K] throughput:")
-    batch_bk = []
+    print("  Batch [S+B+K+MLP] throughput:")
+    batch_full = []
     for bs in BATCH_SIZES:
-        x_beh_bs  = rng.standard_normal((bs, len(FEATURE_COLS))).astype(np.float32)
+        x_beh_bs = rng.standard_normal((bs, len(FEATURE_COLS))).astype(np.float32)
+        x_sem_bs = rng.standard_normal((bs, 384)).astype(np.float32)
         x_know_bs = np.stack([kn_lookup("Conti")] * bs)
-        b_inp  = [{"features": x_beh_bs[i]}  for i in range(bs)]
-        k_inp  = [{"features": x_know_bs[i]} for i in range(bs)]
-        def pipe_batch(bi=b_inp, ki=k_inp, bsz=bs):
+        s_inp = [{"embedding": x_sem_bs[i]} for i in range(bs)]
+        b_inp = [{"features": x_beh_bs[i]}  for i in range(bs)]
+        k_inp = [{"features": x_know_bs[i]} for i in range(bs)]
+        def pipe_batch(si=s_inp, bi=b_inp, ki=k_inp, bsz=bs):
+            s_outs = s_agent.score_batch(si)
             b_outs = b_agent.score_batch(bi)
             k_outs = k_agent.score_batch(ki)
-            _ = [(b.prob + k.prob) / 2 for b, k in zip(b_outs, k_outs)]
+            _ = [d_agent.score({
+                    "p_sem": s.prob, "p_beh": b.prob, "p_know": k.prob,
+                    "σ_sem": s.uncert, "σ_beh": b.uncert, "σ_know": k.uncert,
+                 }) for s, b, k in zip(s_outs, b_outs, k_outs)]
         res = timed_batch(pipe_batch, bs, N_BATCH_REPS, WARMUP)
-        batch_bk.append(res)
+        batch_full.append(res)
         print(f"    bs={bs:>5}  p50={res['p50_ms']:>7.2f} ms  "
               f"throughput={res['throughput_sps']:>8.0f} sps")
 
-    results["pipeline_bk"] = {
-        "single_T10": lat_bk,
-        "batch": batch_bk,
-        "description": "knowledge_lookup + K-CNN (T=10) + B-CNN (T=10) + mean fusion + triage",
+    results["pipeline_full"] = {
+        "single_T10": lat_full,
+        "agents_only_no_mlp": lat_agents_only,
+        "delta_mlp_ms": round(delta_mlp_ms, 4),
+        "batch": batch_full,
+        "description": ("S-CNN(T=10) + B-CNN(T=10) + K-CNN(T=10) + Decision MLP (single pass), "
+                         "genuinely measured together -- this is what the main paper's "
+                         "'Full pipeline (3 agents + MLP)' row reports"),
     }
+    # Kept for backward compatibility with any downstream consumer of the old key.
+    lat_bk = lat_full
 
     # -----------------------------------------------------------------------
     # F. Triage queue simulation: sustained throughput over 10-second window
     # -----------------------------------------------------------------------
     print("\n=== F. Triage queue context ===")
     window_s = 10.0    # telemetry window duration (seconds)
-    p50_bk   = lat_bk["p50_ms"] / 1000.0
-    windows_per_second = 1.0 / p50_bk
-    latency_budget_pct = (p50_bk / window_s) * 100
+    p50_full = lat_full["p50_ms"] / 1000.0
+    latency_budget_pct = (p50_full / window_s) * 100
 
-    print(f"  10-second window duration: {window_s:.0f} s")
-    print(f"  [B+K] p50 latency:         {lat_bk['p50_ms']:.3f} ms")
-    print(f"  Latency / window budget:   {latency_budget_pct:.4f}%")
-    print(f"  Concurrent streams at p50: {int(window_s / p50_bk):,} streams")
-    print(f"  [B]  p50 throughput:       {lat_b['throughput_sps']:.0f} sps")
-    print(f"  [B+K] p50 throughput:      {lat_bk['throughput_sps']:.0f} sps")
+    print(f"  10-second window duration:   {window_s:.0f} s")
+    print(f"  [S+B+K+MLP] p50 latency:     {lat_full['p50_ms']:.3f} ms")
+    print(f"  Latency / window budget:     {latency_budget_pct:.4f}%")
+    print(f"  Concurrent streams at p50:   {int(window_s / p50_full):,} streams")
+    print(f"  [B]          p50 throughput: {lat_b['throughput_sps']:.0f} sps")
+    print(f"  [S+B+K+MLP]  p50 throughput: {lat_full['throughput_sps']:.0f} sps")
 
     results["triage_queue"] = {
         "window_duration_s":       window_s,
-        "bk_p50_ms":               lat_bk["p50_ms"],
+        "full_pipeline_p50_ms":    lat_full["p50_ms"],
         "latency_budget_pct":      round(latency_budget_pct, 4),
-        "concurrent_streams_p50":  int(window_s / p50_bk),
+        "concurrent_streams_p50":  int(window_s / p50_full),
         "b_throughput_sps":        lat_b["throughput_sps"],
-        "bk_throughput_sps":       lat_bk["throughput_sps"],
+        "full_pipeline_throughput_sps": lat_full["throughput_sps"],
     }
 
     # -----------------------------------------------------------------------
@@ -452,25 +494,29 @@ def main() -> None:
     print(f"\n{'='*65}")
     print("  E16 RUNTIME BENCHMARK SUMMARY")
     print(f"{'='*65}")
-    print(f"  {'Agent':<12} {'Params':>10} {'Wts(KB)':>8} {'p50(ms)':>9} "
+    print(f"  {'Component':<18} {'Params':>10} {'Wts(KB)':>8} {'p50(ms)':>9} "
           f"{'p95(ms)':>9} {'throughput':>12}")
-    print("  " + "-" * 63)
+    print("  " + "-" * 69)
 
+    mlp_params = sum(p.numel() for p in d_agent.trainer.model.parameters())
     rows = [
-        ("[B]",    sz_b["params"], sz_b["weight_kb"],  lat_b["p50_ms"],  lat_b["p95_ms"],  lat_b["throughput_sps"]),
-        ("[K]",    sz_k["params"], sz_k["weight_kb"],  lat_k["p50_ms"],  lat_k["p95_ms"],  lat_k["throughput_sps"]),
-        ("[S]",    sz_s["params"], sz_s["weight_kb"],  lat_s["p50_ms"],  lat_s["p95_ms"],  lat_s["throughput_sps"]),
-        ("[B+K]",  sz_b["params"]+sz_k["params"], sz_b["weight_kb"]+sz_k["weight_kb"],
-                   lat_bk["p50_ms"], lat_bk["p95_ms"], lat_bk["throughput_sps"]),
+        ("Semantic [S]",    sz_s["params"], sz_s["weight_kb"], lat_s["p50_ms"],   lat_s["p95_ms"],   lat_s["throughput_sps"]),
+        ("Behavioural [B]", sz_b["params"], sz_b["weight_kb"], lat_b["p50_ms"],   lat_b["p95_ms"],   lat_b["throughput_sps"]),
+        ("Knowledge [K]",   sz_k["params"], sz_k["weight_kb"], lat_k["p50_ms"],   lat_k["p95_ms"],   lat_k["throughput_sps"]),
+        ("Decision MLP",    mlp_params,     None,               lat_mlp["p50_ms"], lat_mlp["p95_ms"], lat_mlp["throughput_sps"]),
+        ("Full [S+B+K+MLP]", sz_s["params"]+sz_b["params"]+sz_k["params"]+mlp_params, None,
+                             lat_full["p50_ms"], lat_full["p95_ms"], lat_full["throughput_sps"]),
     ]
     for name, params, wt, p50, p95, tp in rows:
-        print(f"  {name:<12} {params:>10,} {wt:>8.1f} {p50:>9.3f} {p95:>9.3f} {tp:>11.0f} sps")
+        wt_s = f"{wt:>8.1f}" if wt is not None else f"{'--':>8}"
+        print(f"  {name:<18} {params:>10,} {wt_s} {p50:>9.3f} {p95:>9.3f} {tp:>11.0f} sps")
 
     print(f"\n  MC-Dropout overhead (T=10 vs T=1, [B]): {overhead:.2f}×")
+    print(f"  Delta vs agent-only (no MLP):            +{delta_mlp_ms:.3f} ms")
     print(f"  Knowledge lookup (dict):                "
           f"{lat_kl['p50_ms']*1000:.3f} µs (negligible)")
     print(f"  Concurrent streams supported (p50):     "
-          f"{int(window_s / p50_bk):,} at [B+K] single-sample latency")
+          f"{int(window_s / p50_full):,} at [S+B+K+MLP] single-sample latency")
 
     # -----------------------------------------------------------------------
     # Save
