@@ -1019,8 +1019,11 @@ gap is correctly identified by elevated $\sigma_{\text{beh}}$ routing to
 \footnotesize
 \caption{Detection AUROC per modality and fusion strategy, per evaluation split
   (mean $\pm$ 95\% CI over $K{=}6$ seeds where applicable).
-  Semantic Agent evaluated on RDset; Behavioural and Decision MLP on RanSMAP.
-  Mean Fusion = equal-weight average of $\hat{p}_i$, no uncertainty weighting.
+  Semantic Agent evaluated on RDset; Behavioural, Mean Fusion, and Decision
+  MLP on RanSMAP. Mean Fusion = [B+K] equal-weight average of
+  $\hat{p}_{\text{beh}}, \hat{p}_{\text{know}}$ (Semantic excluded, no
+  uncertainty weighting); Decision MLP = [S+B+K], the full six-dimensional
+  score pool (Remark~\ref{rem:corpus_mean}).
   Bold = best per column.
   $--$ = not evaluated (dataset mismatch).
 }
