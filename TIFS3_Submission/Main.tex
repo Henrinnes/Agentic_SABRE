@@ -969,8 +969,9 @@ We compare against:
   \item Hirano and Kobayashi~\cite{hirano2025ransmap}: 1D-CNN + LSTM baseline on
         RanSMAP (23D features, $T_{\text{window}}=0.1\,\text{s}$,
         $T_d=30\,\text{s}$) — direct dataset comparison.
-  \item Mean fusion (equal-weight average of $\hat{p}_i$) without Decision
-        MLP.
+  \item Mean fusion: [B+K] equal-weight average of
+        $\hat{p}_{\text{beh}}, \hat{p}_{\text{know}}$ (Semantic excluded),
+        without the Decision MLP.
   \item Fixed hand-tuned triage thresholds $\Theta_{\text{fixed}}$.
   \item Grid search over $\Theta$.
   \item Fusion-architecture alternatives to the one-layer Decision MLP:
@@ -1260,8 +1261,9 @@ Under concurrent execution, the Behavioural Agent observes superimposed
 I/O and memory patterns, inflating $\sigma_{\text{beh}}$ and suppressing
 $\hat{p}_{\text{beh}}$: the most adversarial scenario (AESCrypt+REvil)
 detects only $1.5\%$ of the time without Peer Consultation, as AESCrypt's
-legitimate bulk encryption overwhelms REvil's signal and the Knowledge
-Agent's near-zero RansKnow-absent probability further degrades mean fusion.
+legitimate bulk encryption overwhelms REvil's signal in the [B+K] mean
+fusion baseline, whose fixed corpus-mean Knowledge component
+(Remark~\ref{rem:corpus_mean}) provides no scenario-specific correction.
 
 Since it is $\sigma_{\text{beh}}$ that is elevated here, Peer Consultation
 (Definition~\ref{def:pc}) triggers on the \emph{Behavioural} Agent: with PC
@@ -1489,9 +1491,11 @@ Supplementary Section~S-IX.
 
 \subsection{Fusion Method Comparison}\label{sec:results_fusion_compare}
 
-We compare the Decision MLP-1L against four alternatives trained on the
-identical (unaugmented) random-stratified score pool: na\"{i}ve BK mean
-fusion, Random Forest, Gradient Boosting (GBT), and a two-layer MLP.
+We compare the Decision MLP-1L ([S+B+K]) against four alternatives trained
+on the identical (unaugmented) random-stratified score pool: na\"{i}ve
+[B+K] mean fusion (Semantic excluded, as in Table~\ref{tab:auroc_splits}),
+and three further [S+B+K] fusion architectures on the full six-dimensional
+pool---Random Forest, Gradient Boosting (GBT), and a two-layer MLP.
 On in-distribution splits, all MLP and tree-based methods cluster within
 $0.005$ AUROC of each other: GBT achieves the highest AUROC ($0.954$
 random-stratified), while calibration is best for MLP-2L and RF (ECE
