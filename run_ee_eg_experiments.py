@@ -469,7 +469,8 @@ results["E_E"] = ee_results
 
 # Figure E-E: AUROC per method × split
 methods  = ["BK_mean", "RF", "GBT", "MLP_2L", "MLP_1L"]
-mlabels  = ["BK Mean", "Random Forest", "Grad. Boosting", "MLP-2L", "MLP-1L (ours)"]
+mlabels  = ["BK Mean [B+K]", "Random Forest [S+B+K]", "Grad. Boosting [S+B+K]",
+            "MLP-2L [S+B+K]", "MLP-1L (ours) [S+B+K]"]
 colors_e = ["#999999", "#fdae61", "#f46d43", "#74add1", "#d73027"]
 x = np.arange(len(SPLIT_NAMES)); w = 0.15
 
