@@ -2,6 +2,12 @@
 """
 eval_e12_adversarial.py — E12 Adversarial Mimicry Stress Tests
 ===============================================================
+NOT currently cited anywhere in TIFS3_Submission -- results/e12_adversarial.json
+exists (this script has been run at some point) but no number from it
+appears in Main.tex or Supplementary.tex. The "Adversarial robustness"
+limitation paragraph in Main.tex's Discussion is a qualitative statement
+that does not cite specific numbers from this script.
+
 Simulates a knowledgeable adversary who perturbs ransomware behavioral
 features to evade detection, and measures how well the uncertainty-based
 ESCALATE route catches evasions that slip past prob ≥ 0.5.
@@ -37,7 +43,8 @@ Triage model
 Agents evaluated
 ----------------
   [B]   : BehavioralAgent (random_stratified, T=10 MC-Dropout)
-  [B+K] : [B] fused with KnowledgeAgent via family lookup (mean average)
+  [B+K] : [B] mean-fused with KnowledgeAgent's fixed corpus-mean score
+          (build_knowledge_lookup() -- not a per-family lookup)
 
 Outputs
 -------
@@ -107,6 +114,15 @@ ALPHAS = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]
 # ---------------------------------------------------------------------------
 
 def build_knowledge_lookup() -> tuple[dict, np.ndarray, callable]:
+    """Corpus-mean-always: identical Knowledge vector regardless of the
+    window's true family. NOT currently called by any live paper number
+    (this script's output is not cited in TIFS3_Submission), but a
+    per-family lookup keyed by the sample's own true label -- as this
+    function used to do -- is a label leak, matching the bug fixed in
+    eval_sabre2.py, run_ea_ed_experiments.py, run_ee_eg_experiments.py,
+    eval_mix_robustness.py, eval_e16_runtime.py, and eval_e4_imbalance.py.
+    Fixed here too so the leaky pattern isn't copy-pasted into future
+    scripts from this one."""
     df_rk = pd.read_csv(RANSKNOW_CSV)
     feat_cols = (
         df_rk.drop(columns=KNOWLEDGE_DROP_COLS, errors="ignore")
@@ -114,24 +130,13 @@ def build_knowledge_lookup() -> tuple[dict, np.ndarray, callable]:
              .columns.tolist()
     )
     X_rk = df_rk[feat_cols].fillna(0).to_numpy(dtype=np.float32)
-    family_feats: dict[str, list] = {}
-    for i, row in df_rk.iterrows():
-        for fam in [f.strip() for f in str(row.get("Family_List", "")).split(",")]:
-            if fam and fam != "nan":
-                family_feats.setdefault(fam, []).append(X_rk[i])
-    family_mean = {fam: np.mean(np.stack(vecs), axis=0)
-                   for fam, vecs in family_feats.items()}
-    zero_vec = np.zeros(X_rk.shape[1], dtype=np.float32)
+    corpus_mean = X_rk.mean(axis=0)
+    zero_vec = np.zeros(X_rk.shape[1], dtype=np.float32)  # kept for API compatibility
 
     def lookup(class_name: str) -> np.ndarray:
-        if class_name in family_mean:
-            return family_mean[class_name]
-        for k in family_mean:
-            if k.lower() in class_name.lower() or class_name.lower() in k.lower():
-                return family_mean[k]
-        return zero_vec
+        return corpus_mean
 
-    return family_mean, zero_vec, lookup
+    return {}, zero_vec, lookup
 
 
 # ---------------------------------------------------------------------------
@@ -292,11 +297,10 @@ def main() -> None:
     # -----------------------------------------------------------------------
     # Knowledge vectors (static — not perturbed)
     # -----------------------------------------------------------------------
-    print("Building knowledge lookup ...")
+    print("Building knowledge lookup (corpus-mean-always) ...")
     _, zero_vec, kn_lookup = build_knowledge_lookup()
     X_know = np.stack([kn_lookup(f) for f in families])
-    know_hit = (X_know != zero_vec).any(axis=1)
-    print(f"  Knowledge hit rate: {know_hit.mean():.1%}")
+    print(f"  Knowledge feature dim: {X_know.shape[1]}  (identical vector for every window)")
 
     # -----------------------------------------------------------------------
     # Baseline (α = 0)
