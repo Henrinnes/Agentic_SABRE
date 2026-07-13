@@ -590,8 +590,10 @@ reason, not an inconsistency.
 
 \begin{table}[h]
 \centering
-\caption{Fusion method comparison across four evaluation splits.
-  All methods trained on the random-stratified training score pool without
+\caption{Fusion method comparison across four evaluation splits. BK Mean is
+  [B+K] (Semantic excluded, matching Table II's Mean Fusion row); RF, GBT,
+  MLP-2L, and MLP-1L are all [S+B+K], trained on the identical
+  six-dimensional out-of-fold score pool (Remark~1 of the main paper) without
   augmentation. ECE reported on the random-stratified test split.
   GBT = gradient boosting; MLP-1L = Decision MLP $6{\to}32{\to}1$
   (\textbf{ours}). Bold = best per column.}
@@ -603,11 +605,11 @@ Method & \multicolumn{4}{c}{AUROC} & ECE \\
 \cmidrule(lr){2-5}
  & Random & Family & Hardware & Temporal & (Random) \\
 \midrule
-BK Mean       & $0.885$ & $0.649$ & $0.849$ & $0.877$ & $0.102$ \\
-RF            & $0.950$ & $0.677$ & $0.928$ & $0.952$ & $0.020$ \\
-GBT           & $\mathbf{0.954}$ & $\mathbf{0.682}$ & $\mathbf{0.934}$ & $0.957$ & $0.023$ \\
-MLP-2L        & $\mathbf{0.954}$ & $0.678$ & $\mathbf{0.934}$ & $\mathbf{0.958}$ & $\mathbf{0.020}$ \\
-MLP-1L (ours) & $\mathbf{0.954}$ & $0.677$ & $\mathbf{0.934}$ & $0.957$ & $0.031$ \\
+BK Mean {\scriptsize[B+K]}        & $0.885$ & $0.649$ & $0.849$ & $0.877$ & $0.102$ \\
+RF {\scriptsize[S+B+K]}            & $0.950$ & $0.677$ & $0.928$ & $0.952$ & $0.020$ \\
+GBT {\scriptsize[S+B+K]}           & $\mathbf{0.954}$ & $\mathbf{0.682}$ & $\mathbf{0.934}$ & $0.957$ & $0.023$ \\
+MLP-2L {\scriptsize[S+B+K]}        & $\mathbf{0.954}$ & $0.678$ & $\mathbf{0.934}$ & $\mathbf{0.958}$ & $\mathbf{0.020}$ \\
+MLP-1L (ours) {\scriptsize[S+B+K]} & $\mathbf{0.954}$ & $0.677$ & $\mathbf{0.934}$ & $0.957$ & $0.031$ \\
 \bottomrule
 \end{tabular}
 \end{table}
