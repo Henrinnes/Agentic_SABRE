@@ -2,11 +2,16 @@
 """
 eval_e6e7_calibration.py — E6 Calibration + E7 Conformal Triage
 ================================================================
+NOT currently cited anywhere in TIFS3_Submission -- results/e6e7_calibration.json
+exists (this script has been run at some point) but no number from it
+appears in Main.tex or Supplementary.tex.
 
 E6 — Calibration analysis for each agent before and after temperature scaling
   Metrics: ECE (15 equal-width bins), MCE, Brier score, reliability curve
   Calibration set: val split (fit temperature T on val, evaluate on test)
-  Agents: [B] and [B+K] on RanSMAP; [S] on RDset; [K] leave-one-out on RansKnow
+  Agents: [B] and [B+K] on RanSMAP ([B+K] uses a fixed corpus-mean
+  Knowledge score, build_knowledge_lookup(), not a per-family lookup);
+  [S] on RDset; [K] leave-one-out on RansKnow
 
 E7 — Mondrian conformal prediction triage
   Inductive conformal prediction with class-conditional thresholds.
@@ -268,6 +273,15 @@ def score_knowledge(X_know: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def build_knowledge_lookup():
+    """Corpus-mean-always: identical Knowledge vector regardless of the
+    window's true family. NOT currently called by any live paper number
+    (this script's output is not cited in TIFS3_Submission), but a
+    per-family lookup keyed by the sample's own true label -- as this
+    function used to do -- is a label leak, matching the bug fixed in
+    eval_sabre2.py, run_ea_ed_experiments.py, run_ee_eg_experiments.py,
+    eval_mix_robustness.py, eval_e16_runtime.py, eval_e4_imbalance.py, and
+    eval_e12_adversarial.py. Fixed here too so the leaky pattern isn't
+    copy-pasted into future scripts from this one."""
     df_rk = pd.read_csv(RANSKNOW_CSV)
     feat_cols = (
         df_rk.drop(columns=KNOWLEDGE_DROP_COLS, errors="ignore")
@@ -275,21 +289,11 @@ def build_knowledge_lookup():
              .columns.tolist()
     )
     X_rk = df_rk[feat_cols].fillna(0).to_numpy(dtype=np.float32)
-    family_feats: dict = {}
-    for i, row in df_rk.iterrows():
-        for fam in [f.strip() for f in str(row.get("Family_List", "")).split(",")]:
-            if fam and fam != "nan":
-                family_feats.setdefault(fam, []).append(X_rk[i])
-    family_mean = {f: np.mean(np.stack(v), axis=0) for f, v in family_feats.items()}
-    zero_vec = np.zeros(X_rk.shape[1], dtype=np.float32)
+    corpus_mean = X_rk.mean(axis=0)
+    zero_vec = np.zeros(X_rk.shape[1], dtype=np.float32)  # kept for API compatibility
 
     def lookup(cn: str) -> np.ndarray:
-        if cn in family_mean:
-            return family_mean[cn]
-        for k in family_mean:
-            if k.lower() in cn.lower() or cn.lower() in k.lower():
-                return family_mean[k]
-        return zero_vec
+        return corpus_mean
 
     return lookup, zero_vec
 
