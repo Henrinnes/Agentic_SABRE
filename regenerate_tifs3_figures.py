@@ -73,9 +73,9 @@ def fig2_roc():
         auc_mlp = d["BK_mlp"]["auroc"]["mean"]
 
         for label, col, auc_val in [
-            ("[B]",        C_B,   auc_b),
-            ("[B+K] Mean", C_MN,  auc_mn),
-            ("[B+K] MLP",  C_MLP, auc_mlp),
+            ("[B]",          C_B,   auc_b),
+            ("[B+K] Mean",   C_MN,  auc_mn),
+            ("[S+B+K] MLP",  C_MLP, auc_mlp),
         ]:
             fpr, tpr = binormal_roc(auc_val)
             ax.plot(fpr, tpr, color=col, linewidth=1.4,
@@ -142,7 +142,7 @@ def fig3_calibration():
     ax.plot(bins, fracs_mean_post, "v--", color="#e08c2a", linewidth=1.2,
             markersize=4, label=f"[B+K] Mean post-TS ECE={ece_mean_post:.3f}")
     ax.plot(bins, fracs_mlp,       "o-",  color="#d7191c", linewidth=1.4,
-            markersize=4, label=f"[B+K] MLP ECE={ece_mlp:.3f}")
+            markersize=4, label=f"[S+B+K] MLP ECE={ece_mlp:.3f}")
 
     ax.set_xlabel("Mean predicted probability", fontsize=8)
     ax.set_ylabel("Fraction of positives", fontsize=8)
