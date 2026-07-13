@@ -2,6 +2,10 @@
 """
 eval_e4_imbalance.py — E4 Realistic Imbalance Evaluation
 ==========================================================
+NOT currently cited anywhere in TIFS3_Submission -- results/e4_imbalance.json
+exists (this script has been run at some point) but no number from it
+appears in Main.tex or Supplementary.tex.
+
 Enterprise endpoints see ~95% benign / 5% ransomware traffic.
 Standard 50/50 test sets overstate recall and understate FP cost.
 
@@ -10,7 +14,9 @@ Protocol
 For each split's test set:
   1. Resample to 5% ransomware / 95% benign (downsample ransomware).
      Repeat N_REPS=100 times with different seeds for stable estimates.
-  2. Evaluate [B] and [B+K] on each resample.
+  2. Evaluate [B] and [B+K] on each resample. [B+K] uses a fixed
+     corpus-mean Knowledge score (build_knowledge_lookup()), not a
+     per-family lookup -- see that function's docstring.
   3. Report: AUPRC, PR-curve points, FP/day and FN/day at 10K events/day,
      cost-weighted risk, optimal threshold under realistic cost ratio.
 
@@ -79,6 +85,14 @@ def load_test_windows(split_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarr
 
 
 def build_knowledge_lookup():
+    """Corpus-mean-always: identical Knowledge vector regardless of the
+    window's true family. NOT currently called by any live paper number
+    (this script's output is not cited in TIFS3_Submission), but a
+    per-family lookup keyed by the sample's own true label -- as this
+    function used to do -- is a label leak, matching the bug fixed in
+    eval_sabre2.py, run_ea_ed_experiments.py, run_ee_eg_experiments.py,
+    eval_mix_robustness.py, and eval_e16_runtime.py. Fixed here too so the
+    leaky pattern isn't copy-pasted into future scripts from this one."""
     df_rk = pd.read_csv("/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv")
     df_rk["Ransomware_Context"] = (
         (df_rk["Tactic_Total_Mentions"] > 10) | (df_rk["Tool_Total_Mentions"] > 2)
@@ -88,21 +102,10 @@ def build_knowledge_lookup():
              .select_dtypes(include="number").columns.tolist()
     )
     X_rk = df_rk[feat_cols].fillna(0).to_numpy(dtype=np.float32)
-    family_feats: dict[str, list] = {}
-    for i, row in df_rk.iterrows():
-        for fam in [f.strip() for f in str(row.get("Family_List", "")).split(",")]:
-            if fam and fam != "nan":
-                family_feats.setdefault(fam, []).append(X_rk[i])
-    family_mean = {f: np.mean(np.stack(v), axis=0) for f, v in family_feats.items()}
-    zero = np.zeros(X_rk.shape[1], dtype=np.float32)
+    corpus_mean = X_rk.mean(axis=0)
 
     def lookup(cn: str) -> np.ndarray:
-        if cn in family_mean:
-            return family_mean[cn]
-        for k in family_mean:
-            if k.lower() in cn.lower() or cn.lower() in k.lower():
-                return family_mean[k]
-        return zero
+        return corpus_mean
 
     return lookup
 
