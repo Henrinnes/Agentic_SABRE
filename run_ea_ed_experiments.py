@@ -2,13 +2,27 @@
 """
 run_ea_ed_experiments.py
 ========================
-Implements four post-hoc experiments (E-A through E-D) using existing
-checkpoints and results — no model retraining required.
+Implements four post-hoc experiments (E-A through E-D). The Decision MLP
+IS retrained here (train_fresh_mlp(), seed=0) on out-of-fold Behavioural +
+corpus-mean Semantic/Knowledge score-pool features (see eval_sabre2.py's
+module docstring for the full [S+B+K] fusion / no-stacking-leak design
+note, which applies identically here); only the base agent checkpoints are
+reused rather than retrained.
 
-  E-A  Statistical significance   Paired Wilcoxon (B vs MLP, each split) +
-                                   McNemar per-sample disagreement test
-  E-B  Risk-coverage (AURC)       Selective-prediction curve: precision vs
-                                   auto-classification coverage for the MLP
+  E-A  Statistical significance   One-sample Wilcoxon: 6 per-seed [S+B+K]
+                                   Decision MLP AUROCs vs. the single fixed,
+                                   deployed [B] Behavioural CNN checkpoint
+                                   (B is not retrained per seed, so this is
+                                   the correct design, not a paired test on
+                                   two matched seed distributions) + a
+                                   session-level McNemar test (window-level
+                                   McNemar is also reported but is NOT
+                                   independence-respecting, since windows
+                                   within a session are correlated)
+  E-B  Selective precision-coverage (AUSPC)   Precision vs. auto-classification
+                                   coverage for the [S+B+K] Decision MLP;
+                                   higher is better -- this is not the
+                                   conventional risk-coverage curve
   E-C  Conformal coverage shift    Empirical Mondrian CP coverage on all four
                                    splits (calibrate on val, evaluate on test)
   E-D  Session-level aggregation  Max-score and majority-vote per RanSMAP

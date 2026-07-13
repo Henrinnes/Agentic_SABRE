@@ -1,23 +1,45 @@
 #!/usr/bin/env python3
 """
-eval_sabre2.py — SABRE-II evaluation for TIFS2 paper tables.
+eval_sabre2.py — SABRE-II evaluation for TIFS3 paper tables.
 
 Design note
 -----------
 RanSMAP (behavioral), RDset (semantic), and RansKnow (knowledge) are
-INDEPENDENT datasets — no single executable appears in all three.
-Therefore the main [B+K] evaluation is done on the behavioral test split
-with knowledge looked up by class_name (same approach as TIFS1).
-Semantic scores are included in a separate family-level lookup experiment.
+INDEPENDENT datasets — no single executable appears in all three, so no
+RanSMAP window has a matched Semantic embedding or Knowledge transcript.
+
+All RanSMAP evaluations below therefore use the full six-dimensional score
+pool [S+B+K] (Semantic, Behavioural, Knowledge), NOT [B+K] as earlier
+comments in this file used to say: Semantic and Knowledge each contribute a
+fixed, label-independent corpus-mean score (their own MC Dropout mean/std
+over their own corpus, RDset and RansKnow respectively), identical for
+every RanSMAP sample regardless of family, computed once by
+build_semantic_fill() and build_knowledge_lookup(). Only the Behavioural
+Agent carries genuine per-sample signal in this evaluation. Knowledge is
+NOT looked up by class_name/true family label -- an earlier version of
+this lookup was and is a label leak, since it lets the RanSMAP sample's own
+true family identity reach the Decision MLP; build_knowledge_lookup() now
+ignores its `cn` argument entirely and always returns the corpus mean.
+
+The Decision MLP's training-feature construction scores the Behavioural
+Agent out-of-fold (5-fold session-grouped cross-fitting over
+random_stratified's train sessions, see build_oof_behavioural_scores()) --
+scoring training windows with a checkpoint trained on those same windows
+would be stacking leakage. Test-time scoring uses the full-training-set
+checkpoint on genuinely held-out test data, which requires no
+cross-fitting.
+
+See Remark 1 ("Cross-Dataset Fusion Without Per-Sample Pairing") in
+TIFS3_Submission/Main.tex for the paper-facing version of this note.
 
 Experiments
 -----------
-  E1  AUROC/AUPRC: [B] and [B+K] across 4 splits (Table I)
-  E2  Calibration ECE: mean fusion vs Decision MLP (Table II)
-  E3  CTGAN ablation: no-aug / SMOTE / CTGAN (Table III)
-  E4  Peer Consultation: family holdout per-family recovery (Table IV)
-  E5  Policy: fixed τ vs grid vs Bayesian TPE (Table V)
-  E6  Latency: Decision MLP overhead vs mean fusion (Table VI)
+  E1  AUROC/AUPRC: [B] and [S+B+K] across 4 splits (Table II)
+  E2  Calibration ECE: [B+K] mean fusion vs [S+B+K] Decision MLP (Table III)
+  E3  CTGAN ablation on the [S+B+K] Decision MLP: no-aug / SMOTE / CTGAN (Table IV)
+  E4  Peer Consultation: family holdout per-family recovery (Table IV, Supplementary)
+  E5  Policy: fixed τ vs grid vs Bayesian TPE, on [S+B+K] Decision MLP output (Table V)
+  E6  Latency: [S+B+K] Decision MLP overhead vs [B+K] mean fusion (Table VI)
 """
 from __future__ import annotations
 
