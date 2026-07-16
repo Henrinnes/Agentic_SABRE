@@ -563,14 +563,20 @@ explicit.
   (Remark~\ref{rem:corpus_mean}). Only the Behavioural Agent's contribution
   to $\mathbf{v}$ varies per RanSMAP sample.}
 \label{tab:agent_dataset_map}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lll}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.19\linewidth}p{0.27\linewidth}p{0.45\linewidth}@{}}
 \toprule
 Agent & Trained \& evaluated on & Contribution to RanSMAP $\mathbf{v}(\mathbf{x})$ \\
 \midrule
-Semantic    & RDset (own train/test split)     & Fixed corpus-mean $(\hat{p}_{\text{sem}},\sigma_{\text{sem}})$, identical $\forall\,\mathbf{x}$ \\
-Behavioural & RanSMAP (own train/test split)   & Per-sample $(\hat{p}_{\text{beh}}(\mathbf{x}),\sigma_{\text{beh}}(\mathbf{x}))$ \\
-Knowledge   & RansKnow (own train/test split)  & Fixed corpus-mean $(\hat{p}_{\text{know}},\sigma_{\text{know}})$, identical $\forall\,\mathbf{x}$ \\
+Semantic &
+  RDset (own train/test split) &
+  Fixed corpus-mean $(\hat{p}_{\text{sem}},\sigma_{\text{sem}})$, identical $\forall\,\mathbf{x}$ \\[2pt]
+Behavioural &
+  RanSMAP (own train/test split) &
+  Per-sample $(\hat{p}_{\text{beh}}(\mathbf{x}),\sigma_{\text{beh}}(\mathbf{x}))$ \\[2pt]
+Knowledge &
+  RansKnow (own train/test split) &
+  Fixed corpus-mean $(\hat{p}_{\text{know}},\sigma_{\text{know}})$, identical $\forall\,\mathbf{x}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
