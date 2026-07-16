@@ -1,0 +1,137 @@
+{
+  "k_seeds": 6,
+  "split": "random_stratified",
+  "variants": {
+    "storage_only": {
+      "n_features": 5,
+      "features": [
+        "avg_read_throughput",
+        "avg_write_throughput",
+        "read_LBA_variance",
+        "write_LBA_variance",
+        "write_entropy_mean"
+      ],
+      "auroc": {
+        "mean": 0.8799,
+        "ci95_lo": 0.8751,
+        "ci95_hi": 0.8848,
+        "half_width": 0.0048
+      },
+      "auprc": {
+        "mean": 0.8733,
+        "ci95_lo": 0.8691,
+        "ci95_hi": 0.8774,
+        "half_width": 0.0041
+      },
+      "auroc_seeds": [
+        0.883,
+        0.8827,
+        0.8713,
+        0.8829,
+        0.8814,
+        0.8782
+      ],
+      "auprc_seeds": [
+        0.8753,
+        0.8765,
+        0.8658,
+        0.8757,
+        0.8739,
+        0.8725
+      ]
+    },
+    "memory_only": {
+      "n_features": 11,
+      "features": [
+        "mem_read_entropy_mean",
+        "mem_write_entropy_mean",
+        "mem_readwrite_entropy_mean",
+        "mem_read_GPA_variance",
+        "mem_write_GPA_variance",
+        "mem_readwrite_GPA_variance",
+        "mem_exec_GPA_variance",
+        "mem_read_count",
+        "mem_write_count",
+        "mem_readwrite_count",
+        "mem_exec_count"
+      ],
+      "auroc": {
+        "mean": 0.8899,
+        "ci95_lo": 0.8868,
+        "ci95_hi": 0.893,
+        "half_width": 0.0031
+      },
+      "auprc": {
+        "mean": 0.8817,
+        "ci95_lo": 0.8756,
+        "ci95_hi": 0.8879,
+        "half_width": 0.0062
+      },
+      "auroc_seeds": [
+        0.8859,
+        0.8897,
+        0.8888,
+        0.8905,
+        0.8949,
+        0.8895
+      ],
+      "auprc_seeds": [
+        0.8754,
+        0.8803,
+        0.88,
+        0.8858,
+        0.8914,
+        0.8775
+      ]
+    },
+    "combined_16d": {
+      "n_features": 16,
+      "features": [
+        "avg_read_throughput",
+        "avg_write_throughput",
+        "read_LBA_variance",
+        "write_LBA_variance",
+        "write_entropy_mean",
+        "mem_read_entropy_mean",
+        "mem_write_entropy_mean",
+        "mem_readwrite_entropy_mean",
+        "mem_read_GPA_variance",
+        "mem_write_GPA_variance",
+        "mem_readwrite_GPA_variance",
+        "mem_exec_GPA_variance",
+        "mem_read_count",
+        "mem_write_count",
+        "mem_readwrite_count",
+        "mem_exec_count"
+      ],
+      "auroc": {
+        "mean": 0.96,
+        "ci95_lo": 0.9573,
+        "ci95_hi": 0.9628,
+        "half_width": 0.0027
+      },
+      "auprc": {
+        "mean": 0.9624,
+        "ci95_lo": 0.9598,
+        "ci95_hi": 0.9649,
+        "half_width": 0.0026
+      },
+      "auroc_seeds": [
+        0.9588,
+        0.9618,
+        0.962,
+        0.9556,
+        0.9598,
+        0.9624
+      ],
+      "auprc_seeds": [
+        0.9613,
+        0.9637,
+        0.9646,
+        0.9582,
+        0.9621,
+        0.9645
+      ]
+    }
+  }
+}

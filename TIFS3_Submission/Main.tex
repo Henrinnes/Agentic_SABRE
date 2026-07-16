@@ -410,10 +410,12 @@ in general; we verify this tendency empirically across family and hardware
 holdout splits (Supplementary Section~S-VI).
 \end{proposition}
 
-We use $T=10$ passes per agent, empirically verified to stabilise $\sigma_i$
-to within $1\%$ of the $T=50$ estimate (Section~\ref{sec:ablation});
-Supplementary Section~S-VI quantifies this stability and the associated
-latency trade-off.
+We use $T=10$ passes per agent; a T-sweep against a near-converged $T{=}200$
+reference (Section~\ref{sec:ablation}) shows $\sigma_{\text{beh}}$ reaches
+within $11\%$ of that reference by $T{=}10$, down from $100\%$ at $T{=}1$,
+at $1.9\,\text{ms}$ latency versus $9.5\,\text{ms}$ at $T{=}50$ (which itself
+is only within $2\%$ of the reference). Supplementary Section~S-VI
+quantifies this stability and the associated latency trade-off.
 
 \subsection{Semantic Agent}
 
@@ -681,13 +683,17 @@ samples in $(\hat{p}, \sigma_{\max})$ space.
   \centering
   \includegraphics[width=\columnwidth]{Figures/fig14_triage_space.pdf}
   \caption{Triage decision regions in $(\hat{p},\,\sigma_{\max})$ space under
-    Bayesian TPE-derived thresholds
-    $(\tau_{\text{high}}{=}0.78,\,\tau{=}0.35,\,\kappa{=}0.22,\,
-    \kappa_{\text{low}}{=}0.10)$.
-    Simulated samples from the training distribution (ransomware / benign)
-    and OOD unseen-family samples ($\triangle$) are overlaid.
-    OOD samples cluster in the \textsc{Escalate} region due to elevated
-    $\sigma_{\max}$.}
+    the real Bayesian TPE-optimised thresholds
+    $(\tau_{\text{high}}{=}0.905,\,\tau{=}0.396,\,\kappa{=}0.196,\,
+    \kappa_{\text{low}}{=}0.195)$ from \texttt{checkpoints/policy\_auto.json}.
+    Points are genuine fused $[S{+}B{+}K]$ Decision MLP output: ransomware
+    and benign from the random-stratified test split (in-distribution for
+    that checkpoint), and OOD unseen-family samples ($\triangle$) from the
+    family-holdout test split restricted to REvil and WannaCry, the two
+    families that checkpoint never trained on.
+    OOD samples concentrate in the \textsc{Escalate} region ($63\%$)
+    due to elevated $\sigma_{\max}$, though not exclusively
+    ($19\%$ still reach \textsc{Auto-Contain}).}
   \label{fig:triage_space}
 \end{figure}
 
@@ -1241,15 +1247,20 @@ Section~S-VIII.
 The \texttt{variants} partition of RanSMAP provides $1{,}397$ windows from
 seven Conti sub-variants (Conti.A--G), none seen in training. Against
 Hirano and Kobayashi~\cite{hirano2025ransmap} (mean recall $0.56$, full
-23D), our Behavioural CNN achieves mean recall $0.68$ (16D), with
-Conti.C/D strongest ($\geq 0.78$) and Conti.F weakest ($0.51$). On
-sub-variants where recall is lowest ($\leq 0.55$), escalation is highest
-($\geq 32\%$): $\sigma_{\text{beh}}$ rises on novel patterns, routing to
-\textsc{Escalate} rather than containment---unlike Hirano and Kobayashi's
-detector, which silently misclassifies low-recall variants as benign.
-This is consistent with, and now more rigorously
-established by, the systematic leave-one-family-out analysis of
-Section~\ref{sec:results_lofo}. The full per-variant table and figure are
+23D), our Behavioural CNN alone achieves mean recall $0.63$ (16D), with
+Conti.G strongest ($0.89$) and Conti.F an outlier at $0.09$. On five of
+the six remaining sub-variants, escalation under the fused $[S{+}B{+}K]$
+Decision MLP and the real Bayesian-TPE policy is high ($66$--$85\%$):
+$\sigma_{\text{beh}}$ rises on novel patterns, routing to
+\textsc{Escalate} rather than silent containment---unlike Hirano and
+Kobayashi's detector, which has no such fallback. Conti.F is the
+exception and a genuine limitation: both its mean fused probability and
+$\sigma_{\text{beh}}$ are low (escalation only $24\%$), meaning the system
+is confidently wrong rather than appropriately uncertain on this specific
+variant---the uncertainty-driven safety net does not catch every evasive
+case. This partial coverage gap is consistent with the pattern already
+noted for SDelete+REvil below, and is discussed further in
+Section~\ref{sec:limitations}. The full per-variant table and figure are
 provided in Supplementary Section~S-VIII.
 
 \subsection{Simultaneous Execution}
@@ -1456,10 +1467,12 @@ Overhead vs deterministic pass  & $3.8\times$ & $--$ \\
 
 Four ablation studies validate key design choices.
 \textbf{(1) MC Dropout pass count $T$:} at $T{=}10$, $\sigma_{\text{beh}}$
-noise falls to $0.9\%$ of its mean (within $1\%$ of $T{=}50$, $+1.42\,\text{ms}$
-overhead); $T{=}1$ degenerates the triage policy to two actions.
-\textbf{(2) Feature ablation:} storage-only ($\chi_s$, 5D) AUROC $0.851$;
-memory-only ($\chi_m$, 11D) $0.903$; combined 16D $\mathbf{0.961}$,
+is within $11\%$ of a near-converged $T{=}200$ reference (down from $100\%$
+at $T{=}1$), at $+1.58\,\text{ms}$ latency overhead versus $T{=}1$;
+$T{=}1$ additionally degenerates the triage policy to two actions since
+$\sigma_{\text{beh}}{=}0$ by construction with a single pass.
+\textbf{(2) Feature ablation:} storage-only ($\chi_s$, 5D) AUROC $0.880$;
+memory-only ($\chi_m$, 11D) $0.890$; combined 16D $\mathbf{0.960}$,
 confirming complementarity.
 \textbf{(3) Decision MLP depth:} one ($6{\to}32{\to}1$) and two hidden-layer
 variants are statistically equivalent on AUROC
@@ -1633,7 +1646,7 @@ Section~\ref{sec:results_significance}). Fifth, score-pool AUROC stays
 above $0.92$ even at $1\%$ ransomware prevalence under CTGAN or SMOTE
 augmentation (Section~\ref{sec:results_imbalance}).
 
-\subsection{Where the Framework Struggles}
+\subsection{Where the Framework Struggles}\label{sec:limitations}
 
 The framework's principal failure mode is distributional shift at the family
 level. Under family holdout, the Behavioural CNN drops to AUROC $0.707$ and
@@ -1671,14 +1684,17 @@ telemetry likewise cannot separate concurrent execution traces without
 process-level attribution.
 
 Critically, the uncertainty mechanism provides graceful degradation rather
-than silent failure in both scenarios: $\sigma_{\text{beh}}$ rises on
-unseen families (Supplementary Section~S-VI), driving escalation rates of
-$32$--$38\%$ for the lowest-recall Conti sub-variants
+than silent failure for most of these hard cases: $\sigma_{\text{beh}}$
+rises on unseen families (Supplementary Section~S-VI), driving escalation
+rates of $66$--$85\%$ on five of the six lower-recall Conti sub-variants
 (Section~\ref{sec:ood_variants}), while concurrent-execution escalation
-exceeds $60\%$ for all \texttt{mix} combinations (Supplementary
-Section~S-VIII). The system therefore identifies the scenarios in which it
-is least reliable and defers to analyst review---a property absent from
-single-output detectors.
+exceeds $60\%$ for most \texttt{mix} combinations (Supplementary
+Section~S-VIII). This is not universal, however: Conti.F ($24\%$
+escalation) and, to a lesser extent, SDelete+REvil (roughly half its
+windows neither escalated nor auto-contained) show the system can also be
+confidently wrong rather than appropriately uncertain, so the
+uncertainty-driven safety net should be read as a substantial reduction in
+silent-failure risk, not a guarantee against it.
 
 \subsection{Additional Limitations}
 
@@ -1720,12 +1736,13 @@ depend on the temperature or policy thresholds' fitting data.
 The closest direct comparator, Hirano and Kobayashi's~\cite{hirano2025ransmap}
 1D-CNN+LSTM (23D features, $30$-second window), reports F-score $0.856$ on
 hardware-holdout versus our Behavioural CNN's AUROC $0.939$
-(Table~\ref{tab:auroc_splits}) and mean recall $0.68$ versus their $0.56$
+(Table~\ref{tab:auroc_splits}) and mean recall $0.63$ versus their $0.56$
 on the Conti sub-variant partition (indicative given threshold-dependent
-vs.\ threshold-independent metrics); more importantly, where both
-frameworks struggle, ours escalates rather than misclassifies via
-$\sigma_{\text{beh}}$ (Section~\ref{sec:ood_variants}). An extended
-comparison is in Supplementary Section~S-IV.
+vs.\ threshold-independent metrics); more importantly, on most sub-variants
+where both frameworks struggle, ours escalates rather than misclassifies
+via $\sigma_{\text{beh}}$ (Section~\ref{sec:ood_variants}), though this
+does not hold uniformly (Conti.F, Section~\ref{sec:limitations}). An
+extended comparison is in Supplementary Section~S-IV.
 
 The Bayesian TPE policy sets thresholds $(\tau^*, \kappa^*)$ once on the
 calibration split; an online Bayesian posterior updated from rolling

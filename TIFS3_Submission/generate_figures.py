@@ -1,14 +1,32 @@
-"""Generate new figures for TIFS3 standalone paper."""
+"""Generate new figures for TIFS3 standalone paper.
+
+Every figure in this file used to be built from hand-typed literal values
+with no connection to any actual experiment output -- several had gone
+stale relative to the corrected results/*.json produced elsewhere in this
+codebase, and fig_triage_space used simulated score distributions with
+threshold values that did not match checkpoints/policy_auto.json at all.
+Figures are now loaded from the real results files where such a file
+exists; where no persisted result exists, the loader script (or an
+explicit note) is documented in the corresponding function's docstring.
+"""
+import json
+from pathlib import Path
+
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyArrowPatch
-from matplotlib.path import Path
+from matplotlib.path import Path as MplPath
 import matplotlib.patheffects as pe
 
 OUT = "Figures"
+RESULTS = Path(__file__).parent.parent / "results"
+CKPT    = Path(__file__).parent.parent / "checkpoints"
+
+def _load(name):
+    return json.loads((RESULTS / name).read_text())
 
 # ── Shared style ────────────────────────────────────────────────────────────
 plt.rcParams.update({
@@ -104,6 +122,15 @@ def fig_radar():
 # Fig radar_splits — Generalisation profile across evaluation splits
 # ════════════════════════════════════════════════════════════════════════════
 def fig_radar_splits():
+    """AUROC from results/sabre2_eval.json (E1_main, [S+B+K] Decision MLP);
+    AUSPC (labelled AURC on the plot axis for brevity -- see Remark on
+    tab:auroc_splits in Main.tex re: this is a selective precision-coverage
+    curve, not a conventional risk-coverage one) from results/ea_ed_results.json
+    (E_B); Session Detection from ea_ed_results.json (E_D majority_vote);
+    Conformal Coverage at alpha=0.01 from ea_ed_results.json (E_C)."""
+    sabre2 = _load("sabre2_eval.json")
+    ea_ed  = _load("ea_ed_results.json")
+
     categories = [
         "AUROC", "AURC", "Session\nDetection", "Conformal\nCoverage",
     ]
@@ -111,21 +138,29 @@ def fig_radar_splits():
     angles = [n / float(N) * 2 * np.pi for n in range(N)]
     angles += angles[:1]
 
+    def vals(split):
+        return [
+            sabre2["E1_main"][split]["BK_mlp"]["auroc"]["mean"],
+            ea_ed["E_B"][split]["aurc"],
+            ea_ed["E_D"][split]["majority_vote"]["detection_rate"],
+            ea_ed["E_C"][split]["alpha_0.01"]["empirical_coverage"],
+        ]
+
     splits = {
         "Random-Stratified": {
-            "values": [0.976, 0.843, 0.985, 0.991],
+            "values": vals("random_stratified"),
             "color": BLUE, "lw": 2.0, "ls": "-", "alpha": 0.10,
         },
         "Temporal Holdout": {
-            "values": [0.980, 0.693, 0.989, 0.993],
+            "values": vals("temporal_holdout"),
             "color": TEAL, "lw": 1.8, "ls": "--", "alpha": 0.08,
         },
         "Hardware Holdout": {
-            "values": [0.962, 0.841, 0.911, 0.984],
+            "values": vals("hardware_holdout"),
             "color": PURPLE, "lw": 1.8, "ls": "-.", "alpha": 0.08,
         },
         "Family Holdout (unseen)": {
-            "values": [0.676, 0.644, 0.459, 0.750],
+            "values": vals("family_holdout"),
             "color": RED, "lw": 2.5, "ls": ":", "alpha": 0.22,
         },
     }
@@ -168,11 +203,21 @@ def fig_radar_splits():
 # Fig 13 — OOD Conti variants bar chart (ours vs Hirano)
 # ════════════════════════════════════════════════════════════════════════════
 def fig_ood_variants():
+    """From results/ood_variants_eval.json (gen_ood_variants_data.py, a
+    rerun of eval_ood_variants.py extended with real escalation rates).
+    Recall is the Behavioural CNN alone (checkpoints/behavioral_cnn.pt,
+    matching tab:ood_variants's caption); Hirano recall is a literal from
+    Table 14 of Hirano et al. (cited, not computed here). Escalation rate
+    is the fused [S+B+K] Decision MLP output routed through the real
+    Bayesian-TPE policy (checkpoints/policy_auto.json).
+    """
+    d = _load("ood_variants_eval.json")
+    variant_keys = [f"Conti_{i:02d}" for i in range(1, 8)]
     variants  = ["Conti.A", "Conti.B", "Conti.C", "Conti.D",
                  "Conti.E", "Conti.F", "Conti.G"]
-    hirano    = [0.52, 0.57, 0.61, 0.64, 0.53, 0.48, 0.55]
-    ours      = [0.65, 0.70, 0.78, 0.79, 0.63, 0.51, 0.72]
-    esc_rates = [0.29, 0.24, 0.18, 0.17, 0.31, 0.38, 0.22]
+    hirano    = [0.52, 0.57, 0.61, 0.64, 0.53, 0.48, 0.55]  # cited, Hirano et al. Table 14
+    ours      = [d["per_variant"][k]["recall"]   for k in variant_keys]
+    esc_rates = [d["per_variant"][k]["esc_rate"] for k in variant_keys]
 
     x = np.arange(len(variants))
     w = 0.32
@@ -181,7 +226,7 @@ def fig_ood_variants():
 
     b1 = ax1.bar(x - w/2, hirano, w, color=ORANGE, label="Hirano et al. (23D)",
                  edgecolor="white", linewidth=0.6, zorder=3)
-    b2 = ax1.bar(x + w/2, ours,   w, color=BLUE,   label="Ours — Decision MLP (16D)",
+    b2 = ax1.bar(x + w/2, ours,   w, color=BLUE,   label="Ours — Behavioural CNN (16D)",
                  edgecolor="white", linewidth=0.6, zorder=3)
 
     ax1.set_xlabel("Conti Sub-variant")
@@ -204,7 +249,7 @@ def fig_ood_variants():
              ls="-", label="Esc. Rate (ours)", zorder=4)
     ax2.set_ylabel("Escalation Rate", color=RED)
     ax2.tick_params(axis="y", colors=RED)
-    ax2.set_ylim(0, 0.65)
+    ax2.set_ylim(0, max(esc_rates) * 1.15)
     ax2.spines["right"].set_color(RED)
 
     # Combined legend
@@ -226,22 +271,39 @@ def fig_ood_variants():
 # Fig 14 — Triage decision region in (p̂, σ_max) space
 # ════════════════════════════════════════════════════════════════════════════
 def fig_triage_space():
+    """(p_hat, sigma_max) scatter from results/triage_space_scatter.json --
+    real Decision MLP output on random_stratified test (Ransomware/Benign,
+    checkpoint trained on these families) and family_holdout test restricted
+    to the two families that split actually holds out, REvil and WannaCry
+    (checkpoint never trained on them). See gen_triage_space_data.py.
+    Thresholds are the real Bayesian-TPE policy, checkpoints/policy_auto.json.
+    """
+    data = _load("triage_space_scatter.json")
+    pol  = data["policy"]
+
+    ran  = data["ransomware_train_dist"]
+    ben  = data["benign_train_dist"]
+    unk  = data["unseen_family_ood"]
+
+    p_ran = np.array(ran["p_hat"]);  s_ran = np.array(ran["sigma_max"])
+    p_ben = np.array(ben["p_hat"]);  s_ben = np.array(ben["sigma_max"])
+    p_unk = np.array(unk["p_hat"]);  s_unk = np.array(unk["sigma_max"])
+
     rng = np.random.default_rng(42)
-    n   = 600
+    def subsample(p, s, n_max=300):
+        if len(p) <= n_max:
+            return p, s
+        idx = rng.choice(len(p), n_max, replace=False)
+        return p[idx], s[idx]
+    p_ran, s_ran = subsample(p_ran, s_ran)
+    p_ben, s_ben = subsample(p_ben, s_ben)
+    p_unk, s_unk = subsample(p_unk, s_unk, n_max=150)
 
-    # Simulate score distributions
-    # Ransomware — high p̂, variable σ
-    p_ran  = np.clip(rng.beta(6, 1.5, n//2), 0.01, 0.99)
-    s_ran  = np.clip(rng.beta(1.5, 5,  n//2), 0.01, 0.50)
-    # Benign — low p̂, low σ
-    p_ben  = np.clip(rng.beta(1.2, 6, n//2), 0.01, 0.99)
-    s_ben  = np.clip(rng.beta(1.2, 6, n//2), 0.01, 0.50)
-    # Unseen family — mid p̂, high σ
-    p_unk  = np.clip(rng.normal(0.55, 0.18, 60), 0.05, 0.95)
-    s_unk  = np.clip(rng.normal(0.30, 0.08, 60), 0.08, 0.50)
-
-    # TPE-derived thresholds
-    tau_h = 0.78; tau = 0.35; kappa = 0.22; kappa_l = 0.10
+    # Real Bayesian-TPE policy thresholds (checkpoints/policy_auto.json)
+    tau_h, tau, kappa, kappa_l = (
+        pol["tau_high"], pol["tau"], pol["kappa"], pol["kappa_low"]
+    )
+    y_max = float(max(s_ran.max(), s_ben.max(), s_unk.max()) * 1.08)
 
     fig, ax = plt.subplots(figsize=(6.0, 5.0))
 
@@ -250,20 +312,20 @@ def fig_triage_space():
     ax.fill_between([tau_h, 1.0], 0, kappa_l,
                     color=TEAL, alpha=0.18, label="_nolegend_")
     # ESCALATE: p̂ >= tau AND σ > kappa
-    ax.fill_between([tau, 1.0], kappa, 0.52,
+    ax.fill_between([tau, 1.0], kappa, y_max,
                     color=ORANGE, alpha=0.18, label="_nolegend_")
     # ALLOW: rest (approximate)
-    ax.fill_between([0.0, tau], 0, 0.52,
+    ax.fill_between([0.0, tau], 0, y_max,
                     color=LGREY, alpha=0.35, label="_nolegend_")
 
     # Region labels
-    ax.text(0.88, 0.05, "AUTO-CONTAIN", ha="center", va="center",
+    ax.text(0.88, kappa_l*0.5, "AUTO-CONTAIN", ha="center", va="center",
             fontsize=8, fontweight="bold", color=TEAL,
             bbox=dict(fc="white", ec=TEAL, alpha=0.8, boxstyle="round,pad=0.2"))
-    ax.text(0.67, 0.38, "ESCALATE", ha="center", va="center",
+    ax.text(0.67, (kappa+y_max)*0.5, "ESCALATE", ha="center", va="center",
             fontsize=8, fontweight="bold", color=ORANGE,
             bbox=dict(fc="white", ec=ORANGE, alpha=0.8, boxstyle="round,pad=0.2"))
-    ax.text(0.17, 0.28, "ALLOW", ha="center", va="center",
+    ax.text(0.17, y_max*0.55, "ALLOW", ha="center", va="center",
             fontsize=8, fontweight="bold", color=GREY,
             bbox=dict(fc="white", ec=GREY, alpha=0.8, boxstyle="round,pad=0.2"))
 
@@ -282,9 +344,9 @@ def fig_triage_space():
                marker="^", label="Unseen family (OOD)", zorder=5)
 
     # Annotations
-    ax.annotate(r"$\tau_{\mathrm{high}}$", xy=(tau_h, 0.48),
+    ax.annotate(r"$\tau_{\mathrm{high}}$", xy=(tau_h, y_max*0.92),
                 ha="center", fontsize=8, color=TEAL)
-    ax.annotate(r"$\tau$", xy=(tau, 0.48), ha="center", fontsize=8,
+    ax.annotate(r"$\tau$", xy=(tau, y_max*0.92), ha="center", fontsize=8,
                 color=ORANGE)
     ax.annotate(r"$\kappa$", xy=(1.01, kappa), va="center", fontsize=8,
                 color=ORANGE)
@@ -292,7 +354,7 @@ def fig_triage_space():
                 fontsize=8, color=TEAL)
 
     ax.set_xlim(0, 1.0)
-    ax.set_ylim(0, 0.52)
+    ax.set_ylim(0, y_max)
     ax.set_xlabel(r"Fused risk score $\hat{p}$")
     ax.set_ylabel(r"Max epistemic uncertainty $\sigma_{\max}$")
     ax.set_title("Triage Decision Regions in $(\\hat{p},\\,\\sigma_{\\max})$ Space",
@@ -312,51 +374,54 @@ def fig_triage_space():
 # Fig 15 — Uncertainty distributions per family (σ_beh violin)
 # ════════════════════════════════════════════════════════════════════════════
 def fig_uncertainty_violin():
-    rng = np.random.default_rng(0)
-    families = ["Conti", "Darkside", "LockBit", "REvil*", "Ryuk", "WannaCry*",
-                "Benign"]
-    # σ_beh distributions (approximate from paper numbers)
-    params = [
-        (0.062, 0.018),  # Conti
-        (0.055, 0.015),  # Darkside
-        (0.058, 0.016),  # LockBit
-        (0.091, 0.025),  # REvil  (unseen — elevated)
-        (0.050, 0.012),  # Ryuk
-        (0.089, 0.024),  # WannaCry (unseen — elevated)
-        (0.035, 0.010),  # Benign
-    ]
-    data = [np.clip(rng.normal(mu, sd, 500), 0.01, 0.45)
-            for mu, sd in params]
+    """From results/uncertainty_violin.json (gen_uncertainty_violin_data.py):
+    real Behavioural CNN sigma_beh per family. Conti/Darkside/LockBit/Ryuk/
+    Benign scored on random_stratified test (in-distribution for that
+    checkpoint); REvil/WannaCry scored on family_holdout test with the
+    family_holdout checkpoint, which never trained on those two families
+    (genuinely unseen, not relabeled in-distribution numbers).
+    """
+    d = _load("uncertainty_violin.json")
+    order = ["Conti", "Darkside", "LockBit", "Ryuk", "Benign", "REvil", "WannaCry"]
+    fam_info = d["families"]
+    labels = [f"{f}*" if fam_info[f]["held_out"] else f for f in order]
+    data = [np.array(fam_info[f]["sigma_beh"]) for f in order]
+    colors = [BLUE if not fam_info[f]["held_out"] else ORANGE for f in order]
+    colors = [TEAL if f == "Benign" else c for f, c in zip(order, colors)]
+
+    policy = json.loads((CKPT / "policy_auto.json").read_text())
+    kappa = policy["kappa"]
 
     fig, ax = plt.subplots(figsize=(7.5, 4.2))
-    colors = [BLUE, BLUE, BLUE, ORANGE, BLUE, ORANGE, TEAL]
 
-    parts = ax.violinplot(data, positions=range(len(families)),
+    parts = ax.violinplot(data, positions=range(len(order)),
                           widths=0.65, showmedians=True,
                           showextrema=False)
     for pc, col in zip(parts["bodies"], colors):
         pc.set_facecolor(col)
         pc.set_alpha(0.55)
         pc.set_edgecolor("white")
-    parts["cmedians"].set_colors([GREY]*len(families))
+    parts["cmedians"].set_colors([GREY]*len(order))
     parts["cmedians"].set_linewidth(1.5)
 
-    ax.axhline(0.22, color=RED, lw=1.3, ls="--", label=r"Triage $\kappa$ threshold")
-    ax.set_xticks(range(len(families)))
-    ax.set_xticklabels(families, fontsize=9)
+    ax.axhline(kappa, color=RED, lw=1.3, ls="--",
+               label=r"Triage $\kappa$ threshold ($\kappa{=}%.3f$)" % kappa)
+    ax.set_xticks(range(len(order)))
+    ax.set_xticklabels(labels, fontsize=9)
     ax.set_ylabel(r"Epistemic uncertainty $\sigma_{\mathrm{beh}}$")
     ax.set_xlabel("Family  (* = held-out / unseen in training)")
     ax.set_title(r"$\sigma_{\mathrm{beh}}$ Distribution per Family"
-                 " (Random-Stratified Split)", fontsize=11,
+                 " (Real vs Held-out Behavioural Checkpoints)", fontsize=11,
                  fontweight="bold", color=BLUE, pad=8)
     ax.legend(fontsize=9, framealpha=0.9, edgecolor=LGREY)
     ax.yaxis.grid(True, color=LGREY, linewidth=0.7, zorder=0)
     ax.set_axisbelow(True)
 
     # Annotate unseen
-    for i, fam in enumerate(families):
-        if "*" in fam:
-            ax.annotate("OOD\n↑σ", xy=(i, params[i][0] + 0.04),
+    for i, f in enumerate(order):
+        if fam_info[f]["held_out"]:
+            top = float(np.percentile(data[i], 95))
+            ax.annotate("OOD\n↑σ", xy=(i, top + 0.03),
                         ha="center", fontsize=7.5, color=ORANGE)
 
     fig.tight_layout()
@@ -470,20 +535,29 @@ def fig_conformal():
 # Fig 18 — Feature ablation: storage vs memory vs combined
 # ════════════════════════════════════════════════════════════════════════════
 def fig_feature_ablation():
+    """From results/feature_ablation.json (gen_feature_ablation_data.py):
+    3 genuinely retrained Behavioural CNN variants (storage-only 5D,
+    memory-only 11D, combined 16D) x K=6 seeds each on random_stratified,
+    same SMOTE/early-stopping recipe as retrain_behavioural.py. No prior
+    script performed this specific feature-subset ablation.
+    """
+    d = _load("feature_ablation.json")
+    order = ["storage_only", "memory_only", "combined_16d"]
     groups   = ["Storage only\n(5D)", "Memory only\n(11D)",
                 "Combined\n(16D — ours)"]
-    auroc    = [0.851, 0.903, 0.961]
-    auprc    = [0.860, 0.910, 0.966]
-    err      = [0.008, 0.005, 0.003]
+    auroc    = [d["variants"][k]["auroc"]["mean"] for k in order]
+    auprc    = [d["variants"][k]["auprc"]["mean"] for k in order]
+    err_auroc = [d["variants"][k]["auroc"]["half_width"] for k in order]
+    err_auprc = [d["variants"][k]["auprc"]["half_width"] for k in order]
 
     x = np.arange(len(groups))
     w = 0.35
 
     fig, ax = plt.subplots(figsize=(5.5, 4.0))
-    b1 = ax.bar(x - w/2, auroc, w, yerr=err, capsize=4,
+    b1 = ax.bar(x - w/2, auroc, w, yerr=err_auroc, capsize=4,
                 color=BLUE, label="AUROC", edgecolor="white",
                 error_kw=dict(ecolor=GREY, lw=1.2), zorder=3)
-    b2 = ax.bar(x + w/2, auprc, w, yerr=err, capsize=4,
+    b2 = ax.bar(x + w/2, auprc, w, yerr=err_auprc, capsize=4,
                 color=TEAL, label="AUPRC", edgecolor="white",
                 error_kw=dict(ecolor=GREY, lw=1.2), zorder=3)
 
@@ -511,25 +585,33 @@ def fig_feature_ablation():
 # Fig 19 — MC Dropout T-sensitivity
 # ════════════════════════════════════════════════════════════════════════════
 def fig_t_sensitivity():
-    T      = [1, 5, 10, 20, 50]
-    auroc  = [0.961, 0.961, 0.961, 0.961, 0.961]  # stable
-    sigma_noise = [0.0, 8.3, 0.9, 0.4, 0.0]       # % noise in σ_beh
-    latency     = [0.52, 1.10, 1.94, 3.65, 9.20]  # ms
+    """From results/t_sensitivity.json (gen_t_sensitivity_data.py): real
+    Behavioural CNN (random_stratified checkpoint), single-sample GB10
+    latency (500 reps, 50 warm-up, matching eval_e16_runtime.py's protocol),
+    and sigma_beh drift relative to a T=200 near-converged reference mean
+    (not run-to-run repeat noise, which never drops below the reference by
+    T=50 -- see docstring in gen_t_sensitivity_data.py). Real T=10 drift is
+    ~11%, not the <1% this figure used to claim; T=10 is still the chosen
+    operating point since latency grows near-linearly in T while drift falls
+    off sharply between T=1 and T=10.
+    """
+    d = _load("t_sensitivity.json")
+    T = [1, 5, 10, 20, 50]
+    drift   = [d["sweep"][str(t)]["sigma_beh_drift_from_ref_pct"] for t in T]
+    latency = [d["sweep"][str(t)]["latency_p50_ms"] for t in T]
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8.5, 3.8))
 
-    # Left: σ noise vs T
-    ax1.plot(T, sigma_noise, color=ORANGE, lw=2.0, marker="o", ms=6)
-    ax1.axhline(1.0, color=RED, lw=1.2, ls="--",
-                label="1% stability threshold")
-    ax1.fill_between(T, sigma_noise, 1.0, where=[s > 1.0 for s in sigma_noise],
-                     color=ORANGE, alpha=0.2, label="Unstable region")
-    ax1.annotate("T=10\nchosen", xy=(10, 0.9), xytext=(15, 3.5),
-                 arrowprops=dict(arrowstyle="->", color=BLUE, lw=1.2),
-                 fontsize=8, color=BLUE)
+    # Left: σ_beh drift from T=200 reference, vs T
+    ax1.plot(T, drift, color=ORANGE, lw=2.0, marker="o", ms=6)
+    for t, v in zip(T, drift):
+        ax1.annotate(f"{v:.1f}%", (t, v), textcoords="offset points",
+                     xytext=(0, 7), ha="center", fontsize=7.5, color=ORANGE)
+    ax1.axvline(10, color=BLUE, lw=1.2, ls="--", alpha=0.7,
+                label="T=10 chosen")
     ax1.set_xlabel("MC Dropout passes T")
-    ax1.set_ylabel(r"Noise in $\sigma_{\mathrm{beh}}$ (% of mean)")
-    ax1.set_title(r"$\sigma_{\mathrm{beh}}$ Stability vs T", fontsize=10,
+    ax1.set_ylabel(r"$\sigma_{\mathrm{beh}}$ drift from $T{=}200$ ref. (%)")
+    ax1.set_title(r"$\sigma_{\mathrm{beh}}$ Convergence vs T", fontsize=10,
                   fontweight="bold", color=BLUE)
     ax1.legend(fontsize=8, framealpha=0.9, edgecolor=LGREY)
     ax1.yaxis.grid(True, color=LGREY, linewidth=0.7)
