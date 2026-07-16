@@ -63,7 +63,7 @@ def fig2_roc():
     C_MN  = "#fdae61"
     C_MLP = "#d7191c"
 
-    fig, axes = plt.subplots(2, 2, figsize=(7.0, 5.6))
+    fig, axes = plt.subplots(2, 2, figsize=(7.4, 4.3))
     axes = axes.flatten()
 
     for ax, (key, title) in zip(axes, splits):
@@ -89,7 +89,7 @@ def fig2_roc():
         ax.tick_params(labelsize=7)
         ax.set_xlim(0, 1); ax.set_ylim(0, 1)
 
-    plt.tight_layout(pad=0.8)
+    plt.tight_layout(pad=0.5, h_pad=0.8, w_pad=0.8)
     out = FIG_DIR / "fig2_roc.pdf"
     plt.savefig(out, dpi=DPI, bbox_inches="tight")
     plt.savefig(FIG_DIR / "fig2_roc.png", dpi=DPI, bbox_inches="tight")
