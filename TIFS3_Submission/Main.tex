@@ -575,17 +575,12 @@ Knowledge   & RansKnow (own train/test split)  & Fixed corpus-mean $(\hat{p}_{\t
 \end{tabular}
 \end{table}
 
-Because the Semantic and Knowledge Agents' own in-domain AUROC (RDset
-$0.996$; Knowledge Agent metrics not separately reported given RansKnow's
-small size, Section~\ref{sec:discussion}) says nothing about their
-contribution to a RanSMAP fusion score---which is fixed and
-sample-independent by construction---the framework in its RanSMAP
-evaluations (Section~\ref{sec:eval}) is honestly a
-\textbf{Behavioural--Knowledge--Semantic score-pool fusion with only the
-Behavioural Agent contributing per-sample signal}, not a validated
-three-way \emph{sample-level} fusion. The Semantic Agent's own
-three-way-independent contribution is validated separately, in-domain, on
-RDset.
+The Semantic and Knowledge Agents' own in-domain AUROC (RDset $0.996$;
+Knowledge Agent metrics not separately reported given RansKnow's small
+size, Section~\ref{sec:discussion}) therefore says nothing about their
+contribution to a RanSMAP fusion score, which is fixed and
+sample-independent by construction; the Semantic Agent's genuine
+sample-level contribution is validated separately, in-domain, on RDset.
 \end{remark}
 
 \begin{remark}[Why Score Space]
@@ -1114,38 +1109,13 @@ Decision MLP (ours) & $-$     & $\mathbf{0.025 \pm 0.001}$ \\
 
 \subsection{CTGAN Ablation}
 
-Table~\ref{tab:ctgan_ablation} isolates the contribution of score-space
-augmentation.
-All three variants achieve statistically equivalent AUROC, AUPRC, and ECE,
-confirming that the score-space distribution at the unmodified
-random-stratified prevalence ($51.3\%$ ransomware) is not imbalanced enough
-for augmentation to matter.
-CTGAN's benefit, where it exists, only emerges under the more severe induced
-imbalance evaluated in Section~\ref{sec:results_imbalance}.
-
-\begin{table}[t]
-\centering
-\footnotesize
-\caption{Decision MLP performance by score-space augmentation strategy
-  (random-stratified split; mean $\pm$ 95\% CI, $K{=}6$ seeds).
-}
-\label{tab:ctgan_ablation}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccc}
-\toprule
-Augmentation & AUROC $\uparrow$ & AUPRC $\uparrow$ & ECE $\downarrow$ \\
-\midrule
-None
-  & $0.952 \pm 0.0003$ & $\mathbf{0.955 \pm 0.0004}$ & $\mathbf{0.022 \pm 0.0011}$ \\
-SMOTE
-  & $0.952 \pm 0.0003$ & $\mathbf{0.955 \pm 0.0004}$ & $\mathbf{0.022 \pm 0.0011}$ \\
-CTGAN
-  & $0.952 \pm 0.0005$
-  & $0.955 \pm 0.0008$
-  & $0.025 \pm 0.0008$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+At the unmodified random-stratified prevalence ($51.3\%$ ransomware), None,
+SMOTE, and CTGAN augmentation of the Decision MLP's score-space training
+set achieve statistically equivalent AUROC, AUPRC, and ECE (baseline row of
+Supplementary Table~S-IV)---this prevalence is not imbalanced enough for
+augmentation to matter. CTGAN's benefit, where it exists, only emerges
+under the more severe induced imbalance evaluated in
+Section~\ref{sec:results_imbalance}.
 
 \subsection{Triage Policy Optimisation}\label{sec:results_tpe}
 
@@ -1419,16 +1389,13 @@ EWC ($\lambda{=}300$) & $\mathbf{0.999}$ & $\mathbf{-0.001}$ & $0.827$ & $+0.827
 \subsection{Runtime Performance}
 
 Table~\ref{tab:latency} reports \emph{model-inference} latency (NVIDIA
-GB10, single-sample requests, $N{=}500$ repetitions, $50$ warm-up):
-the three agents' MC Dropout forward passes plus the Decision MLP, given
-already-extracted feature vectors, genuinely measured running in sequence
-end-to-end (an earlier version of this benchmark measured Semantic and the
-Decision MLP separately from the reported ``full pipeline'' figure, which
-in fact only ever timed Behavioural+Knowledge mean fusion; both are now
-measured together). It does not include PE parsing, sentence-transformer
-embedding generation, hypervisor telemetry feature extraction, ATT\&CK
-transcript generation, or data transfer, each of which would add to true
-end-to-end deployment latency and is not benchmarked here.
+GB10, single-sample requests, $N{=}500$ repetitions, $50$ warm-up): the
+three agents' MC Dropout forward passes plus the Decision MLP, given
+already-extracted feature vectors, measured running in sequence
+end-to-end. It excludes PE parsing, sentence-transformer embedding
+generation, hypervisor telemetry feature extraction, ATT\&CK transcript
+generation, and data transfer, each of which would add to true end-to-end
+deployment latency and is not benchmarked here.
 Full pipeline median is $6.99\,\text{ms}$ per sample
 (p95 $7.09\,\text{ms}$); batching multiple concurrent windows together
 (the realistic deployment pattern for periodic telemetry scoring) raises
@@ -1563,42 +1530,27 @@ Supplementary Section~S-VIII.
 
 \subsection{Leave-One-Family-Out Robustness}\label{sec:results_lofo}
 
-We evaluate cross-family zero-shot transfer by systematically excluding each
-of the six ransomware families from \emph{both} the Behavioural Agent's
-training data and the Decision MLP's training score pool (see ``Out-of-fold
-Decision MLP training features'' in Section~\ref{sec:eval}), so no stage of
-the pipeline has ever seen the held-out family. Overall AUROC on the full
-random-stratified test set remains stable at $0.925$--$0.952$ across all
-holdouts (Table~\ref{tab:lofo}), confirming the Decision MLP's
-in-distribution discrimination does not depend on any single family being
-present in training; per-family detection, however, varies substantially
-and no longer follows the pattern we previously reported under in-sample
-Behavioural scoring. Darkside ($91.4\%$) and LockBit ($90.0\%$) transfer
-best when held out entirely. Conti, previously reported as a perfect
-zero-shot transfer, in fact reaches only $80.5\%$ once its own Behavioural
-checkpoint has genuinely never seen it. REvil ($69.1\%$) is moderately
-challenging. Ryuk and WannaCry are the most difficult: Ryuk---previously
-reported as $100\%$ zero-shot detection---collapses to $27.3\%$ once
-evaluated honestly, and WannaCry recovers only $37.2\%$, indicating both
-families' score-pool signatures are poorly covered by the remaining five
-training families. Escalation rates are higher and more variable than
-previously reported ($1.1$--$14.5\%$), rising for REvil ($14.5\%$) and
-WannaCry ($10.4\%$)---for these two families the triage policy correctly
-routes more genuinely unfamiliar cases to analyst review rather than
-reporting spuriously confident decisions. Ryuk, the single hardest family
-to transfer to ($27.3\%$ detection), is the exception this pattern does not
-cover: its escalation rate is only $3.9\%$, barely above Darkside's
-best-case $1.1\%$, so at least $69\%$ of Ryuk's held-out windows are both
-missed ($\hat{p}<0.5$) and \textsc{Allow}ed rather than escalated---the
-uncertainty-driven safety net does not catch this family; the system is
-confidently wrong on Ryuk rather than appropriately uncertain about it.
-This revision changes the paper's zero-shot generalisation story
-materially: rather than three near-perfect transfers and two weak ones,
-honest leave-one-family-out shows a wider and less predictable spread
-across all six families, and escalation coverage of that spread is itself
-uneven---proactive coverage via uncertainty-driven escalation and conformal
-prediction (Section~\ref{sec:results_conformal}) helps for some unseen
-families but is not guaranteed for all of them. A per-family figure is
+We evaluate cross-family zero-shot transfer by excluding each of the six
+ransomware families from \emph{both} the Behavioural Agent's training data
+and the Decision MLP's training score pool (``Out-of-fold Decision MLP
+training features,'' Section~\ref{sec:eval}), so no stage of the pipeline
+has ever seen the held-out family. Overall AUROC stays stable at
+$0.925$--$0.952$ across all holdouts (Table~\ref{tab:lofo}), but per-family
+detection varies substantially and no longer matches the near-perfect
+transfer we previously reported under in-sample Behavioural scoring:
+Darkside and LockBit still transfer well ($91.4\%$, $90.0\%$), Conti drops
+to $80.5\%$ (from a previously-reported perfect transfer), and Ryuk and
+WannaCry collapse to $27.3\%$ and $37.2\%$ (Ryuk from a previously-reported
+$100\%$). Escalation tracks this difficulty for REvil and WannaCry
+($14.5\%$, $10.4\%$, up from $1.1$--$3.8\%$ elsewhere), correctly routing
+more unfamiliar cases to analyst review. Ryuk is the exception: despite the
+worst detection rate of any held-out family, its escalation is only
+$3.9\%$, so at least $69\%$ of its windows are both missed and
+\textsc{Allow}ed rather than escalated---the system is confidently wrong on
+Ryuk, not appropriately uncertain. Honest leave-one-family-out thus shows a
+wider, less predictable generalisation spread than previously reported,
+with escalation coverage of that spread itself uneven: it helps for some
+unseen families but is not guaranteed for all. A per-family figure is
 provided in Supplementary Section~S-VIII.
 
 \begin{table}[t]
@@ -1657,57 +1609,38 @@ augmentation (Section~\ref{sec:results_imbalance}).
 
 \subsection{Where the Framework Struggles}\label{sec:limitations}
 
-The framework's principal failure mode is distributional shift at the family
-level. Under family holdout, the Behavioural CNN drops to AUROC $0.707$ and
-the fused Decision MLP to $0.676$---degradations of $0.257$ and $0.276$ from
-random-stratified performance. Fusion does not recover this gap: the
-Knowledge and Semantic Agents' fixed corpus-mean scores
-(Remark~\ref{rem:corpus_mean}) carry no family-specific signal, so the
-framework is not suitable for autonomous containment on families entirely
-absent from training without prior operator review. As Fig.~\ref{fig:radar_splits}
-shows, this degradation is deployment-relevant and consistent across every
-axis---discrimination, selective prediction, session-level detection, and
-the conformal guarantee alike collapse together, rather than any single
-metric being an outlier. The leave-one-family-out analysis
-(Section~\ref{sec:results_lofo}), evaluated with the held-out family
-genuinely absent from Behavioural training, reveals that the gap is driven
-by a subset of families with score-pool profiles distinct from all training
-families: Darkside and LockBit transfer well ($91.4\%$ and $90.0\%$
-detection unseen) while Ryuk and WannaCry drop to $27.3\%$ and $37.2\%$;
-proactive coverage for novel threats should prioritise uncertainty-driven
-escalation for low-confidence detections, and should not assume any
-specific family is inherently easy to generalise to---the previously
-reported perfect zero-shot transfer for Conti and Ryuk did not survive
-honest, genuinely family-excluded evaluation.
+The framework's principal failure mode is distributional shift at the
+family level (Section~\ref{sec:results_lofo}): family-holdout AUROC drops
+to $0.676$ fused, and---since the Knowledge and Semantic Agents' fixed
+corpus-mean scores (Remark~\ref{rem:corpus_mean}) carry no family-specific
+signal to recover it---this degradation is consistent across every axis in
+Fig.~\ref{fig:radar_splits}, not an outlier metric. The framework is
+therefore not suitable for autonomous containment on families entirely
+absent from training without prior operator review. Leave-one-family-out
+evaluation shows this risk is family-specific rather than uniform (Darkside
+and LockBit transfer well; Ryuk and WannaCry do not) and, critically,
+overturns previously-reported perfect zero-shot transfer for Conti and
+Ryuk once evaluated with the family genuinely excluded from Behavioural
+training.
 
-A more fundamental limitation arises under concurrent execution: when
-ransomware and a benign application run simultaneously, hypervisor-level
-telemetry aggregates both processes' I/O and memory events, suppressing
-$\hat{p}_{\text{beh}}$ and inflating $\sigma_{\text{beh}}$ for some
-combinations. For the most adversarial case (SDelete with REvil), detection
-reaches only $30.2\%$ without Peer Consultation and $42.7\%$ with it
-(Section~\ref{sec:eval}), and roughly half of its windows are neither
-escalated nor auto-contained under the triage policy---a limitation shared
-with Hirano and Kobayashi~\cite{hirano2025ransmap}, whose
-telemetry likewise cannot separate concurrent execution traces without
-process-level attribution.
+A more fundamental limitation arises under concurrent execution
+(Section~\ref{sec:eval}): superimposed I/O and memory patterns suppress
+$\hat{p}_{\text{beh}}$ and inflate $\sigma_{\text{beh}}$, and for the most
+adversarial case (SDelete with REvil), roughly half its windows are
+neither escalated nor auto-contained---a limitation shared with Hirano and
+Kobayashi~\cite{hirano2025ransmap}, whose telemetry likewise cannot
+separate concurrent traces without process-level attribution.
 
 Critically, the uncertainty mechanism provides graceful degradation rather
-than silent failure for most of these hard cases: $\sigma_{\text{beh}}$
-rises on unseen families (Supplementary Section~S-VI), driving escalation
-rates of $66$--$85\%$ on five of the six lower-recall Conti sub-variants
-(Section~\ref{sec:ood_variants}), while concurrent-execution escalation
-exceeds $60\%$ for most \texttt{mix} combinations (Supplementary
-Section~S-VIII); REvil and WannaCry similarly show rising escalation
-($14.5\%$, $10.4\%$) as leave-one-family-out detection worsens
-(Table~\ref{tab:lofo}). This is not universal, however: Conti.F ($24\%$
-escalation), Ryuk under leave-one-family-out ($3.9\%$ escalation despite
-the worst detection rate of any held-out family, Section~\ref{sec:results_lofo}),
-and, to a lesser extent, SDelete+REvil (roughly half its windows neither
-escalated nor auto-contained) show the system can also be confidently
-wrong rather than appropriately uncertain, so the uncertainty-driven
-safety net should be read as a substantial reduction in silent-failure
-risk, not a guarantee against it.
+than silent failure for most of these hard cases---escalation rises on
+unseen Conti sub-variants (Section~\ref{sec:ood_variants}), concurrent-mix
+combinations (Supplementary Section~S-VIII), and the harder-to-transfer
+LOFO families (Table~\ref{tab:lofo})---but this is not universal: Conti.F,
+Ryuk under leave-one-family-out (worst detection rate of any held-out
+family, yet only $3.9\%$ escalation), and, to a lesser extent, SDelete+REvil
+show the system can also be confidently wrong rather than appropriately
+uncertain. The uncertainty-driven safety net is thus a substantial
+reduction in silent-failure risk, not a guarantee against it.
 
 \subsection{Additional Limitations}
 
