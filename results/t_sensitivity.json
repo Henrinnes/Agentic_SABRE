@@ -1,0 +1,47 @@
+{
+  "T_MC_paper": 10,
+  "k_repeats": 20,
+  "n_noise_samples": 300,
+  "n_reps_latency": 500,
+  "warmup": 50,
+  "device": "cuda",
+  "sweep": {
+    "1": {
+      "sigma_beh_mean": 0.0,
+      "sigma_beh_noise_pct": 0.0,
+      "sigma_beh_drift_from_ref_pct": 100.0,
+      "latency_p50_ms": 0.35,
+      "latency_p95_ms": 0.3652
+    },
+    "5": {
+      "sigma_beh_mean": 0.06445,
+      "sigma_beh_noise_pct": 62.142,
+      "sigma_beh_drift_from_ref_pct": 20.4,
+      "latency_p50_ms": 1.0614,
+      "latency_p95_ms": 1.1935
+    },
+    "10": {
+      "sigma_beh_mean": 0.07203,
+      "sigma_beh_noise_pct": 46.322,
+      "sigma_beh_drift_from_ref_pct": 11.037,
+      "latency_p50_ms": 1.926,
+      "latency_p95_ms": 1.9584
+    },
+    "20": {
+      "sigma_beh_mean": 0.07662,
+      "sigma_beh_noise_pct": 34.72,
+      "sigma_beh_drift_from_ref_pct": 5.362,
+      "latency_p50_ms": 3.6626,
+      "latency_p95_ms": 3.9985
+    },
+    "50": {
+      "sigma_beh_mean": 0.07906,
+      "sigma_beh_noise_pct": 23.828,
+      "sigma_beh_drift_from_ref_pct": 2.347,
+      "latency_p50_ms": 9.4703,
+      "latency_p95_ms": 9.6558
+    }
+  },
+  "t_reference": 200,
+  "sigma_beh_mean_reference": 0.08096
+}
