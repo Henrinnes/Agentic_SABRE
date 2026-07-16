@@ -92,8 +92,10 @@ output ($0.952$), which trades a small AUROC margin for substantially better
 calibration and principled per-sample uncertainty.
 Under family holdout, AUROC falls to $0.706$ ($0.676$ fused), revealing a
 meaningful generalisation gap for unseen families; epistemic uncertainty
-routes these novel-family samples to analyst escalation rather than
-autonomous containment. A Mondrian conformal prediction wrapper provides
+routes most, but not all, novel-family samples to analyst escalation rather
+than autonomous containment or silent miss---Ryuk is a documented exception
+where the system is confidently wrong rather than appropriately uncertain.
+A Mondrian conformal prediction wrapper provides
 distribution-free coverage under exchangeability, auto-classifying $54\%$ of traffic
 at $99\%$ coverage.
 \end{abstract}
@@ -1580,17 +1582,24 @@ reported as $100\%$ zero-shot detection---collapses to $27.3\%$ once
 evaluated honestly, and WannaCry recovers only $37.2\%$, indicating both
 families' score-pool signatures are poorly covered by the remaining five
 training families. Escalation rates are higher and more variable than
-previously reported ($1.1$--$14.5\%$), rising for the hardest-to-transfer
-families (REvil $14.5\%$, WannaCry $10.4\%$)---the triage policy correctly
-routes more of these genuinely unfamiliar cases to analyst review rather
-than reporting spuriously confident decisions. This revision changes the
-paper's zero-shot generalisation story materially: rather than three
-near-perfect transfers and two weak ones, honest leave-one-family-out shows
-a wider and less predictable spread across all six families, underscoring
-that proactive coverage via uncertainty-driven escalation and conformal
-prediction (Section~\ref{sec:results_conformal}) is necessary for any
-unseen family, not only the previously-identified weak cases. A per-family
-figure is provided in Supplementary Section~S-VIII.
+previously reported ($1.1$--$14.5\%$), rising for REvil ($14.5\%$) and
+WannaCry ($10.4\%$)---for these two families the triage policy correctly
+routes more genuinely unfamiliar cases to analyst review rather than
+reporting spuriously confident decisions. Ryuk, the single hardest family
+to transfer to ($27.3\%$ detection), is the exception this pattern does not
+cover: its escalation rate is only $3.9\%$, barely above Darkside's
+best-case $1.1\%$, so at least $69\%$ of Ryuk's held-out windows are both
+missed ($\hat{p}<0.5$) and \textsc{Allow}ed rather than escalated---the
+uncertainty-driven safety net does not catch this family; the system is
+confidently wrong on Ryuk rather than appropriately uncertain about it.
+This revision changes the paper's zero-shot generalisation story
+materially: rather than three near-perfect transfers and two weak ones,
+honest leave-one-family-out shows a wider and less predictable spread
+across all six families, and escalation coverage of that spread is itself
+uneven---proactive coverage via uncertainty-driven escalation and conformal
+prediction (Section~\ref{sec:results_conformal}) helps for some unseen
+families but is not guaranteed for all of them. A per-family figure is
+provided in Supplementary Section~S-VIII.
 
 \begin{table}[t]
 \centering
@@ -1689,12 +1698,16 @@ rises on unseen families (Supplementary Section~S-VI), driving escalation
 rates of $66$--$85\%$ on five of the six lower-recall Conti sub-variants
 (Section~\ref{sec:ood_variants}), while concurrent-execution escalation
 exceeds $60\%$ for most \texttt{mix} combinations (Supplementary
-Section~S-VIII). This is not universal, however: Conti.F ($24\%$
-escalation) and, to a lesser extent, SDelete+REvil (roughly half its
-windows neither escalated nor auto-contained) show the system can also be
-confidently wrong rather than appropriately uncertain, so the
-uncertainty-driven safety net should be read as a substantial reduction in
-silent-failure risk, not a guarantee against it.
+Section~S-VIII); REvil and WannaCry similarly show rising escalation
+($14.5\%$, $10.4\%$) as leave-one-family-out detection worsens
+(Table~\ref{tab:lofo}). This is not universal, however: Conti.F ($24\%$
+escalation), Ryuk under leave-one-family-out ($3.9\%$ escalation despite
+the worst detection rate of any held-out family, Section~\ref{sec:results_lofo}),
+and, to a lesser extent, SDelete+REvil (roughly half its windows neither
+escalated nor auto-contained) show the system can also be confidently
+wrong rather than appropriately uncertain, so the uncertainty-driven
+safety net should be read as a substantial reduction in silent-failure
+risk, not a guarantee against it.
 
 \subsection{Additional Limitations}
 
