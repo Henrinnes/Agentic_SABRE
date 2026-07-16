@@ -282,9 +282,11 @@ importance and Expert Feedback Loop convergence respectively.
   \centering
   \includegraphics[width=\columnwidth]{Figures/fig19_t_sensitivity.pdf}
   \caption{MC Dropout pass count sensitivity. Left: $\sigma_{\mathrm{beh}}$
-    noise (as \% of mean) vs $T$ — stabilises below $1\%$ at $T{=}10$.
+    drift from a near-converged $T{=}200$ reference mean vs $T$ — falls from
+    $100\%$ at $T{=}1$ to $11\%$ at $T{=}10$ and $2\%$ at $T{=}50$.
     Right: inference latency vs $T$ on NVIDIA GB10. $T{=}10$ is the
-    chosen operating point.}
+    chosen operating point, balancing the steep early drop in drift against
+    near-linear latency growth in $T$.}
   \label{fig:t_sensitivity}
 \end{figure}
 
@@ -317,9 +319,9 @@ importance and Expert Feedback Loop convergence respectively.
 \toprule
 Feature set & Dim & AUROC \\
 \midrule
-Storage only ($\chi_s$)         & $5$  & $0.851 \pm 0.008$ \\
-Memory only ($\chi_m$)          & $11$ & $0.903 \pm 0.005$ \\
-Combined ($\chi_s \cup \chi_m$) & $16$ & $\mathbf{0.961 \pm 0.003}$ \\
+Storage only ($\chi_s$)         & $5$  & $0.880 \pm 0.005$ \\
+Memory only ($\chi_m$)          & $11$ & $0.890 \pm 0.003$ \\
+Combined ($\chi_s \cup \chi_m$) & $16$ & $\mathbf{0.960 \pm 0.003}$ \\
 Hirano 23D (reported)~\cite{hirano2025ransmap}
   & $23$ & (F-score; not directly comparable) \\
 \bottomrule
@@ -397,23 +399,28 @@ the main paper (Section~VIII).
 \caption{Per-variant recall and escalation rate on RanSMAP
   \texttt{variants} partition (seven Conti sub-variants; $1{,}397$ windows).
   Hirano recall from Table~14 of~\cite{hirano2025ransmap} ($\chi$, full 23D).
-  Our recall: Behavioural CNN (16D, $T_w{=}10\,\text{s}$, single seed).
-  Esc = fraction routed to \textsc{Escalate} by Bayesian TPE policy.}
+  Our recall: Behavioural CNN alone (16D, checkpoints/behavioral\_cnn.pt).
+  Esc = fraction of windows the fused $[S{+}B{+}K]$ Decision MLP output
+  routes to \textsc{Escalate} under the real Bayesian-TPE policy
+  (checkpoints/policy\_auto.json). Conti.F is a genuine hard case: our
+  Behavioural-only recall ($0.09$) falls below Hirano's on this one variant,
+  and its low escalation rate reflects the system being confidently (and
+  wrongly) low-probability rather than appropriately uncertain about it.}
 \label{tab:ood_variants}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccc}
 \toprule
 Variant & Hirano Recall & Ours Recall & Esc Rate \\
 \midrule
-Conti.A & $0.52$ & $0.65$ & $0.29$ \\
-Conti.B & $0.57$ & $0.70$ & $0.24$ \\
-Conti.C & $0.61$ & $0.78$ & $0.18$ \\
-Conti.D & $0.64$ & $0.79$ & $0.17$ \\
-Conti.E & $0.53$ & $0.63$ & $0.31$ \\
-Conti.F & $0.48$ & $0.51$ & $0.38$ \\
-Conti.G & $0.55$ & $0.72$ & $0.22$ \\
+Conti.A & $0.52$ & $0.77$ & $0.66$ \\
+Conti.B & $0.57$ & $0.65$ & $0.85$ \\
+Conti.C & $0.61$ & $0.65$ & $0.81$ \\
+Conti.D & $0.64$ & $0.67$ & $0.81$ \\
+Conti.E & $0.53$ & $0.68$ & $0.74$ \\
+Conti.F & $0.48$ & $0.09$ & $0.24$ \\
+Conti.G & $0.55$ & $0.89$ & $0.69$ \\
 \midrule
-Mean    & $0.56$ & $\mathbf{0.68}$ & $0.26$ \\
+Mean    & $0.56$ & $\mathbf{0.63}$ & $0.69$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -422,10 +429,14 @@ Mean    & $0.56$ & $\mathbf{0.68}$ & $0.26$ \\
   \centering
   \includegraphics[width=\columnwidth]{Figures/fig13_ood_variants.pdf}
   \caption{Per-variant recall on the RanSMAP \texttt{variants} partition
-    (seven Conti sub-variants). Our Behavioural CNN (16D, $T_w{=}10\,\text{s}$)
-    outperforms Hirano and Kobayashi\ (23D) on six of seven variants; the secondary
-    axis shows the escalation rate --- highest where recall is lowest,
-    confirming uncertainty-conditioned graceful degradation.}
+    (seven Conti sub-variants). Our Behavioural CNN (16D) outperforms
+    Hirano and Kobayashi\ (23D) on six of seven variants; the secondary
+    axis shows the fused $[S{+}B{+}K]$ escalation rate under the real
+    Bayesian-TPE policy. Escalation is high ($66$--$85\%$) on five of the
+    six lower-recall variants, but Conti.F -- our one loss against Hirano
+    and Kobayashi -- is also the one case where the system is confidently
+    wrong rather than escalating (``Where the Framework Struggles'' in the
+    main paper's Discussion).}
   \label{fig:ood_variants}
 \end{figure}
 
