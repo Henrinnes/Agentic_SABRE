@@ -1622,18 +1622,15 @@ train/val/test), small for a CNN classifier; since its role is
 complementary ATT\&CK-level signal, its generalisation metrics should be
 read accordingly.
 
-\textbf{Calibration-set separation for temperature scaling and TPE.} The
-Decision MLP's temperature scaling and Bayesian TPE triage-policy
-optimisation are fit on a stratified sample drawn independently of the
-session-level train/val/test partitions used elsewhere in this paper
-(Section~\ref{sec:eval}), rather than on a dedicated held-out slice of the
-same partition scheme. We have not audited this sample for overlap with
-the evaluation splits' training sessions. A rigorous re-fit on a clean,
-partition-consistent calibration set---with temperature scaling, TPE, and
-conformal calibration each using their own disjoint slice, as recommended
-in peer review---is deferred to future work; all AUROC, calibration, and
-LOFO numbers reported in this paper are unaffected, since they do not
-depend on the temperature or policy thresholds' fitting data.
+\textbf{Calibration-set separation for temperature scaling and TPE.}
+Temperature scaling and Bayesian TPE are fit on a stratified sample drawn
+independently of the session-level train/val/test partitions used
+elsewhere in this paper, rather than a dedicated held-out slice of the
+same partition scheme; a rigorous re-fit on a clean, partition-consistent
+calibration set is deferred to future work (Supplementary
+Section~S-XI). All AUROC, calibration, and LOFO numbers reported here are
+unaffected, since they do not depend on the temperature or policy
+thresholds' fitting data.
 
 \subsection{Comparison with Hirano and Kobayashi, Adaptive Thresholding, and Deployment}\label{sec:discussion_hirano}
 
