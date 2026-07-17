@@ -228,6 +228,24 @@ escalation rate confirms that $\sigma_{\text{beh}}$ reliably identifies samples
 most likely to be misclassified, transforming undetected attacks into escalated
 events.
 
+A second, more recent comparator is Ranker~\cite{zhang2024ranker}, a
+kernel-level behavioural ransomware detector evaluated on 68 families,
+reporting F1 $0.9943$ and false-positive rate $0.11\%$, with $97.16\%$
+accuracy on 22 held-out families. These headline numbers exceed the AUROC
+figures reported here, but the comparison is not like-for-like---different
+dataset, different metric (F1/accuracy vs.\ AUROC), and no disclosed
+protocol for confirming held-out families are genuinely distinct rather
+than close variants of trained-on families, a distinction that matters
+considerably: our own leave-one-family-out results
+(Section~\ref{sec:supp_eaeg}) overturn a previously-reported perfect
+zero-shot transfer once the family is honestly excluded. More
+fundamentally, Ranker, like Hirano and Kobayashi's detector, produces a
+single deterministic verdict, with no calibrated risk score and no
+mechanism to route uncertain cases to analyst review---the uncertainty
+quantification and formal coverage guarantees central to this paper
+remain, to our knowledge, absent from the current kernel/behavioural
+ransomware-detection literature.
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adaptive Thresholding}\label{sec:supp_adaptive}
 % ─────────────────────────────────────────────────────────────────────────────
@@ -893,6 +911,34 @@ $40\times$ higher escalation rate. Neither policy is universally "correct"
 -- the right choice depends on the deployer's actual cost structure, which
 is exactly why we report the full breakdown here rather than a single
 balanced-accuracy number.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Triage Decision Space}\label{sec:supp_triage_space}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Section~VI of the main paper defines the three triage regions
+(\textsc{Auto-Contain}, \textsc{Escalate}, \textsc{Allow}) over
+$(\hat{p}, \sigma_{\max})$ space. Fig.~\ref{fig:triage_space} illustrates
+these regions geometrically alongside the real, genuine fused
+$[S{+}B{+}K]$ Decision MLP output.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig14_triage_space.pdf}
+  \caption{Triage decision regions in $(\hat{p},\,\sigma_{\max})$ space under
+    the real Bayesian TPE-optimised thresholds
+    $(\tau_{\text{high}}{=}0.905,\,\tau{=}0.396,\,\kappa{=}0.196,\,
+    \kappa_{\text{low}}{=}0.195)$ from \texttt{checkpoints/policy\_auto.json}.
+    Points are genuine fused $[S{+}B{+}K]$ Decision MLP output: ransomware
+    and benign from the random-stratified test split (in-distribution for
+    that checkpoint), and OOD unseen-family samples ($\triangle$) from the
+    family-holdout test split restricted to REvil and WannaCry, the two
+    families that checkpoint never trained on.
+    OOD samples concentrate in the \textsc{Escalate} region ($63\%$)
+    due to elevated $\sigma_{\max}$, though not exclusively
+    ($19\%$ still reach \textsc{Auto-Contain}).}
+  \label{fig:triage_space}
+\end{figure}
 
 \bibliographystyle{IEEEtran}
 \bibliography{Reference_Main}
