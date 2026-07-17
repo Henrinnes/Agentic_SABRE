@@ -263,7 +263,7 @@ papers draw on the same underlying RDset and RanSMAP datasets.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{Figures/fig0_pipeline.png}
+  \includegraphics[width=0.86\textwidth]{Figures/fig0_pipeline.png}
   \caption{End-to-end framework pipeline. Three specialised CNN agents (Semantic,
     Behavioural, Knowledge) each run $T{=}10$ MC Dropout forward passes to produce
     a probability--uncertainty pair $(\hat{p}_i, \sigma_i)$. Peer Consultation
@@ -662,27 +662,12 @@ determine the action. The boundary conditions ensure that:
   \item \textsc{Allow} covers the confident-benign region.
 \end{itemize}
 
-Fig.~\ref{fig:triage_space} illustrates the three regions geometrically and
-shows the distribution of training-distribution ransomware, benign, and OOD
-samples in $(\hat{p}, \sigma_{\max})$ space.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig14_triage_space.pdf}
-  \caption{Triage decision regions in $(\hat{p},\,\sigma_{\max})$ space under
-    the real Bayesian TPE-optimised thresholds
-    $(\tau_{\text{high}}{=}0.905,\,\tau{=}0.396,\,\kappa{=}0.196,\,
-    \kappa_{\text{low}}{=}0.195)$ from \texttt{checkpoints/policy\_auto.json}.
-    Points are genuine fused $[S{+}B{+}K]$ Decision MLP output: ransomware
-    and benign from the random-stratified test split (in-distribution for
-    that checkpoint), and OOD unseen-family samples ($\triangle$) from the
-    family-holdout test split restricted to REvil and WannaCry, the two
-    families that checkpoint never trained on.
-    OOD samples concentrate in the \textsc{Escalate} region ($63\%$)
-    due to elevated $\sigma_{\max}$, though not exclusively
-    ($19\%$ still reach \textsc{Auto-Contain}).}
-  \label{fig:triage_space}
-\end{figure}
+The three regions are illustrated geometrically, with the distribution of
+training-distribution ransomware, benign, and OOD samples in
+$(\hat{p}, \sigma_{\max})$ space, in Supplementary Section~S-X: OOD
+samples concentrate in the \textsc{Escalate} region ($63\%$) due to
+elevated $\sigma_{\max}$, though not exclusively ($19\%$ still reach
+\textsc{Auto-Contain}).
 
 \subsection{Bayesian Triage Policy Optimisation via TPE}
 
@@ -981,7 +966,7 @@ We compare against:
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{Figures/fig2_roc.pdf}
+  \includegraphics[width=0.88\textwidth]{Figures/fig2_roc.pdf}
   \caption{ROC curves across the four evaluation splits for [B] (Behavioural
     Agent alone), [B+K] Mean (equal-weight mean of Behavioural and
     Knowledge, Semantic excluded), and [S+B+K] MLP (the full Decision MLP
@@ -1259,28 +1244,21 @@ Agent: with PC active, $\hat{p}_{\text{beh}}$ is replaced by the
 inverse-uncertainty-weighted average of $\hat{p}_{\text{sem}}$ and
 $\hat{p}_{\text{know}}$, recovering the Semantic Agent's partial signal:
 detection improves to $44.3\%$ for SDelete+REvil and $91.9\%$ for
-SDelete+Conti (from $43.8\%$ and $89.8\%$ without PC). Following the RansKnow correction, the fixed corpus-mean Knowledge score
-is now high and stable enough to clear the strict
-$\tau_{\text{high}}{=}0.90$ threshold on a majority of mix-partition
-windows: under the Bayesian TPE-optimised triage policy,
-\textsc{Auto-Contain} fires on $53.6\%$ of windows overall without PC and
-$60.5\%$ with PC---a substantial change from the pre-correction
-evaluation, where the corpus-mean score was too weak and noisy to ever
-clear the threshold. \textsc{Escalate} fires on $17$--$82\%$ of windows
-per combination ($46.4\%$ overall without PC, $39.5\%$ with PC), and the
-previously observed \textsc{Allow} gap closes entirely: every window in
-the mix partition is now either escalated or auto-contained
-($0\%$ silently \textsc{Allow}ed overall), correctly routing the
-ambiguous cases to analyst review or autonomous containment rather than
-missing them silently---unlike Hirano and
+SDelete+Conti (from $43.8\%$ and $89.8\%$ without PC). The fixed
+corpus-mean Knowledge score is high and stable enough to clear the strict
+$\tau_{\text{high}}{=}0.90$ threshold on most mix-partition windows: under
+the Bayesian TPE-optimised policy, \textsc{Auto-Contain} fires on
+$53.6\%$ of windows without PC and $60.5\%$ with PC, while
+\textsc{Escalate} fires on $17$--$82\%$ per combination ($46.4\%$/$39.5\%$
+overall). Every window in the mix partition is now escalated or
+auto-contained ($0\%$ silently \textsc{Allow}ed), correctly routing
+ambiguous cases rather than missing them---unlike Hirano and
 Kobayashi~\cite{hirano2025ransmap}'s binary-output detector, which has no
-mechanism to express this ambiguity. The SDelete combinations remain the
-hardest cases in relative terms: SDelete+REvil auto-contains only
-$17.7$--$22.9\%$ of the time and SDelete+Conti $28.9$--$45.7\%$, both
-well below the $45$--$83\%$ auto-contain rates on the remaining
-combinations, so autonomous containment confidence is still the weakest
-here even though the coverage gap itself has closed. Per-scenario rates
-are plotted in Supplementary Section~S-VIII.
+such mechanism. SDelete combinations remain hardest in relative terms
+(SDelete+REvil auto-contains only $17.7$--$22.9\%$; SDelete+Conti
+$28.9$--$45.7\%$, versus $45$--$83\%$ elsewhere), so autonomous
+containment confidence is still weakest here even though the coverage
+gap has closed. Per-scenario rates are in Supplementary Section~S-VIII.
 
 \subsection{Conformal Coverage}\label{sec:results_conformal}
 
@@ -1613,19 +1591,17 @@ of the remaining windows, so no window in the mix partition goes
 unaddressed, but the system still cannot autonomously contain this
 scenario with confidence.
 
-Critically, the uncertainty mechanism provides graceful degradation rather
-than silent failure for most of these hard cases---escalation rises on
-unseen Conti sub-variants (Section~\ref{sec:ood_variants}), concurrent-mix
-combinations (Supplementary Section~S-VIII), and the harder-to-transfer
+The uncertainty mechanism provides graceful degradation rather than
+silent failure for most hard cases---escalation rises on unseen Conti
+sub-variants (Section~\ref{sec:ood_variants}), concurrent-mix
+combinations (Supplementary Section~S-VIII, where even the hardest case,
+SDelete+REvil, escalates $82\%$ of its windows), and harder-to-transfer
 LOFO families (Table~\ref{tab:lofo})---but this is not universal: Conti.F
 and Ryuk under leave-one-family-out (worst detection rate of any held-out
 family, yet only $1.5\%$ escalation) show the system can also be
 confidently wrong rather than appropriately uncertain. The
-concurrent-execution combinations no longer exhibit this pattern following
-the RansKnow correction (Section~\ref{sec:eval}): even the hardest case,
-SDelete+REvil, now escalates $82\%$ of its windows rather than being
-silently missed. The uncertainty-driven safety net is thus a substantial
-reduction in silent-failure risk, not a guarantee against it.
+uncertainty-driven safety net is thus a substantial reduction in
+silent-failure risk, not a guarantee against it.
 
 \subsection{Additional Limitations}
 
