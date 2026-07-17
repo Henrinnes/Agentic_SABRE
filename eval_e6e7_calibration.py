@@ -44,7 +44,7 @@ from sklearn.metrics import brier_score_loss, roc_auc_score, average_precision_s
 
 RANSMAP_PARQUET = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
 RDSET_PARQUET   = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
-RANSKNOW_CSV    = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv"
+RANSKNOW_CSV    = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 SPLITS_DIR      = Path("splits")
 CKPT_DIR        = Path("checkpoints")
 RESULTS_DIR     = Path("results")
@@ -68,6 +68,7 @@ KNOWLEDGE_DROP_COLS = [
     "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
     "YouTube_URL", "Transcript_Path", "Family_Count", "Family_List",
     "Tool_List", "Dominant_Tactic", "Platform_Signal",
+    "Year", "DurationSeconds", "Transcript_Provider",
 ]
 
 RANSOMWARE_FAMILIES = {"Conti", "Darkside", "LockBit", "REvil", "Ryuk", "WannaCry"}

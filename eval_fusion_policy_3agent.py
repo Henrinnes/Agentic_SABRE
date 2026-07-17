@@ -114,7 +114,7 @@ if __name__ == "__main__":
     df_beh = pd.read_parquet(
         r"/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet")
     df_know_raw = pd.read_csv(
-        r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv")
+        r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv")
 
     # Build knowledge label (must match training)
     df_know_raw["label"] = (

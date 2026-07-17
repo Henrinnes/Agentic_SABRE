@@ -70,17 +70,19 @@ these requirements through four coupled contributions. First, a Semantic CNN
 on static PE embeddings, a Behavioural CNN on 16-dimensional hypervisor
 telemetry, and a Knowledge CNN on ATT\&CK tactic embeddings each employ Monte
 Carlo Dropout to produce per-sample predictive probabilities and epistemic
-uncertainties. Second, a Decision MLP learns a calibrated aggregate risk score
-from the six-dimensional score pool, reducing Expected Calibration Error from
-$0.100$ to $0.025$ relative to mean fusion---since RanSMAP, RDset, and
-RansKnow share no real per-sample pairing, the Semantic and Knowledge Agents
-contribute a fixed, label-independent corpus-mean score during RanSMAP fusion,
-so calibration rather than incremental AUROC is fusion's principal benefit;
+uncertainties. Second, a Decision MLP learns a temperature-calibrated
+aggregate risk score (ECE $0.026$) from the six-dimensional score
+pool---since RanSMAP, RDset, and RansKnow share no real per-sample pairing,
+the Semantic and Knowledge Agents contribute a fixed, label-independent
+corpus-mean score during RanSMAP fusion, over which naive mean fusion is
+itself well-calibrated (ECE $0.023$), so fusion's principal value lies in
+the uncertainty structure it exposes for triage rather than incremental
+AUROC or a stark calibration gain over mean fusion;
 Conditional Tabular GAN (CTGAN) augmentation addresses
 score-space imbalance without retraining base agents. Third, a four-threshold
 triage policy optimised via Bayesian TPE reduces
-the escalation rate from $96.8\%$ to $35.5\%$ while raising balanced accuracy from
-$0.525$ to $0.837$. Fourth, a Peer Consultation mechanism mitigates knowledge
+the escalation rate from $54.3\%$ to $29.1\%$ while raising balanced accuracy from
+$0.770$ to $0.865$. Fourth, a Peer Consultation mechanism mitigates knowledge
 collapse under concurrent benign--ransomware execution, and an Expert Feedback
 Loop with Elastic Weight Consolidation enables continual adaptation to novel
 families with negligible catastrophic forgetting
@@ -90,7 +92,7 @@ achieves AUROC $0.996$ on static PE detection and AUROC $0.963$ on runtime
 behavioural detection, matched rather than exceeded by the fused Decision MLP
 output ($0.952$), which trades a small AUROC margin for substantially better
 calibration and principled per-sample uncertainty.
-Under family holdout, AUROC falls to $0.706$ ($0.676$ fused), revealing a
+Under family holdout, AUROC falls to $0.707$ ($0.677$ fused), revealing a
 meaningful generalisation gap for unseen families; epistemic uncertainty
 routes most, but not all, novel-family samples to analyst escalation rather
 than autonomous containment or silent miss---Ryuk is a documented exception
@@ -147,17 +149,21 @@ optimisation via Bayesian TPE. The framework treats uncertainty as a
         probability and an epistemic uncertainty via $T=10$ MC Dropout forward
         passes.
   \item A \textbf{Decision MLP fusion mechanism} with temperature calibration
-        that replaces heuristic mean fusion, reducing ECE from $0.100$ to
-        $0.025$; because the Semantic and Knowledge Agents contribute a fixed
-        corpus-mean score for RanSMAP samples (no real per-sample pairing
-        exists across the three datasets), this calibration gain---not
-        incremental AUROC over the Behavioural Agent alone---is fusion's
-        principal benefit, supported by CTGAN score-space augmentation to
+        (ECE $0.026 \pm 0.003$) that implicitly down-weights the Knowledge
+        Agent under elevated uncertainty; because the Semantic and Knowledge
+        Agents contribute a fixed corpus-mean score for RanSMAP samples (no
+        real per-sample pairing exists across the three datasets), naive
+        mean fusion over this same score pool is itself well-calibrated
+        (ECE $0.023$), so the Decision MLP's principal value lies in the
+        uncertainty structure it exposes for the triage policy
+        (Section~\ref{sec:results_tpe}) rather than a calibration advantage
+        over mean fusion---not incremental AUROC over the Behavioural Agent
+        alone either---supported by CTGAN score-space augmentation to
         handle class imbalance at the fusion layer.
   \item A \textbf{formal triage policy} over $(\hat{p}, \sigma_{\max})$ space
         with four jointly optimised thresholds via Bayesian TPE, reducing
-        escalation rate from $96.8\%$ to $35.5\%$ while improving balanced accuracy
-        from $0.525$ to $0.837$.
+        escalation rate from $54.3\%$ to $29.1\%$ while improving balanced accuracy
+        from $0.770$ to $0.865$.
   \item A \textbf{Peer Consultation} mechanism that prevents knowledge collapse
         under concurrent execution, and an \textbf{Expert Feedback Loop} with
         EWC enabling continual family adaptation without catastrophic
@@ -483,7 +489,7 @@ and six benign applications (AESCrypt, Firefox, Idle, Office, SDelete, Zip).
 
 % ── Architecture ──
 The Knowledge Agent encodes ATT\&CK tactic profiles derived from
-threat-intelligence transcripts (RansKnow~\cite{ransknow_2026}: $307$
+threat-intelligence transcripts (RansKnow~\cite{ransknow_2026}: $718$
 ATT\&CK-aligned transcripts). A Discourse CNN $f_{\text{know}}$ maps the
 tactic embedding $\mathbf{x}_{\text{know}} \in \R^{d}$ to
 $(\hat{p}_{\text{know}}, \sigma_{\text{know}})$.
@@ -654,8 +660,9 @@ where $\{B_m\}_{m=1}^M$ partition $[0,1]$ into $M$ equal-width confidence
 bins, $\text{acc}(B_m)$ is empirical accuracy and $\text{conf}(B_m)$ is mean
 predicted confidence within bin $B_m$.
 
-After calibration, ECE decreases from $0.100$ (mean fusion baseline) to
-$0.025$ (Decision MLP with temperature scaling).
+The mean fusion baseline ($\text{ECE}=0.023$) and the Decision MLP with
+temperature scaling ($\text{ECE}=0.026$) are essentially tied
+(Section~\ref{sec:results_fusion}).
 
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Triage Policy and Bayesian Optimisation}\label{sec:triage}
@@ -732,14 +739,21 @@ Section~\ref{sec:results_tpe}.
 \subsection{Comparison with Grid Search and Fixed Thresholds}
 
 Table~\ref{tab:policy_compare} summarises the triage outcome under the
-three policies on the random-stratified test split. Bayesian TPE cuts
-the escalation rate relative to grid search ($35.5\%$ vs $58.7\%$) at
-slightly lower balanced accuracy ($0.837$ vs $0.843$), and increases the
-auto-contain rate more than tenfold ($26.7\%$ vs $2.6\%$). Fixed thresholds
-($\tau{=}0.10,\,\kappa{=}0.10$, inherited from~\cite{kabuye2026sabre})
-are wholly unsuitable for autonomous deployment: $96.8\%$ escalation
-saturates analyst capacity, and $0.525$ balanced accuracy reflects
-near-random triage.
+three policies on the random-stratified test split. Following the
+RansKnow correction, Bayesian TPE and grid search converge to
+statistically indistinguishable balanced accuracy ($0.865$ for both),
+with TPE retaining a modest edge in escalation rate ($29.1\%$ vs
+$30.2\%$) and auto-contain rate ($29.3\%$ vs $28.2\%$): optimisation
+still pays off, but the margin over grid search has narrowed
+substantially now that the underlying Knowledge score is more reliable.
+Fixed thresholds ($\tau{=}0.10,\,\kappa{=}0.10$, inherited
+from~\cite{kabuye2026sabre}) are no longer near-random: with the
+corrected Knowledge Agent they reach $0.770$ balanced accuracy at
+$54.3\%$ escalation---workable on its own, though still
+noticeably less efficient than either optimised policy, which improves
+balanced accuracy by $0.095$, roughly halves escalation
+($54.3\%\!\to\!29.1\%$), and increases the auto-contain rate by
+$1.6\times$ ($18.0\%\!\to\!29.3\%$).
 
 \begin{table}[t]
 \centering
@@ -758,13 +772,13 @@ near-random triage.
 Policy & Bal.~acc $\uparrow$ & Esc (\%) $\downarrow$ & AC (\%) $\uparrow$ \\
 \midrule
 SABRE+ Fixed~\cite{kabuye2026sabre}
-  & $0.525 \pm 0.001$ & $96.8 \pm 0.1$ & $\phantom{0}0.6 \pm 0.0$ \\
+  & $0.770 \pm 0.001$ & $54.3 \pm 0.7$ & $18.0 \pm 0.6$ \\
 Grid search
-  & $0.843 \pm 0.001$ & $58.7 \pm 0.2$ & $\phantom{0}2.6 \pm 0.0$ \\
+  & $0.865 \pm 0.001$ & $30.2 \pm 0.3$ & $28.2 \pm 0.3$ \\
 Bayesian TPE ($300$ trials)
-  & $\mathbf{0.837 \pm 0.001}$
-  & $\mathbf{35.5 \pm 0.5}$
-  & $\mathbf{26.7 \pm 0.4}$ \\
+  & $\mathbf{0.865 \pm 0.001}$
+  & $\mathbf{29.1 \pm 0.5}$
+  & $\mathbf{29.3 \pm 0.5}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -915,7 +929,7 @@ $1{,}397$ windows from seven Conti sub-variants for OOD analysis; a
 \texttt{mix} partition provides $600$ windows from ten concurrent
 execution combinations. Neither is used for training.
 
-\textbf{RansKnow}~\cite{ransknow_2026}: $307$ ATT\&CK-aligned
+\textbf{RansKnow}~\cite{ransknow_2026}: $718$ ATT\&CK-aligned
 threat-intelligence transcripts, used exclusively for Knowledge Agent
 training. Score-space imbalance at the fusion layer is addressed
 separately by CTGAN augmentation (Section~\ref{sec:fusion}).
@@ -934,7 +948,7 @@ embedding level ($r_{\text{minority}}{=}0.30$). The Behavioural CNN takes
 $\mathbf{x}_{\text{beh}} \in \R^{16}$ with $C{=}16$ channels and a $64$-unit
 hidden FC layer ($8{,}385$ parameters, $32.8\,\text{KB}$); SMOTE is applied
 to RanSMAP training windows. The Knowledge CNN mirrors this architecture
-scaled to $\mathbf{x}_{\text{know}} \in \R^{23}$, trained on $307$ RansKnow
+scaled to $\mathbf{x}_{\text{know}} \in \R^{23}$, trained on $718$ RansKnow
 transcripts (70/15/15 train/val/test by family label). None of the three
 base agents use BatchNorm. The Decision MLP maps
 $\mathbf{v} \in [0,1]^6$ (standardised per component) through
@@ -1016,9 +1030,9 @@ $0.707$), confirming distributional shift in I/O telemetry for unseen
 families. Because the Semantic and Knowledge Agents contribute only a fixed
 corpus-mean score during RanSMAP fusion (Remark~\ref{rem:corpus_mean}), the
 Decision MLP cannot exceed the Behavioural Agent's own discrimination on any
-split (random $-0.011$; hardware $-0.011$; temporal $-0.009$;
-family $-0.030$); mean fusion degrades further still on every split
-(e.g.\ family $0.641$). The Decision MLP's contribution is therefore
+split (random $-0.010$; hardware $-0.011$; temporal $-0.009$;
+family $-0.029$); mean fusion degrades further still on every split
+(e.g.\ family $0.649$). The Decision MLP's contribution is therefore
 calibration and uncertainty-gated triage (Sections~\ref{sec:results_fusion}
 and~\ref{sec:results_tpe}), not incremental AUROC, and the family-holdout
 gap is correctly identified by elevated $\sigma_{\text{beh}}$ routing to
@@ -1048,10 +1062,10 @@ Semantic CNN (RDset)
 Behavioural CNN
   & $\mathbf{0.961} \pm 0.003$ & $\mathbf{0.960} \pm 0.005$ & $\mathbf{0.707} \pm 0.010$ & $\mathbf{0.939} \pm 0.006$ \\
 Mean Fusion ($\hat{p}$ avg.)
-  & $0.880$ & $0.872$ & $0.641$ & $0.850$ \\
+  & $0.887$ & $0.878$ & $0.649$ & $0.854$ \\
 Decision MLP (ours)
-  & $0.952 \pm 0.0005$ & $0.957 \pm 0.0002$
-  & $0.676 \pm 0.0007$ & $0.933 \pm 0.0003$ \\
+  & $0.952 \pm 0.0004$ & $0.958 \pm 0.0004$
+  & $0.677 \pm 0.0007$ & $0.934 \pm 0.0003$ \\
 \midrule
 Hirano and Kobayashi~\cite{hirano2025ransmap}
   (23D, $T_w{=}0.1$s)
@@ -1063,18 +1077,23 @@ Hirano and Kobayashi~\cite{hirano2025ransmap}
 \subsection{Fusion and Calibration}\label{sec:results_fusion}
 
 Table~\ref{tab:calibration} reports ECE on the random-stratified test
-split. Mean fusion pre-calibration ($\text{ECE}{=}0.100$) reflects
-structural miscalibration from mixing agents with heterogeneous
-probability scales; post-temperature-scaling mean fusion
-($\text{ECE}{=}0.123$) is \emph{worse}, since temperature scaling cannot
-resolve the bimodal Knowledge Agent output for unseen families. The
-Decision MLP instead implicitly down-weights the Knowledge Agent when
-$\sigma_{\text{know}}$ is elevated, achieving $\text{ECE}{=}0.025$---a
-$4.0\times$ reduction over the mean-fusion baseline (Behavioural
-Agent alone: $0.044$ post-TS), confirming the gain is attributable to
-learned fusion rather than temperature scaling alone, even though (as
-Remark~\ref{rem:corpus_mean} notes) it does not translate into an AUROC
-gain over the Behavioural Agent.
+split. Following the RansKnow correction (Section~\ref{sec:datasets}), the
+fixed corpus-mean Knowledge score is higher and far less noisy than in the
+pre-correction evaluation, and mean fusion pre-calibration is itself now
+well-calibrated ($\text{ECE}{=}0.023$); post-temperature-scaling mean
+fusion ($\text{ECE}{=}0.074$) is still \emph{worse}, since temperature
+scaling cannot resolve the residual bimodal Knowledge Agent output for
+unseen families---the same structural issue as before, just starting from
+a lower baseline. The Decision MLP, which implicitly down-weights the
+Knowledge Agent when $\sigma_{\text{know}}$ is elevated, achieves
+$\text{ECE}{=}0.026 \pm 0.003$ (Behavioural Agent alone: $0.041$ post-TS):
+essentially tied with pre-TS mean fusion rather than a clear improvement
+over it. Learned fusion therefore no longer offers a calibration advantage
+over naive averaging in this evaluation setting; as
+Remark~\ref{rem:corpus_mean} notes, it does not offer an AUROC advantage
+over the Behavioural Agent either, so its practical value lies in exposing
+the uncertainty structure that the triage policy
+(Section~\ref{sec:results_tpe}) depends on.
 
 \begin{table}[t]
 \centering
@@ -1095,9 +1114,9 @@ gain over the Behavioural Agent.
 \toprule
 System & Pre-TS ECE $\downarrow$ & Post-TS ECE $\downarrow$ \\
 \midrule
-Behavioural CNN${}^\dagger$     & $0.044$ & $0.025$ \\
-Mean Fusion${}^\dagger$         & $0.100$ & $0.123$ \\
-Decision MLP (ours) & $-$     & $\mathbf{0.025 \pm 0.001}$ \\
+Behavioural CNN${}^\dagger$     & $0.041$ & $0.025$ \\
+Mean Fusion${}^\dagger$         & $0.023$ & $0.074$ \\
+Decision MLP (ours) & $-$     & $0.026 \pm 0.003$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1108,8 +1127,9 @@ Decision MLP (ours) & $-$     & $\mathbf{0.025 \pm 0.001}$ \\
   \caption{Reliability diagrams (15-bin) for [B] (Behavioural Agent alone),
     [B+K] Mean fusion (pre- and post-temperature scaling), and [S+B+K] MLP
     (the full Decision MLP; Remark~\ref{rem:corpus_mean}).
-    The Decision MLP achieves ECE $0.025$, a $4.0\times$ reduction over
-    pre-TS mean fusion (ECE $0.100$).}
+    Following the RansKnow correction, pre-TS mean fusion is itself
+    well-calibrated (ECE $0.023$), essentially matching the Decision MLP
+    (ECE $0.026$).}
   \label{fig:calibration}
 \end{figure}
 
@@ -1138,7 +1158,7 @@ $(\tau^*, \kappa^*) \approx (0.35, 0.22)$ for the random-stratified split.
   \caption{Triage policy comparison: decision-rate breakdown (Escalate /
     Auto-Contain / Allow) and balanced accuracy for Fixed, Grid Search,
     and Bayesian TPE policies. TPE achieves the lowest escalation rate
-    ($35.5\%$) and highest auto-contain rate ($26.7\%$).}
+    ($29.1\%$) and highest auto-contain rate ($29.3\%$).}
   \label{fig:policy}
 \end{figure}
 
@@ -1147,13 +1167,13 @@ $(\tau^*, \kappa^*) \approx (0.35, 0.22)$ for the random-stratified split.
 Table~\ref{tab:auroc_splits} reports the Behavioural CNN and Decision MLP
 AUROC across the four evaluation splits over $K{=}6$ seeds (seed
 variability ${<}0.002$ for the Decision MLP on random, temporal, and
-hardware). Temporal ($0.966$) holdout slightly exceeds, and hardware
+hardware). Temporal ($0.967$) holdout slightly exceeds, and hardware
 ($0.944$) holdout slightly trails, random-stratified performance
 ($0.963$), confirming the Behavioural Agent's discrimination is stable
 across sessions and hardware without retraining; the Decision MLP
 (Table~\ref{tab:auroc_splits}) tracks the same pattern a small, consistent
 margin below it (Remark~\ref{rem:corpus_mean}).
-Family holdout ($0.676 \pm 0.001$ fused; $0.707 \pm 0.010$ Behavioural-only)
+Family holdout ($0.677 \pm 0.001$ fused; $0.707 \pm 0.010$ Behavioural-only)
 reveals a meaningful gap: unseen families exhibit distributional shift in
 I/O telemetry, and the Knowledge and Semantic Agents' fixed corpus-mean
 scores contribute no family-specific signal to help close it, but
@@ -1181,20 +1201,20 @@ hardware-holdout partition is provided in Section~\ref{sec:discussion_hirano}.
 Decision MLP AUROCs vs.\ the single, fixed, deployed Behavioural CNN
 checkpoint, H$_1$: MLP $>$ B) fails to reject the null on every split
 ($p{=}1.00$ throughout); the Behavioural CNN exceeds the Decision MLP by
-$0.009$--$0.030$ AUROC on all four splits. This is the direct, expected
+$0.009$--$0.029$ AUROC on all four splits. This is the direct, expected
 consequence of Remark~\ref{rem:corpus_mean}: once the Knowledge and
 Semantic Agents are restricted to a genuinely label-independent corpus-mean
 score, fusion cannot add per-sample discriminative signal over the
-Behavioural Agent alone, so its measured benefit is calibration
-(Section~\ref{sec:results_fusion}) and uncertainty-gated triage
-(Section~\ref{sec:results_tpe}) rather than AUROC. A \emph{session-level}
+Behavioural Agent alone, so its measured benefit is the uncertainty-gated
+triage policy it supports (Section~\ref{sec:results_tpe}) rather than
+AUROC or calibration (Section~\ref{sec:results_fusion}). A \emph{session-level}
 McNemar test on random-stratified (majority-vote aggregation, avoiding the
 within-session window correlation that invalidates a window-level test)
 finds only one session out of $267$ where the two models disagree
 ($\chi^2{=}0$, $p{=}1.00$)---the models make essentially identical
 session-level decisions despite the small, consistent per-window AUROC gap
 above; a window-level McNemar on the same split is nominally significant
-($\chi^2{=}58.7$, $p{<}10^{-4}$) but is not independence-respecting and is
+($\chi^2{=}54.4$, $p{<}10^{-4}$) but is not independence-respecting and is
 reported only for continuity with earlier drafts.
 
 \textbf{Selective precision-coverage:} sweeping the auto-contain threshold
@@ -1203,21 +1223,21 @@ $\tau$ and tracing precision against the fraction of traffic covered
 Precision--Coverage curve (AUSPC; higher is better---this is a
 precision-coverage curve, not the conventional risk-coverage curve where
 lower is better) is $0.829$ on random-stratified and $0.823$ on hardware
-holdout; temporal ($0.675$) and family ($0.649$) holdout are lower,
+holdout; temporal ($0.675$) and family ($0.651$) holdout are lower,
 consistent with the same moderate-vs-severe shift pattern seen in
 Table~\ref{tab:auroc_splits}.
 
 \textbf{Session-level detection and latency:} majority-vote aggregation
 (flag if $>50\%$ of windows exceed $\hat{p}_{\text{MLP}}{\geq}0.5$)
 achieves near-perfect in-distribution detection (random $100\%$, hardware
-$98.9\%$, temporal $100\%$) at low session FPR ($1.5$--$5.6\%$), falling to
-$65.9\%$ detection (FPR $15.5\%$) on family holdout; max-score (flag if
+$99.4\%$, temporal $100\%$) at low session FPR ($3.0$--$6.1\%$), falling to
+$70.7\%$ detection (FPR $19.7\%$) on family holdout; max-score (flag if
 \emph{any} window exceeds threshold) reaches $100\%$ detection on three of
-four splits but at much higher FPR ($80$--$98\%$), confirming majority-vote
+four splits but at much higher FPR ($81$--$98\%$), confirming majority-vote
 is the more reliable session-level rule under honestly out-of-fold scoring.
 Median latency to first detection is $0\,\text{s}$ across all splits; mean
-latency rises modestly under distribution shift (random $4.7\,\text{s}$ vs.\
-family holdout $6.2\,\text{s}$). Full statistics are in Supplementary
+latency rises modestly under distribution shift (random $4.6\,\text{s}$ vs.\
+family holdout $6.1\,\text{s}$). Full statistics are in Supplementary
 Section~S-VIII.
 
 \subsection{OOD Ransomware Variants}\label{sec:ood_variants}
@@ -1249,44 +1269,51 @@ simultaneously), the hardest generalisation challenge in the benchmark.
 Under concurrent execution, the Behavioural Agent observes superimposed
 I/O and memory patterns, inflating $\sigma_{\text{beh}}$ and suppressing
 $\hat{p}_{\text{beh}}$ for some, though not all, combinations: the most
-adversarial scenario is SDelete+REvil, detecting only $27.1\%$ of the time
-at the Behavioural Agent alone and $30.2\%$ in the [B+K] mean fusion
+adversarial scenario is SDelete+REvil, detecting only $28.1\%$ of the time
+at the Behavioural Agent alone and $43.8\%$ in the [B+K] mean fusion
 baseline (Remark~\ref{rem:corpus_mean}), as SDelete's legitimate file
 deletion I/O overwhelms REvil's signal; SDelete+Conti is the second
-hardest ($58.4\%$/$66.5\%$). The remaining eight combinations are detected
-$84$--$99\%$ of the time even without Peer Consultation.
+hardest ($59.4\%$/$89.8\%$). The remaining eight combinations are detected
+$84$--$98\%$ of the time even without Peer Consultation.
 
 Since it is $\sigma_{\text{beh}}$ that is elevated on the hard cases, Peer
 Consultation (Definition~\ref{def:pc}) triggers on the \emph{Behavioural}
 Agent: with PC active, $\hat{p}_{\text{beh}}$ is replaced by the
 inverse-uncertainty-weighted average of $\hat{p}_{\text{sem}}$ and
 $\hat{p}_{\text{know}}$, recovering the Semantic Agent's partial signal:
-detection improves to $42.7\%$ for SDelete+REvil and $86.8\%$ for
-SDelete+Conti (from $30.2\%$ and $66.5\%$ without PC). Under the
-Bayesian TPE-optimised triage policy, \textsc{Auto-Contain} never fires on
-this partition ($0\%$ across every combination, with or without PC): the
-fixed corpus-mean Semantic and Knowledge scores mean the mean-fused
-probability cannot clear the strict $\tau_{\text{high}}{=}0.90$ threshold
-regardless of how confident the Behavioural Agent is. \textsc{Escalate}
-fires on $47$--$100\%$ of windows per combination ($93.0\%$ overall
-without PC, $93.5\%$ with PC), correctly routing the ambiguous cases to
-analyst review rather than autonomous containment---unlike Hirano and
+detection improves to $44.3\%$ for SDelete+REvil and $91.9\%$ for
+SDelete+Conti (from $43.8\%$ and $89.8\%$ without PC). Following the RansKnow correction, the fixed corpus-mean Knowledge score
+is now high and stable enough to clear the strict
+$\tau_{\text{high}}{=}0.90$ threshold on a majority of mix-partition
+windows: under the Bayesian TPE-optimised triage policy,
+\textsc{Auto-Contain} fires on $53.6\%$ of windows overall without PC and
+$60.5\%$ with PC---a substantial change from the pre-correction
+evaluation, where the corpus-mean score was too weak and noisy to ever
+clear the threshold. \textsc{Escalate} fires on $17$--$82\%$ of windows
+per combination ($46.4\%$ overall without PC, $39.5\%$ with PC), and the
+previously observed \textsc{Allow} gap closes entirely: every window in
+the mix partition is now either escalated or auto-contained
+($0\%$ silently \textsc{Allow}ed overall), correctly routing the
+ambiguous cases to analyst review or autonomous containment rather than
+missing them silently---unlike Hirano and
 Kobayashi~\cite{hirano2025ransmap}'s binary-output detector, which has no
 mechanism to express this ambiguity. The SDelete combinations remain the
-exception: even under the triage policy, roughly half of SDelete+REvil's
-windows are neither escalated nor auto-contained but silently
-\textsc{Allow}ed, a genuine coverage gap for this specific concurrent
-scenario. Per-scenario rates are plotted in Supplementary Section~S-VIII.
+hardest cases in relative terms: SDelete+REvil auto-contains only
+$17.7$--$22.9\%$ of the time and SDelete+Conti $28.9$--$45.7\%$, both
+well below the $45$--$83\%$ auto-contain rates on the remaining
+combinations, so autonomous containment confidence is still the weakest
+here even though the coverage gap itself has closed. Per-scenario rates
+are plotted in Supplementary Section~S-VIII.
 
 \subsection{Conformal Coverage}\label{sec:results_conformal}
 
 Table~\ref{tab:conformal} reports the coverage--efficiency trade-off for
 the Mondrian conformal wrapper on the random-stratified split. At
 $\alpha{=}0.01$ ($99\%$ coverage), $54\%$ of traffic is auto-classified
-(singleton prediction set) with $98.7\%$ precision; the remaining $46\%$
+(singleton prediction set) with $98.5\%$ precision; the remaining $46\%$
 receive a two-element set and are routed to analyst review. As $\alpha$
 increases to $0.05$ ($95\%$ coverage), the auto-classified fraction rises
-to $84\%$ at the cost of precision falling to $93.8\%$. The lower
+to $84\%$ at the cost of precision falling to $93.3\%$. The lower
 auto-classified fraction relative to earlier reporting reflects the noisier,
 honestly out-of-fold Decision MLP score (Section~\ref{sec:results_significance});
 the coverage guarantee itself is unaffected, since it depends on
@@ -1307,9 +1334,9 @@ exchangeability rather than classifier accuracy.
 \toprule
 $\alpha$ & Coverage & Auto-class (\%) & Prec (\%) \\
 \midrule
-$0.10$ & $90\%$ & $95.9$ & $88.4$ \\
-$0.05$ & $95\%$ & $83.8$ & $93.8$ \\
-$0.01$ & $99\%$ & $54.0$ & $98.7$ \\
+$0.10$ & $90\%$ & $96.4$ & $87.8$ \\
+$0.05$ & $95\%$ & $84.0$ & $93.3$ \\
+$0.01$ & $99\%$ & $54.5$ & $98.5$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1320,8 +1347,8 @@ only under exchangeability between calibration and test samples.
 Table~\ref{tab:conformal_shift} reports empirical coverage across all four
 splits (thresholds calibrated on the split-specific validation set).
 On in-distribution splits, empirical coverage at $\alpha{=}0.01$ is within
-$0.8$ points of the $99\%$ nominal target; family holdout is the critical
-exception, collapsing to $\mathbf{88.1\%}$ at $\alpha{=}0.01$ and $59.4\%$
+$0.7$ points of the $99\%$ nominal target; family holdout is the critical
+exception, collapsing to $\mathbf{88.0\%}$ at $\alpha{=}0.01$ and $59.2\%$
 at $\alpha{=}0.10$ (Fig.~\ref{fig:radar_splits}), confirming that
 exchangeability is violated when test families are entirely absent from
 calibration---consistent
@@ -1350,10 +1377,10 @@ Supplementary Section~S-VIII.
 Split & $\alpha{=}0.01$ & $\alpha{=}0.05$ & $\alpha{=}0.10$ \\
  & ($99\%$ nom.) & ($95\%$ nom.) & ($90\%$ nom.) \\
 \midrule
-Random           & $99.2\%$ & $93.9\%$ & $88.2\%$ \\
-Hardware         & $98.4\%$ & $93.4\%$ & $86.9\%$ \\
-Temporal         & $99.1\%$ & $94.3\%$ & $88.3\%$ \\
-Family (unseen)  & $\mathbf{88.1\%}$ & $\mathbf{72.7\%}$ & $\mathbf{59.4\%}$ \\
+Random           & $99.2\%$ & $93.8\%$ & $87.8\%$ \\
+Hardware         & $98.3\%$ & $93.3\%$ & $87.1\%$ \\
+Temporal         & $99.1\%$ & $94.2\%$ & $88.6\%$ \\
+Family (unseen)  & $\mathbf{88.0\%}$ & $\mathbf{73.2\%}$ & $\mathbf{59.2\%}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1544,14 +1571,14 @@ has ever seen the held-out family. Overall AUROC stays stable at
 $0.925$--$0.952$ across all holdouts (Table~\ref{tab:lofo}), but per-family
 detection varies substantially and no longer matches the near-perfect
 transfer we previously reported under in-sample Behavioural scoring:
-Darkside and LockBit still transfer well ($91.4\%$, $90.0\%$), Conti drops
-to $80.5\%$ (from a previously-reported perfect transfer), and Ryuk and
-WannaCry collapse to $27.3\%$ and $37.2\%$ (Ryuk from a previously-reported
+Darkside and LockBit still transfer well ($91.4\%$, $89.6\%$), Conti drops
+to $79.2\%$ (from a previously-reported perfect transfer), and Ryuk and
+WannaCry collapse to $26.2\%$ and $35.8\%$ (Ryuk from a previously-reported
 $100\%$). Escalation tracks this difficulty for REvil and WannaCry
-($14.5\%$, $10.4\%$, up from $1.1$--$3.8\%$ elsewhere), correctly routing
+($10.4\%$, $5.4\%$, up from $0.0$--$2.2\%$ elsewhere), correctly routing
 more unfamiliar cases to analyst review. Ryuk is the exception: despite the
 worst detection rate of any held-out family, its escalation is only
-$3.9\%$, so at least $69\%$ of its windows are both missed and
+$1.5\%$, so at least $72\%$ of its windows are both missed and
 \textsc{Allow}ed rather than escalated---the system is confidently wrong on
 Ryuk, not appropriately uncertain. Honest leave-one-family-out thus shows a
 wider, less predictable generalisation spread than previously reported,
@@ -1577,12 +1604,12 @@ provided in Supplementary Section~S-VIII.
 Held-out & Overall & Detect & Auto-C & Esc \\
 Family   & AUROC   & (\%)   & (\%)   & (\%) \\
 \midrule
-Darkside & $0.950$ & $\mathbf{91.4}$ & $\mathbf{78.7}$ & $\phantom{0}1.1$ \\
-LockBit  & $0.952$ & $\phantom{0}90.0$ & $\phantom{00}59.0$ & $\phantom{0}3.8$ \\
-Conti    & $0.947$ & $\phantom{0}80.5$ & $\phantom{00}58.3$ & $\phantom{0}4.2$ \\
-REvil    & $0.939$ & $\phantom{0}69.1$ & $\phantom{00}32.8$ & $14.5$ \\
-WannaCry & $0.927$ & $\phantom{0}37.2$ & $\phantom{000}7.1$ & $10.4$ \\
-Ryuk     & $0.925$ & $\phantom{0}27.3$ & $\phantom{000}7.9$ & $\phantom{0}3.9$ \\
+Darkside & $0.950$ & $\mathbf{91.4}$ & $\mathbf{79.3}$ & $\phantom{0}0.0$ \\
+LockBit  & $0.952$ & $\phantom{0}89.6$ & $\phantom{00}58.8$ & $\phantom{0}1.3$ \\
+Conti    & $0.947$ & $\phantom{0}79.2$ & $\phantom{00}59.0$ & $\phantom{0}2.2$ \\
+REvil    & $0.939$ & $\phantom{0}67.8$ & $\phantom{00}32.2$ & $10.4$ \\
+WannaCry & $0.927$ & $\phantom{0}35.8$ & $\phantom{000}6.1$ & $\phantom{0}5.4$ \\
+Ryuk     & $0.925$ & $\phantom{0}26.2$ & $\phantom{000}8.3$ & $\phantom{0}1.5$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1596,16 +1623,19 @@ Ryuk     & $0.925$ & $\phantom{0}27.3$ & $\phantom{000}7.9$ & $\phantom{0}3.9$ \
 Strongest performance occurs in five areas. First, the Semantic Agent
 achieves AUROC $0.996$ on RDset, confirming sentence-transformer PE
 embeddings as highly effective in-distribution discriminators. Second, the
-Behavioural Agent generalises within distribution: temporal ($0.958$ fused)
+Behavioural Agent generalises within distribution: temporal ($0.959$ fused)
 and hardware ($0.934$ fused) holdout track random-stratified performance
 ($0.953$ fused) closely (Table~\ref{tab:auroc_splits}); the Decision MLP
 does not add discrimination over the Behavioural Agent alone in this
 evaluation setting (Remark~\ref{rem:corpus_mean}), so its measured value
-lies in calibration rather than a fusion AUROC gain. Third, calibration
-error falls $4.0\times$ over mean fusion (ECE $0.025$ vs.\ $0.100$),
-enabling $26.7\%$ autonomous classification versus $0.6\%$ under fixed
-thresholds, with selective precision-coverage AUSPC $0.829$. Fourth, majority-vote session
-aggregation achieves low FPR ($2$--$7\%$) with $\geq 99\%$ detection
+lies in the uncertainty structure it exposes for triage rather than a
+fusion AUROC gain. Third, the RansKnow-corrected Knowledge score makes
+even the fixed-threshold policy usable on its own (balanced accuracy
+$0.770$, versus a near-random $0.525$ before correction), and the
+Bayesian TPE-optimised policy still improves on it, enabling $29.3\%$
+autonomous classification versus $18.0\%$ under fixed thresholds, with
+selective precision-coverage AUSPC $0.829$. Fourth, majority-vote session
+aggregation achieves low FPR ($3$--$6\%$) with $\geq 99\%$ detection
 in-distribution at median $0\,\text{s}$ latency, and EWC limits forgetting
 to $\Delta\text{AUPRC}=0.001$ over five feedback iterations
 (Table~\ref{tab:ewc_feedback}; all points detailed in
@@ -1617,7 +1647,7 @@ augmentation (Section~\ref{sec:results_imbalance}).
 
 The framework's principal failure mode is distributional shift at the
 family level (Section~\ref{sec:results_lofo}): family-holdout AUROC drops
-to $0.676$ fused, and---since the Knowledge and Semantic Agents' fixed
+to $0.677$ fused, and---since the Knowledge and Semantic Agents' fixed
 corpus-mean scores (Remark~\ref{rem:corpus_mean}) carry no family-specific
 signal to recover it---this degradation is consistent across every axis in
 Fig.~\ref{fig:radar_splits}, not an outlier metric. The framework is
@@ -1631,21 +1661,29 @@ training.
 
 A more fundamental limitation arises under concurrent execution
 (Section~\ref{sec:eval}): superimposed I/O and memory patterns suppress
-$\hat{p}_{\text{beh}}$ and inflate $\sigma_{\text{beh}}$, and for the most
-adversarial case (SDelete with REvil), roughly half its windows are
-neither escalated nor auto-contained---a limitation shared with Hirano and
-Kobayashi~\cite{hirano2025ransmap}, whose telemetry likewise cannot
-separate concurrent traces without process-level attribution.
+$\hat{p}_{\text{beh}}$ and inflate $\sigma_{\text{beh}}$, and neither agent
+can fully separate concurrent traces without process-level
+attribution---a limitation shared with Hirano and
+Kobayashi~\cite{hirano2025ransmap}. For the most adversarial case (SDelete
+with REvil), this now manifests as low Auto-Contain coverage
+($17.7$--$22.9\%$, the lowest of any concurrent-execution combination)
+rather than as silent misses: the triage policy escalates essentially all
+of the remaining windows, so no window in the mix partition goes
+unaddressed, but the system still cannot autonomously contain this
+scenario with confidence.
 
 Critically, the uncertainty mechanism provides graceful degradation rather
 than silent failure for most of these hard cases---escalation rises on
 unseen Conti sub-variants (Section~\ref{sec:ood_variants}), concurrent-mix
 combinations (Supplementary Section~S-VIII), and the harder-to-transfer
-LOFO families (Table~\ref{tab:lofo})---but this is not universal: Conti.F,
-Ryuk under leave-one-family-out (worst detection rate of any held-out
-family, yet only $3.9\%$ escalation), and, to a lesser extent, SDelete+REvil
-show the system can also be confidently wrong rather than appropriately
-uncertain. The uncertainty-driven safety net is thus a substantial
+LOFO families (Table~\ref{tab:lofo})---but this is not universal: Conti.F
+and Ryuk under leave-one-family-out (worst detection rate of any held-out
+family, yet only $1.5\%$ escalation) show the system can also be
+confidently wrong rather than appropriately uncertain. The
+concurrent-execution combinations no longer exhibit this pattern following
+the RansKnow correction (Section~\ref{sec:eval}): even the hardest case,
+SDelete+REvil, now escalates $82\%$ of its windows rather than being
+silently missed. The uncertainty-driven safety net is thus a substantial
 reduction in silent-failure risk, not a guarantee against it.
 
 \subsection{Additional Limitations}
@@ -1665,7 +1703,7 @@ uncertainty estimates~\cite{gal2016dropout} remain an open problem we
 defer to future work.
 
 \textbf{Knowledge Agent sample size.} The RansKnow corpus~\cite{ransknow_2026}
-contains only $307$ transcripts (${\approx}215$/$46$/$46$
+contains only $718$ transcripts (${\approx}503$/$108$/$107$
 train/val/test), small for a CNN classifier; since its role is
 complementary ATT\&CK-level signal, its generalisation metrics should be
 read accordingly.
@@ -1727,15 +1765,16 @@ uncertainty, Decision MLP fusion with CTGAN augmentation, Bayesian TPE
 triage policy optimisation, and Peer Consultation with EWC continual
 learning---collectively address the structural limitations of
 single-modality binary detectors, achieving strong static-PE (AUROC
-$0.996$) and runtime behavioural detection (AUROC $0.963$), a $63\%$
+$0.996$) and runtime behavioural detection (AUROC $0.963$), a $46\%$
 reduction in unnecessary escalation over fixed-threshold baselines, and
-markedly improved calibration (ECE $0.025$ vs.\ $0.100$ mean fusion).
+temperature-calibrated fusion (ECE $0.026$) essentially matching the
+well-calibrated mean-fusion baseline (ECE $0.023$) it replaces.
 Because the Semantic and Knowledge Agents necessarily contribute a fixed,
 label-independent corpus-mean score in the absence of real per-sample
 pairing across RDset, RanSMAP, and RansKnow (Remark~\ref{rem:corpus_mean}),
-fusion's demonstrated value in this evaluation setting is calibration and
-uncertainty-gated triage rather than incremental detection AUROC over the
-Behavioural Agent alone. When the system encounters novel families or
+fusion's demonstrated value in this evaluation setting is the
+uncertainty-gated triage policy it supports rather than incremental
+detection AUROC or a calibration gain over mean fusion. When the system encounters novel families or
 concurrent execution beyond its training distribution, epistemic
 uncertainty $\sigma_{\max}$ rises and the triage policy routes to
 \textsc{Escalate}---preserving analyst oversight where the model is least

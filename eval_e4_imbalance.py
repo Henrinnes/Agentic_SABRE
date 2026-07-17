@@ -65,6 +65,7 @@ KNOWLEDGE_DROP_COLS = [
     "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
     "YouTube_URL", "Transcript_Path", "Family_Count", "Family_List",
     "Tool_List", "Dominant_Tactic", "Platform_Signal",
+    "Year", "DurationSeconds", "Transcript_Provider",
 ]
 
 SPLITS = ["random_stratified", "family_holdout", "hardware_holdout", "temporal_holdout"]
@@ -93,7 +94,7 @@ def build_knowledge_lookup():
     eval_sabre2.py, run_ea_ed_experiments.py, run_ee_eg_experiments.py,
     eval_mix_robustness.py, and eval_e16_runtime.py. Fixed here too so the
     leaky pattern isn't copy-pasted into future scripts from this one."""
-    df_rk = pd.read_csv("/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv")
+    df_rk = pd.read_csv("/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv")
     df_rk["Ransomware_Context"] = (
         (df_rk["Tactic_Total_Mentions"] > 10) | (df_rk["Tool_Total_Mentions"] > 2)
     ).astype(int)

@@ -39,7 +39,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 
 PARQUET    = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW   = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv"
+RANSKNOW   = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 SPLITS_DIR = Path("splits")
 CKPT_DIR   = Path("checkpoints")
 SEED_DIR   = CKPT_DIR / "seeds"
