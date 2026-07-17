@@ -55,7 +55,7 @@ RES_DIR.mkdir(exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv"
+RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 RDSET    = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
 
 SPLIT_NAMES  = ["random_stratified", "family_holdout", "hardware_holdout", "temporal_holdout"]

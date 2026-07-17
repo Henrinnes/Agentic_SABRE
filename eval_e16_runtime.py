@@ -48,7 +48,7 @@ import torch
 CKPT_DIR   = Path("checkpoints")
 RESULTS    = Path("results")
 SPLITS_DIR = Path("splits")
-RANSKNOW   = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv"
+RANSKNOW   = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 
 N_REPS       = 500   # single-sample timing reps
 N_BATCH_REPS = 100   # batch timing reps
@@ -70,6 +70,9 @@ KNOWLEDGE_DROP_COLS = [
     "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
     "YouTube_URL", "Transcript_Path", "Family_Count", "Family_List",
     "Tool_List", "Dominant_Tactic", "Platform_Signal",
+    # v4-only RansKnow metadata columns, not part of the 23-dim ATT&CK
+    # feature set (see train_knowledge_agent.py's drop_cols for the same fix)
+    "Year", "DurationSeconds", "Transcript_Provider",
 ]
 
 

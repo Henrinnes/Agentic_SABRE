@@ -51,7 +51,7 @@ RESULTS = ROOT / "results"
 RESULTS.mkdir(exist_ok=True)
 
 RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv"
+RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 
 BEHAVIOR_COLS = [
     "avg_read_throughput","avg_write_throughput",

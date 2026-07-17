@@ -70,7 +70,7 @@ class CNNKnowledgeAgent(nn.Module):
 # -----------------------------
 if __name__ == "__main__":
 
-    DATA_PATH = r"/home/henrykabuye/Ransap/Publications 2026/Proposal_2026/Knowledge_Agent/outputs/Knowledge_Agent_Features_307.csv"
+    DATA_PATH = r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 
     CHECKPOINT_DIR = Path("checkpoints")
     CHECKPOINT_DIR.mkdir(exist_ok=True)
@@ -102,7 +102,13 @@ if __name__ == "__main__":
         "Dominant_Tactic",
         "Platform_Signal",
         "Family_Count",
-        "Ransomware_Context"
+        "Ransomware_Context",
+        # v4-only metadata columns, not part of the 23-dim ATT&CK feature set
+        # the paper describes -- excluded to keep input_dim/feature semantics
+        # unchanged from the 307-row version.
+        "Year",
+        "DurationSeconds",
+        "Transcript_Provider",
     ]
 
     X = df.drop(columns=drop_cols, errors="ignore").select_dtypes(include="number")

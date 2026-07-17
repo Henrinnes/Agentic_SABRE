@@ -43,7 +43,7 @@ FIG_DIR   = ROOT / "TIFS_Submission" / "Figures"
 FIG_DIR.mkdir(exist_ok=True)
 
 RANSMAP   = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW  = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv"
+RANSKNOW  = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 
 # ── style ───────────────────────────────────────────────────────────────────
 plt.rcParams.update({
@@ -82,6 +82,7 @@ KNOWLEDGE_DROP = [
     "Video_ID","Channel_ID","Channel_Name","Video_Title",
     "YouTube_URL","Transcript_Path","Family_Count","Family_List",
     "Tool_List","Dominant_Tactic","Platform_Signal",
+    "Year","DurationSeconds","Transcript_Provider",
 ]
 
 # ── model ────────────────────────────────────────────────────────────────────
