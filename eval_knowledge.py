@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     # Load knowledge feature dataset
     df = pd.read_csv(
-        r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_307.csv"
+        r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
     )
 
     # Match the target used during training

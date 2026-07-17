@@ -6,30 +6,30 @@
   "checkpoint": "behavioral_cnn_random_stratified.pt",
   "overall": {
     "B": {
-      "detection_rate": 0.8348765432098766,
+      "detection_rate": 0.8374485596707819,
       "ci95": [
-        0.8194444444444444,
-        0.8503215020576131
+        0.8220164609053497,
+        0.8533950617283951
       ],
-      "mean_prob": 0.7789379712141976,
-      "mean_uncert": 0.07041037774522493
+      "mean_prob": 0.7800229405170478,
+      "mean_uncert": 0.06995157293047193
     },
     "SBK_no_pc": {
-      "detection_rate": 0.8683127572016461,
+      "detection_rate": 0.9284979423868313,
       "ci95": [
-        0.8539094650205762,
-        0.8827160493827161
+        0.9182098765432098,
+        0.9393004115226338
       ],
-      "mean_prob": 0.7071088410297609
+      "mean_prob": 0.8462055550094185
     },
     "SBK_with_pc": {
-      "detection_rate": 0.9053497942386831,
+      "detection_rate": 0.9310699588477366,
       "ci95": [
-        0.8930041152263375,
-        0.9182227366255143
+        0.9207818930041153,
+        0.9418852880658436
       ],
-      "mean_prob": 0.7377975099516997,
-      "pc_triggered_rate": 0.13117283950617284
+      "mean_prob": 0.8758591200905638,
+      "pc_triggered_rate": 0.13168724279835392
     }
   },
   "triage_policy": {
@@ -40,26 +40,26 @@
       "kappa_low": 0.194572
     },
     "no_pc": {
-      "auto_contain_rate": 0.0,
-      "escalate_rate": 0.9300411522633745,
-      "allow_rate": 0.06995884773662553
+      "auto_contain_rate": 0.5360082304526749,
+      "escalate_rate": 0.46399176954732513,
+      "allow_rate": 0.0
     },
     "with_pc": {
-      "auto_contain_rate": 0.0,
-      "escalate_rate": 0.9346707818930041,
-      "allow_rate": 0.06532921810699588
+      "auto_contain_rate": 0.6054526748971193,
+      "escalate_rate": 0.39454732510288065,
+      "allow_rate": 5.551115123125783e-17
     }
   },
   "note": "SBK = [S+B+K]: fixed corpus-mean Semantic (RDset) and Knowledge (RansKnow) scores, mean-fused with the Behavioural Agent. no_pc uses raw p_beh; with_pc applies Peer Consultation (kappa=0.15): p_beh is replaced by the inverse-uncertainty-weighted average of the fixed Semantic and Knowledge scores whenever sigma_beh exceeds kappa. Neither Semantic nor Knowledge is looked up by the window's true ransomware family -- doing so would leak that label into the fused score (see eval_sabre2.py's build_knowledge_lookup). detection_rate above uses a naive p>=0.5 cutoff; triage_policy and each per_class entry's auto_contain_rate/escalate_rate use the real Bayesian TPE-optimised thresholds from checkpoints/policy_auto.json, which is what Section VI-F of the main paper actually reports.",
-  "combined_auprc_B": 0.9275727337293367,
-  "combined_auroc_B": 0.9187963705360422,
+  "combined_auprc_B": 0.926580551300539,
+  "combined_auroc_B": 0.9187332667520034,
   "uncertainty": {
-    "p25": 0.017781241331249475,
-    "p50": 0.048588935285806656,
-    "p75": 0.10266594588756561,
-    "p90": 0.16485361009836197,
-    "p95": 0.209958565980196,
-    "high_uncert_rate": 0.2654320987654321
+    "p25": 0.017595815006643534,
+    "p50": 0.04695017263293266,
+    "p75": 0.10415223240852356,
+    "p90": 0.16318244338035584,
+    "p95": 0.2073234498500824,
+    "high_uncert_rate": 0.26080246913580246
   },
   "per_class": {
     "AESCrypt_Conti": {
@@ -70,17 +70,17 @@
         0.921875,
         0.9791666666666666
       ],
-      "detection_rate_BK": 0.96875,
-      "detection_rate_BK_PC": 0.9739583333333334,
-      "mean_prob_B": 0.9111537867768978,
-      "mean_prob_K": 0.6395972575992346,
-      "mean_prob_BK": 0.7753755221880662,
-      "mean_prob_BK_PC": 0.780841251158149,
-      "mean_uncert_B": 0.03700741888800015,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 0.9895833333333334,
-      "escalate_rate_with_pc": 0.9895833333333334
+      "detection_rate_BK": 1.0,
+      "detection_rate_BK_PC": 1.0,
+      "mean_prob_B": 0.91148736118339,
+      "mean_prob_K": 0.9132067809502283,
+      "mean_prob_BK": 0.9123470710668092,
+      "mean_prob_BK_PC": 0.9186701133725159,
+      "mean_uncert_B": 0.03694961892142601,
+      "auto_contain_rate_no_pc": 0.7864583333333334,
+      "auto_contain_rate_with_pc": 0.8072916666666666,
+      "escalate_rate_no_pc": 0.21354166666666666,
+      "escalate_rate_with_pc": 0.19270833333333334
     },
     "AESCrypt_REvil": {
       "n_windows": 203,
@@ -90,237 +90,237 @@
         0.8866995073891626,
         0.9556650246305419
       ],
-      "detection_rate_BK": 0.9605911330049262,
-      "detection_rate_BK_PC": 0.9605911330049262,
-      "mean_prob_B": 0.8218516718155792,
-      "mean_prob_K": 0.6355424066776125,
-      "mean_prob_BK": 0.7286970392465958,
-      "mean_prob_BK_PC": 0.7465327539449783,
-      "mean_uncert_B": 0.07268760609325811,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 0.9901477832512315,
-      "escalate_rate_with_pc": 0.9901477832512315
+      "detection_rate_BK": 0.9901477832512315,
+      "detection_rate_BK_PC": 0.9901477832512315,
+      "mean_prob_B": 0.8195791388907713,
+      "mean_prob_K": 0.9137634981441968,
+      "mean_prob_BK": 0.866671318517484,
+      "mean_prob_BK_PC": 0.8924301678042629,
+      "mean_uncert_B": 0.07369371750185569,
+      "auto_contain_rate_no_pc": 0.5024630541871922,
+      "auto_contain_rate_with_pc": 0.6157635467980296,
+      "escalate_rate_no_pc": 0.4975369458128079,
+      "escalate_rate_with_pc": 0.3842364532019704
     },
     "Firefox_Conti": {
       "n_windows": 191,
       "ransom_family": "Conti",
-      "detection_rate_B": 0.9790575916230366,
+      "detection_rate_B": 0.9842931937172775,
       "ci95_B": [
-        0.9581151832460733,
-        0.9947643979057592
+        0.9633507853403142,
+        1.0
       ],
-      "detection_rate_BK": 0.9895287958115183,
-      "detection_rate_BK_PC": 0.9947643979057592,
-      "mean_prob_B": 0.9104003314884546,
-      "mean_prob_K": 0.6332027487729857,
-      "mean_prob_BK": 0.7718015401307201,
-      "mean_prob_BK_PC": 0.7836310433454649,
-      "mean_uncert_B": 0.06251848885711497,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 1.0,
-      "escalate_rate_with_pc": 1.0
+      "detection_rate_BK": 1.0,
+      "detection_rate_BK_PC": 1.0,
+      "mean_prob_B": 0.9128878864006222,
+      "mean_prob_K": 0.9138837534719737,
+      "mean_prob_BK": 0.913385819936298,
+      "mean_prob_BK_PC": 0.923009759984563,
+      "mean_uncert_B": 0.05840654718520178,
+      "auto_contain_rate_no_pc": 0.7382198952879581,
+      "auto_contain_rate_with_pc": 0.7696335078534031,
+      "escalate_rate_no_pc": 0.2617801047120419,
+      "escalate_rate_with_pc": 0.23036649214659685
     },
     "Firefox_Office_REvil": {
       "n_windows": 194,
       "ransom_family": "REvil",
-      "detection_rate_B": 0.9536082474226805,
+      "detection_rate_B": 0.9639175257731959,
       "ci95_B": [
-        0.9226804123711341,
-        0.979381443298969
+        0.9329896907216495,
+        0.9896907216494846
       ],
-      "detection_rate_BK": 0.9896907216494846,
-      "detection_rate_BK_PC": 0.9896907216494846,
-      "mean_prob_B": 0.8652525178694463,
-      "mean_prob_K": 0.6392430377375219,
-      "mean_prob_BK": 0.7522477778034842,
-      "mean_prob_BK_PC": 0.7748649875613323,
-      "mean_uncert_B": 0.07113056253526628,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 0.9948453608247423,
-      "escalate_rate_with_pc": 0.9948453608247423
+      "detection_rate_BK": 0.9948453608247423,
+      "detection_rate_BK_PC": 0.9948453608247423,
+      "mean_prob_B": 0.863834385323271,
+      "mean_prob_K": 0.913135977749972,
+      "mean_prob_BK": 0.8884851815366215,
+      "mean_prob_BK_PC": 0.9083043672097828,
+      "mean_uncert_B": 0.07148190107095756,
+      "auto_contain_rate_no_pc": 0.5463917525773195,
+      "auto_contain_rate_with_pc": 0.634020618556701,
+      "escalate_rate_no_pc": 0.4536082474226804,
+      "escalate_rate_with_pc": 0.36597938144329895
     },
     "Firefox_REvil": {
       "n_windows": 193,
       "ransom_family": "REvil",
-      "detection_rate_B": 0.9533678756476683,
+      "detection_rate_B": 0.9378238341968912,
       "ci95_B": [
-        0.9222797927461139,
-        0.9792746113989638
+        0.9015544041450777,
+        0.9689119170984456
       ],
-      "detection_rate_BK": 0.9792746113989638,
-      "detection_rate_BK_PC": 0.9792746113989638,
-      "mean_prob_B": 0.8441502738917739,
-      "mean_prob_K": 0.6307950330212944,
-      "mean_prob_BK": 0.7374726534565341,
-      "mean_prob_BK_PC": 0.7523650257595953,
-      "mean_uncert_B": 0.071763782261948,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 0.9948186528497409,
-      "escalate_rate_with_pc": 0.9948186528497409
+      "detection_rate_BK": 0.9948186528497409,
+      "detection_rate_BK_PC": 0.9948186528497409,
+      "mean_prob_B": 0.844694248424756,
+      "mean_prob_K": 0.9113612950157007,
+      "mean_prob_BK": 0.8780277717202284,
+      "mean_prob_BK_PC": 0.8982871709592155,
+      "mean_uncert_B": 0.07411136903553969,
+      "auto_contain_rate_no_pc": 0.45077720207253885,
+      "auto_contain_rate_with_pc": 0.533678756476684,
+      "escalate_rate_no_pc": 0.5492227979274611,
+      "escalate_rate_with_pc": 0.46632124352331605
     },
     "Office_REvil": {
       "n_windows": 195,
       "ransom_family": "REvil",
-      "detection_rate_B": 0.9333333333333333,
+      "detection_rate_B": 0.9384615384615385,
       "ci95_B": [
-        0.8974358974358975,
-        0.9641025641025641
+        0.9025641025641026,
+        0.9692307692307692
       ],
-      "detection_rate_BK": 0.958974358974359,
-      "detection_rate_BK_PC": 0.9743589743589743,
-      "mean_prob_B": 0.8346081554889679,
-      "mean_prob_K": 0.6331939234183385,
-      "mean_prob_BK": 0.7339010394536531,
-      "mean_prob_BK_PC": 0.760124645296584,
-      "mean_uncert_B": 0.07945070094070755,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 1.0,
-      "escalate_rate_with_pc": 1.0
+      "detection_rate_BK": 1.0,
+      "detection_rate_BK_PC": 1.0,
+      "mean_prob_B": 0.8403169747346487,
+      "mean_prob_K": 0.9122510772485,
+      "mean_prob_BK": 0.8762840259915743,
+      "mean_prob_BK_PC": 0.8996068614081715,
+      "mean_uncert_B": 0.0771659380553338,
+      "auto_contain_rate_no_pc": 0.48717948717948717,
+      "auto_contain_rate_with_pc": 0.558974358974359,
+      "escalate_rate_no_pc": 0.5128205128205128,
+      "escalate_rate_with_pc": 0.441025641025641
     },
     "SDelete_Conti": {
       "n_windows": 197,
       "ransom_family": "Conti",
-      "detection_rate_B": 0.583756345177665,
+      "detection_rate_B": 0.5939086294416244,
       "ci95_B": [
-        0.5076142131979695,
-        0.6548223350253807
+        0.5228426395939086,
+        0.6598984771573604
       ],
-      "detection_rate_BK": 0.6649746192893401,
-      "detection_rate_BK_PC": 0.868020304568528,
-      "mean_prob_B": 0.5897793763526656,
-      "mean_prob_K": 0.6315566342191647,
-      "mean_prob_BK": 0.6106680052859152,
-      "mean_prob_BK_PC": 0.7270599520484474,
-      "mean_uncert_B": 0.1265360590287546,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 0.9035532994923858,
-      "escalate_rate_with_pc": 0.9187817258883249
+      "detection_rate_BK": 0.8984771573604061,
+      "detection_rate_BK_PC": 0.9187817258883249,
+      "mean_prob_B": 0.5938080081285975,
+      "mean_prob_K": 0.9105804511133184,
+      "mean_prob_BK": 0.7521942296209579,
+      "mean_prob_BK_PC": 0.8665391208175617,
+      "mean_uncert_B": 0.12852232807864278,
+      "auto_contain_rate_no_pc": 0.2893401015228426,
+      "auto_contain_rate_with_pc": 0.45685279187817257,
+      "escalate_rate_no_pc": 0.7106598984771574,
+      "escalate_rate_with_pc": 0.5431472081218274
     },
     "SDelete_REvil": {
       "n_windows": 192,
       "ransom_family": "REvil",
-      "detection_rate_B": 0.2708333333333333,
+      "detection_rate_B": 0.28125,
       "ci95_B": [
-        0.20820312500000002,
-        0.3333333333333333
+        0.21875,
+        0.3489583333333333
       ],
-      "detection_rate_BK": 0.3020833333333333,
-      "detection_rate_BK_PC": 0.4270833333333333,
-      "mean_prob_B": 0.2939156535240037,
-      "mean_prob_K": 0.634378365551432,
-      "mean_prob_BK": 0.4641470095377178,
-      "mean_prob_BK_PC": 0.5335632334013495,
-      "mean_uncert_B": 0.07961608585865558,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 0.46875,
-      "escalate_rate_with_pc": 0.5
+      "detection_rate_BK": 0.4375,
+      "detection_rate_BK_PC": 0.4427083333333333,
+      "mean_prob_B": 0.29275521868902993,
+      "mean_prob_K": 0.9106590114533901,
+      "mean_prob_BK": 0.60170711507121,
+      "mean_prob_BK_PC": 0.6612383615426171,
+      "mean_uncert_B": 0.07621842880995737,
+      "auto_contain_rate_no_pc": 0.17708333333333334,
+      "auto_contain_rate_with_pc": 0.22916666666666666,
+      "escalate_rate_no_pc": 0.8229166666666666,
+      "escalate_rate_with_pc": 0.7708333333333334
     },
     "Zip_Conti": {
       "n_windows": 193,
       "ransom_family": "Conti",
-      "detection_rate_B": 0.9533678756476683,
+      "detection_rate_B": 0.9585492227979274,
       "ci95_B": [
-        0.9222797927461139,
-        0.9792746113989638
+        0.927461139896373,
+        0.9844559585492227
       ],
-      "detection_rate_BK": 0.9792746113989638,
-      "detection_rate_BK_PC": 0.9792746113989638,
-      "mean_prob_B": 0.9183024774098025,
-      "mean_prob_K": 0.6392552080549725,
-      "mean_prob_BK": 0.7787788427323875,
-      "mean_prob_BK_PC": 0.7851257045870993,
-      "mean_uncert_B": 0.04332041577375711,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 1.0,
-      "escalate_rate_with_pc": 1.0
+      "detection_rate_BK": 1.0,
+      "detection_rate_BK_PC": 1.0,
+      "mean_prob_B": 0.9212316705464082,
+      "mean_prob_K": 0.9100594085115226,
+      "mean_prob_BK": 0.9156455395289653,
+      "mean_prob_BK_PC": 0.9212610409396571,
+      "mean_uncert_B": 0.04262435457812757,
+      "auto_contain_rate_no_pc": 0.8290155440414507,
+      "auto_contain_rate_with_pc": 0.844559585492228,
+      "escalate_rate_no_pc": 0.17098445595854922,
+      "escalate_rate_with_pc": 0.15544041450777202
     },
     "Zip_REvil": {
       "n_windows": 194,
       "ransom_family": "REvil",
-      "detection_rate_B": 0.845360824742268,
+      "detection_rate_B": 0.8402061855670103,
       "ci95_B": [
-        0.7938144329896907,
-        0.8917525773195877
+        0.788659793814433,
+        0.8865979381443299
       ],
-      "detection_rate_BK": 0.8865979381443299,
-      "detection_rate_BK_PC": 0.9020618556701031,
-      "mean_prob_B": 0.8000630612374696,
-      "mean_prob_K": 0.6360891072713223,
-      "mean_prob_BK": 0.718076084254396,
-      "mean_prob_BK_PC": 0.7328782734571021,
-      "mean_uncert_B": 0.058548331710740385,
-      "auto_contain_rate_no_pc": 0.0,
-      "auto_contain_rate_with_pc": 0.0,
-      "escalate_rate_no_pc": 0.9536082474226805,
-      "escalate_rate_with_pc": 0.9536082474226805
+      "detection_rate_BK": 0.9639175257731959,
+      "detection_rate_BK_PC": 0.9639175257731959,
+      "mean_prob_B": 0.7998160244512957,
+      "mean_prob_K": 0.9149417419409015,
+      "mean_prob_BK": 0.8573788831960986,
+      "mean_prob_BK_PC": 0.8678047275268053,
+      "mean_uncert_B": 0.058651430049872735,
+      "auto_contain_rate_no_pc": 0.5618556701030928,
+      "auto_contain_rate_with_pc": 0.6082474226804123,
+      "escalate_rate_no_pc": 0.4381443298969072,
+      "escalate_rate_with_pc": 0.3917525773195876
     }
   },
   "per_family_concurrent": {
     "Conti": {
       "n_windows": 773,
-      "detection_rate_B": 0.8654592496765847,
+      "detection_rate_B": 0.8706338939197931,
       "ci95_B": [
-        0.8408796895213454,
-        0.888745148771022
+        0.8473479948253557,
+        0.8939197930142303
       ],
-      "detection_rate_BK": 0.8990944372574385,
-      "detection_rate_BK_PC": 0.9534282018111255,
-      "mean_prob_B": 0.8308498132691154,
-      "mean_uncert_B": 0.06770362182562066
+      "detection_rate_BK": 0.9741267787839586,
+      "detection_rate_BK_PC": 0.9793014230271668,
+      "mean_prob_B": 0.8333053682619925,
+      "mean_uncert_B": 0.06700566159166699
     },
     "REvil": {
       "n_windows": 1171,
-      "detection_rate_B": 0.8146883005977796,
+      "detection_rate_B": 0.8155422715627668,
       "ci95_B": [
-        0.7933390264731,
-        0.8368915456874466
+        0.7941929974380871,
+        0.8377668659265585
       ],
-      "detection_rate_BK": 0.8479931682322801,
-      "detection_rate_BK_PC": 0.8736122971818958,
-      "mean_prob_B": 0.7446699490891324,
-      "mean_uncert_B": 0.0721971602608988
+      "detection_rate_BK": 0.8983774551665243,
+      "detection_rate_BK_PC": 0.8992314261315115,
+      "mean_prob_B": 0.7448501679749109,
+      "mean_uncert_B": 0.07189622661526802
     }
   },
   "solo_baseline": {
-    "REvil": {
-      "n_windows": 463,
-      "detection_rate": 0.8682505399568035,
-      "ci95": [
-        0.8358531317494601,
-        0.8984881209503239
-      ],
-      "mean_prob": 0.800811169226503,
-      "mean_uncert": 0.07278028843053426
-    },
     "Conti": {
       "n_windows": 456,
-      "detection_rate": 0.9407894736842105,
+      "detection_rate": 0.9429824561403509,
       "ci95": [
-        0.9166666666666666,
-        0.9627741228070176
+        0.918859649122807,
+        0.9649122807017544
       ],
-      "mean_prob": 0.8781251269801144,
-      "mean_uncert": 0.059419036109032104
+      "mean_prob": 0.8780280550647723,
+      "mean_uncert": 0.05819864110922106
+    },
+    "REvil": {
+      "n_windows": 463,
+      "detection_rate": 0.8596112311015118,
+      "ci95": [
+        0.8250539956803455,
+        0.8898488120950324
+      ],
+      "mean_prob": 0.7980647243470854,
+      "mean_uncert": 0.0750840675959778
     }
   },
   "concurrent_vs_solo": {
     "Conti": {
-      "solo": 0.9407894736842105,
-      "concurrent": 0.8654592496765847,
-      "delta": -0.07533022400762579
+      "solo": 0.9429824561403509,
+      "concurrent": 0.8706338939197931,
+      "delta": -0.07234856222055785
     },
     "REvil": {
-      "solo": 0.8682505399568035,
-      "concurrent": 0.8146883005977796,
-      "delta": -0.05356223935902382
+      "solo": 0.8596112311015118,
+      "concurrent": 0.8155422715627668,
+      "delta": -0.04406895953874501
     }
   }
 }
