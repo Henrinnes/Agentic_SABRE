@@ -151,15 +151,13 @@ optimisation via Bayesian TPE. The framework treats uncertainty as a
   \item A \textbf{Decision MLP fusion mechanism} with temperature calibration
         (ECE $0.026 \pm 0.003$) that implicitly down-weights the Knowledge
         Agent under elevated uncertainty; because the Semantic and Knowledge
-        Agents contribute a fixed corpus-mean score for RanSMAP samples (no
-        real per-sample pairing exists across the three datasets), naive
-        mean fusion over this same score pool is itself well-calibrated
-        (ECE $0.023$), so the Decision MLP's principal value lies in the
-        uncertainty structure it exposes for the triage policy
-        (Section~\ref{sec:results_tpe}) rather than a calibration advantage
-        over mean fusion---not incremental AUROC over the Behavioural Agent
-        alone either---supported by CTGAN score-space augmentation to
-        handle class imbalance at the fusion layer.
+        Agents contribute a fixed corpus-mean score for RanSMAP samples,
+        naive mean fusion over the same pool is itself well-calibrated
+        (ECE $0.023$), so its principal value lies in the uncertainty
+        structure it exposes for the triage policy
+        (Section~\ref{sec:results_tpe}) rather than a calibration or AUROC
+        advantage, supported by CTGAN score-space augmentation to handle
+        class imbalance at the fusion layer.
   \item A \textbf{formal triage policy} over $(\hat{p}, \sigma_{\max})$ space
         with four jointly optimised thresholds via Bayesian TPE, reducing
         escalation rate from $54.3\%$ to $29.1\%$ while improving balanced accuracy
@@ -169,15 +167,6 @@ optimisation via Bayesian TPE. The framework treats uncertainty as a
         EWC enabling continual family adaptation without catastrophic
         forgetting.
 \end{enumerate}
-
-The remainder of this paper reviews related work
-(Section~\ref{sec:related}), formalises the detection and triage problem
-(Section~\ref{sec:problem}), describes the three agents, MC Dropout
-uncertainty, Decision MLP fusion, the triage policy, Peer Consultation,
-and conformal prediction (Sections~\ref{sec:agents}--\ref{sec:conformal}),
-presents experimental evaluation (Section~\ref{sec:eval}), and discusses
-results, limitations, and conclusions
-(Sections~\ref{sec:discussion}--\ref{sec:conclusion}).
 
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Related Work}\label{sec:related}
@@ -1344,9 +1333,8 @@ $0.01$ & $99\%$ & $54.5$ & $98.5$ \\
 \paragraph{Coverage under distribution shift.}
 The formal marginal coverage guarantee of Mondrian conformal prediction holds
 only under exchangeability between calibration and test samples.
-Table~\ref{tab:conformal_shift} reports empirical coverage across all four
-splits (thresholds calibrated on the split-specific validation set).
-On in-distribution splits, empirical coverage at $\alpha{=}0.01$ is within
+On in-distribution splits (thresholds calibrated on the split-specific
+validation set), empirical coverage at $\alpha{=}0.01$ is within
 $0.7$ points of the $99\%$ nominal target; family holdout is the critical
 exception, collapsing to $\mathbf{88.0\%}$ at $\alpha{=}0.01$ and $59.2\%$
 at $\alpha{=}0.10$ (Fig.~\ref{fig:radar_splits}), confirming that
@@ -1358,32 +1346,8 @@ guarantees degrade under covariate shift.
 in-distribution validity certificate rather than a universal bound;} for
 unseen families, the escalation mechanism (via $\sigma_{\text{beh}}$
 thresholding) provides a complementary, uncertainty-driven safety net.
-Per-$\alpha$ escalation rates and the coverage-shift figure are provided in
-Supplementary Section~S-VIII.
-
-\begin{table}[t]
-\centering
-\footnotesize
-\caption{Mondrian conformal prediction empirical coverage across four
-  evaluation splits at three nominal miscoverage levels $\alpha$.
-  Thresholds calibrated on the split-specific validation set.
-  Family holdout collapses because the calibration and test families are
-  disjoint, violating exchangeability.
-}
-\label{tab:conformal_shift}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccc}
-\toprule
-Split & $\alpha{=}0.01$ & $\alpha{=}0.05$ & $\alpha{=}0.10$ \\
- & ($99\%$ nom.) & ($95\%$ nom.) & ($90\%$ nom.) \\
-\midrule
-Random           & $99.2\%$ & $93.8\%$ & $87.8\%$ \\
-Hardware         & $98.3\%$ & $93.3\%$ & $87.1\%$ \\
-Temporal         & $99.1\%$ & $94.2\%$ & $88.6\%$ \\
-Family (unseen)  & $\mathbf{88.0\%}$ & $\mathbf{73.2\%}$ & $\mathbf{59.2\%}$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+The full per-split, per-$\alpha$ coverage and escalation-rate table and
+coverage-shift figure are provided in Supplementary Section~S-VIII.
 
 \subsection{Expert Feedback Loop}\label{sec:results_ewc}
 
@@ -1477,50 +1441,38 @@ $\sigma_{\text{beh}}{=}0$ by construction with a single pass.
 memory-only ($\chi_m$, 11D) $0.890$; combined 16D $\mathbf{0.960}$,
 confirming complementarity.
 \textbf{(3) Decision MLP depth:} one ($6{\to}32{\to}1$) and two hidden-layer
-variants are statistically equivalent on AUROC
-(Section~\ref{sec:results_fusion_compare}); calibration favours the
-two-layer variant (ECE $0.020$ vs.\ one-layer $0.031$), though we retain
-the one-layer architecture for consistency with the prior two-agent
-design~\cite{kabuye2026sabre}.
+variants are statistically equivalent on both AUROC
+(Section~\ref{sec:results_fusion_compare}) and calibration (ECE $0.023$
+each), so we retain the one-layer architecture for consistency with the
+prior two-agent design~\cite{kabuye2026sabre}.
 \textbf{(4) CTGAN ratio:} $N_{\text{synth}} \in [500,5000]$ produces no
 significant AUROC/ECE change; we adopt $N_{\text{synth}}{=}2{,}000$.
 Full figures and tables are in Supplementary Section~S-VI.
 
 \subsection{Behavioural Baselines, Deep Ensembles, and Knowledge Robustness}\label{sec:results_extra}
 
-Three further checks address questions not covered above; full tables are
-in Supplementary Section~S-IX. \textbf{Tabular baselines:} on the identical
-16D Behavioural feature set, Random Forest ($0.989$), gradient boosting
-($0.975$), and an ordinary MLP ($0.968$) all exceed the CNN's AUROC
-($0.963$); logistic regression ($0.851$) and an RBF SVM ($0.953$) do not.
-Convolution's locality assumption is therefore not obviously justified by
-raw discrimination alone---we retain the CNN chiefly because MC Dropout
-gives it a native, integrated uncertainty mechanism the tabular
-alternatives lack. \textbf{Deep ensemble vs.\ MC Dropout:} six
-independently-trained CNN seeds match MC Dropout's AUROC ($0.963$ vs.\
-$0.963$) with better calibration (ECE $0.027$ vs.\ $0.042$), at $6\times$
-the storage cost; both methods' error rate rises monotonically with
-predicted uncertainty. \textbf{Knowledge robustness:} a genuine 2-agent
-Behavioural+Knowledge fusion is statistically indistinguishable from
-Behavioural-alone on AUROC but better calibrated (ECE $0.018$ vs.\
-$0.040$), confirming Knowledge functions as a learned prior, not a
-discriminative signal; swapping the deployed model's Knowledge input
-between corpus-mean, masked, and adversarial values changes AUROC by
-$<0.001$ but degrades calibration (ECE $0.015{\to}0.023$), since Peer
-Consultation only re-weights an agent whose \emph{own} uncertainty is
-elevated, and a low-uncertainty adversarial input evades this safeguard.
-
-\textbf{Cost-sensitive triage.} Balanced accuracy alone hides an important
-tradeoff: the policy in Table~\ref{tab:policy_compare} allows $6.0\%$ of
-ransomware through undetected at only $0.6\%$ analyst workload. A
-cost-sensitive re-optimisation ($J_{\text{cost}} = -(10\,P_{\text{ransomware
-allowed}} + 5\,P_{\text{benign auto-contained}} + P_{\text{escalated}})$,
-an illustrative weighting reflecting that missed ransomware is costlier
-than a false auto-contain, which is costlier than an escalation) cuts
-missed ransomware to $0.9\%$ at the cost of raising analyst workload to
-$22.4\%$; operators should select thresholds against their own cost
-structure, not balanced accuracy alone. Full confusion breakdowns are in
-Supplementary Section~S-IX.
+Three further checks address questions not covered above (full tables,
+methodology, and confusion breakdowns in Supplementary Section~S-IX).
+\textbf{Tabular baselines:} on the identical 16D Behavioural feature set,
+Random Forest, gradient boosting, and an ordinary MLP all exceed the CNN's
+AUROC ($0.963$); we retain the CNN because MC Dropout gives it a native,
+integrated uncertainty mechanism the tabular alternatives lack.
+\textbf{Deep ensemble vs.\ MC Dropout:} a genuine 6-member ensemble
+matches MC Dropout's AUROC with better calibration (ECE $0.027$ vs.\
+$0.042$) at $6\times$ the storage cost. \textbf{Knowledge robustness:} a
+genuine 2-agent Behavioural+Knowledge fusion is statistically
+indistinguishable from Behavioural-alone on AUROC but better calibrated
+(ECE $0.018$ vs.\ $0.040$), confirming Knowledge functions as a learned
+prior; swapping its input at inference time between corpus-mean, masked,
+and adversarial values changes AUROC by $<0.001$ but degrades calibration
+(ECE $0.015{\to}0.023$), since Peer Consultation only re-weights an agent
+whose \emph{own} uncertainty is elevated, and a low-uncertainty
+adversarial input evades this safeguard.
+\textbf{Cost-sensitive triage:} balanced accuracy alone hides an important
+tradeoff exposed by re-optimising with an illustrative cost objective that
+penalises missed ransomware more than a false auto-contain, and a false
+auto-contain more than an escalation; operators should select thresholds
+against their own cost structure, not balanced accuracy alone.
 
 \subsection{Fusion Method Comparison}\label{sec:results_fusion_compare}
 
@@ -1530,17 +1482,18 @@ on the identical (unaugmented) random-stratified score pool: na\"{i}ve
 and three further [S+B+K] fusion architectures on the full six-dimensional
 pool---Random Forest, Gradient Boosting (GBT), and a two-layer MLP.
 On in-distribution splits, all MLP and tree-based methods cluster within
-$0.005$ AUROC of each other: GBT achieves the highest AUROC ($0.954$
-random-stratified), while calibration is best for MLP-2L and RF (ECE
-$0.020$ each), followed by GBT ($0.023$) and MLP-1L ($0.031$). Family
-holdout degrades all methods similarly (AUROC $\approx 0.68$), confirming
-the degradation originates in the score-pool features rather than the
-fusion architecture. We retain the one-layer Decision MLP as the deployed
-architecture for its simplicity and continuity with the prior two-agent
-design~\cite{kabuye2026sabre}, not for a calibration advantage: once
-Behavioural scoring is honestly out-of-fold, MLP-2L and Random Forest are
-in fact slightly better calibrated. Full results are provided in
-Supplementary Section~S-VIII.
+$0.005$ AUROC of each other: GBT and MLP-2L are tied for the highest
+AUROC ($0.954$ random-stratified), while GBT is now the best-calibrated
+(ECE $0.021$), with RF, MLP-2L, and MLP-1L essentially tied just behind
+($0.023$ each). Family holdout degrades all methods similarly (AUROC
+$\approx 0.68$), confirming the degradation originates in the score-pool
+features rather than the fusion architecture. We retain the one-layer
+Decision MLP as the deployed architecture for its simplicity and
+continuity with the prior two-agent design~\cite{kabuye2026sabre}, not
+for a calibration advantage: the five methods are now essentially
+indistinguishable on calibration once Behavioural scoring is honestly
+out-of-fold, with GBT holding only a small edge. Full results are
+provided in Supplementary Section~S-VIII.
 
 \subsection{Score-Space Augmentation Under Class Imbalance}\label{sec:results_imbalance}
 
