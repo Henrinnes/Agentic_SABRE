@@ -1598,39 +1598,12 @@ and Ryuk under leave-one-family-out (worst detection rate of any held-out
 family, yet only $1.5\%$ escalation) show the system can also be
 confidently wrong rather than appropriately uncertain. The
 uncertainty-driven safety net is thus a substantial reduction in
-silent-failure risk, not a guarantee against it.
-
-\subsection{Additional Limitations}
-
-\textbf{Dataset scope.} RanSMAP families range from WannaCry (2017) to
-Conti (2022); post-2022 families (Cl0p, BlackCat/ALPHV, LockBit 3.0) are
-not represented, since RanSMAP is the only publicly available
-hypervisor-level telemetry dataset with family labels and multi-split
-protocols at time of writing. Extension to current-generation families is
-future work.
-
-\textbf{Adversarial robustness.} An adaptive attacker aware of the triage
-policy could craft executions suppressing $\sigma_{\max}$ below $\kappa$
-while keeping $\hat{p}$ below $\tau_{\text{high}}$, avoiding both
-Escalation and Auto-Contain. Adversarial attacks against MC Dropout
-uncertainty estimates~\cite{gal2016dropout} remain an open problem we
-defer to future work.
-
-\textbf{Knowledge Agent sample size.} The RansKnow corpus~\cite{ransknow_2026}
-contains only $718$ transcripts (${\approx}503$/$108$/$107$
-train/val/test), small for a CNN classifier; since its role is
-complementary ATT\&CK-level signal, its generalisation metrics should be
-read accordingly.
-
-\textbf{Calibration-set separation for temperature scaling and TPE.}
-Temperature scaling and Bayesian TPE are fit on a stratified sample drawn
-independently of the session-level train/val/test partitions used
-elsewhere in this paper, rather than a dedicated held-out slice of the
-same partition scheme; a rigorous re-fit on a clean, partition-consistent
-calibration set is deferred to future work (Supplementary
-Section~S-XI). All AUROC, calibration, and LOFO numbers reported here are
-unaffected, since they do not depend on the temperature or policy
-thresholds' fitting data.
+silent-failure risk, not a guarantee against it. Four additional,
+secondary limitations---RanSMAP's dataset scope (no post-2022 families),
+adversarial robustness against a triage-policy-aware attacker, the
+Knowledge Agent's sample size, and calibration-set separation for
+temperature scaling and TPE---are discussed in Supplementary
+Section~S-XI.
 
 \subsection{Comparison with Hirano and Kobayashi, Adaptive Thresholding, and Deployment}\label{sec:discussion_hirano}
 
