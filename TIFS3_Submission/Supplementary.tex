@@ -611,11 +611,24 @@ Family      & $0.01\ (99\%)$ & $\mathbf{88.0\%}$ & $56.1\%$ \\
   \caption{Session-level aggregation of Decision MLP predictions across all
     four evaluation splits. Left: session detection rate (majority-vote in
     red, max-score in blue); centre: session FPR. Majority-vote achieves
-    low session FPR ($1.5$--$5.6\%$) on all in-distribution splits with
-    detection rates $\geq 98.9\%$. Right: latency-to-first-detection
+    low session FPR ($3.0$--$6.1\%$) on all in-distribution splits with
+    detection rates $\geq 99.4\%$. Right: latency-to-first-detection
     histogram for the random-stratified split ($133$ ransomware sessions;
     median $0\,\text{s}$, p90 $20\,\text{s}$).}
   \label{fig:ed_session_level}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/fig_radar_splits.pdf}
+  \caption{Generalisation profile across the four evaluation splits: AUROC,
+    selective precision-coverage (AUSPC), session-level detection rate, and Mondrian
+    conformal coverage at $\alpha{=}0.01$. Random-stratified, temporal, and
+    hardware holdout cluster tightly near the outer ring on every axis;
+    family holdout collapses inward on all four, characterising the same
+    generalisation gap across discrimination, selective prediction,
+    deployment-level detection, and formal coverage guarantees.}
+  \label{fig:radar_splits}
 \end{figure}
 
 Table~\ref{tab:fusion_compare} reports the full per-split fusion method

@@ -1144,18 +1144,14 @@ $\sigma_{\text{beh}}$ correctly rises, routing these samples to
 with Hirano and Kobayashi~\cite{hirano2025ransmap}'s detector on the same
 hardware-holdout partition is provided in Section~\ref{sec:discussion_hirano}.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig_radar_splits.pdf}
-  \caption{Generalisation profile across the four evaluation splits: AUROC,
-    selective precision-coverage (AUSPC), session-level detection rate, and Mondrian
-    conformal coverage at $\alpha{=}0.01$. Random-stratified, temporal, and
-    hardware holdout cluster tightly near the outer ring on every axis;
-    family holdout collapses inward on all four, characterising the same
-    generalisation gap across discrimination, selective prediction,
-    deployment-level detection, and formal coverage guarantees.}
-  \label{fig:radar_splits}
-\end{figure}
+The generalisation profile across all four splits---AUROC, selective
+precision-coverage (AUSPC), session-level detection rate, and Mondrian
+conformal coverage at $\alpha{=}0.01$---is plotted as a radar chart in
+Supplementary Section~S-VIII: random-stratified, temporal, and hardware
+holdout cluster tightly near the outer ring on every axis, while family
+holdout collapses inward on all four, characterising the same
+generalisation gap across discrimination, selective prediction,
+deployment-level detection, and formal coverage guarantees.
 
 \subsection{Statistical Significance, Risk-Coverage, and Session-Level Analysis}\label{sec:results_significance}
 
@@ -1303,7 +1299,7 @@ On in-distribution splits (thresholds calibrated on the split-specific
 validation set), empirical coverage at $\alpha{=}0.01$ is within
 $0.7$ points of the $99\%$ nominal target; family holdout is the critical
 exception, collapsing to $\mathbf{88.0\%}$ at $\alpha{=}0.01$ and $59.2\%$
-at $\alpha{=}0.10$ (Fig.~\ref{fig:radar_splits}), confirming that
+at $\alpha{=}0.10$ (Supplementary Section~S-VIII), confirming that
 exchangeability is violated when test families are entirely absent from
 calibration---consistent
 with~\cite{angelopoulos_conformal_risk_2022}'s observation that conformal
@@ -1568,8 +1564,9 @@ The framework's principal failure mode is distributional shift at the
 family level (Section~\ref{sec:results_lofo}): family-holdout AUROC drops
 to $0.677$ fused, and---since the Knowledge and Semantic Agents' fixed
 corpus-mean scores (Remark~\ref{rem:corpus_mean}) carry no family-specific
-signal to recover it---this degradation is consistent across every axis in
-Fig.~\ref{fig:radar_splits}, not an outlier metric. The framework is
+signal to recover it---this degradation is consistent across every axis of
+the generalisation-profile radar (Supplementary Section~S-VIII), not an
+outlier metric. The framework is
 therefore not suitable for autonomous containment on families entirely
 absent from training without prior operator review. Leave-one-family-out
 evaluation shows this risk is family-specific rather than uniform (Darkside
