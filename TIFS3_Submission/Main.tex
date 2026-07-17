@@ -62,44 +62,32 @@ E-mail: bissac@ieee.org.}%
 \maketitle
 
 \begin{abstract}
-Ransomware detection under operational constraints demands more than a binary
-verdict: it requires principled uncertainty estimation, heterogeneous evidence
-fusion, and uncertainty-driven triage that balances autonomous containment
-against analyst escalation. We present a three-agent framework addressing
-these requirements through four coupled contributions. First, a Semantic CNN
-on static PE embeddings, a Behavioural CNN on 16-dimensional hypervisor
-telemetry, and a Knowledge CNN on ATT\&CK tactic embeddings each employ Monte
-Carlo Dropout to produce per-sample predictive probabilities and epistemic
-uncertainties. Second, a Decision MLP learns a temperature-calibrated
-aggregate risk score (ECE $0.026$) from the six-dimensional score
-pool---since RanSMAP, RDset, and RansKnow share no real per-sample pairing,
-the Semantic and Knowledge Agents contribute a fixed, label-independent
-corpus-mean score during RanSMAP fusion, over which naive mean fusion is
-itself well-calibrated (ECE $0.023$), so fusion's principal value lies in
-the uncertainty structure it exposes for triage rather than incremental
-AUROC or a stark calibration gain over mean fusion;
-Conditional Tabular GAN (CTGAN) augmentation addresses
-score-space imbalance without retraining base agents. Third, a four-threshold
-triage policy optimised via Bayesian TPE reduces
-the escalation rate from $54.3\%$ to $29.1\%$ while raising balanced accuracy from
-$0.770$ to $0.865$. Fourth, a Peer Consultation mechanism mitigates knowledge
-collapse under concurrent benign--ransomware execution, and an Expert Feedback
-Loop with Elastic Weight Consolidation enables continual adaptation to novel
-families with negligible catastrophic forgetting
-($\Delta\text{AUPRC}{=}0.001$). Evaluated across four generalisation axes
-over six independent seeds on RanSMAP, RDset, and RansKnow, the framework
-achieves AUROC $0.996$ on static PE detection and AUROC $0.963$ on runtime
-behavioural detection, matched rather than exceeded by the fused Decision MLP
-output ($0.952$), which trades a small AUROC margin for substantially better
-calibration and principled per-sample uncertainty.
-Under family holdout, AUROC falls to $0.707$ ($0.677$ fused), revealing a
-meaningful generalisation gap for unseen families; epistemic uncertainty
-routes most, but not all, novel-family samples to analyst escalation rather
-than autonomous containment or silent miss---Ryuk is a documented exception
-where the system is confidently wrong rather than appropriately uncertain.
-A Mondrian conformal prediction wrapper provides
-distribution-free coverage under exchangeability, auto-classifying $54\%$ of traffic
-at $99\%$ coverage.
+Ransomware detection demands more than a binary verdict: it requires
+uncertainty estimation, heterogeneous evidence fusion, and
+uncertainty-driven triage. We present a three-agent framework with four
+contributions. First, a Semantic CNN (static PE embeddings), a
+Behavioural CNN (16D hypervisor telemetry), and a Knowledge CNN (ATT\&CK
+tactic embeddings) each use Monte Carlo Dropout for predictive
+probability and epistemic uncertainty. Second, a Decision MLP learns a
+temperature-calibrated risk score (ECE $0.026$) from the six-dimensional
+score pool; since the Semantic and Knowledge Agents contribute only a
+fixed corpus-mean score during RanSMAP fusion, naive mean fusion is
+well-calibrated (ECE $0.023$), so fusion's value lies in the
+uncertainty structure it exposes for triage rather than a calibration or
+AUROC gain; CTGAN augmentation addresses score-space imbalance without
+retraining base agents. Third, a four-threshold triage policy optimised
+via Bayesian TPE cuts escalation from $54.3\%$ to $29.1\%$ while raising
+balanced accuracy from $0.770$ to $0.865$. Fourth, Peer Consultation mitigates
+knowledge collapse under concurrent execution, and an Expert Feedback Loop
+with Elastic Weight Consolidation limits catastrophic forgetting
+($\Delta\text{AUPRC}{=}0.001$). Over six seeds and four generalisation splits on
+RanSMAP, RDset, and RansKnow, the framework achieves AUROC $0.996$ (static
+PE) and $0.963$ (behavioural), matched by the fused Decision MLP ($0.952$).
+Family holdout AUROC falls to $0.707$ ($0.677$ fused): epistemic uncertainty
+routes most novel-family samples to escalation rather than silent miss,
+though Ryuk is an exception where the system is confidently wrong. A
+Mondrian conformal prediction wrapper adds distribution-free coverage
+under exchangeability, auto-classifying $54\%$ of traffic at $99\%$ coverage.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -179,9 +167,9 @@ captures low-level I/O and memory access patterns before encryption
 artefacts surface in the filesystem, providing strong coverage of novel
 variants, though IRP monitors~\cite{scaife_cryptolock_2016} remain
 vulnerable to slow-encrypt evasion and API-call
-classifiers~\cite{Fernando2024FeSAD,sgandurra_automated_2016} require
+classifiers~\cite{sgandurra_automated_2016} require
 costly process-level instrumentation.
-Survey work~\cite{moussaileb2021survey,Ispahany2024Survey} confirms that
+Survey work~\cite{moussaileb2021survey} confirms that
 runtime behavioural methods outperform static analysis against obfuscated
 ransomware, but notes a structural limitation shared by all existing
 systems: they produce a scalar confidence score with no mechanism for
@@ -247,7 +235,7 @@ reconstruction artefacts.
 Catastrophic forgetting---gradient updates for a new task systematically
 overwriting prior weight configurations~\cite{kirkpatrick_ewc_2017}---is
 the key barrier to continual adaptation; temporal evaluation
-frameworks~\cite{pendlebury_tesseract_2019,jordaney_transcend_2017,Ceschin2022ConceptDrift}
+frameworks~\cite{pendlebury_tesseract_2019,jordaney_transcend_2017}
 establish that standard classifiers lose substantial accuracy within
 months of the training cutoff under concept drift.
 Elastic Weight Consolidation (EWC)~\cite{kirkpatrick_ewc_2017} mitigates
