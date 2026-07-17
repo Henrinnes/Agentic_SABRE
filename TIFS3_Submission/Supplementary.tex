@@ -953,6 +953,22 @@ $[S{+}B{+}K]$ Decision MLP output.
   \label{fig:triage_space}
 \end{figure}
 
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Calibration-Set Separation for Temperature Scaling and TPE}\label{sec:supp_calset}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The Decision MLP's temperature scaling and Bayesian TPE triage-policy
+optimisation are fit on a stratified sample drawn independently of the
+session-level train/val/test partitions used elsewhere in this paper,
+rather than on a dedicated held-out slice of the same partition scheme.
+We have not audited this sample for overlap with the evaluation splits'
+training sessions. A rigorous re-fit on a clean, partition-consistent
+calibration set---with temperature scaling, TPE, and conformal
+calibration each using their own disjoint slice, as recommended in peer
+review---is deferred to future work; all AUROC, calibration, and LOFO
+numbers reported in the main paper are unaffected, since they do not
+depend on the temperature or policy thresholds' fitting data.
+
 \bibliographystyle{IEEEtran}
 \bibliography{Reference_Main}
 
