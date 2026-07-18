@@ -1123,22 +1123,15 @@ $(\tau^*, \kappa^*) \approx (0.35, 0.22)$ for the random-stratified split.
 
 \subsection{Generalisation Analysis}
 
-Table~\ref{tab:auroc_splits} reports the Behavioural CNN and Decision MLP
-AUROC across the four evaluation splits over $K{=}6$ seeds (seed
-variability ${<}0.002$ for the Decision MLP on random, temporal, and
-hardware). Temporal ($0.966$) holdout slightly exceeds, and hardware
-($0.944$) holdout slightly trails, random-stratified performance
-($0.963$), confirming the Behavioural Agent's discrimination is stable
-across sessions and hardware without retraining; the Decision MLP
-(Table~\ref{tab:auroc_splits}) tracks the same pattern a small, consistent
-margin below it (Remark~\ref{rem:corpus_mean}).
-Family holdout ($0.681 \pm 0.001$ fused; $0.707 \pm 0.010$ Behavioural-only)
-reveals a meaningful gap: unseen families exhibit distributional shift in
-I/O telemetry, and the Knowledge and Semantic Agents' fixed corpus-mean
-scores contribute no family-specific signal to help close it, but
-$\sigma_{\text{beh}}$ correctly rises, routing these samples to
-\textsc{Escalate} rather than \textsc{Auto-Contain}. A direct comparison
-with Hirano and Kobayashi~\cite{hirano2025ransmap}'s detector on the same
+Over $K{=}6$ seeds (variability ${<}0.002$ for the Decision MLP on
+random, temporal, and hardware), temporal ($0.966$) holdout slightly
+exceeds, and hardware ($0.944$) holdout slightly trails, random-stratified
+performance ($0.963$), confirming the Behavioural Agent's discrimination
+is stable across sessions and hardware without retraining; the Decision
+MLP tracks the same pattern a small, consistent margin below it
+throughout (Remark~\ref{rem:corpus_mean}), family holdout remaining the
+one outlier (Section~\ref{sec:results_agents}). A direct comparison with
+Hirano and Kobayashi~\cite{hirano2025ransmap}'s detector on the same
 hardware-holdout partition is provided in Section~\ref{sec:discussion_hirano}.
 
 The generalisation profile across all four splits---AUROC, selective
@@ -1394,11 +1387,10 @@ $\sigma_{\text{beh}}{=}0$ by construction with a single pass.
 \textbf{(2) Feature ablation:} storage-only ($\chi_s$, 5D) AUROC $0.880$;
 memory-only ($\chi_m$, 11D) $0.890$; combined 16D $\mathbf{0.960}$,
 confirming complementarity.
-\textbf{(3) Decision MLP depth:} one ($6{\to}32{\to}1$) and two hidden-layer
-variants are statistically equivalent on AUROC
-(Section~\ref{sec:results_fusion_compare}), though the two-layer variant
-is somewhat better-calibrated (ECE $0.022$ vs.\ $0.026$); we retain the
-one-layer architecture for consistency with the prior two-agent
+\textbf{(3) Decision MLP depth:} one and two hidden-layer variants are
+statistically equivalent on AUROC but not calibration
+(Section~\ref{sec:results_fusion_compare}); we retain the one-layer
+architecture for consistency with the prior two-agent
 design~\cite{kabuye2026sabre}.
 \textbf{(4) CTGAN ratio:} $N_{\text{synth}} \in [500,5000]$ produces no
 significant AUROC/ECE change; we adopt $N_{\text{synth}}{=}2{,}000$.
