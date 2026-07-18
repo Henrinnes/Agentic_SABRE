@@ -63,9 +63,13 @@ def fig2_roc():
     C_MN  = "#fdae61"
     C_MLP = "#d7191c"
 
-    fig, axes = plt.subplots(2, 2, figsize=(7.4, 4.3))
+    # Single-column layout: 2x2 grid, one shared legend instead of four
+    # per-panel legends, sized to fit \columnwidth in the two-column
+    # IEEE layout rather than spanning both columns as figure*.
+    fig, axes = plt.subplots(2, 2, figsize=(3.45, 3.55))
     axes = axes.flatten()
 
+    handles, labels = None, None
     for ax, (key, title) in zip(axes, splits):
         d = e1[key]
         auc_b   = d["B"]["auroc"]
@@ -78,18 +82,25 @@ def fig2_roc():
             ("[S+B+K] MLP",  C_MLP, auc_mlp),
         ]:
             fpr, tpr = binormal_roc(auc_val)
-            ax.plot(fpr, tpr, color=col, linewidth=1.4,
+            ax.plot(fpr, tpr, color=col, linewidth=1.2,
                     label=f"{label} (AUC={auc_val:.3f})")
 
-        ax.plot([0, 1], [0, 1], "k--", linewidth=0.7)
-        ax.set_title(title, fontsize=8.5, fontweight="bold")
-        ax.set_xlabel("False Positive Rate", fontsize=7.5)
-        ax.set_ylabel("True Positive Rate", fontsize=7.5)
-        ax.legend(fontsize=6.5, loc="lower right")
-        ax.tick_params(labelsize=7)
+        ax.plot([0, 1], [0, 1], "k--", linewidth=0.6)
+        ax.set_title(title, fontsize=7, fontweight="bold")
+        ax.set_xlabel("FPR", fontsize=6.5)
+        ax.set_ylabel("TPR", fontsize=6.5)
+        ax.tick_params(labelsize=5.5)
         ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+        handles, labels = ax.get_legend_handles_labels()
 
-    plt.tight_layout(pad=0.5, h_pad=0.8, w_pad=0.8)
+    # Drop the per-panel AUC value from the shared legend (it duplicates
+    # what each panel's title/curve already conveys per split) -- keep
+    # just the three method labels, shared across all four panels.
+    short_labels = ["[B]", "[B+K] Mean", "[S+B+K] MLP"]
+    fig.legend(handles[:3], short_labels, loc="lower center", ncol=3,
+               fontsize=6, frameon=False, bbox_to_anchor=(0.5, -0.02))
+
+    plt.tight_layout(pad=0.3, h_pad=0.6, w_pad=0.6, rect=(0, 0.045, 1, 1))
     out = FIG_DIR / "fig2_roc.pdf"
     plt.savefig(out, dpi=DPI, bbox_inches="tight")
     plt.savefig(FIG_DIR / "fig2_roc.png", dpi=DPI, bbox_inches="tight")
