@@ -862,8 +862,8 @@ disjoint train/test splits at the binary (file-hash) level.
 
 \textbf{RanSMAP}~\cite{hirano2025ransmap}: $35{,}857$ ten-second execution
 windows from $1{,}776$ sessions across 15 hardware configurations (four
-CPUs: Celeron G3920, Core i3-12100, Core i5-12500, Core i7-12700; six
-DDR4/DDR5 frequencies; two RAM capacities), six ransomware families
+CPU models, six DDR4/DDR5 frequencies, two RAM capacities), six
+ransomware families
 (Conti, Darkside, LockBit, REvil, Ryuk, WannaCry), and six benign
 applications (AESCrypt, Firefox, Idle, Office, SDelete, Zip) under BitVisor
 hypervisor surveillance; moderate class imbalance addressed via SMOTE
@@ -1151,8 +1151,7 @@ statistic is degenerate with zero discordant pairs, so we do not report a
 $\chi^2$/$p$-value for this test), despite the small, consistent
 per-window AUROC gap above; a window-level McNemar on the same split is
 nominally significant ($\chi^2{=}53.7$, $p{<}10^{-4}$) but is not
-independence-respecting and is reported only for continuity with earlier
-drafts.
+independence-respecting, for the reason above.
 
 \textbf{Selective precision-coverage:} sweeping the auto-contain threshold
 $\tau$ and tracing precision against the fraction of traffic covered
@@ -1396,17 +1395,15 @@ matches MC Dropout's AUROC with better calibration (ECE $0.027$ vs.\
 $0.042$) at $6\times$ the storage cost. \textbf{Knowledge robustness:} a
 genuine 2-agent Behavioural+Knowledge fusion is statistically
 indistinguishable from Behavioural-alone on AUROC but better calibrated
-(ECE $0.018$ vs.\ $0.040$), confirming Knowledge functions as a learned
-prior; swapping its input at inference time between corpus-mean, masked,
-and adversarial values changes AUROC by $<0.001$ but degrades calibration
-(ECE $0.015{\to}0.023$), since Peer Consultation only re-weights an agent
-whose \emph{own} uncertainty is elevated, and a low-uncertainty
-adversarial input evades this safeguard.
-\textbf{Cost-sensitive triage:} balanced accuracy alone hides an important
-tradeoff exposed by re-optimising with an illustrative cost objective that
-penalises missed ransomware more than a false auto-contain, and a false
-auto-contain more than an escalation; operators should select thresholds
-against their own cost structure, not balanced accuracy alone.
+(ECE $0.018$ vs.\ $0.040$); an adversarial input-swap test shows Peer
+Consultation's safeguard can still be evaded by a low-uncertainty
+adversarial input, degrading calibration (ECE $0.015{\to}0.023$) though
+not AUROC (mechanism in Supplementary Section~S-IX).
+\textbf{Cost-sensitive triage:} re-optimising with an illustrative cost
+objective (missed ransomware $>$ false auto-contain $>$ escalation)
+exposes a tradeoff balanced accuracy alone hides; operators should select
+thresholds against their own cost structure (Supplementary
+Section~S-IX).
 
 \subsection{Fusion Method Comparison}\label{sec:results_fusion_compare}
 
