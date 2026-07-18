@@ -244,10 +244,14 @@ framework~\cite{kabuye2026sabre} (Semantic + Behavioural CNN, MC
 Dropout, fixed triage policy) with the four contributions listed
 above---a third Knowledge agent, Bayesian TPE threshold optimisation,
 CTGAN score-space augmentation, and EWC/conformal wrappers---each
-technically distinct from that prior work. All experiments and reported
-numerical results in this paper were rerun independently; no numerical
-results or figures are reused from~\cite{kabuye2026sabre}, though both
-papers draw on the same underlying RDset and RanSMAP datasets.
+technically distinct from that prior work. The Behavioural CNN baseline
+(Table~\ref{tab:auroc_splits}) is the same checkpoint and multi-split
+evaluation reported in~\cite{kabuye2026sabre} and is not independently
+rerun here; every downstream result building on it---fusion, temperature
+calibration, the Bayesian TPE triage policy, Peer Consultation, EWC, and
+the Knowledge Agent itself---is newly computed for this paper, and no
+figures are reused from~\cite{kabuye2026sabre}. Both papers draw on the
+same underlying RDset and RanSMAP datasets.
 
 \begin{figure*}[t]
   \centering
@@ -990,6 +994,10 @@ gap is correctly identified by elevated $\sigma_{\text{beh}}$ routing to
   score pool (Remark~\ref{rem:corpus_mean}).
   Bold = best per column.
   $--$ = not evaluated (dataset mismatch).
+  ${}^\dagger$Behavioural CNN row as reported
+  in~\cite{kabuye2026sabre} (same checkpoint, not rerun here); all
+  other rows and all downstream results are newly computed for this
+  paper.
 }
 \label{tab:auroc_splits}
 \setlength{\tabcolsep}{5pt}
@@ -999,7 +1007,7 @@ System & Random & Temporal & Family & Hardware \\
 \midrule
 Semantic CNN (RDset)
   & $\mathbf{0.996}$ & $--$ & $--$ & $--$ \\
-Behavioural CNN
+Behavioural CNN${}^\dagger$
   & $\mathbf{0.961} \pm 0.003$ & $\mathbf{0.960} \pm 0.005$ & $\mathbf{0.707} \pm 0.010$ & $\mathbf{0.939} \pm 0.006$ \\
 Mean Fusion ($\hat{p}$ avg.)
   & $0.889$ & $0.877$ & $0.650$ & $0.854$ \\
