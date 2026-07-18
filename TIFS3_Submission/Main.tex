@@ -124,11 +124,9 @@ We identify three structural gaps in the current state of practice:
         detection to automatic containment risks business disruption.
 \end{enumerate}
 
-This paper presents a framework that addresses all three gaps through a
-principled pipeline: per-agent uncertainty quantification via MC Dropout,
-learned score fusion via a calibrated Decision MLP, and triage policy
-optimisation via Bayesian TPE. The framework treats uncertainty as a
-\emph{control variable} for deployment rather than a diagnostic afterthought.
+This paper presents a framework addressing all three gaps, treating
+uncertainty as a \emph{control variable} for deployment rather than a
+diagnostic afterthought, via the four contributions below.
 
 \subsection*{Contributions}
 \begin{enumerate}
@@ -1176,7 +1174,7 @@ latency rises modestly under distribution shift (random $4.3\,\text{s}$ vs.\
 family holdout $7.0\,\text{s}$). Full statistics are in Supplementary
 Section~S-VIII.
 
-\subsection{OOD Ransomware Variants}\label{sec:ood_variants}
+\subsection{OOD Variants and Concurrent Execution}\label{sec:ood_variants}
 
 The \texttt{variants} partition of RanSMAP provides $1{,}397$ windows from
 seven Conti sub-variants (Conti.A--G), none seen in training. Against
@@ -1196,8 +1194,6 @@ case. This partial coverage gap is consistent with the pattern already
 noted for SDelete+REvil below, and is discussed further in
 Section~\ref{sec:limitations}. The full per-variant table and figure are
 provided in Supplementary Section~S-VIII.
-
-\subsection{Simultaneous Execution}
 
 The \texttt{mix} partition of RanSMAP provides $1{,}944$ windows from ten
 concurrent-execution combinations (ransomware + benign application running
