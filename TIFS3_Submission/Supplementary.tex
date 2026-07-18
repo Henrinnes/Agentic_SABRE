@@ -433,20 +433,6 @@ its plotted rates are no longer current; see Section~VII
 mix-partition figures and numbers, including the closed SDelete+REvil
 coverage gap.
 
-This section provides the full statistical-significance, risk-coverage, and
-session-level analysis summarised in the main paper (Section~VIII).
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig7_multiseed.pdf}
-  \caption{AUROC distribution over $K{=}6$ seeds across four evaluation
-    splits. Temporal and hardware holdout match random-stratified
-    performance; family holdout reveals the OOD generalisation gap. This
-    per-seed view underlies the generalisation-profile radar in the main
-    paper.}
-  \label{fig:multiseed}
-\end{figure}
-
 Figs.~\ref{fig:ea_significance}--\ref{fig:radar_splits} below provide the
 full statistical-significance, risk-coverage, and session-level analysis
 summarised in the main paper (Section~VIII); see that section for the
@@ -489,7 +475,10 @@ paper (Section~VIII).
 \centering
 \caption{Mondrian conformal prediction empirical coverage and escalation rate
   across four evaluation splits at three nominal miscoverage levels $\alpha$
-  (extends the corresponding table in the main paper).}
+  (extends the corresponding table in the main paper). In-distribution
+  splits meet or closely approach the nominal guarantee; family holdout
+  collapses, confirming the exchangeability assumption is violated for
+  novel ransomware families.}
 \label{tab:conformal_shift_full}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{llcc}
@@ -514,18 +503,6 @@ Family      & $0.01\ (99\%)$ & $\mathbf{88.2\%}$ & $56.5\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig_ec_conformal_shift.pdf}
-  \caption{Mondrian conformal prediction: empirical coverage (left) and
-    escalation rate (right) across four evaluation splits at three nominal
-    levels. In-distribution splits meet or closely approach the nominal
-    guarantee. Family holdout collapses to $88.2\%$ empirical coverage at
-    $\alpha{=}0.01$ and $58.7\%$ at $\alpha{=}0.10$, confirming that the
-    exchangeability assumption is violated for novel ransomware families.}
-  \label{fig:ec_conformal_shift}
-\end{figure}
 
 \begin{figure}[h]
   \centering
@@ -646,10 +623,9 @@ manually-ordered, heterogeneous features is not obviously justified by
 raw discriminative performance, since convolution assumes local structure
 among adjacent features that this feature vector was not designed to have.
 We retain the CNN as the deployed Behavioural Agent because MC Dropout
-gives it a native, single-forward-pass epistemic uncertainty estimate that
-the tabular alternatives do not provide without a separate uncertainty
-mechanism (e.g.\ quantile regression forests for Random Forest, or an
-explicit deep ensemble, evaluated next).
+gives it a native, single-forward-pass epistemic uncertainty estimate the
+tabular alternatives lack without a separate mechanism (e.g.\ an explicit
+deep ensemble, evaluated next).
 
 \begin{table}[h]
 \centering
