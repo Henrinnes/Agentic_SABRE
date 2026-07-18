@@ -1,0 +1,396 @@
+{
+  "E_A": {
+    "random_stratified": {
+      "B_fixed_auroc": 0.9625,
+      "MLP_seeds": [
+        0.9518,
+        0.9524,
+        0.9525,
+        0.9524,
+        0.9525,
+        0.9518
+      ],
+      "MLP_mean": 0.9522333333333334,
+      "MLP_ci95_lo": 0.9519,
+      "MLP_ci95_hi": 0.9526,
+      "mean_diff": -0.010266666666666683,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0,
+      "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+      "robustness_check_vs_B_retraining_noise": {
+        "B_multiseed_mean": 0.9604666666666667,
+        "B_multiseed_std": 0.003042148363684241,
+        "B_multiseed_seeds": [
+          0.9646,
+          0.9588,
+          0.9617,
+          0.9621,
+          0.9558,
+          0.9598
+        ],
+        "wilcoxon_stat": 0.0,
+        "wilcoxon_p": 1.0,
+        "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)"
+      }
+    },
+    "family_holdout": {
+      "B_fixed_auroc": 0.7066,
+      "MLP_seeds": [
+        0.6768,
+        0.6768,
+        0.6783,
+        0.6777,
+        0.6782,
+        0.6773
+      ],
+      "MLP_mean": 0.6775166666666667,
+      "MLP_ci95_lo": 0.6768,
+      "MLP_ci95_hi": 0.6782,
+      "mean_diff": -0.02908333333333335,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0,
+      "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+      "robustness_check_vs_B_retraining_noise": {
+        "B_multiseed_mean": 0.7068666666666666,
+        "B_multiseed_std": 0.010415501268141955,
+        "B_multiseed_seeds": [
+          0.6977,
+          0.719,
+          0.7007,
+          0.6955,
+          0.7098,
+          0.7185
+        ],
+        "wilcoxon_stat": 0.0,
+        "wilcoxon_p": 1.0,
+        "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)"
+      }
+    },
+    "hardware_holdout": {
+      "B_fixed_auroc": 0.9443,
+      "MLP_seeds": [
+        0.9332,
+        0.9338,
+        0.9336,
+        0.9337,
+        0.9336,
+        0.9334
+      ],
+      "MLP_mean": 0.93355,
+      "MLP_ci95_lo": 0.9333,
+      "MLP_ci95_hi": 0.9338,
+      "mean_diff": -0.010750000000000037,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0,
+      "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+      "robustness_check_vs_B_retraining_noise": {
+        "B_multiseed_mean": 0.9386833333333332,
+        "B_multiseed_std": 0.005751318689367374,
+        "B_multiseed_seeds": [
+          0.9464,
+          0.9352,
+          0.9393,
+          0.9429,
+          0.93,
+          0.9383
+        ],
+        "wilcoxon_stat": 2.0,
+        "wilcoxon_p": 0.96875,
+        "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)"
+      }
+    },
+    "temporal_holdout": {
+      "B_fixed_auroc": 0.9667,
+      "MLP_seeds": [
+        0.9577,
+        0.9584,
+        0.9583,
+        0.9583,
+        0.9584,
+        0.9578
+      ],
+      "MLP_mean": 0.95815,
+      "MLP_ci95_lo": 0.9578,
+      "MLP_ci95_hi": 0.9585,
+      "mean_diff": -0.008549999999999983,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0,
+      "note": "PRIMARY: one-sample, diff = MLP_seed_i - fixed_deployed_B; H1: median diff > 0",
+      "robustness_check_vs_B_retraining_noise": {
+        "B_multiseed_mean": 0.9602666666666667,
+        "B_multiseed_std": 0.00543274025392958,
+        "B_multiseed_seeds": [
+          0.9673,
+          0.9605,
+          0.9611,
+          0.9645,
+          0.9528,
+          0.9554
+        ],
+        "wilcoxon_stat": 6.0,
+        "wilcoxon_p": 0.84375,
+        "note": "SECONDARY: paired index-for-index against B's own retraining noise (not causally linked to MLP seed)"
+      }
+    },
+    "mcnemar_window_level_random_stratified": {
+      "note": "NOT independent -- windows within a session are correlated; see mcnemar_session_level below",
+      "B_right_MLP_wrong": 257,
+      "B_wrong_MLP_right": 114,
+      "chi2": 54.3504,
+      "pvalue": 0.0
+    },
+    "mcnemar_session_level_random_stratified": {
+      "n_sessions": 267,
+      "B_right_MLP_wrong": 1,
+      "B_wrong_MLP_right": 0,
+      "chi2": 0.0,
+      "pvalue": 1.0
+    }
+  },
+  "E_B": {
+    "random_stratified": {
+      "aurc": 0.8291
+    },
+    "family_holdout": {
+      "aurc": 0.6512
+    },
+    "hardware_holdout": {
+      "aurc": 0.8232
+    },
+    "temporal_holdout": {
+      "aurc": 0.6748
+    }
+  },
+  "E_C": {
+    "random_stratified": {
+      "alpha_0.01": {
+        "empirical_coverage": 0.9916620344635909,
+        "detect_rate": 0.26588845654993515,
+        "benign_rate": 0.2786733370390958,
+        "escalate_rate": 0.45543820641096905,
+        "auto_classify_rate": 0.5445617935890309,
+        "detect_precision": 0.9846689895470383,
+        "nominal_coverage": 0.99,
+        "alpha": 0.01
+      },
+      "alpha_0.05": {
+        "empirical_coverage": 0.9375579025384473,
+        "detect_rate": 0.4206040392810821,
+        "benign_rate": 0.4194923105428942,
+        "escalate_rate": 0.1599036501760237,
+        "auto_classify_rate": 0.8400963498239763,
+        "detect_precision": 0.9334801762114537,
+        "nominal_coverage": 0.95,
+        "alpha": 0.05
+      },
+      "alpha_0.1": {
+        "empirical_coverage": 0.8784509912914582,
+        "detect_rate": 0.4919399666481378,
+        "benign_rate": 0.4724847137298499,
+        "escalate_rate": 0.03557531962201223,
+        "auto_classify_rate": 0.9644246803779878,
+        "detect_precision": 0.8775894538606404,
+        "nominal_coverage": 0.9,
+        "alpha": 0.1
+      }
+    },
+    "family_holdout": {
+      "alpha_0.01": {
+        "empirical_coverage": 0.8797828335056876,
+        "detect_rate": 0.2036366770079283,
+        "benign_rate": 0.23560841089279558,
+        "escalate_rate": 0.5607549120992761,
+        "auto_classify_rate": 0.43924508790072386,
+        "detect_precision": 0.7515869657215404,
+        "nominal_coverage": 0.99,
+        "alpha": 0.01
+      },
+      "alpha_0.05": {
+        "empirical_coverage": 0.7315580834195106,
+        "detect_rate": 0.35324026197862807,
+        "benign_rate": 0.41649431230610134,
+        "escalate_rate": 0.2302654257152706,
+        "auto_classify_rate": 0.7697345742847294,
+        "detect_precision": 0.675286655281776,
+        "nominal_coverage": 0.95,
+        "alpha": 0.05
+      },
+      "alpha_0.1": {
+        "empirical_coverage": 0.5924681144432954,
+        "detect_rate": 0.42597380213719405,
+        "benign_rate": 0.5345570492933471,
+        "escalate_rate": 0.0,
+        "auto_classify_rate": 0.9605308514305412,
+        "detect_precision": 0.6360509811855148,
+        "nominal_coverage": 0.9,
+        "alpha": 0.1
+      }
+    },
+    "hardware_holdout": {
+      "alpha_0.01": {
+        "empirical_coverage": 0.9829740491555677,
+        "detect_rate": 0.2629410957023205,
+        "benign_rate": 0.301112179047096,
+        "escalate_rate": 0.43594672525058353,
+        "auto_classify_rate": 0.5640532747494165,
+        "detect_precision": 0.972845953002611,
+        "nominal_coverage": 0.99,
+        "alpha": 0.01
+      },
+      "alpha_0.05": {
+        "empirical_coverage": 0.9329946450638473,
+        "detect_rate": 0.3748455306879033,
+        "benign_rate": 0.4071124536592064,
+        "escalate_rate": 0.2180420156528903,
+        "auto_classify_rate": 0.7819579843471097,
+        "detect_precision": 0.9384615384615385,
+        "nominal_coverage": 0.95,
+        "alpha": 0.05
+      },
+      "alpha_0.1": {
+        "empirical_coverage": 0.8709323081147878,
+        "detect_rate": 0.44555814911437597,
+        "benign_rate": 0.48455306879033366,
+        "escalate_rate": 0.0698887820952904,
+        "auto_classify_rate": 0.9301112179047096,
+        "detect_precision": 0.8939907550077042,
+        "nominal_coverage": 0.9,
+        "alpha": 0.1
+      }
+    },
+    "temporal_holdout": {
+      "alpha_0.01": {
+        "empirical_coverage": 0.9909365558912386,
+        "detect_rate": 0.20694864048338368,
+        "benign_rate": 0.35139728096676737,
+        "escalate_rate": 0.44165407854984895,
+        "auto_classify_rate": 0.558345921450151,
+        "detect_precision": 0.9616788321167883,
+        "nominal_coverage": 0.99,
+        "alpha": 0.01
+      },
+      "alpha_0.05": {
+        "empirical_coverage": 0.9422205438066465,
+        "detect_rate": 0.3306268882175227,
+        "benign_rate": 0.47658610271903323,
+        "escalate_rate": 0.19278700906344412,
+        "auto_classify_rate": 0.8072129909365559,
+        "detect_precision": 0.8486579097658481,
+        "nominal_coverage": 0.95,
+        "alpha": 0.05
+      },
+      "alpha_0.1": {
+        "empirical_coverage": 0.8861404833836858,
+        "detect_rate": 0.39746978851963743,
+        "benign_rate": 0.5370090634441088,
+        "escalate_rate": 0.06552114803625378,
+        "auto_classify_rate": 0.9344788519637462,
+        "detect_precision": 0.7577197149643705,
+        "nominal_coverage": 0.9,
+        "alpha": 0.1
+      }
+    }
+  },
+  "E_D": {
+    "random_stratified": {
+      "max_score": {
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.8731,
+        "balanced_accuracy": 0.5634,
+        "n_sessions": 267,
+        "n_ransomware_sessions": 133,
+        "n_benign_sessions": 134
+      },
+      "majority_vote": {
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0299,
+        "balanced_accuracy": 0.9851,
+        "n_sessions": 267,
+        "n_ransomware_sessions": 133,
+        "n_benign_sessions": 134
+      },
+      "latency_to_first_detection_s": {
+        "n_detected": 133,
+        "median": 0.0,
+        "mean": 4.586466165413534,
+        "p10": 0.0,
+        "p90": 20.0
+      }
+    },
+    "family_holdout": {
+      "max_score": {
+        "detection_rate": 0.9966,
+        "false_positive_rate": 0.9759,
+        "balanced_accuracy": 0.5103,
+        "n_sessions": 580,
+        "n_ransomware_sessions": 290,
+        "n_benign_sessions": 290
+      },
+      "majority_vote": {
+        "detection_rate": 0.7069,
+        "false_positive_rate": 0.1966,
+        "balanced_accuracy": 0.7552,
+        "n_sessions": 580,
+        "n_ransomware_sessions": 290,
+        "n_benign_sessions": 290
+      },
+      "latency_to_first_detection_s": {
+        "n_detected": 289,
+        "median": 0.0,
+        "mean": 6.124567474048443,
+        "p10": 0.0,
+        "p90": 20.0
+      }
+    },
+    "hardware_holdout": {
+      "max_score": {
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.8111,
+        "balanced_accuracy": 0.5944,
+        "n_sessions": 360,
+        "n_ransomware_sessions": 180,
+        "n_benign_sessions": 180
+      },
+      "majority_vote": {
+        "detection_rate": 0.9944,
+        "false_positive_rate": 0.0611,
+        "balanced_accuracy": 0.9667,
+        "n_sessions": 360,
+        "n_ransomware_sessions": 180,
+        "n_benign_sessions": 180
+      },
+      "latency_to_first_detection_s": {
+        "n_detected": 180,
+        "median": 0.0,
+        "mean": 5.0,
+        "p10": 0.0,
+        "p90": 10.999999999999943
+      }
+    },
+    "temporal_holdout": {
+      "max_score": {
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.8444,
+        "balanced_accuracy": 0.5778,
+        "n_sessions": 267,
+        "n_ransomware_sessions": 87,
+        "n_benign_sessions": 180
+      },
+      "majority_vote": {
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0444,
+        "balanced_accuracy": 0.9778,
+        "n_sessions": 267,
+        "n_ransomware_sessions": 87,
+        "n_benign_sessions": 180
+      },
+      "latency_to_first_detection_s": {
+        "n_detected": 87,
+        "median": 0.0,
+        "mean": 3.9080459770114944,
+        "p10": 0.0,
+        "p90": 10.0
+      }
+    }
+  }
+}

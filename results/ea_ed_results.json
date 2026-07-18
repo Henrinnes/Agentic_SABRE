@@ -134,158 +134,158 @@
     },
     "mcnemar_window_level_random_stratified": {
       "note": "NOT independent -- windows within a session are correlated; see mcnemar_session_level below",
-      "B_right_MLP_wrong": 257,
-      "B_wrong_MLP_right": 114,
-      "chi2": 54.3504,
+      "B_right_MLP_wrong": 253,
+      "B_wrong_MLP_right": 112,
+      "chi2": 53.6986,
       "pvalue": 0.0
     },
     "mcnemar_session_level_random_stratified": {
       "n_sessions": 267,
-      "B_right_MLP_wrong": 1,
+      "B_right_MLP_wrong": 0,
       "B_wrong_MLP_right": 0,
-      "chi2": 0.0,
-      "pvalue": 1.0
+      "chi2": 1000000000.0,
+      "pvalue": 0.0
     }
   },
   "E_B": {
     "random_stratified": {
-      "aurc": 0.8291
+      "aurc": 0.829
     },
     "family_holdout": {
-      "aurc": 0.6512
+      "aurc": 0.6499
     },
     "hardware_holdout": {
-      "aurc": 0.8232
+      "aurc": 0.8227
     },
     "temporal_holdout": {
-      "aurc": 0.6748
+      "aurc": 0.6744
     }
   },
   "E_C": {
     "random_stratified": {
       "alpha_0.01": {
-        "empirical_coverage": 0.9916620344635909,
-        "detect_rate": 0.26588845654993515,
-        "benign_rate": 0.2786733370390958,
-        "escalate_rate": 0.45543820641096905,
-        "auto_classify_rate": 0.5445617935890309,
-        "detect_precision": 0.9846689895470383,
+        "empirical_coverage": 0.9914767463405596,
+        "detect_rate": 0.26310913470446545,
+        "benign_rate": 0.28627015008337964,
+        "escalate_rate": 0.4506207152121549,
+        "auto_classify_rate": 0.5493792847878451,
+        "detect_precision": 0.9852112676056338,
         "nominal_coverage": 0.99,
         "alpha": 0.01
       },
       "alpha_0.05": {
-        "empirical_coverage": 0.9375579025384473,
-        "detect_rate": 0.4206040392810821,
-        "benign_rate": 0.4194923105428942,
-        "escalate_rate": 0.1599036501760237,
-        "auto_classify_rate": 0.8400963498239763,
-        "detect_precision": 0.9334801762114537,
+        "empirical_coverage": 0.9394107837687604,
+        "detect_rate": 0.42319807300352047,
+        "benign_rate": 0.41745414118954977,
+        "escalate_rate": 0.15934778580692976,
+        "auto_classify_rate": 0.8406522141930702,
+        "detect_precision": 0.936077057793345,
         "nominal_coverage": 0.95,
         "alpha": 0.05
       },
       "alpha_0.1": {
-        "empirical_coverage": 0.8784509912914582,
-        "detect_rate": 0.4919399666481378,
-        "benign_rate": 0.4724847137298499,
-        "escalate_rate": 0.03557531962201223,
-        "auto_classify_rate": 0.9644246803779878,
-        "detect_precision": 0.8775894538606404,
+        "empirical_coverage": 0.8823420418751158,
+        "detect_rate": 0.48508430609597925,
+        "benign_rate": 0.4722994256068186,
+        "escalate_rate": 0.04261626829720215,
+        "auto_classify_rate": 0.9573837317027979,
+        "detect_precision": 0.8834988540870894,
         "nominal_coverage": 0.9,
         "alpha": 0.1
       }
     },
     "family_holdout": {
       "alpha_0.01": {
-        "empirical_coverage": 0.8797828335056876,
-        "detect_rate": 0.2036366770079283,
-        "benign_rate": 0.23560841089279558,
-        "escalate_rate": 0.5607549120992761,
-        "auto_classify_rate": 0.43924508790072386,
-        "detect_precision": 0.7515869657215404,
+        "empirical_coverage": 0.8815925542916235,
+        "detect_rate": 0.19260599793174768,
+        "benign_rate": 0.24258876249569114,
+        "escalate_rate": 0.5648052395725612,
+        "auto_classify_rate": 0.4351947604274388,
+        "detect_precision": 0.7592841163310962,
         "nominal_coverage": 0.99,
         "alpha": 0.01
       },
       "alpha_0.05": {
-        "empirical_coverage": 0.7315580834195106,
-        "detect_rate": 0.35324026197862807,
-        "benign_rate": 0.41649431230610134,
-        "escalate_rate": 0.2302654257152706,
-        "auto_classify_rate": 0.7697345742847294,
-        "detect_precision": 0.675286655281776,
+        "empirical_coverage": 0.7265598069631162,
+        "detect_rate": 0.3548776284039986,
+        "benign_rate": 0.41709755256807995,
+        "escalate_rate": 0.2280248190279214,
+        "auto_classify_rate": 0.7719751809720786,
+        "detect_precision": 0.6692569208353569,
         "nominal_coverage": 0.95,
         "alpha": 0.05
       },
       "alpha_0.1": {
-        "empirical_coverage": 0.5924681144432954,
-        "detect_rate": 0.42597380213719405,
-        "benign_rate": 0.5345570492933471,
+        "empirical_coverage": 0.5866080661840745,
+        "detect_rate": 0.41313340227507755,
+        "benign_rate": 0.537400896242675,
         "escalate_rate": 0.0,
-        "auto_classify_rate": 0.9605308514305412,
-        "detect_precision": 0.6360509811855148,
+        "auto_classify_rate": 0.9505342985177525,
+        "detect_precision": 0.6408010012515645,
         "nominal_coverage": 0.9,
         "alpha": 0.1
       }
     },
     "hardware_holdout": {
       "alpha_0.01": {
-        "empirical_coverage": 0.9829740491555677,
-        "detect_rate": 0.2629410957023205,
+        "empirical_coverage": 0.9833859673211589,
+        "detect_rate": 0.25964575037759163,
         "benign_rate": 0.301112179047096,
-        "escalate_rate": 0.43594672525058353,
-        "auto_classify_rate": 0.5640532747494165,
-        "detect_precision": 0.972845953002611,
+        "escalate_rate": 0.4392420705753124,
+        "auto_classify_rate": 0.5607579294246876,
+        "detect_precision": 0.973030142781597,
         "nominal_coverage": 0.99,
         "alpha": 0.01
       },
       "alpha_0.05": {
-        "empirical_coverage": 0.9329946450638473,
-        "detect_rate": 0.3748455306879033,
-        "benign_rate": 0.4071124536592064,
-        "escalate_rate": 0.2180420156528903,
-        "auto_classify_rate": 0.7819579843471097,
-        "detect_precision": 0.9384615384615385,
+        "empirical_coverage": 0.9305231360703007,
+        "detect_rate": 0.3742963064671152,
+        "benign_rate": 0.4124673898118907,
+        "escalate_rate": 0.21323630372099409,
+        "auto_classify_rate": 0.7867636962790059,
+        "detect_precision": 0.9376375641966251,
         "nominal_coverage": 0.95,
         "alpha": 0.05
       },
       "alpha_0.1": {
-        "empirical_coverage": 0.8709323081147878,
-        "detect_rate": 0.44555814911437597,
-        "benign_rate": 0.48455306879033366,
-        "escalate_rate": 0.0698887820952904,
-        "auto_classify_rate": 0.9301112179047096,
-        "detect_precision": 0.8939907550077042,
+        "empirical_coverage": 0.8690100233420294,
+        "detect_rate": 0.445970067279967,
+        "benign_rate": 0.48757380200466843,
+        "escalate_rate": 0.06645613071536455,
+        "auto_classify_rate": 0.9335438692846354,
+        "detect_precision": 0.895320197044335,
         "nominal_coverage": 0.9,
         "alpha": 0.1
       }
     },
     "temporal_holdout": {
       "alpha_0.01": {
-        "empirical_coverage": 0.9909365558912386,
-        "detect_rate": 0.20694864048338368,
-        "benign_rate": 0.35139728096676737,
-        "escalate_rate": 0.44165407854984895,
-        "auto_classify_rate": 0.558345921450151,
-        "detect_precision": 0.9616788321167883,
+        "empirical_coverage": 0.9911253776435045,
+        "detect_rate": 0.20468277945619334,
+        "benign_rate": 0.34422205438066467,
+        "escalate_rate": 0.451095166163142,
+        "auto_classify_rate": 0.548904833836858,
+        "detect_precision": 0.9621771217712177,
         "nominal_coverage": 0.99,
         "alpha": 0.01
       },
       "alpha_0.05": {
-        "empirical_coverage": 0.9422205438066465,
-        "detect_rate": 0.3306268882175227,
-        "benign_rate": 0.47658610271903323,
-        "escalate_rate": 0.19278700906344412,
-        "auto_classify_rate": 0.8072129909365559,
-        "detect_precision": 0.8486579097658481,
+        "empirical_coverage": 0.9403323262839879,
+        "detect_rate": 0.33496978851963743,
+        "benign_rate": 0.4773413897280967,
+        "escalate_rate": 0.18768882175226587,
+        "auto_classify_rate": 0.8123111782477341,
+        "detect_precision": 0.8455467869222097,
         "nominal_coverage": 0.95,
         "alpha": 0.05
       },
       "alpha_0.1": {
-        "empirical_coverage": 0.8861404833836858,
-        "detect_rate": 0.39746978851963743,
-        "benign_rate": 0.5370090634441088,
-        "escalate_rate": 0.06552114803625378,
-        "auto_classify_rate": 0.9344788519637462,
-        "detect_precision": 0.7577197149643705,
+        "empirical_coverage": 0.8834969788519638,
+        "detect_rate": 0.3995468277945619,
+        "benign_rate": 0.5385196374622356,
+        "escalate_rate": 0.061933534743202415,
+        "auto_classify_rate": 0.9380664652567976,
+        "detect_precision": 0.7542533081285444,
         "nominal_coverage": 0.9,
         "alpha": 0.1
       }
@@ -295,16 +295,16 @@
     "random_stratified": {
       "max_score": {
         "detection_rate": 1.0,
-        "false_positive_rate": 0.8731,
-        "balanced_accuracy": 0.5634,
+        "false_positive_rate": 0.8657,
+        "balanced_accuracy": 0.5672,
         "n_sessions": 267,
         "n_ransomware_sessions": 133,
         "n_benign_sessions": 134
       },
       "majority_vote": {
         "detection_rate": 1.0,
-        "false_positive_rate": 0.0299,
-        "balanced_accuracy": 0.9851,
+        "false_positive_rate": 0.0224,
+        "balanced_accuracy": 0.9888,
         "n_sessions": 267,
         "n_ransomware_sessions": 133,
         "n_benign_sessions": 134
@@ -312,7 +312,7 @@
       "latency_to_first_detection_s": {
         "n_detected": 133,
         "median": 0.0,
-        "mean": 4.586466165413534,
+        "mean": 4.285714285714286,
         "p10": 0.0,
         "p90": 20.0
       }
@@ -320,16 +320,16 @@
     "family_holdout": {
       "max_score": {
         "detection_rate": 0.9966,
-        "false_positive_rate": 0.9759,
-        "balanced_accuracy": 0.5103,
+        "false_positive_rate": 0.969,
+        "balanced_accuracy": 0.5138,
         "n_sessions": 580,
         "n_ransomware_sessions": 290,
         "n_benign_sessions": 290
       },
       "majority_vote": {
         "detection_rate": 0.7069,
-        "false_positive_rate": 0.1966,
-        "balanced_accuracy": 0.7552,
+        "false_positive_rate": 0.1793,
+        "balanced_accuracy": 0.7638,
         "n_sessions": 580,
         "n_ransomware_sessions": 290,
         "n_benign_sessions": 290
@@ -337,7 +337,7 @@
       "latency_to_first_detection_s": {
         "n_detected": 289,
         "median": 0.0,
-        "mean": 6.124567474048443,
+        "mean": 6.989619377162629,
         "p10": 0.0,
         "p90": 20.0
       }
@@ -353,8 +353,8 @@
       },
       "majority_vote": {
         "detection_rate": 0.9944,
-        "false_positive_rate": 0.0611,
-        "balanced_accuracy": 0.9667,
+        "false_positive_rate": 0.0667,
+        "balanced_accuracy": 0.9639,
         "n_sessions": 360,
         "n_ransomware_sessions": 180,
         "n_benign_sessions": 180
@@ -362,7 +362,7 @@
       "latency_to_first_detection_s": {
         "n_detected": 180,
         "median": 0.0,
-        "mean": 5.0,
+        "mean": 5.111111111111111,
         "p10": 0.0,
         "p90": 10.999999999999943
       }
@@ -378,8 +378,8 @@
       },
       "majority_vote": {
         "detection_rate": 1.0,
-        "false_positive_rate": 0.0444,
-        "balanced_accuracy": 0.9778,
+        "false_positive_rate": 0.0389,
+        "balanced_accuracy": 0.9806,
         "n_sessions": 267,
         "n_ransomware_sessions": 87,
         "n_benign_sessions": 180

@@ -1,0 +1,233 @@
+{
+  "E_E": {
+    "random_stratified": {
+      "BK_mean": {
+        "auroc": 0.8867,
+        "auprc": 0.7947,
+        "ece": 0.022
+      },
+      "MLP_1L": {
+        "auroc": 0.953,
+        "auprc": 0.9557,
+        "ece": 0.0231
+      },
+      "MLP_2L": {
+        "auroc": 0.9542,
+        "auprc": 0.9574,
+        "ece": 0.0228
+      },
+      "RF": {
+        "auroc": 0.9495,
+        "auprc": 0.9519,
+        "ece": 0.0229
+      },
+      "GBT": {
+        "auroc": 0.9542,
+        "auprc": 0.9574,
+        "ece": 0.021
+      }
+    },
+    "family_holdout": {
+      "BK_mean": {
+        "auroc": 0.6504,
+        "auprc": 0.5962,
+        "ece": 0.0669
+      },
+      "MLP_1L": {
+        "auroc": 0.6771,
+        "auprc": 0.6822,
+        "ece": 0.155
+      },
+      "MLP_2L": {
+        "auroc": 0.6806,
+        "auprc": 0.6856,
+        "ece": 0.1511
+      },
+      "RF": {
+        "auroc": 0.6823,
+        "auprc": 0.6827,
+        "ece": 0.1735
+      },
+      "GBT": {
+        "auroc": 0.6845,
+        "auprc": 0.688,
+        "ece": 0.1565
+      }
+    },
+    "hardware_holdout": {
+      "BK_mean": {
+        "auroc": 0.8518,
+        "auprc": 0.7626,
+        "ece": 0.0234
+      },
+      "MLP_1L": {
+        "auroc": 0.9331,
+        "auprc": 0.938,
+        "ece": 0.0309
+      },
+      "MLP_2L": {
+        "auroc": 0.9341,
+        "auprc": 0.9392,
+        "ece": 0.0278
+      },
+      "RF": {
+        "auroc": 0.9284,
+        "auprc": 0.9311,
+        "ece": 0.0407
+      },
+      "GBT": {
+        "auroc": 0.9342,
+        "auprc": 0.9395,
+        "ece": 0.0285
+      }
+    },
+    "temporal_holdout": {
+      "BK_mean": {
+        "auroc": 0.8779,
+        "auprc": 0.6468,
+        "ece": 0.1224
+      },
+      "MLP_1L": {
+        "auroc": 0.9577,
+        "auprc": 0.9277,
+        "ece": 0.0662
+      },
+      "MLP_2L": {
+        "auroc": 0.9584,
+        "auprc": 0.929,
+        "ece": 0.0649
+      },
+      "RF": {
+        "auroc": 0.9539,
+        "auprc": 0.9205,
+        "ece": 0.0664
+      },
+      "GBT": {
+        "auroc": 0.9588,
+        "auprc": 0.9305,
+        "ece": 0.0664
+      }
+    }
+  },
+  "E_F": {
+    "prev_10pct": {
+      "none": {
+        "auroc": 0.9514,
+        "auprc": 0.9542,
+        "ece": 0.2162,
+        "n_train": 13583,
+        "actual_prev": 0.1
+      },
+      "smote": {
+        "auroc": 0.9528,
+        "auprc": 0.9558,
+        "ece": 0.085,
+        "n_train": 24450,
+        "actual_prev": 0.1
+      },
+      "ctgan": {
+        "auroc": 0.9427,
+        "auprc": 0.9442,
+        "ece": 0.0805,
+        "n_train": 24450,
+        "actual_prev": 0.1
+      }
+    },
+    "prev_5pct": {
+      "none": {
+        "auroc": 0.9503,
+        "auprc": 0.9534,
+        "ece": 0.2781,
+        "n_train": 12868,
+        "actual_prev": 0.05
+      },
+      "smote": {
+        "auroc": 0.9505,
+        "auprc": 0.9537,
+        "ece": 0.0891,
+        "n_train": 24450,
+        "actual_prev": 0.05
+      },
+      "ctgan": {
+        "auroc": 0.9385,
+        "auprc": 0.9399,
+        "ece": 0.1573,
+        "n_train": 24450,
+        "actual_prev": 0.05
+      }
+    },
+    "prev_1pct": {
+      "none": {
+        "auroc": 0.9439,
+        "auprc": 0.9487,
+        "ece": 0.4094,
+        "n_train": 12348,
+        "actual_prev": 0.01
+      },
+      "smote": {
+        "auroc": 0.9393,
+        "auprc": 0.9453,
+        "ece": 0.112,
+        "n_train": 24450,
+        "actual_prev": 0.01
+      },
+      "ctgan": {
+        "auroc": 0.9446,
+        "auprc": 0.9467,
+        "ece": 0.0807,
+        "n_train": 24450,
+        "actual_prev": 0.01
+      }
+    }
+  },
+  "E_G": {
+    "Conti": {
+      "overall_auroc": 0.9466,
+      "family_detection_rate": 0.7917,
+      "family_escalation_rate": 0.0219,
+      "family_autocontain_rate": 0.5899,
+      "n_family_test_windows": 456,
+      "n_train_removed": 2175
+    },
+    "Darkside": {
+      "overall_auroc": 0.9503,
+      "family_detection_rate": 0.914,
+      "family_escalation_rate": 0.0,
+      "family_autocontain_rate": 0.7935,
+      "n_family_test_windows": 465,
+      "n_train_removed": 2177
+    },
+    "LockBit": {
+      "overall_auroc": 0.9515,
+      "family_detection_rate": 0.896,
+      "family_escalation_rate": 0.0127,
+      "family_autocontain_rate": 0.5881,
+      "n_family_test_windows": 471,
+      "n_train_removed": 2195
+    },
+    "REvil": {
+      "overall_auroc": 0.9392,
+      "family_detection_rate": 0.6782,
+      "family_escalation_rate": 0.1037,
+      "family_autocontain_rate": 0.3218,
+      "n_family_test_windows": 463,
+      "n_train_removed": 2144
+    },
+    "Ryuk": {
+      "overall_auroc": 0.9246,
+      "family_detection_rate": 0.2624,
+      "family_escalation_rate": 0.0145,
+      "family_autocontain_rate": 0.0826,
+      "n_family_test_windows": 484,
+      "n_train_removed": 2268
+    },
+    "WannaCry": {
+      "overall_auroc": 0.9267,
+      "family_detection_rate": 0.3576,
+      "family_escalation_rate": 0.0541,
+      "family_autocontain_rate": 0.0612,
+      "n_family_test_windows": 425,
+      "n_train_removed": 1941
+    }
+  }
+}

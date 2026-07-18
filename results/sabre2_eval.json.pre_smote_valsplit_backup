@@ -1,0 +1,325 @@
+{
+  "K_seeds": 6,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "E1_main": {
+    "random_stratified": {
+      "n_test": 5397,
+      "n_ransom": 2764,
+      "B": {
+        "auroc": 0.9625,
+        "auprc": 0.9649
+      },
+      "BK_mean": {
+        "auroc": 0.8868,
+        "auprc": 0.7961
+      },
+      "BK_mlp": {
+        "auroc": {
+          "mean": 0.9522,
+          "ci95_lo": 0.9519,
+          "ci95_hi": 0.9526
+        },
+        "auprc": {
+          "mean": 0.9554,
+          "ci95_lo": 0.955,
+          "ci95_hi": 0.9557
+        },
+        "auroc_seeds": [
+          0.9518,
+          0.9524,
+          0.9525,
+          0.9524,
+          0.9525,
+          0.9518
+        ]
+      }
+    },
+    "family_holdout": {
+      "n_test": 11604,
+      "n_ransom": 5836,
+      "B": {
+        "auroc": 0.7066,
+        "auprc": 0.7087
+      },
+      "BK_mean": {
+        "auroc": 0.6487,
+        "auprc": 0.5943
+      },
+      "BK_mlp": {
+        "auroc": {
+          "mean": 0.6775,
+          "ci95_lo": 0.6768,
+          "ci95_hi": 0.6782
+        },
+        "auprc": {
+          "mean": 0.6807,
+          "ci95_lo": 0.6801,
+          "ci95_hi": 0.6812
+        },
+        "auroc_seeds": [
+          0.6768,
+          0.6768,
+          0.6783,
+          0.6777,
+          0.6782,
+          0.6773
+        ]
+      }
+    },
+    "hardware_holdout": {
+      "n_test": 7283,
+      "n_ransom": 3772,
+      "B": {
+        "auroc": 0.9443,
+        "auprc": 0.9457
+      },
+      "BK_mean": {
+        "auroc": 0.8538,
+        "auprc": 0.76
+      },
+      "BK_mlp": {
+        "auroc": {
+          "mean": 0.9335,
+          "ci95_lo": 0.9333,
+          "ci95_hi": 0.9338
+        },
+        "auprc": {
+          "mean": 0.937,
+          "ci95_lo": 0.9367,
+          "ci95_hi": 0.9374
+        },
+        "auroc_seeds": [
+          0.9332,
+          0.9338,
+          0.9336,
+          0.9337,
+          0.9336,
+          0.9334
+        ]
+      }
+    },
+    "temporal_holdout": {
+      "n_test": 5296,
+      "n_ransom": 1785,
+      "B": {
+        "auroc": 0.9667,
+        "auprc": 0.94
+      },
+      "BK_mean": {
+        "auroc": 0.8776,
+        "auprc": 0.6345
+      },
+      "BK_mlp": {
+        "auroc": {
+          "mean": 0.9581,
+          "ci95_lo": 0.9578,
+          "ci95_hi": 0.9585
+        },
+        "auprc": {
+          "mean": 0.9283,
+          "ci95_lo": 0.9267,
+          "ci95_hi": 0.9299
+        },
+        "auroc_seeds": [
+          0.9577,
+          0.9584,
+          0.9583,
+          0.9583,
+          0.9584,
+          0.9578
+        ]
+      }
+    }
+  },
+  "E2_calibration": {
+    "B_ece": 0.0405,
+    "BK_mean_pre": 0.0226,
+    "BK_mean_post": 0.0737,
+    "T_sp": 0.702,
+    "BK_mlp_ece": {
+      "mean": 0.0258,
+      "ci95_lo": 0.0232,
+      "ci95_hi": 0.0284
+    }
+  },
+  "E3_ctgan_ablation": {
+    "no_aug": {
+      "auroc": {
+        "mean": 0.9519,
+        "ci95_lo": 0.9517,
+        "ci95_hi": 0.9522
+      },
+      "auprc": {
+        "mean": 0.9549,
+        "ci95_lo": 0.9547,
+        "ci95_hi": 0.9551
+      },
+      "ece": {
+        "mean": 0.0261,
+        "ci95_lo": 0.0236,
+        "ci95_hi": 0.0287
+      }
+    },
+    "smote": {
+      "auroc": {
+        "mean": 0.9519,
+        "ci95_lo": 0.9517,
+        "ci95_hi": 0.9522
+      },
+      "auprc": {
+        "mean": 0.9549,
+        "ci95_lo": 0.9547,
+        "ci95_hi": 0.9551
+      },
+      "ece": {
+        "mean": 0.0261,
+        "ci95_lo": 0.0236,
+        "ci95_hi": 0.0287
+      }
+    },
+    "ctgan": {
+      "auroc": {
+        "mean": 0.9522,
+        "ci95_lo": 0.9519,
+        "ci95_hi": 0.9526
+      },
+      "auprc": {
+        "mean": 0.9554,
+        "ci95_lo": 0.955,
+        "ci95_hi": 0.9557
+      },
+      "ece": {
+        "mean": 0.0258,
+        "ci95_lo": 0.0232,
+        "ci95_hi": 0.0284
+      }
+    }
+  },
+  "E4_peer_consultation": {
+    "auroc_no_pc": {
+      "mean": 0.6866,
+      "ci95_lo": 0.6847,
+      "ci95_hi": 0.6886
+    },
+    "auroc_with_pc": {
+      "mean": 0.6775,
+      "ci95_lo": 0.6768,
+      "ci95_hi": 0.6782
+    },
+    "per_family": {
+      "REvil": {
+        "n": 3046,
+        "ransom": 3046,
+        "B_dr": 0.7646,
+        "mlp_nopc": {
+          "mean": 0.6676,
+          "ci95_lo": 0.6491,
+          "ci95_hi": 0.6861
+        },
+        "mlp_pc": {
+          "mean": 0.6902,
+          "ci95_lo": 0.6807,
+          "ci95_hi": 0.6996
+        }
+      },
+      "WannaCry": {
+        "n": 2790,
+        "ransom": 2790,
+        "B_dr": 0.4423,
+        "mlp_nopc": {
+          "mean": 0.3829,
+          "ci95_lo": 0.3676,
+          "ci95_hi": 0.3982
+        },
+        "mlp_pc": {
+          "mean": 0.4419,
+          "ci95_lo": 0.4322,
+          "ci95_hi": 0.4515
+        }
+      }
+    }
+  },
+  "E5_policy_comparison": {
+    "sabre_plus_fixed": {
+      "balanced_accuracy": {
+        "mean": 0.7698,
+        "ci95_lo": 0.7687,
+        "ci95_hi": 0.7708
+      },
+      "escalation_rate": {
+        "mean": 0.5431,
+        "ci95_lo": 0.5364,
+        "ci95_hi": 0.5498
+      },
+      "ac_rate": {
+        "mean": 0.1799,
+        "ci95_lo": 0.1742,
+        "ci95_hi": 0.1856
+      },
+      "allow_rate": {
+        "mean": 0.277,
+        "ci95_lo": 0.2757,
+        "ci95_hi": 0.2784
+      }
+    },
+    "grid_search": {
+      "balanced_accuracy": {
+        "mean": 0.8651,
+        "ci95_lo": 0.8638,
+        "ci95_hi": 0.8663
+      },
+      "escalation_rate": {
+        "mean": 0.3022,
+        "ci95_lo": 0.2993,
+        "ci95_hi": 0.305
+      },
+      "ac_rate": {
+        "mean": 0.2816,
+        "ci95_lo": 0.2783,
+        "ci95_hi": 0.2848
+      },
+      "allow_rate": {
+        "mean": 0.4163,
+        "ci95_lo": 0.414,
+        "ci95_hi": 0.4186
+      }
+    },
+    "bayesian_tpe": {
+      "balanced_accuracy": {
+        "mean": 0.8647,
+        "ci95_lo": 0.8637,
+        "ci95_hi": 0.8656
+      },
+      "escalation_rate": {
+        "mean": 0.2914,
+        "ci95_lo": 0.2862,
+        "ci95_hi": 0.2967
+      },
+      "ac_rate": {
+        "mean": 0.2931,
+        "ci95_lo": 0.288,
+        "ci95_hi": 0.2982
+      },
+      "allow_rate": {
+        "mean": 0.4154,
+        "ci95_lo": 0.4133,
+        "ci95_hi": 0.4175
+      }
+    }
+  },
+  "E6_latency": {
+    "batch_size": 32,
+    "n_reps": 500,
+    "sabre_plus_ms": 5.456,
+    "sabre2_ms": 6.029,
+    "overhead_ms": 0.573,
+    "overhead_pct": 10.5
+  }
+}
