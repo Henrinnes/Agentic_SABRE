@@ -156,7 +156,7 @@ diagnostic afterthought, via the four contributions below.
 
 \subsection{Behavioural Ransomware Detection}
 
-Hypervisor-level behavioural monitoring~\cite{HiranoK22,hirano2025ransmap}
+Hypervisor-level behavioural monitoring~\cite{hirano2025ransmap}
 captures low-level I/O and memory access patterns before encryption
 artefacts surface in the filesystem, providing strong coverage of novel
 variants, though IRP monitors~\cite{scaife_cryptolock_2016} remain
@@ -179,10 +179,10 @@ Gawlikowski et al.~\cite{gawlikowski2023Uncertainity} establish MC Dropout
 and deep ensembles~\cite{lakshminarayanan_simple_2017} as the most broadly
 applicable of four neural-network uncertainty method families, though
 ensembles require retaining $M$ full model copies at inference.
-For distribution-free guarantees, conformal prediction~\cite{papadopoulos_icp_2002}
-and its Mondrian variant~\cite{vovk_mondrian_2003} bound coverage
-probability without parametric assumptions, generalised to arbitrary risk
-functions by Angelopoulos and Bates~\cite{angelopoulos_conformal_risk_2022}.
+For distribution-free guarantees, Mondrian conformal
+prediction~\cite{vovk_mondrian_2003} bounds coverage probability
+without parametric assumptions, generalised to arbitrary risk functions
+by Angelopoulos and Bates~\cite{angelopoulos_conformal_risk_2022}.
 Uncertainty estimation has been applied to network anomaly
 detection~\cite{Doan2024uncertainBay}, but ransomware \emph{triage}---where
 an autonomous-containment error differs qualitatively in cost from an
