@@ -1259,16 +1259,15 @@ gap has closed. Per-scenario rates are in Supplementary Section~S-VIII.
 \subsection{Conformal Coverage}\label{sec:results_conformal}
 
 Table~\ref{tab:conformal} reports the coverage--efficiency trade-off for
-the Mondrian conformal wrapper on the random-stratified split. At
-$\alpha{=}0.01$ ($99\%$ coverage), $55\%$ of traffic is auto-classified
-(singleton prediction set) with $98.5\%$ precision; the remaining $45\%$
-receive a two-element set and are routed to analyst review. As $\alpha$
-increases to $0.05$ ($95\%$ coverage), the auto-classified fraction rises
-to $84\%$ at the cost of precision falling to $93.6\%$. The lower
-auto-classified fraction relative to earlier reporting reflects the noisier,
-honestly out-of-fold Decision MLP score (Section~\ref{sec:results_significance});
-the coverage guarantee itself is unaffected, since it depends on
-exchangeability rather than classifier accuracy.
+the Mondrian conformal wrapper on the random-stratified split: the
+auto-classified (singleton-set) fraction and its precision both fall as
+$\alpha$ tightens toward higher nominal coverage, with the remainder
+receiving a two-element set routed to analyst review. The lower
+auto-classified fraction relative to earlier reporting reflects the
+noisier, honestly out-of-fold Decision MLP score
+(Section~\ref{sec:results_significance}); the coverage guarantee itself
+is unaffected, since it depends on exchangeability rather than
+classifier accuracy.
 
 \begin{table}[t]
 \centering
@@ -1315,13 +1314,11 @@ coverage-shift figure are provided in Supplementary Section~S-VIII.
 
 Table~\ref{tab:ewc_feedback} reports AUPRC on retained and newly-corrected
 families across five feedback iterations, comparing vanilla fine-tuning
-against EWC regularisation ($\lambda_{\text{EWC}}{=}300$). Without EWC,
-retained-family AUPRC drops by $0.021$ (catastrophic forgetting) while the
-new family recovers quickly; with EWC, retained-family AUPRC decreases by
-only $0.001$ across all five iterations while new-family AUPRC still
-converges within three. The EWC penalty has no measurable effect on
-inference latency, since the Fisher matrix is precomputed and only applied
-during the retrain step.
+against EWC regularisation ($\lambda_{\text{EWC}}{=}300$): EWC cuts
+retained-family forgetting $21\times$ relative to vanilla fine-tuning
+while new-family AUPRC still converges within three iterations. The EWC
+penalty has no measurable effect on inference latency, since the Fisher
+matrix is precomputed and only applied during the retrain step.
 
 \begin{table}[t]
 \centering
@@ -1481,23 +1478,21 @@ ransomware families from \emph{both} the Behavioural Agent's training data
 and the Decision MLP's training score pool (``Out-of-fold Decision MLP
 training features,'' Section~\ref{sec:eval}), so no stage of the pipeline
 has ever seen the held-out family. Overall AUROC stays stable at
-$0.925$--$0.952$ across all holdouts (Table~\ref{tab:lofo}), but per-family
-detection varies substantially and no longer matches the near-perfect
-transfer we previously reported under in-sample Behavioural scoring:
-Darkside and LockBit still transfer well ($91.6\%$, $90.0\%$), Conti drops
-to $80.3\%$ (from a previously-reported perfect transfer), and Ryuk and
-WannaCry collapse to $26.9\%$ and $35.5\%$ (Ryuk from a previously-reported
-$100\%$). Escalation tracks this difficulty for REvil and WannaCry
-($9.9\%$, $2.8\%$, up from $0.0$--$2.6\%$ elsewhere), correctly routing
-more unfamiliar cases to analyst review. Ryuk is the exception: despite the
-worst detection rate of any held-out family, its escalation is only
-$1.7\%$, so at least $71\%$ of its windows are both missed and
-\textsc{Allow}ed rather than escalated---the system is confidently wrong on
-Ryuk, not appropriately uncertain. Honest leave-one-family-out thus shows a
-wider, less predictable generalisation spread than previously reported,
-with escalation coverage of that spread itself uneven: it helps for some
-unseen families but is not guaranteed for all. A per-family figure is
-provided in Supplementary Section~S-VIII.
+$0.925$--$0.952$ across all holdouts, but per-family detection
+(Table~\ref{tab:lofo}) varies substantially---Darkside and LockBit
+transfer well, Ryuk and WannaCry collapse---and no longer matches the
+near-perfect transfer previously reported under in-sample Behavioural
+scoring, including for Conti and Ryuk specifically (previously $100\%$).
+Escalation tracks detection difficulty for REvil and WannaCry, correctly
+routing more unfamiliar cases to analyst review, but Ryuk is the
+exception: despite the worst detection rate of any held-out family, its
+escalation is only $1.7\%$, so at least $71\%$ of its windows are both
+missed and \textsc{Allow}ed rather than escalated---the system is
+confidently wrong on Ryuk, not appropriately uncertain. Honest
+leave-one-family-out thus shows a wider, less predictable generalisation
+spread than previously reported, with escalation coverage of that spread
+itself uneven. A per-family figure is provided in Supplementary
+Section~S-VIII.
 
 \begin{table}[t]
 \centering
