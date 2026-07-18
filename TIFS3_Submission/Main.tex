@@ -100,7 +100,7 @@ generative adversarial networks, continual learning, conformal prediction.
 % ═══════════════════════════════════════════════════════════════════════════════
 
 Ransomware attacks impose escalating operational and financial costs on
-enterprises and critical infrastructure~\cite{beaman2021ransomware,cybersecurity_ventures_2022}.
+enterprises and critical infrastructure~\cite{beaman2021ransomware}.
 State-of-the-art detectors---signature-based antivirus, EDR platforms, or
 machine-learning classifiers on file-level features---converge on a common
 architectural limitation: a single scalar confidence score mapped to a
@@ -223,9 +223,9 @@ ensemble methods.
 
 Class imbalance in detection datasets is routinely addressed by
 SMOTE~\cite{chawla2002smote} and Conditional Tabular GAN
-(CTGAN)~\cite{xu_ctgan_2019}, applied to fraud and intrusion
-detection~\cite{fiore_using_gans_2019,lin_idsgan_2022} and consistently
-outperforming SMOTE when the minority class is small and non-Gaussian.
+(CTGAN)~\cite{xu_ctgan_2019}, applied to intrusion
+detection~\cite{lin_idsgan_2022} and consistently outperforming SMOTE
+when the minority class is small and non-Gaussian.
 We apply CTGAN at the \emph{score space} output of the multi-agent
 detector: operating on bounded $[0,1]^6$ probability--uncertainty vectors
 constrains synthetic samples to the agents' output range, reducing the
@@ -234,9 +234,8 @@ reconstruction artefacts.
 
 Catastrophic forgetting---gradient updates for a new task systematically
 overwriting prior weight configurations~\cite{kirkpatrick_ewc_2017}---is
-the key barrier to continual adaptation; temporal evaluation
-frameworks~\cite{pendlebury_tesseract_2019,jordaney_transcend_2017}
-establish that standard classifiers lose substantial accuracy within
+the key barrier to continual adaptation; TESSERACT~\cite{pendlebury_tesseract_2019}
+establishes that standard classifiers lose substantial accuracy within
 months of the training cutoff under concept drift.
 Elastic Weight Consolidation (EWC)~\cite{kirkpatrick_ewc_2017} mitigates
 this via a diagonal Fisher penalty protecting parameters important to
