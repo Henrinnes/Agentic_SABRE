@@ -178,10 +178,9 @@ detections to analyst escalation.
 
 \subsection{Uncertainty Quantification in Detection}
 
-Monte Carlo Dropout~\cite{gal2016dropout} re-activates dropout at test time,
-treating each stochastic forward pass as a draw from an approximate
-posterior over network weights, with the variance of $T$ outputs
-approximating epistemic uncertainty at $T\times$ the inference cost.
+Monte Carlo Dropout~\cite{gal2016dropout} approximates a posterior over
+network weights via repeated stochastic forward passes at test time, at
+$T\times$ inference cost (formalised in Section~\ref{sec:agents}).
 Gawlikowski et al.~\cite{gawlikowski2023Uncertainity} establish MC Dropout
 and deep ensembles~\cite{lakshminarayanan_simple_2017} as the most broadly
 applicable of four neural-network uncertainty method families, though
@@ -248,14 +247,10 @@ without retraining base agents.
 
 This paper extends the two-agent Agentic SABRE
 framework~\cite{kabuye2026sabre} (Semantic + Behavioural CNN, MC
-Dropout, fixed triage policy) with four technically distinct
-contributions: (1) a third Knowledge CNN agent on ATT\&CK tactic
-embeddings, expanding the score pool from $[0,1]^4$ to $[0,1]^6$;
-(2) Bayesian TPE optimisation of four jointly tuned triage thresholds
-$(\tau_{\text{high}}, \tau, \kappa, \kappa_{\text{low}})$ replacing the
-fixed $(\tau{=}0.10, \kappa{=}0.10)$ pair; (3) CTGAN score-space
-augmentation at the fusion layer; and (4) EWC continual learning and
-Mondrian conformal prediction wrappers. All experiments and reported
+Dropout, fixed triage policy) with the four contributions listed
+above---a third Knowledge agent, Bayesian TPE threshold optimisation,
+CTGAN score-space augmentation, and EWC/conformal wrappers---each
+technically distinct from that prior work. All experiments and reported
 numerical results in this paper were rerun independently; no numerical
 results or figures are reused from~\cite{kabuye2026sabre}, though both
 papers draw on the same underlying RDset and RanSMAP datasets.
