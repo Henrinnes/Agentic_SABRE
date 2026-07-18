@@ -562,11 +562,10 @@ Knowledge &
 \end{table}
 
 The Semantic and Knowledge Agents' own in-domain AUROC (RDset $0.996$;
-Knowledge Agent metrics not separately reported given RansKnow's small
-size, Section~\ref{sec:discussion}) therefore says nothing about their
-contribution to a RanSMAP fusion score, which is fixed and
-sample-independent by construction; the Semantic Agent's genuine
-sample-level contribution is validated separately, in-domain, on RDset.
+Knowledge Agent not separately reported given RansKnow's small size,
+Section~\ref{sec:discussion}) is therefore irrelevant to their fixed
+RanSMAP fusion contribution; the Semantic Agent's genuine sample-level
+contribution is validated in-domain on RDset instead.
 \end{remark}
 
 \begin{remark}[Why Score Space]
@@ -1355,16 +1354,13 @@ already-extracted feature vectors, measured running in sequence
 end-to-end. It excludes PE parsing, sentence-transformer embedding
 generation, hypervisor telemetry feature extraction, ATT\&CK transcript
 generation, and data transfer, each of which would add to true end-to-end
-deployment latency and is not benchmarked here.
-Full pipeline median is $6.99\,\text{ms}$ per sample
-(p95 $7.09\,\text{ms}$); batching multiple concurrent windows together
-(the realistic deployment pattern for periodic telemetry scoring) raises
-throughput to $3{,}031$ samples/s at batch size $1{,}024$, supporting
-$\approx 30{,}000$ concurrent monitored streams at a $10$-second window
-under batch inference \emph{once features are available}.
-MC Dropout ($T{=}10$) contributes $3.8\times$ overhead over a single
-deterministic pass (measured on the Behavioural Agent); the Decision MLP
-adds $0.45\,\text{ms}$.
+deployment latency and is not benchmarked here (full pipeline figures:
+Table~\ref{tab:latency}).
+Batching multiple concurrent windows together (the realistic deployment
+pattern for periodic telemetry scoring) raises throughput to $3{,}031$
+samples/s at batch size $1{,}024$, supporting $\approx 30{,}000$
+concurrent monitored streams at a $10$-second window under batch
+inference \emph{once features are available}.
 
 \begin{table}[t]
 \centering
