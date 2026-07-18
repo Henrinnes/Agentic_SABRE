@@ -766,17 +766,12 @@ its own threshold $\kappa_{\text{PC}}^{(i)}$; in practice all are set equal
 to the triage threshold $\kappa$ optimised by Bayesian TPE.
 \end{definition}
 
-The three triggering conditions are evaluated independently, in the fixed
-order Semantic $\to$ Behavioural $\to$ Knowledge, using whatever
-probabilities are current \emph{at that point}: if multiple agents are
-simultaneously uncertain, a later substitution can draw on an earlier
-one's already-substituted value rather than its original (e.g., if
-$\sigma_{\text{sem}}, \sigma_{\text{beh}} > \kappa_{\text{PC}}$ both, the
-Semantic Agent's probability is substituted first from the
-Behavioural/Knowledge originals, then the Behavioural substitution draws
-on the Semantic Agent's \emph{already-substituted} value together with
-the Knowledge Agent's original). Peer Consultation does not suppress the
-triggering agent's own uncertainty---it routes the sample to
+The three conditions are evaluated independently in fixed order
+(Semantic $\to$ Behavioural $\to$ Knowledge) using whichever
+probabilities are current at that point, so a later substitution can
+draw on an earlier agent's already-substituted value rather than its
+original---the update is sequential, not simultaneous. Peer Consultation
+never suppresses the triggering agent's own uncertainty; it routes to
 \textsc{Escalate} while ensuring the score pool reflects the more
 reliable modalities' evidence.
 
@@ -848,14 +843,11 @@ Under exchangeability of calibration and test samples:
 Mondrian conformal prediction stratifies the calibration non-conformity
 scores by each calibration sample's \emph{true} label (standard
 label-conditional Mondrian CP), conditioning~\eqref{eq:cp_set} separately
-for each class.
-Theorem~\ref{thm:coverage} provides a formal \emph{marginal} coverage guarantee
-under exchangeability of calibration and test samples; Mondrian stratification
-yields class-conditional coverage empirically but does not carry a separate
-distribution-free guarantee beyond the marginal bound.
-The exchangeability assumption holds for the random-stratified split; under
-temporal and family holdout, the formal guarantee does not apply and
-coverage is verified empirically (Section~\ref{sec:results_conformal}).
+for each class; this yields class-conditional coverage empirically but
+does not carry a guarantee beyond Theorem~\ref{thm:coverage}'s marginal
+bound. The exchangeability assumption holds for the random-stratified
+split; under temporal and family holdout it does not, and coverage is
+verified empirically instead (Section~\ref{sec:results_conformal}).
 
 % ═══════════════════════════════════════════════════════════════════════════════
 \section{Experimental Evaluation}\label{sec:eval}
