@@ -1528,7 +1528,7 @@ Ryuk     & $0.924$ & $\phantom{0}26.9$ & $\phantom{000}8.3$ & $\phantom{0}1.7$ \
 
 \subsection{Where the Framework Excels}
 
-Strongest performance clusters around five properties, each quantified in
+Strongest performance clusters around four properties, each quantified in
 Sections~\ref{sec:results_agents}--\ref{sec:results_imbalance}: near-ceiling
 in-distribution discrimination, both for the Semantic Agent on RDset and
 for the Behavioural Agent across random, temporal, and hardware splits
@@ -1558,17 +1558,14 @@ for Conti and Ryuk once evaluated with the family genuinely excluded from
 Behavioural training.
 
 A more fundamental limitation arises under concurrent execution
-(Section~\ref{sec:eval}): superimposed I/O and memory patterns suppress
-$\hat{p}_{\text{beh}}$ and inflate $\sigma_{\text{beh}}$, and neither agent
-can fully separate concurrent traces without process-level
-attribution---a limitation shared with Hirano and
-Kobayashi~\cite{hirano2025ransmap}. For the most adversarial case (SDelete
-with REvil), this now manifests as low Auto-Contain coverage
-($16.7$--$24.0\%$, the lowest of any concurrent-execution combination)
-rather than as silent misses: the triage policy escalates essentially all
-of the remaining windows, so no window in the mix partition goes
-unaddressed, but the system still cannot autonomously contain this
-scenario with confidence.
+(Section~\ref{sec:eval}): neither agent can fully separate concurrent
+traces without process-level attribution---a limitation shared with
+Hirano and Kobayashi~\cite{hirano2025ransmap}. For the most adversarial
+case (SDelete with REvil), this manifests as low Auto-Contain coverage
+($16.7$--$24.0\%$, the lowest of any combination) rather than silent
+misses: the triage policy escalates nearly all remaining windows, so no
+window in the mix partition goes unaddressed, though the system still
+cannot autonomously contain this scenario with confidence.
 
 The uncertainty mechanism provides graceful degradation rather than
 silent failure for most hard cases---escalation rises on unseen Conti
@@ -1601,10 +1598,9 @@ does not hold uniformly (Conti.F, Section~\ref{sec:limitations}). An
 extended comparison is in Supplementary Section~S-IV.
 
 The Bayesian TPE policy sets thresholds $(\tau^*, \kappa^*)$ once on the
-calibration split; an online Bayesian posterior updated from rolling
-analyst feedback would let thresholds track distribution shift without
-retraining base agents (Supplementary Section~S-V), an extension we defer
-to future work.
+calibration split; online recalibration under concept drift
+(Supplementary Section~S-V) is future work
+(Section~\ref{sec:conclusion}).
 
 Inference latency (Table~\ref{tab:latency}, Section~\ref{sec:runtime}) is
 the honest cost of running the three agents \emph{sequentially} followed
