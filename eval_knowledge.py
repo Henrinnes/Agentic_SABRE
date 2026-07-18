@@ -1,4 +1,7 @@
 # eval_knowledge.py
+import json
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
@@ -18,6 +21,19 @@ if __name__ == "__main__":
         (df["Tool_Total_Mentions"] > 2)
     ).astype(int)
 
+    # Restrict to the held-out test split saved by train_knowledge_agent.py
+    # so this evaluates generalisation rather than partly in-sample fit.
+    test_indices_path = Path("checkpoints/knowledge_test_indices.json")
+    if not test_indices_path.exists():
+        raise FileNotFoundError(
+            f"{test_indices_path} not found -- run train_knowledge_agent.py "
+            "first so this script can evaluate on the same held-out test "
+            "split rather than the full train+val+test dataset."
+        )
+    test_indices = json.loads(test_indices_path.read_text())
+    df = df.loc[test_indices]
+    print(f"Evaluating on held-out test split: {len(df)} rows")
+
     # Same columns used during training
     drop_cols = [
         "Video_ID",
@@ -32,6 +48,11 @@ if __name__ == "__main__":
         "Platform_Signal",
         "Family_Count",
         "Ransomware_Context",
+        # v4-only metadata columns, not part of the 23-dim ATT&CK feature set
+        # -- excluded to match train_knowledge_agent.py's feature set exactly.
+        "Year",
+        "DurationSeconds",
+        "Transcript_Provider",
     ]
 
     X = (
