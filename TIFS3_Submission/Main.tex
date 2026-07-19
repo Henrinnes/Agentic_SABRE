@@ -456,7 +456,7 @@ Training data: RanSMAP~\cite{hirano2025ransmap} (Section~\ref{sec:datasets}).
 % ── Architecture ──
 The Knowledge Agent encodes ATT\&CK tactic profiles derived from
 threat-intelligence transcripts (RansKnow~\cite{ransknow_2026}: $718$
-ATT\&CK-aligned transcripts). A Discourse CNN $f_{\text{know}}$ maps the
+ATT\&CK-aligned transcripts). A Knowledge CNN $f_{\text{know}}$ maps the
 tactic embedding $\mathbf{x}_{\text{know}} \in \R^{d}$ to
 $(\hat{p}_{\text{know}}, \sigma_{\text{know}})$.
 
@@ -1275,7 +1275,7 @@ only under exchangeability between calibration and test samples.
 On in-distribution splits (thresholds calibrated on the split-specific
 validation set), empirical coverage at $\alpha{=}0.01$ is within
 $0.7$ points of the $99\%$ nominal target; family holdout is the critical
-exception, collapsing to $\mathbf{88.0\%}$ at $\alpha{=}0.01$ and $59.2\%$
+exception, collapsing to $\mathbf{88.2\%}$ at $\alpha{=}0.01$ and $58.7\%$
 at $\alpha{=}0.10$ (Supplementary Section~S-VIII), confirming that
 exchangeability is violated when test families are entirely absent from
 calibration---consistent
@@ -1625,7 +1625,7 @@ triage thresholds under concept drift.
 
 The behavioural feature extraction procedure (Algorithm~S1), the Decision
 MLP training procedure with CTGAN and Bayesian TPE (Algorithm~S2),
-per-class confusion matrices, an extended Hirano and
+per-class accuracy analysis, an extended Hirano and
 Kobayashi~\cite{hirano2025ransmap} comparison, adaptive thresholding, and
 full computational complexity derivations are provided in the
 supplementary material.
