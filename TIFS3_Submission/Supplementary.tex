@@ -17,6 +17,8 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{microtype}
+\usepackage{float}
+\renewcommand{\arraystretch}{0.88}
 
 \newcommand{\R}{\mathbb{R}}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -168,30 +170,14 @@ Bayesian TPE policy optimisation.
 \section{Confusion Matrices and Per-Class Accuracy}\label{sec:supp_confusion}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Figure~\ref{fig:cm_binary} shows normalised binary confusion matrices for the
-Behavioural CNN on the random-stratified, family-holdout, and hardware-holdout
-test splits.
-Figure~\ref{fig:cm_recall} shows per-class accuracy for all twelve classes
-(six ransomware families, six benign applications) across the same three splits.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig_cm_binary.pdf}
-  \caption{Normalised binary confusion matrices for the Behavioural CNN
-    (MC Dropout $T{=}10$) on three evaluation splits.
-    Cell values show row-normalised recall; raw counts in parentheses.}
-  \label{fig:cm_binary}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.7\columnwidth]{Figures/fig_cm_recall.pdf}
-  \caption{Per-class accuracy for all twelve classes across three evaluation
-    splits. The dashed line separates ransomware (top) from benign (bottom)
-    classes. Family-holdout degradation is concentrated in held-out Conti
-    sub-variants and REvil.}
-  \label{fig:cm_recall}
-\end{figure}
+Row-normalised binary recall for the Behavioural CNN (MC Dropout $T{=}10$)
+on the random-stratified, family-holdout, and hardware-holdout test
+splits follows the AUROC pattern reported in the main paper: strong and
+consistent on random-stratified and hardware holdout, degraded on family
+holdout. Per-class accuracy for all twelve classes (six ransomware
+families, six benign applications) follows the same pattern;
+family-holdout degradation is concentrated in held-out Conti
+sub-variants and REvil.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Comparison with Hirano and Kobayashi}\label{sec:supp_hirano}
@@ -275,28 +261,18 @@ We defer this extension to future work.
 % ─────────────────────────────────────────────────────────────────────────────
 
 This section provides the full ablation figures supporting Section~VII-D of
-the main paper.
-Figure~\ref{fig:t_sensitivity} quantifies MC Dropout pass-count stability
-and latency.
+the main paper. MC Dropout pass-count sensitivity ($\sigma_{\mathrm{beh}}$
+drift falls from $100\%$ at $T{=}1$ to $11\%$ at $T{=}10$) is reported
+in the main paper's own agent description
+(Section~\ref{sec:agents}) and is not repeated as a figure here.
 Table~\ref{tab:feature_ablation} reports AUROC by feature subset.
 Figure~\ref{fig:violin} shows per-family uncertainty distributions
 (held-out families REvil and WannaCry exhibit markedly elevated
 uncertainty relative to trained families, confirming the epistemic
 signal mechanism).
-Figures~\ref{fig:feature_importance} and~\ref{fig:feedback} show SHAP feature
-importance and Expert Feedback Loop convergence respectively.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig19_t_sensitivity.pdf}
-  \caption{MC Dropout pass count sensitivity. Left: $\sigma_{\mathrm{beh}}$
-    drift from a near-converged $T{=}200$ reference mean vs $T$ — falls from
-    $100\%$ at $T{=}1$ to $11\%$ at $T{=}10$ and $2\%$ at $T{=}50$.
-    Right: inference latency vs $T$ on NVIDIA GB10. $T{=}10$ is the
-    chosen operating point, balancing the steep early drop in drift against
-    near-linear latency growth in $T$.}
-  \label{fig:t_sensitivity}
-\end{figure}
+Figure~\ref{fig:feature_importance} shows SHAP feature importance; the
+Expert Feedback Loop's per-iteration convergence is reported directly in
+the main paper's Table~VI and is not duplicated here.
 
 \begin{figure}[h]
   \centering
@@ -309,6 +285,7 @@ importance and Expert Feedback Loop convergence respectively.
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Behavioural CNN AUROC by feature subset (random-stratified split,
   mean $\pm$ 95\% CI over $K{=}6$ seeds).}
 \label{tab:feature_ablation}
@@ -334,15 +311,6 @@ Hirano 23D (reported)~\cite{hirano2025ransmap}
     LBA write variance ($V_{s,w}$) are the dominant storage features;
     GPA write variance ($V_{m,w}$) is the dominant memory feature.}
   \label{fig:feature_importance}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\columnwidth]{Figures/fig6_feedback.pdf}
-  \caption{Feedback loop adaptation: false-negative count vs streaming step
-    for OOD Conti sub-variant detection. EWC-regularised Decision MLP
-    retraining converges to AUPRC $\geq 0.80$ by iteration 3.}
-  \label{fig:feedback}
 \end{figure}
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -394,6 +362,7 @@ the main paper (Section~VIII).
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Per-variant recall and escalation rate on RanSMAP
   \texttt{variants} partition (seven Conti sub-variants; $1{,}397$ windows).
   Hirano recall from Table~14 of~\cite{hirano2025ransmap} ($\chi$, full 23D).
@@ -473,6 +442,7 @@ paper (Section~VIII).
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Mondrian conformal prediction empirical coverage and escalation rate
   across four evaluation splits at three nominal miscoverage levels $\alpha$
   (extends the corresponding table in the main paper). In-distribution
@@ -540,6 +510,7 @@ reason, not an inconsistency.
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Fusion method comparison across four evaluation splits. BK Mean is
   [B+K] (Semantic excluded, matching Table II's Mean Fusion row); RF, GBT,
   MLP-2L, and MLP-1L are all [S+B+K], trained on the identical
@@ -572,6 +543,7 @@ values summarised in the main paper (Section~VIII).
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Decision MLP AUROC and ECE under induced class imbalance
   (random-stratified test split). Ransomware prevalence is reduced by
   subsampling; benign count fixed at $12{,}225$. SMOTE = linear interpolation
@@ -629,6 +601,7 @@ deep ensemble, evaluated next).
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Behavioural Agent: tabular baselines on the identical 16D feature
   set (random-stratified split). Bold = best per column.}
 \label{tab:behavioural_baselines}
@@ -659,13 +632,15 @@ checkpoint, each scored with a single deterministic forward pass and
 combined by mean/std across members. AUROC is essentially identical
 between the two uncertainty methods; the ensemble is meaningfully better
 calibrated, at $6\times$ the storage and training cost of a single MC
-Dropout checkpoint. Table~\ref{tab:uncertainty_deciles} confirms both
-methods' uncertainty is informative: binning test windows into deciles by
-predicted uncertainty, error rate rises monotonically from the
-lowest-uncertainty decile to the highest for both methods.
+Dropout checkpoint. Both methods' uncertainty is informative: binning
+test windows into deciles by predicted uncertainty, error rate rises
+monotonically from the lowest-uncertainty decile to the highest for both
+methods ($0.2\%\to28.2\%$ for MC Dropout, $0.0\%\to28.6\%$ for the
+ensemble).
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Deep ensemble (6 independently-trained checkpoints) vs.\ MC
   Dropout (1 checkpoint, $T{=}10$), random-stratified test split.}
 \label{tab:deep_ensemble}
@@ -676,23 +651,6 @@ Method & AUROC & AUPRC & ECE \\
 \midrule
 MC Dropout ($T{=}10$, 1 checkpoint) & $0.963$ & $0.965$ & $0.042$ \\
 Deep Ensemble (6 checkpoints)       & $0.963$ & $0.965$ & $\mathbf{0.027}$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[h]
-\centering
-\caption{Error rate by predicted-uncertainty decile (1 = lowest
-  uncertainty, 10 = highest), random-stratified test split. Both methods
-  show a monotonic error-uncertainty relationship.}
-\label{tab:uncertainty_deciles}
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{lcccccccccc}
-\toprule
-Decile & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
-\midrule
-MC Dropout & .002 & .000 & .007 & .022 & .059 & .093 & .157 & .221 & .243 & .282 \\
-Ensemble   & .000 & .000 & .004 & .017 & .046 & .067 & .135 & .224 & .273 & .286 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -715,6 +673,7 @@ uncertainty-gating does not catch it).
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Knowledge Agent ablations (random-stratified test split).}
 \label{tab:knowledge_ablation}
 \setlength{\tabcolsep}{4pt}
@@ -736,34 +695,33 @@ Adversarial (inverted)      & $0.962$ & $0.964$ & $0.023$ \\
 
 Two conclusions follow. First, the constant Knowledge dimension improves
 calibration substantially (E-J1: ECE $0.040 \to 0.018$) at negligible
-AUROC cost -- it functions as a learned prior the Decision MLP can shift
-its output distribution against, not a discriminative signal. Second, the
-deployed model's \emph{discrimination} is essentially insensitive to what
-the Knowledge input actually is (E-J2: AUROC varies by $<0.001$ across
+AUROC cost -- a learned prior, not a discriminative signal. Second, the
+deployed model's \emph{discrimination} is insensitive to the Knowledge
+input's content (E-J2: AUROC varies by $<0.001$ across
 default/masked/adversarial), but its \emph{calibration} is not (ECE
-$0.015 \to 0.023$ under adversarial input). This matters operationally:
-Peer Consultation (Definition~1 of the main paper) only substitutes an
+$0.015 \to 0.023$ under adversarial input). Operationally, Peer
+Consultation (Definition~1 of the main paper) only substitutes an
 agent's probability when \emph{that agent's own} uncertainty exceeds
 $\kappa_{\text{PC}}$, so a deliberately low-uncertainty adversarial
-Knowledge input is not caught by this safeguard, even though its practical
-impact here is limited to calibration rather than detection.
+Knowledge input evades this safeguard, though its impact here is
+limited to calibration rather than detection.
 
 \subsection{E-K: Cost-Sensitive Triage Objective}\label{sec:supp_cost}
 
 Table~\ref{tab:cost_sensitive} reports the full confusion breakdown the
-main paper's balanced-accuracy objective does not expose. We define
+main paper's balanced-accuracy objective does not expose, using
 $J_{\text{cost}}(\Theta) = -(w_{\text{fn}} P_{\text{ransomware allowed}} +
 w_{\text{fp}} P_{\text{benign auto-contained}} + w_{\text{esc}}
-P_{\text{escalated}})$ with $w_{\text{fn}}{=}10$, $w_{\text{fp}}{=}5$,
-$w_{\text{esc}}{=}1$ -- an illustrative weighting, not a claim of the
-"correct" costs for every deployment, reflecting only that missing
-ransomware is worse than a false auto-contain, which is worse than an
-unnecessary escalation. Both policies are fit by the same Optuna TPE
-procedure (150 trials) on a held-out validation split and evaluated on the
-genuinely held-out random-stratified test split.
+P_{\text{escalated}})$, $w_{\text{fn}}{=}10$, $w_{\text{fp}}{=}5$,
+$w_{\text{esc}}{=}1$ -- illustrative weights reflecting only that missed
+ransomware $>$ false auto-contain $>$ unnecessary escalation. Both
+policies are fit by the same 150-trial Optuna TPE procedure on a
+held-out validation split and evaluated on the held-out
+random-stratified test split.
 
 \begin{table}[h]
 \centering
+\footnotesize
 \caption{Cost-sensitive vs.\ balanced-accuracy triage policy, full
   confusion breakdown (random-stratified test split, $n{=}5397$).}
 \label{tab:cost_sensitive}
@@ -784,13 +742,12 @@ Balanced accuracy                & $\mathbf{0.889}$ & $0.834$ \\
 \end{table}
 
 The balanced-accuracy policy silently allows $6.0\%$ of ransomware through
-undetected in exchange for a very low $0.6\%$ analyst workload; the
-cost-sensitive policy reduces missed ransomware more than sixfold (to
-$0.85\%$) and false auto-containment nearly by half, at the cost of a
-$40\times$ higher escalation rate. Neither policy is universally "correct"
--- the right choice depends on the deployer's actual cost structure, which
-is exactly why we report the full breakdown here rather than a single
-balanced-accuracy number.
+undetected at a very low $0.6\%$ analyst workload; the cost-sensitive
+policy cuts missed ransomware more than sixfold (to $0.85\%$) and false
+auto-containment nearly by half, at $40\times$ the escalation rate.
+Neither is universally "correct" -- the right choice depends on the
+deployer's cost structure, which is why we report the full breakdown
+rather than a single number.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Triage Decision Space}\label{sec:supp_triage_space}
@@ -802,9 +759,10 @@ $(\hat{p}, \sigma_{\max})$ space. Fig.~\ref{fig:triage_space} illustrates
 these regions geometrically alongside the real, genuine fused
 $[S{+}B{+}K]$ Decision MLP output.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=\columnwidth]{Figures/fig14_triage_space.pdf}
+  \footnotesize
+  \includegraphics[width=0.62\columnwidth]{Figures/fig14_triage_space.pdf}
   \caption{Triage decision regions in $(\hat{p},\,\sigma_{\max})$ space under
     the real Bayesian TPE-optimised thresholds
     $(\tau_{\text{high}}{=}0.905,\,\tau{=}0.396,\,\kappa{=}0.196,\,
@@ -824,38 +782,31 @@ $[S{+}B{+}K]$ Decision MLP output.
 \section{Additional Limitations}\label{sec:supp_calset}
 % ─────────────────────────────────────────────────────────────────────────────
 
+\footnotesize
 \textbf{Dataset scope.} RanSMAP families range from WannaCry (2017) to
 Conti (2022); post-2022 families (Cl0p, BlackCat/ALPHV, LockBit 3.0) are
-not represented, since RanSMAP is the only publicly available
-hypervisor-level telemetry dataset with family labels and multi-split
-protocols at time of writing. Extension to current-generation families is
-future work.
+absent, since RanSMAP is the only public hypervisor-level telemetry
+dataset with family labels and multi-split protocols. Extension to
+current-generation families is future work.
 
 \textbf{Adversarial robustness.} An adaptive attacker aware of the triage
 policy could craft executions suppressing $\sigma_{\max}$ below $\kappa$
 while keeping $\hat{p}$ below $\tau_{\text{high}}$, avoiding both
-Escalation and Auto-Contain. Adversarial attacks against MC Dropout
-uncertainty estimates~\cite{gal2016dropout} remain an open problem we
-defer to future work.
+Escalation and Auto-Contain -- an open problem for MC Dropout
+uncertainty~\cite{gal2016dropout} we defer to future work.
 
-\textbf{Knowledge Agent sample size.} The RansKnow corpus~\cite{ransknow_2026}
-contains only $718$ transcripts (${\approx}503$/$108$/$107$
-train/val/test), small for a CNN classifier; since its role is
-complementary ATT\&CK-level signal, its generalisation metrics should be
-read accordingly.
+\textbf{Knowledge Agent sample size.} RansKnow~\cite{ransknow_2026} has
+only $718$ transcripts (${\approx}503$/$108$/$107$ train/val/test),
+small for a CNN classifier; its generalisation metrics should be read
+accordingly given its complementary role.
 
-\textbf{Calibration-set separation for temperature scaling and TPE.} The
-Decision MLP's temperature scaling and Bayesian TPE triage-policy
-optimisation are fit on a stratified sample drawn independently of the
-session-level train/val/test partitions used elsewhere in this paper,
-rather than on a dedicated held-out slice of the same partition scheme.
-We have not audited this sample for overlap with the evaluation splits'
-training sessions. A rigorous re-fit on a clean, partition-consistent
-calibration set---with temperature scaling, TPE, and conformal
-calibration each using their own disjoint slice, as recommended in peer
-review---is deferred to future work; all AUROC, calibration, and LOFO
-numbers reported in the main paper are unaffected, since they do not
-depend on the temperature or policy thresholds' fitting data.
+\textbf{Calibration-set separation.} Temperature scaling and Bayesian
+TPE are fit on a stratified sample independent of the session-level
+train/val/test partitions used elsewhere, not audited for
+training-session overlap. A rigorous re-fit on a clean,
+partition-consistent calibration set is deferred to future work; all
+AUROC, calibration, and LOFO numbers in the main paper are unaffected,
+since none depend on this fitting data.
 
 \bibliographystyle{IEEEtran}
 \bibliography{Reference_Main}
