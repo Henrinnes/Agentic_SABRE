@@ -854,7 +854,7 @@ verified empirically instead (Section~\ref{sec:results_conformal}).
 \subsection{Datasets}\label{sec:datasets}
 
 \textbf{RDset}~\cite{kabuye2025explainable,mathur2020ransomware}:
-$138{,}047$ PE files ($41{,}123$ ransomware; $96{,}924$ benign; $\approx\!30\%$
+$138{,}047$ PE files ($96{,}724$ ransomware; $41{,}323$ benign; $\approx\!70\%$
 prevalence), used exclusively for Semantic Agent training/evaluation with
 disjoint train/test splits at the binary (file-hash) level.
 
@@ -867,7 +867,7 @@ applications (AESCrypt, Firefox, Idle, Office, SDelete, Zip) under BitVisor
 hypervisor surveillance; moderate class imbalance addressed via SMOTE
 at the feature level. A separate \texttt{variants} partition provides
 $1{,}397$ windows from seven Conti sub-variants for OOD analysis; a
-\texttt{mix} partition provides $600$ windows from ten concurrent
+\texttt{mix} partition provides $1{,}944$ windows from ten concurrent
 execution combinations. Neither is used for training.
 
 \textbf{RansKnow}~\cite{ransknow_2026}: $718$ ATT\&CK-aligned
