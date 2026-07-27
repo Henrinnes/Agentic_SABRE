@@ -189,6 +189,11 @@ def main():
                         help="Output JSON path")
     parser.add_argument("--n-samples",   type=int,   default=2000,
                         help="Semantic samples per class for tuning (default: 2000)")
+    parser.add_argument("--storage",     type=str,   default="sqlite:///checkpoints/optuna_studies.db",
+                        help="Optuna storage URL, so the full trial history persists "
+                             "(default: sqlite:///checkpoints/optuna_studies.db)")
+    parser.add_argument("--study-name",  type=str,   default=None,
+                        help="Optuna study name (default: derived from --out filename)")
     args = parser.parse_args()
 
     rng = np.random.default_rng(42)
@@ -274,8 +279,14 @@ def main():
     # ------------------------------------------------------------------ #
     #  Run optimisation
     # ------------------------------------------------------------------ #
-    print(f"\nRunning Optuna ({args.trials} trials)...")
+    study_name = args.study_name or Path(args.out).stem
+    if args.storage.startswith("sqlite:///"):
+        Path(args.storage[len("sqlite:///"):]).parent.mkdir(parents=True, exist_ok=True)
+    print(f"\nRunning Optuna ({args.trials} trials, study '{study_name}' -> {args.storage})...")
     study = optuna.create_study(
+        study_name=study_name,
+        storage=args.storage,
+        load_if_exists=True,
         direction="maximize",
         sampler=optuna.samplers.TPESampler(seed=42),
     )
