@@ -48,6 +48,10 @@ KNOW_DROP_COLS = [
     "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
     "YouTube_URL", "Transcript_Path", "Family_List", "Tool_List",
     "Dominant_Tactic", "Platform_Signal", "Family_Count", "Ransomware_Context",
+    # v4-only metadata columns, not part of the 23-dim ATT&CK feature set
+    # the paper describes -- excluded to keep input_dim unchanged (see
+    # train_knowledge_agent.py).
+    "Year", "DurationSeconds", "Transcript_Provider",
     "label",
 ]
 
@@ -203,9 +207,9 @@ def main():
     # ------------------------------------------------------------------ #
     print("Loading datasets...")
     df_sem = pd.read_parquet(
-        r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet")
+        r"/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet")
     df_beh = pd.read_parquet(
-        r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet")
+        r"/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet")
 
     sem_s = stratified_sample(df_sem, args.n_samples)
     beh_s = stratified_sample(df_beh, args.n_samples)
@@ -217,7 +221,7 @@ def main():
 
     if args.pipeline == 3:
         df_know_raw = pd.read_csv(
-            r"/home/henrykabuye/Ransap/Publications 2026/Proposal_2026/Knowledge_Agent/outputs/Knowledge_Agent_Features_307.csv")
+            r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv")
         df_know_raw["label"] = (
             (df_know_raw["Tactic_Total_Mentions"] > 10) |
             (df_know_raw["Tool_Total_Mentions"] > 2)
