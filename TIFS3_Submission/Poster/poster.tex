@@ -1,4 +1,4 @@
-\documentclass[20pt,a0paper,portrait,margin=6mm,innermargin=10mm,blockverticalspace=7mm,colspace=12mm,subcolspace=8mm]{tikzposter}
+\documentclass[17pt,a0paper,portrait,margin=5mm,innermargin=8mm,blockverticalspace=5mm,colspace=10mm,subcolspace=8mm]{tikzposter}
 
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
@@ -18,6 +18,24 @@ and Bayesian Triage Policy Optimisation}}
 
 \begin{document}
 \maketitle
+
+\begin{columns}
+\column{1.0}
+\block{Framework Overview}{
+\centering
+\includegraphics[width=0.78\linewidth]{fig0_pipeline.png}
+
+\vspace{0.8em}
+\raggedright
+Three specialised CNN agents each produce $(\hat p_i, \sigma_i)$ via MC
+Dropout. Peer Consultation substitutes an unreliable agent's probability
+before the score pool is fused by the Decision MLP into a calibrated risk
+$\hat p$. Bayesian TPE derives the four-threshold policy mapping
+$(\hat p, \sigma_{\max})$ to \textsc{Auto-Contain}, \textsc{Escalate}, or
+\textsc{Allow}; analyst corrections feed back via EWC-regularised
+incremental retraining.
+}
+\end{columns}
 
 \begin{columns}
 
@@ -89,21 +107,6 @@ thresholds under concept drift is likewise deferred to future work.
 % ─────────────────────────────────────────────────────────── COLUMN 2
 \column{0.36}
 
-\block{Framework Overview}{
-\centering
-\includegraphics[width=0.98\linewidth]{fig0_pipeline.png}
-
-\vspace{0.8em}
-\raggedright
-Three specialised CNN agents each produce $(\hat p_i, \sigma_i)$ via MC
-Dropout. Peer Consultation substitutes an unreliable agent's probability
-before the score pool is fused by the Decision MLP into a calibrated risk
-$\hat p$. Bayesian TPE derives the four-threshold policy mapping
-$(\hat p, \sigma_{\max})$ to \textsc{Auto-Contain}, \textsc{Escalate}, or
-\textsc{Allow}; analyst corrections feed back via EWC-regularised
-incremental retraining.
-}
-
 \block{Triage Policy over $(\hat p,\sigma_{\max})$ Space}{
 \begin{equation*}
 \pi(\hat p, \sigma_{\max};\Theta) =
@@ -133,6 +136,17 @@ Since Semantic/Knowledge contribute fixed corpus-mean scores on RanSMAP, the
 Decision MLP cannot exceed the Behavioural Agent's own AUROC here. Its honest
 value is uncertainty-gated triage: naive mean fusion is in fact better
 calibrated (ECE $0.017$) than the Decision MLP (ECE $0.027$).
+}
+
+\block{Conclusion}{
+A three-agent framework treating epistemic uncertainty as a
+\textbf{first-class control variable} for autonomous triage: strong
+in-distribution detection (AUROC $0.996$ static / $0.963$ behavioural), a
+$47\%$ escalation reduction, and a Mondrian conformal wrapper giving
+distribution-free coverage guarantees where exchangeability holds.
+\vspace{0.4em}
+
+\centering{\small \texttt{github.com/Henrinnes/Agentic\_SABRE}}
 }
 
 % ─────────────────────────────────────────────────────────── COLUMN 3
@@ -183,20 +197,8 @@ Grid search      & 0.864 & 32.6 & 26.2\\
 \raggedright
 \vspace{0.4em}
 Random-stratified, temporal, and hardware holdout cluster tightly on every
-axis (AUROC, selective precision-coverage, session-level detection,
-Mondrian conformal coverage); family holdout collapses inward on all four
---- the same generalisation gap, not four independent weaknesses.
-}
-
-\block{Conclusion}{
-A three-agent framework that treats epistemic uncertainty as a
-\textbf{first-class control variable} for autonomous triage: strong
-in-distribution detection (AUROC $0.996$ static / $0.963$ behavioural), a
-$47\%$ reduction in unnecessary escalation, and a Mondrian conformal wrapper
-giving distribution-free coverage guarantees where exchangeability holds.
-\vspace{0.6em}
-
-\centering{\small \texttt{github.com/Henrinnes/Agentic\_SABRE}}
+axis; family holdout collapses inward on all four --- the same
+generalisation gap, not four independent weaknesses.
 }
 
 \end{columns}
