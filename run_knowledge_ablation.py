@@ -43,6 +43,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split as _tts
 from sklearn.calibration import calibration_curve
+from Agentic_SABRE.knowledge_features import RANSKNOW_CSV
 
 ROOT    = Path(__file__).parent
 CKPT    = ROOT / "checkpoints"
@@ -51,7 +52,7 @@ RESULTS = ROOT / "results"
 RESULTS.mkdir(exist_ok=True)
 
 RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+RANSKNOW = RANSKNOW_CSV
 
 BEHAVIOR_COLS = [
     "avg_read_throughput","avg_write_throughput",

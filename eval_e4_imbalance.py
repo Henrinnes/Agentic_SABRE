@@ -38,6 +38,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
 RANSMAP_PARQUET = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
 SPLITS_DIR      = Path("splits")
@@ -61,12 +62,7 @@ BEHAVIORAL_FEATURE_COLS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOWLEDGE_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_Count", "Family_List",
-    "Tool_List", "Dominant_Tactic", "Platform_Signal",
-    "Year", "DurationSeconds", "Transcript_Provider",
-]
+KNOWLEDGE_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 SPLITS = ["random_stratified", "family_holdout", "hardware_holdout", "temporal_holdout"]
 
@@ -94,7 +90,7 @@ def build_knowledge_lookup():
     eval_sabre2.py, run_ea_ed_experiments.py, run_ee_eg_experiments.py,
     eval_mix_robustness.py, and eval_e16_runtime.py. Fixed here too so the
     leaky pattern isn't copy-pasted into future scripts from this one."""
-    df_rk = pd.read_csv("/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv")
+    df_rk = pd.read_csv(RANSKNOW_CSV)
     df_rk["Ransomware_Context"] = (
         (df_rk["Tactic_Total_Mentions"] > 10) | (df_rk["Tool_Total_Mentions"] > 2)
     ).astype(int)
