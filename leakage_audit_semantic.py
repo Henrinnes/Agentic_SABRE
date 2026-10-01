@@ -6,7 +6,8 @@ Leakage audit for the RDset semantic agent (AUC = 1.0 explanation).
 
 Checks performed
 ----------------
- A. Exact filename duplicates between train / val / test
+ A. Identifier leakage: Name/md5 absent from the embedded data, train/test
+    file-name overlap, and whether a file name alone predicts the label
  B. Near-duplicate embeddings  (cosine similarity ≥ threshold)
     – max-sim distribution across test set
     – % of test samples with a near-duplicate in train
@@ -26,6 +27,8 @@ Checks performed
 from __future__ import annotations
 
 import json
+import os
+import sys
 import time
 from pathlib import Path
 
@@ -33,7 +36,13 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pointbiserialr
 
-RDSET_PARQUET = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
+sys.path.insert(0, str(Path(__file__).parent))
+from data_pipeline.rdset_semantic import IDENTIFIER_COLUMNS  # noqa: E402
+
+DATA_DIR      = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
+RDSET_PARQUET = str(DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
+# Raw CSV, read only by check A to audit identifiers; never fed to a model.
+RDSET_CSV     = str(DATA_DIR / "RDset" / "Ransomware.csv")
 SPLITS_DIR    = Path("splits/rdset_random")
 
 NEAR_DUP_THRESHOLDS = [0.99, 0.97, 0.95, 0.90]
@@ -95,8 +104,29 @@ print(f"\n  Embedding dim: {emb_tr.shape[1]}")
 # ---------------------------------------------------------------------------
 # A. Exact filename duplicates
 # ---------------------------------------------------------------------------
-section_header("A. Exact filename duplicates (Name column)")
+section_header("A. Identifier leakage (Name / md5)")
 
+leaked = [c for c in IDENTIFIER_COLUMNS if c in df.columns]
+print(f"  Identifier columns present in the embedded parquet: {leaked or 'none'}")
+assert not leaked, "Name/md5 must be dropped before embedding (data_pipeline/rdset_semantic.py)"
+
+# Identifiers come from the raw CSV purely for this audit; row order matches the parquet.
+ident = pd.read_csv(RDSET_CSV, delimiter="|", engine="python", usecols=IDENTIFIER_COLUMNS)
+assert len(ident) == len(df)
+if "semantic_text" in df.columns:
+    sample = df["semantic_text"].sample(2000, random_state=0)
+    hits = sample.str.contains("VirusShare_", regex=False).sum()
+    print(f"  'VirusShare_' occurrences in 2,000 sampled semantic_text rows: {hits}")
+    assert hits == 0
+
+vs = ident["Name"].str.startswith("VirusShare_").values
+from sklearn.metrics import roc_auc_score  # noqa: E402
+print(f"  AUROC of the rule 'Name starts with VirusShare_' (why Name is excluded): "
+      f"{roc_auc_score(df['label'].values, vs):.4f}")
+
+df_tr["Name"] = ident["Name"].values[train_idx]
+df_va["Name"] = ident["Name"].values[val_idx]
+df_te["Name"] = ident["Name"].values[test_idx]
 names_tr = set(df_tr["Name"].tolist())
 names_te = set(df_te["Name"].tolist())
 names_va = set(df_va["Name"].tolist())
@@ -145,6 +175,12 @@ print(f"\n  Near-duplicate rates (test samples with max_sim ≥ threshold):")
 for thr in NEAR_DUP_THRESHOLDS:
     n_dup = int((max_sims >= thr).sum())
     print(f"    sim ≥ {thr:.2f}: {n_dup:,}  ({n_dup/len(max_sims)*100:.2f}%)")
+
+# Stored with the split for downstream "hard subset" analyses (dataset row indices).
+np.save(str(SPLITS_DIR / "test_max_sims.npy"), max_sims)
+np.save(str(SPLITS_DIR / "test_hard_indices_sim090.npy"), test_idx[max_sims < 0.90])
+print(f"  Saved test_max_sims.npy and test_hard_indices_sim090.npy "
+      f"({int((max_sims < 0.90).sum()):,} test samples with max_sim < 0.90)")
 
 # Separate by label
 ransom_mask = df_te["label"].values == 1
