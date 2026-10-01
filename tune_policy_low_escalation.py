@@ -16,7 +16,14 @@ The result is a more automation-friendly policy that trades a bit of safety marg
 for reduced analyst workload.
 """
 
+import os
 from pathlib import Path
+
+# Dataset locations; override the root with SABRE_DATA_DIR. The RDset parquet is
+# built by data_pipeline/rdset_semantic.py (all-MiniLM-L6-v2, Name/md5 dropped first).
+_DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
+SEM_PARQUET = str(_DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
+BEH_PARQUET_F = os.environ.get("SABRE_BEH_PARQUET", str(_DATA_DIR / "ransmap_extracted" / "combined_i3-gen12_datasetF.parquet"))
 import json
 import numpy as np
 import pandas as pd
@@ -111,10 +118,10 @@ def main():
 
     # 1) Load datasets
     df_sem = pd.read_parquet(
-        r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet"
+        SEM_PARQUET
     )
     df_beh = pd.read_parquet(
-        r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet"
+        BEH_PARQUET_F
     )
 
     y_sem = df_sem["label"].astype(np.float32).values
