@@ -73,12 +73,12 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 
 | Metric | Value |
 |---|---|
-| Balanced accuracy | **0.9505** |
-| False negatives | **20** (of 2,000 ransomware) |
-| False positives | 178 (of 2,000 benign) |
-| AUTO-CONTAIN | 1,731 samples |
-| ESCALATE | 427 samples |
-| ALLOW | 1,842 samples |
+| Balanced accuracy | **0.9500** |
+| False negatives | **7** (of 2,000 ransomware) |
+| False positives | 193 (of 2,000 benign) |
+| AUTO-CONTAIN | 1,762 samples |
+| ESCALATE | 424 samples |
+| ALLOW | 1,814 samples |
 
 > **RDset preprocessing:** `Name` and `md5` are dropped immediately after loading, before any other step
 > (`data_pipeline/rdset_semantic.py`). Every ransomware file in RDset is named `VirusShare_<hash>` and no
