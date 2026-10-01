@@ -65,7 +65,7 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 
 | Agent | Dataset | Samples | Accuracy | ROC-AUC | F1 | Notes |
 |---|---|---|---|---|---|---|
-| **Semantic** | RDset | 138,047 | 1.0000 | 1.0000 | 1.0000 | Static PE embeddings (384D) |
+| **Semantic** | RDset | 138,047 | 0.9797 | **0.9969** | 0.9854 | Static PE embeddings (384D, all-MiniLM-L6-v2); 20% held-out split; `Name`/`md5` dropped first |
 | **Behavioural** | RanSMAP | 751,588 | 0.9957 | **0.9994** | 0.9978 | Whole dataset, StandardScaler normalised |
 | **Knowledge** | RansKnow | 307 | 0.9900 | **0.9993** | — | MITRE ATT&CK features (23D) |
 
@@ -78,6 +78,15 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 | AUTO-CONTAIN | 1,697 samples |
 | ESCALATE | 415 samples |
 | ALLOW | 1,888 samples |
+
+> **RDset preprocessing:** `Name` and `md5` are dropped immediately after loading, before any other step
+> (`data_pipeline/rdset_semantic.py`). Every ransomware file in RDset is named `VirusShare_<hash>` and no
+> benign file is, so embedding `Name`, as earlier versions of the pipeline did, let the Semantic Agent
+> classify by file name alone and produced the previously reported 1.0000. `audit_semantic_name_leak.py`
+> quantifies the effect (with `Name`: AUROC 1.0000; without: 0.9969 ± 0.0010 over 5 seeds).
+>
+> **3-agent policy table:** computed with the earlier Semantic Agent; regenerate it with
+> `train_decision_agent.py` and `tune_policy_optuna.py` before citing it.
 
 > **Dataset note:** All three datasets are independent — no sample appears in more than one. Fusion pipeline metrics reflect semantic agent dominance. A valid multi-modal fusion evaluation requires a unified dataset with all modalities from the same executable instance.
 

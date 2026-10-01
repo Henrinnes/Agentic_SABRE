@@ -1,5 +1,9 @@
 # train_cnn_agents.py  (run from repo root)
+#   python train_cnn_agents.py                     # both agents (default)
+#   python train_cnn_agents.py --agents semantic   # Semantic CNN only
+import argparse
 import json
+import os
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -31,13 +35,14 @@ def to_tensor(x, unsqueeze=False):
 set_seed(42)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-# ---------- load data ----------
-# adjust these paths to your real parquet locations
-df_sem = pd.read_parquet(r'/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet')
-X_sem = np.stack(df_sem["embedding"].values).astype(np.float32)
-y_sem = df_sem["label"].astype(np.float32).values
+# ---------- data ----------
+# Override with SABRE_DATA_DIR / SABRE_BEH_PARQUET on machines that keep the data elsewhere.
+DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
+# Built by data_pipeline/rdset_semantic.py (all-MiniLM-L6-v2, Name/md5 dropped first).
+SEM_PARQUET = DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet"
+BEH_PARQUET = os.environ.get("SABRE_BEH_PARQUET",
+                             "/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet")
 
-df_beh = pd.read_parquet(r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet")
 behavior_columns = [
     'avg_read_throughput', 'avg_write_throughput',
     'read_LBA_variance', 'write_LBA_variance',
@@ -47,8 +52,20 @@ behavior_columns = [
     'mem_exec_GPA_variance', 'mem_read_count', 'mem_write_count',
     'mem_readwrite_count', 'mem_exec_count'
 ]
-X_beh = df_beh[behavior_columns].to_numpy(dtype=np.float32)
-y_beh = df_beh["label"].astype(np.float32).values
+
+
+def load_semantic_data():
+    df_sem = pd.read_parquet(SEM_PARQUET, columns=["embedding", "label"])
+    X_sem = np.stack(df_sem["embedding"].values).astype(np.float32)
+    y_sem = df_sem["label"].astype(np.float32).values
+    return X_sem, y_sem
+
+
+def load_behavioural_data():
+    df_beh = pd.read_parquet(BEH_PARQUET)
+    X_beh = df_beh[behavior_columns].to_numpy(dtype=np.float32)
+    y_beh = df_beh["label"].astype(np.float32).values
+    return X_beh, y_beh
 
 # ---------- model defs ----------
 class CNNSemanticAgent(nn.Module):
@@ -238,40 +255,48 @@ def train_cnn(
 
 
 if __name__ == "__main__":
-    print("Training Semantic CNN...")
-    sem_model, acc_sem = train_cnn(
-        CNNSemanticAgent(X_sem.shape[1], dropout=0.3),
-        X_sem, y_sem,
-        epochs=15,
-        batch_size=256,
-        is_cnn=True,
-        use_smote=True,   # SMOTE as in diagram
-    )
-    print(f"Semantic accuracy: {acc_sem:.4f}")
-
-    print("Training Behavioural CNN...")
-    beh_scaler = StandardScaler()
-    X_beh_scaled = beh_scaler.fit_transform(X_beh).astype(np.float32)
-    beh_model, acc_beh = train_cnn(
-        CNNBehavioralAgent(X_beh_scaled.shape[1], dropout=0.3),
-        X_beh_scaled, y_beh,
-        epochs=10,
-        batch_size=256,
-        is_cnn=True,
-        use_smote=True,
-    )
-    print(f"Behavioural accuracy: {acc_beh:.4f}")
+    parser = argparse.ArgumentParser(description="Train the Semantic and/or Behavioural CNN agents")
+    parser.add_argument("--agents", choices=["all", "semantic", "behavioural"], default="all")
+    args = parser.parse_args()
 
     ckpt_dir = Path("checkpoints")
     ckpt_dir.mkdir(exist_ok=True)
-    torch.save(sem_model.state_dict(), ckpt_dir/"semantic_cnn.pt")
-    torch.save(beh_model.state_dict(), ckpt_dir/"behavioral_cnn.pt")
-    joblib.dump(beh_scaler, ckpt_dir/"behavioral_scaler.joblib")
-
     # Update metadata preserving existing keys (knowledge agent etc.)
     meta_path = ckpt_dir / "metadata.json"
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
-    meta["semantic_input_dim"] = int(X_sem.shape[1])
-    meta["behavioral_input_dim"] = int(X_beh_scaled.shape[1])
+
+    if args.agents in ("all", "semantic"):
+        X_sem, y_sem = load_semantic_data()
+        print("Training Semantic CNN...")
+        sem_model, acc_sem = train_cnn(
+            CNNSemanticAgent(X_sem.shape[1], dropout=0.3),
+            X_sem, y_sem,
+            epochs=15,
+            batch_size=256,
+            is_cnn=True,
+            use_smote=True,   # SMOTE as in diagram
+        )
+        print(f"Semantic accuracy: {acc_sem:.4f}")
+        torch.save(sem_model.state_dict(), ckpt_dir/"semantic_cnn.pt")
+        meta["semantic_input_dim"] = int(X_sem.shape[1])
+
+    if args.agents in ("all", "behavioural"):
+        X_beh, y_beh = load_behavioural_data()
+        print("Training Behavioural CNN...")
+        beh_scaler = StandardScaler()
+        X_beh_scaled = beh_scaler.fit_transform(X_beh).astype(np.float32)
+        beh_model, acc_beh = train_cnn(
+            CNNBehavioralAgent(X_beh_scaled.shape[1], dropout=0.3),
+            X_beh_scaled, y_beh,
+            epochs=10,
+            batch_size=256,
+            is_cnn=True,
+            use_smote=True,
+        )
+        print(f"Behavioural accuracy: {acc_beh:.4f}")
+        torch.save(beh_model.state_dict(), ckpt_dir/"behavioral_cnn.pt")
+        joblib.dump(beh_scaler, ckpt_dir/"behavioral_scaler.joblib")
+        meta["behavioral_input_dim"] = int(X_beh_scaled.shape[1])
+
     meta_path.write_text(json.dumps(meta, indent=2))
     print("Saved checkpoints and metadata in ./checkpoints/")
