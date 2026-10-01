@@ -25,7 +25,15 @@ Output
 import argparse
 import json
 import time
+import os
 from pathlib import Path
+
+# Dataset locations; override the root with SABRE_DATA_DIR. The RDset parquet is
+# built by data_pipeline/rdset_semantic.py (all-MiniLM-L6-v2, Name/md5 dropped first).
+_DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
+SEM_PARQUET = str(_DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
+RANSMAP_PARQUET = str(_DATA_DIR / "ransmap_extracted" / "ransmap_train.parquet")
+KNOW_CSV_718 = str(_DATA_DIR / "RansKnow" / "Knowledge_Agent_Features_718.csv")
 
 import numpy as np
 import optuna
@@ -207,9 +215,9 @@ def main():
     # ------------------------------------------------------------------ #
     print("Loading datasets...")
     df_sem = pd.read_parquet(
-        r"/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet")
+        SEM_PARQUET)
     df_beh = pd.read_parquet(
-        r"/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet")
+        RANSMAP_PARQUET)
 
     sem_s = stratified_sample(df_sem, args.n_samples)
     beh_s = stratified_sample(df_beh, args.n_samples)
@@ -221,7 +229,7 @@ def main():
 
     if args.pipeline == 3:
         df_know_raw = pd.read_csv(
-            r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv")
+            KNOW_CSV_718)
         df_know_raw["label"] = (
             (df_know_raw["Tactic_Total_Mentions"] > 10) |
             (df_know_raw["Tool_Total_Mentions"] > 2)

@@ -4,7 +4,13 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
+import os
 from pathlib import Path
+
+# Dataset locations; override the root with SABRE_DATA_DIR. The RDset parquet is
+# built by data_pipeline/rdset_semantic.py (all-MiniLM-L6-v2, Name/md5 dropped first).
+_DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
+SEM_PARQUET = str(_DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
 
 # # ---- Same CNN as in train_cnn_agents.py ----
 # class CNNSemanticAgent(nn.Module):
@@ -54,7 +60,7 @@ def main():
 
     # --- load semantic dataset ---
     df_sem = pd.read_parquet(
-        r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet"
+        SEM_PARQUET
     )
     X_sem = np.stack(df_sem["embedding"].values).astype(np.float32)
     y_sem = df_sem["label"].astype(np.float32).values
