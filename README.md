@@ -67,18 +67,18 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 |---|---|---|---|---|---|---|
 | **Semantic** | RDset | 138,047 | 0.9797 | **0.9969** | 0.9854 | Static PE embeddings (384D, all-MiniLM-L6-v2); 20% held-out split; `Name`/`md5` dropped first |
 | **Behavioural** | RanSMAP | 751,588 | 0.9957 | **0.9994** | 0.9978 | Whole dataset, StandardScaler normalised |
-| **Knowledge** | RansKnow | 307 | 0.9900 | **0.9993** | — | MITRE ATT&CK features (23D) |
+| **Knowledge** | RansKnow v5 | 1,034 | 0.9300 | **0.9860** | 0.92 | MITRE ATT&CK features (21D); 15% held-out split; label-source totals excluded |
 
 ### 3-Agent Policy (Optuna-tuned, 4,000 samples)
 
 | Metric | Value |
 |---|---|
-| Balanced accuracy | **0.9465** |
-| False negatives | **21** (of 2,000 ransomware) |
-| False positives | 193 (of 2,000 benign) |
-| AUTO-CONTAIN | 1,761 samples |
-| ESCALATE | 411 samples |
-| ALLOW | 1,828 samples |
+| Balanced accuracy | **0.9505** |
+| False negatives | **20** (of 2,000 ransomware) |
+| False positives | 178 (of 2,000 benign) |
+| AUTO-CONTAIN | 1,731 samples |
+| ESCALATE | 427 samples |
+| ALLOW | 1,842 samples |
 
 > **RDset preprocessing:** `Name` and `md5` are dropped immediately after loading, before any other step
 > (`data_pipeline/rdset_semantic.py`). Every ransomware file in RDset is named `VirusShare_<hash>` and no
@@ -86,7 +86,12 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 > classify by file name alone and produced the previously reported 1.0000. `audit_semantic_name_leak.py`
 > quantifies the effect (with `Name`: AUROC 1.0000; without: 0.9969 ± 0.0010 over 5 seeds).
 >
-> **3-agent policy table:** regenerated with the identifier-free Semantic Agent
+> **Knowledge Agent:** its label, `Ransomware_Context = (Tactic_Total_Mentions > 10) | (Tool_Total_Mentions > 2)`,
+> was a fixed rule over two of its own 23 inputs. Those two totals now only build the label and are excluded
+> from the inputs (`Agentic_SABRE/knowledge_features.py`), leaving 21 features; the agent is trained on
+> RansKnow v5 (1,034 videos). Previously reported: 307 rows, AUROC 0.9993.
+>
+> **3-agent policy table:** regenerated with the identifier-free Semantic Agent and the 21-feature Knowledge Agent
 > (`train_decision_agent.py`, then `tune_policy_optuna.py --pipeline 3 --trials 300`). With the
 > earlier, leaking Semantic Agent the same search reported balanced accuracy 0.972 and 0 false
 > negatives; those figures depended on the file-name leak.
