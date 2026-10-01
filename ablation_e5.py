@@ -45,11 +45,11 @@ from sklearn.metrics import (
     accuracy_score, average_precision_score,
     f1_score, roc_auc_score,
 )
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 from sklearn.model_selection import LeaveOneGroupOut
 
 RANSMAP_PARQUET  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
 RDSET_PARQUET    = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
-RANSKNOW_CSV     = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 SPLITS_DIR       = Path("splits")
 CKPT_DIR         = Path("checkpoints")
 
@@ -67,12 +67,7 @@ BEHAVIORAL_FEATURE_COLS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOWLEDGE_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_Count", "Family_List",
-    "Tool_List", "Dominant_Tactic", "Platform_Signal",
-    "Year", "DurationSeconds", "Transcript_Provider",
-]
+KNOWLEDGE_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 RANSOMWARE_FAMILIES = {"Conti", "Darkside", "LockBit", "REvil", "Ryuk", "WannaCry"}
 

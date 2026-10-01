@@ -188,13 +188,13 @@ import numpy as np
 import pandas as pd
 import os
 from pathlib import Path
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
 # Dataset locations; override the root with SABRE_DATA_DIR. The RDset parquet is
 # built by data_pipeline/rdset_semantic.py (all-MiniLM-L6-v2, Name/md5 dropped first).
 _DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
 SEM_PARQUET = str(_DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
 BEH_PARQUET_F = os.environ.get("SABRE_BEH_PARQUET", str(_DATA_DIR / "ransmap_extracted" / "combined_i3-gen12_datasetF.parquet"))
-KNOW_CSV_307 = str(_DATA_DIR / "RansKnow" / "Knowledge_Agent_Features_307.csv")
 
 from Agentic_SABRE.agents.semantic import SemanticAgent
 from Agentic_SABRE.agents.behavioural import BehavioralAgent
@@ -315,7 +315,7 @@ def main():
     )
 
     df_know = pd.read_csv(
-        KNOW_CSV_307
+        RANSKNOW_CSV
     )
 
     # labels
@@ -328,11 +328,7 @@ def main():
 
     X_beh = df_beh[BEHAVIOR_COLUMNS].to_numpy(dtype=np.float32)
 
-    drop_cols = [
-        "Video_ID","Channel_ID","Channel_Name","Video_Title",
-        "YouTube_URL","Transcript_Path","Family_List","Tool_List",
-        "Dominant_Tactic","Platform_Signal","Family_Count"
-    ]
+    drop_cols = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
     X_know = df_know.drop(columns=drop_cols, errors="ignore")\
         .select_dtypes(include="number")\

@@ -13,6 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, roc_auc_score
 from imblearn.over_sampling import SMOTE
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_FEATURES, RANSKNOW_CSV, ransomware_context_label
 
 
 # -----------------------------
@@ -72,7 +73,7 @@ class CNNKnowledgeAgent(nn.Module):
 # -----------------------------
 if __name__ == "__main__":
 
-    DATA_PATH = r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+    DATA_PATH = RANSKNOW_CSV
 
     CHECKPOINT_DIR = Path("checkpoints")
     CHECKPOINT_DIR.mkdir(exist_ok=True)
@@ -84,36 +85,12 @@ if __name__ == "__main__":
     # -----------------------------
     # Build target
     # -----------------------------
-    df["Ransomware_Context"] = (
-        (df["Tactic_Total_Mentions"] > 10) |
-        (df["Tool_Total_Mentions"] > 2)
-    ).astype(int)
+    # Ransomware_Context is built from Tactic_Total_Mentions and Tool_Total_Mentions,
+    # which are therefore excluded from the inputs (Agentic_SABRE/knowledge_features.py):
+    # with them as features the label is a fixed rule over the model's own inputs.
+    df["Ransomware_Context"] = ransomware_context_label(df)
 
-    # -----------------------------
-    # Remove non-feature columns
-    # -----------------------------
-    drop_cols = [
-        "Video_ID",
-        "Channel_ID",
-        "Channel_Name",
-        "Video_Title",
-        "YouTube_URL",
-        "Transcript_Path",
-        "Family_List",
-        "Tool_List",
-        "Dominant_Tactic",
-        "Platform_Signal",
-        "Family_Count",
-        "Ransomware_Context",
-        # v4-only metadata columns, not part of the 23-dim ATT&CK feature set
-        # the paper describes -- excluded to keep input_dim/feature semantics
-        # unchanged from the 307-row version.
-        "Year",
-        "DurationSeconds",
-        "Transcript_Provider",
-    ]
-
-    X = df.drop(columns=drop_cols, errors="ignore").select_dtypes(include="number")
+    X = df[KNOWLEDGE_FEATURES].fillna(0)
     y = df["Ransomware_Context"]
 
     print("Feature matrix:", X.shape)
@@ -123,7 +100,7 @@ if __name__ == "__main__":
     # -----------------------------
     # A family-stratified split (as the paper's Implementation Details
     # section previously claimed) is not achievable here: Family_List is
-    # null for 372/718 rows (52%), so there is no family annotation to
+    # null for about half of the corpus (52% of the 718-row v4), so there is no family annotation to
     # stratify against for over half the corpus. We stratify on the binary
     # Ransomware_Context label instead, which is fully populated.
     SPLIT_SEED = 42

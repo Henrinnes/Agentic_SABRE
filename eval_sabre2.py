@@ -72,7 +72,7 @@ RESULTS.mkdir(exist_ok=True)
 DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
 RANSMAP  = str(DATA_DIR / "ransmap_extracted" / "ransmap_train.parquet")
 RDSET    = str(DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
-RANSKNOW = str(DATA_DIR / "RansKnow" / "Knowledge_Agent_Features_718.csv")
+RANSKNOW = os.environ.get("SABRE_RANSKNOW_CSV", str(DATA_DIR / "RansKnow" / "Knowledge_Agent_Features_1034.csv"))
 
 BEHAVIOR_COLS = [
     "avg_read_throughput","avg_write_throughput",
