@@ -73,11 +73,12 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 
 | Metric | Value |
 |---|---|
-| Balanced accuracy | **0.972** |
-| False negatives | **0** |
-| AUTO-CONTAIN | 1,697 samples |
-| ESCALATE | 415 samples |
-| ALLOW | 1,888 samples |
+| Balanced accuracy | **0.9465** |
+| False negatives | **21** (of 2,000 ransomware) |
+| False positives | 193 (of 2,000 benign) |
+| AUTO-CONTAIN | 1,761 samples |
+| ESCALATE | 411 samples |
+| ALLOW | 1,828 samples |
 
 > **RDset preprocessing:** `Name` and `md5` are dropped immediately after loading, before any other step
 > (`data_pipeline/rdset_semantic.py`). Every ransomware file in RDset is named `VirusShare_<hash>` and no
@@ -85,8 +86,10 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 > classify by file name alone and produced the previously reported 1.0000. `audit_semantic_name_leak.py`
 > quantifies the effect (with `Name`: AUROC 1.0000; without: 0.9969 ± 0.0010 over 5 seeds).
 >
-> **3-agent policy table:** computed with the earlier Semantic Agent; regenerate it with
-> `train_decision_agent.py` and `tune_policy_optuna.py` before citing it.
+> **3-agent policy table:** regenerated with the identifier-free Semantic Agent
+> (`train_decision_agent.py`, then `tune_policy_optuna.py --pipeline 3 --trials 300`). With the
+> earlier, leaking Semantic Agent the same search reported balanced accuracy 0.972 and 0 false
+> negatives; those figures depended on the file-name leak.
 
 > **Dataset note:** All three datasets are independent — no sample appears in more than one. Fusion pipeline metrics reflect semantic agent dominance. A valid multi-modal fusion evaluation requires a unified dataset with all modalities from the same executable instance.
 
