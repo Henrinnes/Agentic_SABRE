@@ -7,6 +7,7 @@ from pathlib import Path
 import plotly.graph_objects as go
 import plotly.express as px
 from PIL import Image
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS
 
 st.set_page_config(
     page_title="Agentic SABRE",
@@ -26,12 +27,7 @@ BEHAVIOR_COLUMNS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOW_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_List", "Tool_List",
-    "Dominant_Tactic", "Platform_Signal", "Family_Count",
-    "Ransomware_Context", "label",
-]
+KNOW_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 DECISION_COLOR = {
     "AUTO_CONTAIN": "#e74c3c",
@@ -262,11 +258,9 @@ def make_demo_know_features():
     # Fallback: use real per-class means from RansKnow (label randomly chosen)
     label = np.random.randint(0, 2)
     if label == 1:
-        raw = np.array([0.9, 31.0, 13.3, 4.7, 4.4, 1.5, 0.02, 1.1, 0.03, 0.8, 1.3, 4.0,
-                        0.6, 0.0, 0.0, 0.1, 0.0, 0.2, 0.0, 0.02, 4.5, 1.5, 0.6], dtype=np.float32)
+        raw = np.array([14, 3.1, 0.86, 1, 0.27, 0.48, 1.3, 2.1, 1.2, 6.8, 0.27, 0.037, 0.072, 0.048, 0.0, 0.24, 0.12, 0.25, 4.3, 1.2, 1.3], dtype=np.float32)
     else:
-        raw = np.array([0.02, 4.2, 1.5, 0.8, 0.9, 0.2, 0.0, 0.05, 0.0, 0.03, 0.2, 0.6,
-                        0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.6, 1.4, 0.15], dtype=np.float32)
+        raw = np.array([1.5, 0.42, 0.14, 0.15, 0.024, 0.073, 0.21, 0.17, 0.17, 0.79, 0.0069, 0.0, 0.0017, 0.0, 0.0, 0.0035, 0.0052, 0.0052, 1.9, 0.71, 0.4], dtype=np.float32)
     return raw
 
 def build_animated_boundary_fig(df_res, tau_high, kappa, kappa_low):
@@ -438,7 +432,7 @@ with tab_infer:
             beh_file = st.file_uploader("Behavioural features (16 values)", type=["csv"], key="beh_up")
         know_file = None
         if pipeline == "3-Agent":
-            know_file = st.file_uploader("Knowledge features (23 values)", type=["csv"], key="know_up")
+            know_file = st.file_uploader("Knowledge features (21 values)", type=["csv"], key="know_up")
         ready = sem_file and beh_file and (know_file if pipeline == "3-Agent" else True)
         if ready and st.button("▶  Run Inference", type="primary"):
             x_sem  = {"embedding": pd.read_csv(sem_file,  header=None).values.flatten().astype("float32")}
@@ -561,9 +555,9 @@ with tab_dash:
 
     st.subheader("Per-Agent Evaluation Results")
     metrics_df = pd.DataFrame([
-        {"Agent": "Semantic",    "Dataset": "RDset",    "Samples": "138,047", "Accuracy": 1.0000, "ROC-AUC": 1.0000, "Notes": "Static PE embeddings (384D)"},
+        {"Agent": "Semantic",    "Dataset": "RDset",    "Samples": "138,047", "Accuracy": 0.9797, "ROC-AUC": 0.9969, "Notes": "Static PE embeddings (384D, all-MiniLM-L6-v2); Name/md5 dropped; 20% held-out"},
         {"Agent": "Behavioural", "Dataset": "RanSMAP",  "Samples": "751,588", "Accuracy": 0.9957, "ROC-AUC": 0.9994, "Notes": "Whole dataset, scaler normalised"},
-        {"Agent": "Knowledge",   "Dataset": "RansKnow", "Samples": "307",     "Accuracy": 0.9900, "ROC-AUC": 0.9993, "Notes": "MITRE ATT&CK features (23D)"},
+        {"Agent": "Knowledge",   "Dataset": "RansKnow", "Samples": "1,034",   "Accuracy": 0.9300, "ROC-AUC": 0.9860, "Notes": "MITRE ATT&CK features (21D); label-source totals excluded; 15% held-out"},
     ])
     st.dataframe(metrics_df, use_container_width=True, hide_index=True)
 
@@ -739,9 +733,9 @@ with tab_explain:
     st.header("Agent Explainability")
 
     try:
-        _KNOW_COLS = json.loads(Path("checkpoints/metadata.json").read_text()).get("knowledge_features", [f"feat_{i}" for i in range(23)])
+        _KNOW_COLS = json.loads(Path("checkpoints/metadata.json").read_text()).get("knowledge_features", [f"feat_{i}" for i in range(21)])
     except Exception:
-        _KNOW_COLS = [f"feat_{i}" for i in range(23)]
+        _KNOW_COLS = [f"feat_{i}" for i in range(21)]
 
     # ── Section 1: MC Dropout Convergence Animation — all three agents ────────
     st.subheader("MC Dropout Convergence Animation")
@@ -1237,10 +1231,8 @@ with tab_calib:
             return [{"features": row[feat_cols].values.astype(np.float32)}
                     for _, row in rows.iterrows()]
         # Fallback: use real per-class means with small noise
-        means_1 = np.array([0.9, 31.0, 13.3, 4.7, 4.4, 1.5, 0.02, 1.1, 0.03, 0.8, 1.3, 4.0,
-                             0.6, 0.0, 0.0, 0.1, 0.0, 0.2, 0.0, 0.02, 4.5, 1.5, 0.6])
-        means_0 = np.array([0.02, 4.2, 1.5, 0.8, 0.9, 0.2, 0.0, 0.05, 0.0, 0.03, 0.2, 0.6,
-                             0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.6, 1.4, 0.15])
+        means_1 = np.array([14, 3.1, 0.86, 1, 0.27, 0.48, 1.3, 2.1, 1.2, 6.8, 0.27, 0.037, 0.072, 0.048, 0.0, 0.24, 0.12, 0.25, 4.3, 1.2, 1.3])
+        means_0 = np.array([1.5, 0.42, 0.14, 0.15, 0.024, 0.073, 0.21, 0.17, 0.17, 0.79, 0.0069, 0.0, 0.0017, 0.0, 0.0, 0.0035, 0.0052, 0.0052, 1.9, 0.71, 0.4])
         base = means_1 if label == 1 else means_0
         return [{"features": np.clip(base + np.random.normal(0, base * 0.1 + 0.01), 0, None).astype(np.float32)}
                 for _ in range(n)]

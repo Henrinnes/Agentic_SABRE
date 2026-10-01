@@ -46,10 +46,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score, average_precision_score
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
 MIX_PARQUET      = "/home/henry_k/Datasets/ransmap_extracted/ransmap_mix.parquet"
 RANSMAP_PARQUET  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW_CSV     = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
 SPLITS_DIR       = Path("splits")
 CKPT_DIR         = Path("checkpoints")
 RESULTS_DIR      = Path("results")
@@ -68,14 +68,7 @@ FEATURE_COLS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOWLEDGE_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_Count", "Family_List",
-    "Tool_List", "Dominant_Tactic", "Platform_Signal",
-    # v4-only RansKnow metadata columns, not part of the 23-dim ATT&CK
-    # feature set (see train_knowledge_agent.py's drop_cols for the same fix)
-    "Year", "DurationSeconds", "Transcript_Provider",
-]
+KNOWLEDGE_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 # Ransomware families present in RansKnow
 RANSOMWARE_FAMILIES = {"Conti", "Darkside", "LockBit", "REvil", "Ryuk", "WannaCry"}

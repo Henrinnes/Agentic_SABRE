@@ -21,6 +21,7 @@ import pandas as pd
 from sklearn.metrics import (
     accuracy_score, roc_auc_score, confusion_matrix, classification_report,
 )
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
 from Agentic_SABRE.orchestrator_3agent import Orchestrator
 from Agentic_SABRE.agents.semantic    import SemanticAgent
@@ -37,12 +38,7 @@ BEHAVIOR_COLUMNS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOW_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_List", "Tool_List",
-    "Dominant_Tactic", "Platform_Signal", "Family_Count", "Ransomware_Context",
-    "label",
-]
+KNOW_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 BATCH_SIZE = 256
 
@@ -114,7 +110,7 @@ if __name__ == "__main__":
     df_beh = pd.read_parquet(
         r"/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet")
     df_know_raw = pd.read_csv(
-        r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv")
+        RANSKNOW_CSV)
 
     # Build knowledge label (must match training)
     df_know_raw["label"] = (

@@ -38,6 +38,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS
 
 # ── Dataset paths ─────────────────────────────────────────────────────────────
 SEM_PARQUET = r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet"
@@ -53,11 +54,7 @@ BEHAVIOR_COLUMNS = [
     "mem_exec_GPA_variance", "mem_read_count", "mem_write_count",
     "mem_readwrite_count", "mem_exec_count",
 ]
-KNOW_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_List", "Tool_List",
-    "Dominant_Tactic", "Platform_Signal", "Family_Count", "Ransomware_Context",
-]
+KNOW_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 
 # ── UQ metric helpers ─────────────────────────────────────────────────────────

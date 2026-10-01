@@ -107,9 +107,9 @@ df_beh.to_parquet("test_data/behavioural_test.parquet", index=False)
 print(f"Behavioural: test_data/behavioural_test.csv       ({N} rows, raw magnitudes)")
 print(f"             test_data/behavioural_test.parquet")
 
-# ── 3. Knowledge (23D MITRE ATT&CK features) ─────────────────────────────────
+# ── 3. Knowledge (21D MITRE ATT&CK features) ─────────────────────────────────
 meta = json.loads(Path("checkpoints/metadata.json").read_text())
-KNOW_COLS = meta["knowledge_features"]  # 23 named columns
+KNOW_COLS = meta["knowledge_features"]  # 21 named columns
 
 # Sample from real RansKnow data so values are in-distribution (same fix applied in app.py)
 _cal_path = Path("checkpoints/knowledge_cal_data.csv")
@@ -120,10 +120,8 @@ if _cal_path.exists():
     X_know_b = df_real[df_real["label"] == 0][feat_cols].sample(100, replace=True, random_state=SEED).values.astype("float32")
 else:
     # Fallback: real per-class means with jitter (mirrors app.py fallback)
-    means_1 = np.array([0.9, 31.0, 13.3, 4.7, 4.4, 1.5, 0.02, 1.1, 0.03, 0.8, 1.3, 4.0,
-                         0.6, 0.0, 0.0, 0.1, 0.0, 0.2, 0.0, 0.02, 4.5, 1.5, 0.6])
-    means_0 = np.array([0.02, 4.2, 1.5, 0.8, 0.9, 0.2, 0.0, 0.05, 0.0, 0.03, 0.2, 0.6,
-                         0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.6, 1.4, 0.15])
+    means_1 = np.array([14, 3.1, 0.86, 1, 0.27, 0.48, 1.3, 2.1, 1.2, 6.8, 0.27, 0.037, 0.072, 0.048, 0.0, 0.24, 0.12, 0.25, 4.3, 1.2, 1.3])
+    means_0 = np.array([1.5, 0.42, 0.14, 0.15, 0.024, 0.073, 0.21, 0.17, 0.17, 0.79, 0.0069, 0.0, 0.0017, 0.0, 0.0, 0.0035, 0.0052, 0.0052, 1.9, 0.71, 0.4])
     X_know_r = np.clip(
         means_1 + rng.standard_normal((100, len(means_1))) * (means_1 * 0.1 + 0.01), 0, None
     ).astype("float32")

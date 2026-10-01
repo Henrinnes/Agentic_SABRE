@@ -54,6 +54,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 from imblearn.over_sampling import SMOTE
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS
 
 # ── Architecture imports (reuse exact same classes) ───────────────────────────
 from Agentic_SABRE.agents.semantic    import CNNSemanticAgent
@@ -75,12 +76,7 @@ BEHAVIOR_COLUMNS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOW_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_List", "Tool_List",
-    "Dominant_Tactic", "Platform_Signal", "Family_Count",
-    "Ransomware_Context",
-]
+KNOW_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 
 # ── Reproducibility ───────────────────────────────────────────────────────────

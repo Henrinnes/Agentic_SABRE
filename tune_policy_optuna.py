@@ -27,13 +27,14 @@ import json
 import time
 import os
 from pathlib import Path
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS
 
 # Dataset locations; override the root with SABRE_DATA_DIR. The RDset parquet is
 # built by data_pipeline/rdset_semantic.py (all-MiniLM-L6-v2, Name/md5 dropped first).
 _DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
 SEM_PARQUET = str(_DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
 RANSMAP_PARQUET = str(_DATA_DIR / "ransmap_extracted" / "ransmap_train.parquet")
-KNOW_CSV_718 = str(_DATA_DIR / "RansKnow" / "Knowledge_Agent_Features_718.csv")
+KNOW_CSV = os.environ.get("SABRE_RANSKNOW_CSV", str(_DATA_DIR / "RansKnow" / "Knowledge_Agent_Features_1034.csv"))
 
 import numpy as np
 import optuna
@@ -52,16 +53,7 @@ BEHAVIOR_COLUMNS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOW_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_List", "Tool_List",
-    "Dominant_Tactic", "Platform_Signal", "Family_Count", "Ransomware_Context",
-    # v4-only metadata columns, not part of the 23-dim ATT&CK feature set
-    # the paper describes -- excluded to keep input_dim unchanged (see
-    # train_knowledge_agent.py).
-    "Year", "DurationSeconds", "Transcript_Provider",
-    "label",
-]
+KNOW_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 BATCH_SIZE = 256
 
@@ -229,7 +221,7 @@ def main():
 
     if args.pipeline == 3:
         df_know_raw = pd.read_csv(
-            KNOW_CSV_718)
+            KNOW_CSV)
         df_know_raw["label"] = (
             (df_know_raw["Tactic_Total_Mentions"] > 10) |
             (df_know_raw["Tool_Total_Mentions"] > 2)
