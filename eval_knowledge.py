@@ -7,12 +7,13 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
 
 from Agentic_SABRE.agents.knowledge import KnowledgeAgent
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
 if __name__ == "__main__":
 
     # Load knowledge feature dataset
     df = pd.read_csv(
-        r"/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+        RANSKNOW_CSV
     )
 
     # Match the target used during training
@@ -35,25 +36,7 @@ if __name__ == "__main__":
     print(f"Evaluating on held-out test split: {len(df)} rows")
 
     # Same columns used during training
-    drop_cols = [
-        "Video_ID",
-        "Channel_ID",
-        "Channel_Name",
-        "Video_Title",
-        "YouTube_URL",
-        "Transcript_Path",
-        "Family_List",
-        "Tool_List",
-        "Dominant_Tactic",
-        "Platform_Signal",
-        "Family_Count",
-        "Ransomware_Context",
-        # v4-only metadata columns, not part of the 23-dim ATT&CK feature set
-        # -- excluded to match train_knowledge_agent.py's feature set exactly.
-        "Year",
-        "DurationSeconds",
-        "Transcript_Provider",
-    ]
+    drop_cols = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
     X = (
         df.drop(columns=drop_cols, errors="ignore")

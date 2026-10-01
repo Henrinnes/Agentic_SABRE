@@ -33,6 +33,7 @@ import joblib
 import torch
 import torch.nn as nn
 import pandas as pd
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
 # ── paths ──────────────────────────────────────────────────────────────────
 ROOT      = Path(__file__).parent
@@ -43,7 +44,7 @@ FIG_DIR   = ROOT / "TIFS_Submission" / "Figures"
 FIG_DIR.mkdir(exist_ok=True)
 
 RANSMAP   = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW  = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+RANSKNOW  = RANSKNOW_CSV
 
 # ── style ───────────────────────────────────────────────────────────────────
 plt.rcParams.update({
@@ -78,12 +79,7 @@ FEATURE_COLS = [
     "mem_readwrite_count","mem_exec_count",
 ]
 
-KNOWLEDGE_DROP = [
-    "Video_ID","Channel_ID","Channel_Name","Video_Title",
-    "YouTube_URL","Transcript_Path","Family_Count","Family_List",
-    "Tool_List","Dominant_Tactic","Platform_Signal",
-    "Year","DurationSeconds","Transcript_Provider",
-]
+KNOWLEDGE_DROP = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 # ── model ────────────────────────────────────────────────────────────────────
 class CNNBehavioralAgent(nn.Module):

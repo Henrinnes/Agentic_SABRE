@@ -43,7 +43,7 @@ Experiments
 """
 from __future__ import annotations
 
-import json, time
+import json, os, time
 from pathlib import Path
 
 import numpy as np
@@ -67,9 +67,12 @@ SPLITS  = ROOT / "splits"
 RESULTS = ROOT / "results"
 RESULTS.mkdir(exist_ok=True)
 
-RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RDSET    = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
-RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+# Override the dataset root with SABRE_DATA_DIR on machines that keep the
+# datasets elsewhere; the layout beneath it is unchanged.
+DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
+RANSMAP  = str(DATA_DIR / "ransmap_extracted" / "ransmap_train.parquet")
+RDSET    = str(DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
+RANSKNOW = os.environ.get("SABRE_RANSKNOW_CSV", str(DATA_DIR / "RansKnow" / "Knowledge_Agent_Features_1034.csv"))
 
 BEHAVIOR_COLS = [
     "avg_read_throughput","avg_write_throughput",

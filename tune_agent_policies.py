@@ -29,6 +29,7 @@ from typing import Dict
 
 import numpy as np
 import pandas as pd
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS
 
 BEHAVIOR_COLUMNS = [
     "avg_read_throughput", "avg_write_throughput",
@@ -40,12 +41,7 @@ BEHAVIOR_COLUMNS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOW_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_List", "Tool_List",
-    "Dominant_Tactic", "Platform_Signal", "Family_Count",
-    "Ransomware_Context", "label",
-]
+KNOW_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 
 def load_datasets(args) -> tuple:

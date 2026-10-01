@@ -44,6 +44,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.model_selection import train_test_split as _tts
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
+from Agentic_SABRE.knowledge_features import RANSKNOW_CSV
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 ROOT    = Path(__file__).parent
@@ -55,7 +56,7 @@ RES_DIR.mkdir(exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+RANSKNOW = RANSKNOW_CSV
 RDSET    = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
 
 SPLIT_NAMES  = ["random_stratified", "family_holdout", "hardware_holdout", "temporal_holdout"]

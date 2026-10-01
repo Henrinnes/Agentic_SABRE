@@ -1,0 +1,216 @@
+{
+  "with_name": [
+    {
+      "seed": 42,
+      "held_out_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "held_out_det": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "all_rows_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      }
+    },
+    {
+      "seed": 0,
+      "held_out_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "held_out_det": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "all_rows_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      }
+    },
+    {
+      "seed": 1,
+      "held_out_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "held_out_det": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "all_rows_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      }
+    },
+    {
+      "seed": 2,
+      "held_out_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "held_out_det": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "all_rows_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      }
+    },
+    {
+      "seed": 3,
+      "held_out_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "held_out_det": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      },
+      "all_rows_mc": {
+        "auroc": 1.0,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "errors": 0
+      }
+    }
+  ],
+  "without_name": [
+    {
+      "seed": 42,
+      "held_out_mc": {
+        "auroc": 0.9976014255118909,
+        "accuracy": 0.9833755885548714,
+        "f1": 0.9880967817224657,
+        "errors": 459
+      },
+      "held_out_det": {
+        "auroc": 0.9976645046632321,
+        "accuracy": 0.9830858384643245,
+        "f1": 0.9878805179975605,
+        "errors": 467
+      },
+      "all_rows_mc": {
+        "auroc": 0.9982521224414248,
+        "accuracy": 0.9852513998855462,
+        "f1": 0.9894324893857764,
+        "errors": 2036
+      }
+    },
+    {
+      "seed": 0,
+      "held_out_mc": {
+        "auroc": 0.9968629857100126,
+        "accuracy": 0.9822165881926838,
+        "f1": 0.9872656067640118,
+        "errors": 491
+      },
+      "held_out_det": {
+        "auroc": 0.9970749017622978,
+        "accuracy": 0.9825425570445491,
+        "f1": 0.9875,
+        "errors": 482
+      },
+      "all_rows_mc": {
+        "auroc": 0.9972650986271034,
+        "accuracy": 0.9824697385672996,
+        "f1": 0.9874437042110288,
+        "errors": 2420
+      }
+    },
+    {
+      "seed": 1,
+      "held_out_mc": {
+        "auroc": 0.9949723592856616,
+        "accuracy": 0.9782687432089823,
+        "f1": 0.9844155844155844,
+        "errors": 600
+      },
+      "held_out_det": {
+        "auroc": 0.9951307623520883,
+        "accuracy": 0.9787033683448026,
+        "f1": 0.9847344098862869,
+        "errors": 588
+      },
+      "all_rows_mc": {
+        "auroc": 0.9959870507750415,
+        "accuracy": 0.9793113939455402,
+        "f1": 0.985169183474233,
+        "errors": 2856
+      }
+    },
+    {
+      "seed": 2,
+      "held_out_mc": {
+        "auroc": 0.9974413712733898,
+        "accuracy": 0.9833755885548714,
+        "f1": 0.9881238841884654,
+        "errors": 459
+      },
+      "held_out_det": {
+        "auroc": 0.9975658752767784,
+        "accuracy": 0.9835204636001449,
+        "f1": 0.9882188446699982,
+        "errors": 455
+      },
+      "all_rows_mc": {
+        "auroc": 0.9974307579424169,
+        "accuracy": 0.9830275196128855,
+        "f1": 0.9878672072827827,
+        "errors": 2343
+      }
+    },
+    {
+      "seed": 3,
+      "held_out_mc": {
+        "auroc": 0.9975309786306124,
+        "accuracy": 0.9834480260775081,
+        "f1": 0.9881443432692557,
+        "errors": 457
+      },
+      "held_out_det": {
+        "auroc": 0.997571982737121,
+        "accuracy": 0.9834118073161898,
+        "f1": 0.988111307237047,
+        "errors": 458
+      },
+      "all_rows_mc": {
+        "auroc": 0.998108874099774,
+        "accuracy": 0.9851282534209364,
+        "f1": 0.9893502788224614,
+        "errors": 2053
+      }
+    }
+  ]
+}
