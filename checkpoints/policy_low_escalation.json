@@ -1,23 +1,23 @@
 {
-  "tau": 0.233044,
-  "kappa": 0.196881,
-  "tau_high": 0.854496,
-  "kappa_low": 0.196865,
-  "balanced_accuracy": 0.976,
-  "escalation_rate": 0.524,
+  "tau": 0.81028,
+  "kappa": 0.223698,
+  "tau_high": 0.888375,
+  "kappa_low": 0.222512,
+  "balanced_accuracy": 0.9445,
+  "escalation_rate": 0.539,
   "esc_penalty_used": 0.3,
   "pipeline": 3,
   "n_trials": 300,
   "n_samples": 4000,
   "triage": {
-    "AUTO_CONTAIN": 1696,
-    "ESCALATE": 400,
-    "ALLOW": 1904
+    "AUTO_CONTAIN": 1736,
+    "ESCALATE": 420,
+    "ALLOW": 1844
   },
   "confusion": {
-    "tn": 1904,
-    "fp": 96,
-    "fn": 0,
-    "tp": 2000
+    "tn": 1811,
+    "fp": 189,
+    "fn": 33,
+    "tp": 1967
   }
 }
