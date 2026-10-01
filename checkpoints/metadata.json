@@ -1,10 +1,8 @@
 {
   "semantic_input_dim": 384,
   "behavioral_input_dim": 16,
-  "knowledge_input_dim": 23,
+  "knowledge_input_dim": 21,
   "knowledge_features": [
-    "Tool_Total_Mentions",
-    "Tactic_Total_Mentions",
     "Tactic_Initial_Access",
     "Tactic_Execution",
     "Tactic_Persistence",
@@ -1517,10 +1515,10 @@
   },
   "knowledge_split": {
     "seed": 42,
-    "n_train_pre_smote": 502,
-    "n_train_post_smote": 574,
-    "n_val": 108,
-    "n_test": 108,
+    "n_train_pre_smote": 723,
+    "n_train_post_smote": 808,
+    "n_val": 155,
+    "n_test": 156,
     "stratified_on": "Ransomware_Context (binary label; Family_List is null for 52% of rows, so family-stratification is not used)"
   }
 }
