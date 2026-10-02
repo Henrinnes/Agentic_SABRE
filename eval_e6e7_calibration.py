@@ -33,6 +33,8 @@ Outputs
 """
 from __future__ import annotations
 
+import os
+
 import json
 from pathlib import Path
 
@@ -43,8 +45,8 @@ from scipy.special import expit, logit
 from sklearn.metrics import brier_score_loss, roc_auc_score, average_precision_score
 from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
-RANSMAP_PARQUET = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RDSET_PARQUET   = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
+RANSMAP_PARQUET = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
+RDSET_PARQUET   = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "RDset/semantic_dataset_with_embeddings.parquet")
 SPLITS_DIR      = Path("splits")
 CKPT_DIR        = Path("checkpoints")
 RESULTS_DIR     = Path("results")
