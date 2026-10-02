@@ -22,6 +22,8 @@ Outputs
 """
 from __future__ import annotations
 
+import os
+
 import json
 import random
 from pathlib import Path
@@ -39,7 +41,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
-PARQUET    = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
+PARQUET    = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
 RANSKNOW   = RANSKNOW_CSV
 SPLITS_DIR = Path("splits")
 CKPT_DIR   = Path("checkpoints")

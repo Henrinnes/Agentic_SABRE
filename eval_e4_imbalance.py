@@ -32,6 +32,8 @@ Outputs
 """
 from __future__ import annotations
 
+import os
+
 import json
 from pathlib import Path
 
@@ -40,7 +42,7 @@ import pandas as pd
 from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score
 from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
-RANSMAP_PARQUET = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
+RANSMAP_PARQUET = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
 SPLITS_DIR      = Path("splits")
 CKPT_DIR        = Path("checkpoints")
 RESULTS_DIR     = Path("results")

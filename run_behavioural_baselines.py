@@ -28,6 +28,8 @@ Outputs: results/behavioural_baselines.json
 """
 from __future__ import annotations
 
+import os
+
 import json, time
 from pathlib import Path
 
@@ -51,7 +53,7 @@ SPLITS  = ROOT / "splits"
 RESULTS = ROOT / "results"
 RESULTS.mkdir(exist_ok=True)
 
-RANSMAP = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
+RANSMAP = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
 
 BEHAVIOR_COLS = [
     "avg_read_throughput","avg_write_throughput",

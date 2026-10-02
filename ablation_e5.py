@@ -34,6 +34,8 @@ Usage
 """
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 from pathlib import Path
@@ -48,8 +50,8 @@ from sklearn.metrics import (
 from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 from sklearn.model_selection import LeaveOneGroupOut
 
-RANSMAP_PARQUET  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RDSET_PARQUET    = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
+RANSMAP_PARQUET  = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
+RDSET_PARQUET    = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "RDset/semantic_dataset_with_embeddings.parquet")
 SPLITS_DIR       = Path("splits")
 CKPT_DIR         = Path("checkpoints")
 
