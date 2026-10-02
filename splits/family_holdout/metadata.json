@@ -18,10 +18,10 @@
   ],
   "seed": 42,
   "train": {
-    "n_sessions": 1016,
-    "n_windows": 20633,
+    "n_sessions": 1020,
+    "n_windows": 20710,
     "ransom_windows": 10676,
-    "benign_windows": 9957,
+    "benign_windows": 10034,
     "families": [
       "AESCrypt",
       "Conti",
@@ -50,10 +50,10 @@
     ]
   },
   "test": {
-    "n_sessions": 580,
-    "n_windows": 11604,
-    "ransom_windows": 5836,
-    "benign_windows": 5768,
+    "n_sessions": 600,
+    "n_windows": 12019,
+    "ransom_windows": 6038,
+    "benign_windows": 5981,
     "families": [
       "Firefox",
       "REvil",
