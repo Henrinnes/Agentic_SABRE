@@ -31,6 +31,8 @@ Outputs: results/knowledge_ablation.json
 """
 from __future__ import annotations
 
+import os
+
 import json
 from pathlib import Path
 
@@ -51,7 +53,7 @@ SPLITS  = ROOT / "splits"
 RESULTS = ROOT / "results"
 RESULTS.mkdir(exist_ok=True)
 
-RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
+RANSMAP  = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
 RANSKNOW = RANSKNOW_CSV
 
 BEHAVIOR_COLS = [

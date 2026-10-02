@@ -10,6 +10,7 @@ scaler fit on train only), reports test AUROC/AUPRC mean +/- 95% CI.
 
 Saves results/feature_ablation.json.
 """
+import os
 import json
 import random
 from pathlib import Path
@@ -25,7 +26,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 from scipy.stats import t as scipy_t
 
-PARQUET    = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
+PARQUET    = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
 SPLITS_DIR = Path("splits")
 RESULTS    = Path("results")
 SPLIT      = "random_stratified"
