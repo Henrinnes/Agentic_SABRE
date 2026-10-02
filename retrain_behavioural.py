@@ -21,6 +21,7 @@ Outputs (per split)
 The canonical checkpoint for the paper is behavioral_cnn_random_stratified.pt,
 which is also symlinked / copied to behavioral_cnn.pt for backward compatibility.
 """
+import os
 import argparse
 import json
 import random
@@ -36,7 +37,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 
-PARQUET   = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
+PARQUET   = str(Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets")) / "ransmap_extracted" / "ransmap_train.parquet")
 SPLITS_DIR = Path("splits")
 CKPT_DIR   = Path("checkpoints")
 
