@@ -24,6 +24,7 @@ retrain_behavioural.py can be invoked unmodified with --split <name>):
   splits/lofo_exclude_{family}/                — final family-excluded model (for E-G test-time scoring)
   splits/lofo_exclude_{family}_fold_{0..4}/     — cross-fitting within the family-excluded pool
 """
+import os
 import json
 from pathlib import Path
 
@@ -32,7 +33,7 @@ import pandas as pd
 from sklearn.model_selection import StratifiedGroupKFold, train_test_split
 
 SEED = 42
-PARQUET = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
+PARQUET = str(Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets")) / "ransmap_extracted" / "ransmap_train.parquet")
 SPLITS_DIR = Path("splits")
 RANSOM_FAMILIES = ["Conti", "Darkside", "LockBit", "REvil", "Ryuk", "WannaCry"]
 

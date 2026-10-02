@@ -69,13 +69,22 @@ FEATURE_KEYS: List[str] = [
     "mem_exec_count",
 ]
 
+# Column layout of every RanSMAP log (Hirano & Kobayashi, RanSMAP README):
+#   UNIX time in sec, UNIX time in ns, LBA|GPA, size, entropy, type
+# ata_read, mem_read and mem_exec record entropy as -1 (not measured); mem_read
+# and mem_exec also record size 0. Windows are keyed on the whole-second field,
+# so window boundaries do not depend on the nanosecond field.
+#
+# Earlier versions omitted the nanosecond column, which shifted every field
+# after the timestamp by one (e.g. "LBA" held nanoseconds, "size" held the
+# address and "entropy" held the size).
 CSV_SCHEMA: Dict[str, List[str]] = {
-    "ata_read.csv":      ["timestamp", "LBA", "size", "entropy", "flag1", "category"],
-    "ata_write.csv":     ["timestamp", "LBA", "size", "entropy", "flag1", "category"],
-    "mem_exec.csv":      ["timestamp", "GPA", "size", "MMIO_flag", "page_type", "access_type"],
-    "mem_read.csv":      ["timestamp", "GPA", "size", "MMIO_flag", "page_type", "access_type"],
-    "mem_readwrite.csv": ["timestamp", "GPA", "size", "MMIO_flag", "page_type", "access_type"],
-    "mem_write.csv":     ["timestamp", "GPA", "size", "MMIO_flag", "page_type", "access_type"],
+    "ata_read.csv":      ["timestamp", "ns", "LBA", "size", "entropy", "type"],
+    "ata_write.csv":     ["timestamp", "ns", "LBA", "size", "entropy", "type"],
+    "mem_exec.csv":      ["timestamp", "ns", "GPA", "size", "entropy", "type"],
+    "mem_read.csv":      ["timestamp", "ns", "GPA", "size", "entropy", "type"],
+    "mem_readwrite.csv": ["timestamp", "ns", "GPA", "size", "entropy", "type"],
+    "mem_write.csv":     ["timestamp", "ns", "GPA", "size", "entropy", "type"],
 }
 
 # Partitions that feed training vs evaluation
@@ -92,11 +101,10 @@ def _safe_var(s: pd.Series) -> float:
     return float(s.var()) if len(s) > 1 else 0.0
 
 
-def _shannon_entropy(s: pd.Series) -> float:
-    if s.empty:
-        return 0.0
-    arr = s.to_numpy(dtype=float)
-    return float(-(arr * np.log2(arr + 1e-10)).mean())
+def _mean_entropy(s: pd.Series) -> float:
+    """Mean of the recorded entropy values; -1 marks "not measured" and is ignored."""
+    valid = s[s >= 0]
+    return float(valid.mean()) if not valid.empty else 0.0
 
 
 def _load_csv(path: str, fname: str) -> pd.DataFrame:
@@ -123,7 +131,7 @@ def _extract_window(fname: str, win: pd.DataFrame) -> Dict[str, float]:
     elif fname == "ata_write.csv":
         feats["avg_write_throughput"] = float(win["size"].sum()) / WINDOW_SIZE
         feats["write_LBA_variance"]   = _safe_var(win["LBA"])
-        feats["write_entropy_mean"]   = float(win["entropy"].mean()) if not win.empty else 0.0
+        feats["write_entropy_mean"]   = _mean_entropy(win["entropy"])
 
     elif fname in ("mem_read.csv", "mem_write.csv", "mem_readwrite.csv", "mem_exec.csv"):
         op     = fname.replace("mem_", "").replace(".csv", "")
@@ -131,7 +139,9 @@ def _extract_window(fname: str, win: pd.DataFrame) -> Dict[str, float]:
         feats[f"{prefix}_GPA_variance"] = _safe_var(win["GPA"])
         feats[f"{prefix}_count"]         = float(len(win))
         if op in ("read", "write", "readwrite"):
-            feats[f"{prefix}_entropy_mean"] = _shannon_entropy(win["size"])
+            # mem_read records no entropy (-1), so mem_read_entropy_mean is 0;
+            # it is kept so the 16-feature input layout is unchanged.
+            feats[f"{prefix}_entropy_mean"] = _mean_entropy(win["entropy"])
 
     return feats
 
