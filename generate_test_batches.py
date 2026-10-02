@@ -93,8 +93,21 @@ def beh_sample(is_ransom, n):
             rng.uniform(1e2,  1e4,  n),
         ]).astype("float32")
 
-X_beh_r = beh_sample(True,  100)
-X_beh_b = beh_sample(False, 100)
+# Real RanSMAP windows from the held-out test sessions of random_stratified (the
+# split the canonical behavioral_cnn.pt is trained on), as for the Semantic and
+# Knowledge batches; the synthetic ranges above are only a fallback when the
+# extracted RanSMAP parquet is not available.
+import os
+_ransmap = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets")) / "ransmap_extracted" / "ransmap_train.parquet"
+_test_sessions = Path("splits/random_stratified/test_sessions.txt")
+if _ransmap.exists() and _test_sessions.exists():
+    _df = pd.read_parquet(_ransmap, columns=["session", "label"] + BEHAVIOR_COLUMNS)
+    _df = _df[_df["session"].isin(set(_test_sessions.read_text().split()))]
+    X_beh_r = _df[_df["label"] == 1][BEHAVIOR_COLUMNS].sample(100, random_state=SEED).to_numpy(dtype="float32")
+    X_beh_b = _df[_df["label"] == 0][BEHAVIOR_COLUMNS].sample(100, random_state=SEED).to_numpy(dtype="float32")
+else:
+    X_beh_r = beh_sample(True,  100)
+    X_beh_b = beh_sample(False, 100)
 X_beh   = np.vstack([X_beh_r, X_beh_b])
 y_beh   = np.array([1]*100 + [0]*100)
 shuffle  = rng.permutation(N)
@@ -104,7 +117,7 @@ df_beh = pd.DataFrame(X_beh, columns=BEHAVIOR_COLUMNS)
 df_beh.insert(0, "label", y_beh)
 df_beh.to_csv("test_data/behavioural_test.csv", index=False)
 df_beh.to_parquet("test_data/behavioural_test.parquet", index=False)
-print(f"Behavioural: test_data/behavioural_test.csv       ({N} rows, raw magnitudes)")
+print(f"Behavioural: test_data/behavioural_test.csv       ({N} rows, {'real RanSMAP windows' if _ransmap.exists() else 'synthetic fallback'})")
 print(f"             test_data/behavioural_test.parquet")
 
 # ── 3. Knowledge (21D MITRE ATT&CK features) ─────────────────────────────────
