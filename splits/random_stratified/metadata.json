@@ -2,10 +2,10 @@
   "description": "Random stratified 70/15/15 by class_name",
   "seed": 42,
   "train": {
-    "n_sessions": 1242,
-    "n_windows": 25125,
-    "ransom_windows": 12900,
-    "benign_windows": 12225,
+    "n_sessions": 1260,
+    "n_windows": 25490,
+    "ransom_windows": 13026,
+    "benign_windows": 12464,
     "families": [
       "AESCrypt",
       "Conti",
@@ -22,10 +22,10 @@
     ]
   },
   "val": {
-    "n_sessions": 267,
-    "n_windows": 5335,
-    "ransom_windows": 2730,
-    "benign_windows": 2605,
+    "n_sessions": 270,
+    "n_windows": 5421,
+    "ransom_windows": 2788,
+    "benign_windows": 2633,
     "families": [
       "AESCrypt",
       "Conti",
@@ -42,10 +42,10 @@
     ]
   },
   "test": {
-    "n_sessions": 267,
-    "n_windows": 5397,
-    "ransom_windows": 2764,
-    "benign_windows": 2633,
+    "n_sessions": 270,
+    "n_windows": 5438,
+    "ransom_windows": 2782,
+    "benign_windows": 2656,
     "families": [
       "AESCrypt",
       "Conti",

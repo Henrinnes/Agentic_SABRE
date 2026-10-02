@@ -3,10 +3,10 @@
   "seed": "none (temporal, no randomisation)",
   "train_date_range": [
     "2022-09-16",
-    "2023-06-27"
+    "2023-07-05"
   ],
   "val_date_range": [
-    "2023-06-27",
+    "2023-07-05",
     "2024-02-21"
   ],
   "test_date_range": [
@@ -14,9 +14,9 @@
     "2024-03-01"
   ],
   "train": {
-    "n_sessions": 1243,
-    "n_windows": 25067,
-    "ransom_windows": 12627,
+    "n_sessions": 1260,
+    "n_windows": 25423,
+    "ransom_windows": 12983,
     "benign_windows": 12440,
     "families": [
       "AESCrypt",
@@ -34,29 +34,10 @@
     ]
   },
   "val": {
-    "n_sessions": 266,
-    "n_windows": 5494,
-    "ransom_windows": 3982,
-    "benign_windows": 1512,
-    "families": [
-      "AESCrypt",
-      "Conti",
-      "Darkside",
-      "Firefox",
-      "Idle",
-      "LockBit",
-      "Office",
-      "REvil",
-      "Ryuk",
-      "SDelete",
-      "WannaCry"
-    ]
-  },
-  "test": {
-    "n_sessions": 267,
-    "n_windows": 5296,
-    "ransom_windows": 1785,
-    "benign_windows": 3511,
+    "n_sessions": 270,
+    "n_windows": 5567,
+    "ransom_windows": 3765,
+    "benign_windows": 1802,
     "families": [
       "AESCrypt",
       "Conti",
@@ -72,5 +53,24 @@
       "Zip"
     ]
   },
-  "class_imbalance_note": "Val/test label imbalance is expected and real: extra hardware configs (i5/i7-gen12, recorded Feb-Mar 2024) fall entirely in the test period, and their session distributions differ from the original configs. Do NOT re-balance; use AUPRC alongside AUROC for reporting."
+  "test": {
+    "n_sessions": 270,
+    "n_windows": 5359,
+    "ransom_windows": 1848,
+    "benign_windows": 3511,
+    "families": [
+      "AESCrypt",
+      "Conti",
+      "Darkside",
+      "Firefox",
+      "Idle",
+      "LockBit",
+      "Office",
+      "REvil",
+      "Ryuk",
+      "SDelete",
+      "WannaCry",
+      "Zip"
+    ]
+  }
 }
