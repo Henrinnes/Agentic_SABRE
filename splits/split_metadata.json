@@ -6,8 +6,8 @@
     "temporal_holdout",
     "rdset_random"
   ],
-  "ransmap_parquet": "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet",
-  "rdset_parquet": "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet",
+  "ransmap_parquet": "/home/res-w23052945/TPM/datasets/ransmap_extracted/ransmap_train.parquet",
+  "rdset_parquet": "/home/res-w23052945/TPM/datasets/RDset/semantic_dataset_with_embeddings.parquet",
   "global_seed": 42,
   "split_unit": "session (not window) \u2014 prevents within-session leakage",
   "holdout_sets_never_used_for_training": {
