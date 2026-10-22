@@ -186,7 +186,15 @@ Pipeline:
 
 import numpy as np
 import pandas as pd
+import os
 from pathlib import Path
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
+
+# Dataset locations; override the root with SABRE_DATA_DIR. The RDset parquet is
+# built by data_pipeline/rdset_semantic.py (all-MiniLM-L6-v2, Name/md5 dropped first).
+_DATA_DIR = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
+SEM_PARQUET = str(_DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
+BEH_PARQUET_F = os.environ.get("SABRE_BEH_PARQUET", str(_DATA_DIR / "ransmap_extracted" / "combined_i3-gen12_datasetF.parquet"))
 
 from Agentic_SABRE.agents.semantic import SemanticAgent
 from Agentic_SABRE.agents.behavioural import BehavioralAgent
@@ -299,15 +307,15 @@ def main():
     # -----------------------------
 
     df_sem = pd.read_parquet(
-        r"/home/henrykabuye/Ransap/Datasets/R2RanSAP-20241205T121617Z-001/R2RanSAP/semantic_dataset_with_embeddings.parquet"
+        SEM_PARQUET
     )
 
     df_beh = pd.read_parquet(
-        r"/mnt/4TBSTORE/Dr_Kabuye4TB/Batched/combined_i3-gen12_datasetF.parquet"
+        BEH_PARQUET_F
     )
 
     df_know = pd.read_csv(
-        r"/home/henrykabuye/Ransap/Publications 2026/Proposal_2026/Knowledge_Agent/outputs/Knowledge_Agent_Features_307.csv"
+        RANSKNOW_CSV
     )
 
     # labels
@@ -320,11 +328,7 @@ def main():
 
     X_beh = df_beh[BEHAVIOR_COLUMNS].to_numpy(dtype=np.float32)
 
-    drop_cols = [
-        "Video_ID","Channel_ID","Channel_Name","Video_Title",
-        "YouTube_URL","Transcript_Path","Family_List","Tool_List",
-        "Dominant_Tactic","Platform_Signal","Family_Count"
-    ]
+    drop_cols = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
     X_know = df_know.drop(columns=drop_cols, errors="ignore")\
         .select_dtypes(include="number")\
@@ -417,5 +421,93 @@ def main():
     print(f"Saved 3-agent decision fusion model → {ckpt_path}")
 
 
+def build_joint_score_dataset_2agent(p_sem, s_sem, y_sem, p_beh, s_beh, y_beh):
+    """
+    2-agent fusion dataset, rows [p_sem, p_beh, σ_sem, σ_beh], built exactly as the
+    original 2-agent trainer (commented out at the top of this file): each
+    semantic row is paired with a same-label behavioural row and vice versa.
+    """
+    rng = np.random.default_rng(42)
+    y_sem_int = y_sem.astype(int)
+    y_beh_int = y_beh.astype(int)
+    idx_sem = {0: np.where(y_sem_int == 0)[0], 1: np.where(y_sem_int == 1)[0]}
+    idx_beh = {0: np.where(y_beh_int == 0)[0], 1: np.where(y_beh_int == 1)[0]}
+
+    def sample_from(indices, max_len):
+        if len(indices) > 0:
+            return int(rng.choice(indices))
+        return int(rng.integers(0, max_len))
+
+    X_rows, y_rows = [], []
+    n_sem, n_beh = len(p_sem), len(p_beh)
+    for i in range(n_sem):
+        k = sample_from(idx_beh[int(y_sem_int[i])], n_beh)
+        X_rows.append([p_sem[i], p_beh[k], s_sem[i], s_beh[k]])
+        y_rows.append(y_sem[i])
+    for j in range(n_beh):
+        k = sample_from(idx_sem[int(y_beh_int[j])], n_sem)
+        X_rows.append([p_sem[k], p_beh[j], s_sem[k], s_beh[j]])
+        y_rows.append(y_beh[j])
+    return np.asarray(X_rows, dtype=np.float32), np.asarray(y_rows, dtype=np.float32)
+
+
+def main_2agent():
+    """Train checkpoints/decision_fuser.json (2-agent: semantic + behavioural)."""
+    df_sem = pd.read_parquet(SEM_PARQUET)
+    df_beh = pd.read_parquet(BEH_PARQUET_F)
+    y_sem = df_sem["label"].astype(np.float32).values
+    y_beh = df_beh["label"].astype(np.float32).values
+    X_sem = np.stack(df_sem["embedding"].values).astype(np.float32)
+    X_beh = df_beh[BEHAVIOR_COLUMNS].to_numpy(dtype=np.float32)
+
+    sem_agent = SemanticAgent(T=10)
+    beh_agent = BehavioralAgent(T=10)
+    BATCH = 512
+
+    print(f"Scoring semantic ({len(X_sem):,} samples)...")
+    sem_inputs = [{"embedding": v} for v in X_sem]
+    sem_outs = []
+    for i in range(0, len(sem_inputs), BATCH):
+        sem_outs.extend(sem_agent.score_batch(sem_inputs[i:i+BATCH]))
+    p_sem = np.array([o.prob for o in sem_outs], dtype=np.float32)
+    s_sem = np.array([o.uncert for o in sem_outs], dtype=np.float32)
+
+    print(f"Scoring behavioural ({len(X_beh):,} samples)...")
+    beh_inputs = [{"features": v} for v in X_beh]
+    beh_outs = []
+    for i in range(0, len(beh_inputs), BATCH):
+        beh_outs.extend(beh_agent.score_batch(beh_inputs[i:i+BATCH]))
+    p_beh = np.array([o.prob for o in beh_outs], dtype=np.float32)
+    s_beh = np.array([o.uncert for o in beh_outs], dtype=np.float32)
+
+    X, y = build_joint_score_dataset_2agent(p_sem, s_sem, y_sem, p_beh, s_beh, y_beh)
+    print("Fusion training set:", X.shape)
+
+    cfg = DecisionTrainConfig(
+        use_uncertainties=True,   # in_dim = 4 (p_sem, p_beh, σ_sem, σ_beh)
+        ctgan_samples=2000,
+        ctgan_epochs=50,
+        hidden=32,
+        p_drop=0.2,
+        lr=1e-3,
+        batch_size=128,
+        max_epochs=50,
+        early_stop_patience=6,
+        valid_size=0.2,
+        temperature_scale=True,
+        n_agents=2,
+    )
+    trainer = DecisionTrainer(cfg)
+    trainer.fit(X, y)
+    ckpt_path = Path("checkpoints/decision_fuser.json")
+    trainer.save(str(ckpt_path))
+    print(f"Saved 2-agent decision fusion model → {ckpt_path}")
+
+
 if __name__ == "__main__":
-    main()
+    import argparse
+    parser = argparse.ArgumentParser(description="Train the Decision MLP fusion head")
+    parser.add_argument("--pipeline", type=int, choices=[2, 3], default=3,
+                        help="3: decision_fuser_3agent.json (default); 2: decision_fuser.json")
+    args = parser.parse_args()
+    main_2agent() if args.pipeline == 2 else main()

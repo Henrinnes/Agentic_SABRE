@@ -33,6 +33,8 @@ Outputs: results/cost_sensitive_policy.json
 """
 from __future__ import annotations
 
+import os
+
 import json
 from pathlib import Path
 
@@ -45,6 +47,7 @@ import joblib
 from sklearn.metrics import roc_auc_score, balanced_accuracy_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split as _tts
+from Agentic_SABRE.knowledge_features import RANSKNOW_CSV
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
@@ -54,8 +57,8 @@ SPLITS  = ROOT / "splits"
 RESULTS = ROOT / "results"
 RESULTS.mkdir(exist_ok=True)
 
-RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+RANSMAP  = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
+RANSKNOW = RANSKNOW_CSV
 
 BEHAVIOR_COLS = [
     "avg_read_throughput","avg_write_throughput",

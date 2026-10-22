@@ -31,6 +31,8 @@ Outputs: results/knowledge_ablation.json
 """
 from __future__ import annotations
 
+import os
+
 import json
 from pathlib import Path
 
@@ -43,6 +45,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split as _tts
 from sklearn.calibration import calibration_curve
+from Agentic_SABRE.knowledge_features import RANSKNOW_CSV
 
 ROOT    = Path(__file__).parent
 CKPT    = ROOT / "checkpoints"
@@ -50,8 +53,8 @@ SPLITS  = ROOT / "splits"
 RESULTS = ROOT / "results"
 RESULTS.mkdir(exist_ok=True)
 
-RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+RANSMAP  = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
+RANSKNOW = RANSKNOW_CSV
 
 BEHAVIOR_COLS = [
     "avg_read_throughput","avg_write_throughput",

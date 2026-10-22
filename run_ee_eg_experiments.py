@@ -27,6 +27,8 @@ Outputs
 """
 from __future__ import annotations
 
+import os
+
 import json
 from pathlib import Path
 
@@ -44,6 +46,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.model_selection import train_test_split as _tts
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
+from Agentic_SABRE.knowledge_features import RANSKNOW_CSV
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 ROOT    = Path(__file__).parent
@@ -54,9 +57,9 @@ FIG_DIR = ROOT / "TIFS3_Submission" / "Figures"
 RES_DIR.mkdir(exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
-RANSMAP  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
-RDSET    = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
+RANSMAP  = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
+RANSKNOW = RANSKNOW_CSV
+RDSET    = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "RDset/semantic_dataset_with_embeddings.parquet")
 
 SPLIT_NAMES  = ["random_stratified", "family_holdout", "hardware_holdout", "temporal_holdout"]
 SPLIT_LABELS = ["Random", "Family", "Hardware", "Temporal"]

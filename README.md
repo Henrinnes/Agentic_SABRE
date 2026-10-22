@@ -65,19 +65,42 @@ Uncertainty acts as a *stabilising control variable* — not a secondary diagnos
 
 | Agent | Dataset | Samples | Accuracy | ROC-AUC | F1 | Notes |
 |---|---|---|---|---|---|---|
-| **Semantic** | RDset | 138,047 | 1.0000 | 1.0000 | 1.0000 | Static PE embeddings (384D) |
-| **Behavioural** | RanSMAP | 751,588 | 0.9957 | **0.9994** | 0.9978 | Whole dataset, StandardScaler normalised |
-| **Knowledge** | RansKnow | 307 | 0.9900 | **0.9993** | — | MITRE ATT&CK features (23D) |
+| **Semantic** | RDset | 138,047 | 0.9797 | **0.9969** | 0.9854 | Static PE embeddings (384D, all-MiniLM-L6-v2); 20% held-out split; `Name`/`md5` dropped first |
+| **Behavioural** | RanSMAP | 36,349 | 0.9292 | **0.9823** | — | 10 s windows, all 1,800 sessions / 15 configs; session-level random_stratified split (5,438 test windows). Family holdout: AUROC 0.7175 |
+| **Knowledge** | RansKnow v5 | 1,034 | 0.9300 | **0.9860** | 0.92 | MITRE ATT&CK features (21D); 15% held-out split; label-source totals excluded |
 
 ### 3-Agent Policy (Optuna-tuned, 4,000 samples)
 
 | Metric | Value |
 |---|---|
-| Balanced accuracy | **0.972** |
-| False negatives | **0** |
-| AUTO-CONTAIN | 1,697 samples |
-| ESCALATE | 415 samples |
-| ALLOW | 1,888 samples |
+| Balanced accuracy | **0.9448** |
+| False negatives | **7** (of 2,000 ransomware) |
+| False positives | 214 (of 2,000 benign) |
+| AUTO-CONTAIN | 1,786 samples |
+| ESCALATE | 421 samples |
+| ALLOW | 1,793 samples |
+
+> **RDset preprocessing:** `Name` and `md5` are dropped immediately after loading, before any other step
+> (`data_pipeline/rdset_semantic.py`). Every ransomware file in RDset is named `VirusShare_<hash>` and no
+> benign file is, so embedding `Name`, as earlier versions of the pipeline did, let the Semantic Agent
+> classify by file name alone and produced the previously reported 1.0000. `audit_semantic_name_leak.py`
+> quantifies the effect (with `Name`: AUROC 1.0000; without: 0.9969 ± 0.0010 over 5 seeds).
+>
+> **Behavioural features:** RanSMAP logs are `sec, ns, LBA|GPA, size, entropy, type`; earlier extraction
+> omitted the nanosecond column, so every later field was shifted (e.g. "LBA variance" was the variance of
+> nanoseconds, "throughput" summed addresses, "write entropy" was the write size). `extract_ransmap_full.py`
+> now reads the columns correctly, RanSMAP's zipped logs are extracted first (`unzip-all.sh`), all 1,800
+> sessions are in the splits, and every Behavioural checkpoint is retrained.
+>
+> **Knowledge Agent:** its label, `Ransomware_Context = (Tactic_Total_Mentions > 10) | (Tool_Total_Mentions > 2)`,
+> was a fixed rule over two of its own 23 inputs. Those two totals now only build the label and are excluded
+> from the inputs (`Agentic_SABRE/knowledge_features.py`), leaving 21 features; the agent is trained on
+> RansKnow v5 (1,034 videos). Previously reported: 307 rows, AUROC 0.9993.
+>
+> **3-agent policy table:** regenerated with the identifier-free Semantic Agent and the 21-feature Knowledge Agent
+> (`train_decision_agent.py`, then `tune_policy_optuna.py --pipeline 3 --trials 300`). With the
+> earlier, leaking Semantic Agent the same search reported balanced accuracy 0.972 and 0 false
+> negatives; those figures depended on the file-name leak.
 
 > **Dataset note:** All three datasets are independent — no sample appears in more than one. Fusion pipeline metrics reflect semantic agent dominance. A valid multi-modal fusion evaluation requires a unified dataset with all modalities from the same executable instance.
 

@@ -22,6 +22,8 @@ Outputs
 """
 from __future__ import annotations
 
+import os
+
 import json
 import random
 from pathlib import Path
@@ -37,9 +39,10 @@ from sklearn.metrics import (accuracy_score, average_precision_score,
                               roc_auc_score, classification_report)
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
+from Agentic_SABRE.knowledge_features import KNOWLEDGE_NON_FEATURE_COLUMNS, RANSKNOW_CSV
 
-PARQUET    = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RANSKNOW   = "/home/henry_k/Datasets/RansKnow/Knowledge_Agent_Features_718.csv"
+PARQUET    = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
+RANSKNOW   = RANSKNOW_CSV
 SPLITS_DIR = Path("splits")
 CKPT_DIR   = Path("checkpoints")
 SEED_DIR   = CKPT_DIR / "seeds"
@@ -66,11 +69,7 @@ FEATURE_COLS = [
     "mem_readwrite_count", "mem_exec_count",
 ]
 
-KNOWLEDGE_DROP_COLS = [
-    "Video_ID", "Channel_ID", "Channel_Name", "Video_Title",
-    "YouTube_URL", "Transcript_Path", "Family_Count", "Family_List",
-    "Tool_List", "Dominant_Tactic", "Platform_Signal",
-]
+KNOWLEDGE_DROP_COLS = list(KNOWLEDGE_NON_FEATURE_COLUMNS)  # Agentic_SABRE/knowledge_features.py
 
 
 # ---------------------------------------------------------------------------

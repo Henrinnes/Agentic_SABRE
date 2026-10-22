@@ -386,6 +386,7 @@ class DecisionTrainConfig:
     early_stop_patience: int = 6
     valid_size: float = 0.2
     temperature_scale: bool = True         # post-hoc calibration on validation
+    n_agents: int = 3                      # 3: [p_sem, p_beh, p_know]; 2: [p_sem, p_beh] (decision_fuser.json)
 
 
 class DecisionTrainer:
@@ -402,7 +403,7 @@ class DecisionTrainer:
         self.scaler: Optional[StandardScaler] = None
         self.model: Optional[FusionMLP] = None
         self.temp: Optional[TemperatureScaler] = None
-        self.in_dim: int = 3 + (3 if cfg.use_uncertainties else 0)
+        self.in_dim: int = cfg.n_agents + (cfg.n_agents if cfg.use_uncertainties else 0)
 
     # ---- CTGAN augmentation (train split only) ----
     def _augment_with_ctgan(self, X_tr: np.ndarray, y_tr: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:

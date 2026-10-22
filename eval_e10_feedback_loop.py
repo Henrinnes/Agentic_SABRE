@@ -30,6 +30,8 @@ Metrics (reported per strategy)
 """
 from __future__ import annotations
 
+import os
+
 import copy
 import json
 import random
@@ -47,8 +49,8 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-RANSMAP_PARQUET = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-OOD_PARQUET     = "/home/henry_k/Datasets/ransmap_extracted/ransmap_ood_variants.parquet"
+RANSMAP_PARQUET = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_train.parquet")
+OOD_PARQUET     = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_ood_variants.parquet")
 SPLITS_DIR      = Path("splits")
 CKPT_DIR        = Path("checkpoints")
 RESULTS_DIR     = Path("results")

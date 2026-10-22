@@ -1,22 +1,22 @@
 {
   "baseline": {
     "B": {
-      "detection_rate": 0.8787988422575976,
-      "escalation_rate": 0.08791606367583213,
-      "triage_coverage": 0.9667149059334298,
-      "miss_rate": 0.03328509406657019,
-      "mean_prob": 0.806910013048822,
-      "mean_uncert": 0.07249446763918505,
-      "high_uncert_rate": 0.30463096960926195
+      "detection_rate": 0.9370956146657081,
+      "escalation_rate": 0.0514018691588785,
+      "triage_coverage": 0.9884974838245866,
+      "miss_rate": 0.011502516175413372,
+      "mean_prob": 0.8660348200336407,
+      "mean_uncert": 0.0641975413212857,
+      "high_uncert_rate": 0.21926671459381739
     },
     "BK": {
-      "detection_rate": 0.6671490593342981,
-      "escalation_rate": 0.13784370477568741,
-      "triage_coverage": 0.8049927641099855,
-      "miss_rate": 0.19500723589001448,
-      "mean_prob": 0.6723837617090795,
-      "mean_uncert": 0.07249446763918505,
-      "high_uncert_rate": 0.30463096960926195
+      "detection_rate": 0.9475197699496765,
+      "escalation_rate": 0.04205607476635514,
+      "triage_coverage": 0.9895758447160317,
+      "miss_rate": 0.010424155283968369,
+      "mean_prob": 0.700945460136735,
+      "mean_uncert": 0.0641975413212857,
+      "high_uncert_rate": 0.21926671459381739
     }
   },
   "attacks": {
@@ -24,211 +24,211 @@
       "0.0": {
         "alpha": 0.0,
         "B": {
-          "detection_rate": 0.8784370477568741,
-          "escalation_rate": 0.08900144717800289,
-          "triage_coverage": 0.967438494934877,
-          "miss_rate": 0.03256150506512301,
-          "mean_prob": 0.8070819193085214,
-          "mean_uncert": 0.0723338647511245,
-          "high_uncert_rate": 0.30426917510853835
+          "detection_rate": 0.9345794392523364,
+          "escalation_rate": 0.053199137311286844,
+          "triage_coverage": 0.9877785765636233,
+          "miss_rate": 0.012221423436376708,
+          "mean_prob": 0.8661617438134314,
+          "mean_uncert": 0.06222196888473667,
+          "high_uncert_rate": 0.22070452911574406
         },
         "BK": {
-          "detection_rate": 0.6657018813314037,
-          "escalation_rate": 0.13929088277858176,
-          "triage_coverage": 0.8049927641099855,
-          "miss_rate": 0.19500723589001448,
-          "mean_prob": 0.6723342911137201,
-          "mean_uncert": 0.0723338647511245,
-          "high_uncert_rate": 0.30426917510853835
+          "detection_rate": 0.9421279654924515,
+          "escalation_rate": 0.04672897196261682,
+          "triage_coverage": 0.9888569374550683,
+          "miss_rate": 0.011143062544931704,
+          "mean_prob": 0.6996192535100352,
+          "mean_uncert": 0.06222196888473667,
+          "high_uncert_rate": 0.22070452911574406
         }
       },
       "0.1": {
         "alpha": 0.1,
         "B": {
-          "detection_rate": 0.9044862518089725,
-          "escalation_rate": 0.07199710564399421,
-          "triage_coverage": 0.9764833574529667,
-          "miss_rate": 0.023516642547033284,
-          "mean_prob": 0.8257717132406962,
-          "mean_uncert": 0.067897878178971,
-          "high_uncert_rate": 0.28039073806078146
+          "detection_rate": 0.9547088425593099,
+          "escalation_rate": 0.037742631200575125,
+          "triage_coverage": 0.992451473759885,
+          "miss_rate": 0.007548526240115025,
+          "mean_prob": 0.8813159616907094,
+          "mean_uncert": 0.05809667035787501,
+          "high_uncert_rate": 0.19122933141624732
         },
         "BK": {
-          "detection_rate": 0.6664254703328509,
-          "escalation_rate": 0.13241678726483358,
-          "triage_coverage": 0.7988422575976846,
-          "miss_rate": 0.2011577424023155,
-          "mean_prob": 0.681848830382524,
-          "mean_uncert": 0.067897878178971,
-          "high_uncert_rate": 0.28039073806078146
+          "detection_rate": 0.9590222861250899,
+          "escalation_rate": 0.03306973400431344,
+          "triage_coverage": 0.9920920201294033,
+          "miss_rate": 0.007907979870596693,
+          "mean_prob": 0.7068063993708952,
+          "mean_uncert": 0.05809667035787501,
+          "high_uncert_rate": 0.19122933141624732
         }
       },
       "0.2": {
         "alpha": 0.2,
         "B": {
-          "detection_rate": 0.9196816208393632,
-          "escalation_rate": 0.05680173661360347,
-          "triage_coverage": 0.9764833574529667,
-          "miss_rate": 0.023516642547033284,
-          "mean_prob": 0.8356857541685738,
-          "mean_uncert": 0.06431072731275757,
-          "high_uncert_rate": 0.2507235890014472
+          "detection_rate": 0.9615384615384616,
+          "escalation_rate": 0.03306973400431344,
+          "triage_coverage": 0.994608195542775,
+          "miss_rate": 0.005391804457225018,
+          "mean_prob": 0.8895089305698936,
+          "mean_uncert": 0.05518079201151061,
+          "high_uncert_rate": 0.17828900071890727
         },
         "BK": {
-          "detection_rate": 0.6653400868306801,
-          "escalation_rate": 0.12445730824891461,
-          "triage_coverage": 0.7897973950795948,
-          "miss_rate": 0.2102026049204052,
-          "mean_prob": 0.6871413352198655,
-          "mean_uncert": 0.06431072731275757,
-          "high_uncert_rate": 0.2507235890014472
+          "detection_rate": 0.9647735442127966,
+          "escalation_rate": 0.03055355859094177,
+          "triage_coverage": 0.9953271028037384,
+          "miss_rate": 0.004672897196261682,
+          "mean_prob": 0.7126651293223846,
+          "mean_uncert": 0.05518079201151061,
+          "high_uncert_rate": 0.17828900071890727
         }
       },
       "0.3": {
         "alpha": 0.3,
         "B": {
-          "detection_rate": 0.9290882778581766,
-          "escalation_rate": 0.04956584659913169,
-          "triage_coverage": 0.9786541244573083,
-          "miss_rate": 0.02134587554269175,
-          "mean_prob": 0.8407529880580467,
-          "mean_uncert": 0.06181969269774446,
-          "high_uncert_rate": 0.24204052098408105
+          "detection_rate": 0.9622573687994249,
+          "escalation_rate": 0.0312724658519051,
+          "triage_coverage": 0.9935298346513299,
+          "miss_rate": 0.006470165348670022,
+          "mean_prob": 0.8953544445734908,
+          "mean_uncert": 0.05228284008503029,
+          "high_uncert_rate": 0.16247304097771387
         },
         "BK": {
-          "detection_rate": 0.6635311143270622,
-          "escalation_rate": 0.12409551374819103,
-          "triage_coverage": 0.7876266280752533,
-          "miss_rate": 0.21237337192474676,
-          "mean_prob": 0.6893477543614257,
-          "mean_uncert": 0.06181969269774446,
-          "high_uncert_rate": 0.24204052098408105
+          "detection_rate": 0.9680086268871315,
+          "escalation_rate": 0.026599568655643422,
+          "triage_coverage": 0.994608195542775,
+          "miss_rate": 0.005391804457225018,
+          "mean_prob": 0.715701692582307,
+          "mean_uncert": 0.05228284008503029,
+          "high_uncert_rate": 0.16247304097771387
         }
       },
       "0.4": {
         "alpha": 0.4,
         "B": {
-          "detection_rate": 0.9265557163531114,
-          "escalation_rate": 0.04884225759768451,
-          "triage_coverage": 0.975397973950796,
-          "miss_rate": 0.024602026049204053,
-          "mean_prob": 0.8407466434947769,
-          "mean_uncert": 0.06043187514840061,
-          "high_uncert_rate": 0.22286541244573083
+          "detection_rate": 0.9669302659956865,
+          "escalation_rate": 0.026599568655643422,
+          "triage_coverage": 0.9935298346513299,
+          "miss_rate": 0.006470165348670022,
+          "mean_prob": 0.899134483038415,
+          "mean_uncert": 0.05127657038706762,
+          "high_uncert_rate": 0.1531272465851905
         },
         "BK": {
-          "detection_rate": 0.6591895803183792,
-          "escalation_rate": 0.11939218523878437,
-          "triage_coverage": 0.7785817655571635,
-          "miss_rate": 0.22141823444283648,
-          "mean_prob": 0.6891708834854584,
-          "mean_uncert": 0.06043187514840061,
-          "high_uncert_rate": 0.22286541244573083
+          "detection_rate": 0.9716031631919483,
+          "escalation_rate": 0.023005032350826744,
+          "triage_coverage": 0.994608195542775,
+          "miss_rate": 0.005391804457225018,
+          "mean_prob": 0.7164201381663832,
+          "mean_uncert": 0.05127657038706762,
+          "high_uncert_rate": 0.1531272465851905
         }
       },
       "0.5": {
         "alpha": 0.5,
         "B": {
-          "detection_rate": 0.9200434153400868,
-          "escalation_rate": 0.05499276410998553,
-          "triage_coverage": 0.9750361794500724,
-          "miss_rate": 0.024963820549927643,
-          "mean_prob": 0.8383317544891913,
-          "mean_uncert": 0.058998955447983545,
-          "high_uncert_rate": 0.21164978292329956
+          "detection_rate": 0.9705248023005032,
+          "escalation_rate": 0.025880661394680086,
+          "triage_coverage": 0.9964054636951833,
+          "miss_rate": 0.0035945363048166786,
+          "mean_prob": 0.9015586689599313,
+          "mean_uncert": 0.05046191199070863,
+          "high_uncert_rate": 0.15636232925952553
         },
         "BK": {
-          "detection_rate": 0.6599131693198264,
-          "escalation_rate": 0.11396526772793053,
-          "triage_coverage": 0.7738784370477568,
-          "miss_rate": 0.22612156295224312,
-          "mean_prob": 0.6884115327111471,
-          "mean_uncert": 0.058998955447983545,
-          "high_uncert_rate": 0.21164978292329956
+          "detection_rate": 0.97411933860532,
+          "escalation_rate": 0.02228612508986341,
+          "triage_coverage": 0.9964054636951833,
+          "miss_rate": 0.0035945363048166786,
+          "mean_prob": 0.7192067457255884,
+          "mean_uncert": 0.05046191199070863,
+          "high_uncert_rate": 0.15636232925952553
         }
       },
       "0.6": {
         "alpha": 0.6,
         "B": {
-          "detection_rate": 0.9113603473227206,
-          "escalation_rate": 0.055716353111432707,
-          "triage_coverage": 0.9670767004341534,
-          "miss_rate": 0.0329232995658466,
-          "mean_prob": 0.8332345460766627,
-          "mean_uncert": 0.05918939561463822,
-          "high_uncert_rate": 0.20224312590448626
+          "detection_rate": 0.9669302659956865,
+          "escalation_rate": 0.028037383177570093,
+          "triage_coverage": 0.9949676491732566,
+          "miss_rate": 0.0050323508267433505,
+          "mean_prob": 0.9016851994652892,
+          "mean_uncert": 0.05010541731042904,
+          "high_uncert_rate": 0.15276779295470885
         },
         "BK": {
-          "detection_rate": 0.6635311143270622,
-          "escalation_rate": 0.10709117221418235,
-          "triage_coverage": 0.7706222865412445,
-          "miss_rate": 0.22937771345875543,
-          "mean_prob": 0.6859862673050534,
-          "mean_uncert": 0.05918939561463822,
-          "high_uncert_rate": 0.20224312590448626
+          "detection_rate": 0.9712437095614666,
+          "escalation_rate": 0.02372393961179008,
+          "triage_coverage": 0.9949676491732566,
+          "miss_rate": 0.0050323508267433505,
+          "mean_prob": 0.7185117711221343,
+          "mean_uncert": 0.05010541731042904,
+          "high_uncert_rate": 0.15276779295470885
         }
       },
       "0.7": {
         "alpha": 0.7,
         "B": {
-          "detection_rate": 0.900506512301013,
-          "escalation_rate": 0.06620839363241679,
-          "triage_coverage": 0.9667149059334298,
-          "miss_rate": 0.03328509406657019,
-          "mean_prob": 0.8256285098338717,
-          "mean_uncert": 0.059821107786592886,
-          "high_uncert_rate": 0.20513748191027498
+          "detection_rate": 0.9680086268871315,
+          "escalation_rate": 0.025880661394680086,
+          "triage_coverage": 0.9938892882818117,
+          "miss_rate": 0.006110711718188354,
+          "mean_prob": 0.9006993275438385,
+          "mean_uncert": 0.05068526749549692,
+          "high_uncert_rate": 0.15276779295470885
         },
         "BK": {
-          "detection_rate": 0.658465991316932,
-          "escalation_rate": 0.11360347322720694,
-          "triage_coverage": 0.7720694645441389,
-          "miss_rate": 0.22793053545586106,
-          "mean_prob": 0.6819844093536719,
-          "mean_uncert": 0.059821107786592886,
-          "high_uncert_rate": 0.20513748191027498
+          "detection_rate": 0.9708842559309849,
+          "escalation_rate": 0.022645578720345075,
+          "triage_coverage": 0.9935298346513299,
+          "miss_rate": 0.006470165348670022,
+          "mean_prob": 0.717662723408242,
+          "mean_uncert": 0.05068526749549692,
+          "high_uncert_rate": 0.15276779295470885
         }
       },
       "0.8": {
         "alpha": 0.8,
         "B": {
-          "detection_rate": 0.8874819102749638,
-          "escalation_rate": 0.07018813314037627,
-          "triage_coverage": 0.9576700434153401,
-          "miss_rate": 0.04232995658465991,
-          "mean_prob": 0.8088309087869215,
-          "mean_uncert": 0.06301524387555191,
-          "high_uncert_rate": 0.2138205499276411
+          "detection_rate": 0.9687275341480949,
+          "escalation_rate": 0.02336448598130841,
+          "triage_coverage": 0.9920920201294033,
+          "miss_rate": 0.007907979870596693,
+          "mean_prob": 0.8980722781257352,
+          "mean_uncert": 0.05189536480222779,
+          "high_uncert_rate": 0.16175413371675054
         },
         "BK": {
-          "detection_rate": 0.6530390738060782,
-          "escalation_rate": 0.10962373371924747,
-          "triage_coverage": 0.7626628075253257,
-          "miss_rate": 0.23733719247467439,
-          "mean_prob": 0.6734645625793956,
-          "mean_uncert": 0.06301524387555191,
-          "high_uncert_rate": 0.2138205499276411
+          "detection_rate": 0.9734004313443566,
+          "escalation_rate": 0.020129403306973402,
+          "triage_coverage": 0.9935298346513299,
+          "miss_rate": 0.006470165348670022,
+          "mean_prob": 0.715767238739045,
+          "mean_uncert": 0.05189536480222779,
+          "high_uncert_rate": 0.16175413371675054
         }
       },
       "1.0": {
         "alpha": 1.0,
         "B": {
-          "detection_rate": 0.8165701881331404,
-          "escalation_rate": 0.10238784370477569,
-          "triage_coverage": 0.918958031837916,
-          "miss_rate": 0.08104196816208394,
-          "mean_prob": 0.7374799043532654,
-          "mean_uncert": 0.07387834737211935,
-          "high_uncert_rate": 0.2594066570188133
+          "detection_rate": 0.9554277498202732,
+          "escalation_rate": 0.03450754852624011,
+          "triage_coverage": 0.9899352983465133,
+          "miss_rate": 0.010064701653486701,
+          "mean_prob": 0.8750007910577622,
+          "mean_uncert": 0.06401206657881657,
+          "high_uncert_rate": 0.22070452911574406
         },
         "BK": {
-          "detection_rate": 0.625904486251809,
-          "escalation_rate": 0.12228654124457308,
-          "triage_coverage": 0.748191027496382,
-          "miss_rate": 0.25180897250361794,
-          "mean_prob": 0.6377058533881551,
-          "mean_uncert": 0.07387834737211935,
-          "high_uncert_rate": 0.2594066570188133
+          "detection_rate": 0.9615384615384616,
+          "escalation_rate": 0.029834651329978434,
+          "triage_coverage": 0.99137311286844,
+          "miss_rate": 0.008626887131560028,
+          "mean_prob": 0.7045609797401278,
+          "mean_uncert": 0.06401206657881657,
+          "high_uncert_rate": 0.22070452911574406
         }
       }
     },
@@ -236,211 +236,211 @@
       "0.0": {
         "alpha": 0.0,
         "B": {
-          "detection_rate": 0.8791606367583212,
-          "escalation_rate": 0.09225759768451519,
-          "triage_coverage": 0.9714182344428365,
-          "miss_rate": 0.028581765557163533,
-          "mean_prob": 0.8073394636767774,
-          "mean_uncert": 0.07260939576022456,
-          "high_uncert_rate": 0.3104196816208394
+          "detection_rate": 0.9374550682961897,
+          "escalation_rate": 0.0514018691588785,
+          "triage_coverage": 0.9888569374550683,
+          "miss_rate": 0.011143062544931704,
+          "mean_prob": 0.8658954176586372,
+          "mean_uncert": 0.0633003117769884,
+          "high_uncert_rate": 0.21603163191948238
         },
         "BK": {
-          "detection_rate": 0.6671490593342981,
-          "escalation_rate": 0.14182344428364688,
-          "triage_coverage": 0.808972503617945,
-          "miss_rate": 0.191027496382055,
-          "mean_prob": 0.6727419221536112,
-          "mean_uncert": 0.07260939576022456,
-          "high_uncert_rate": 0.3104196816208394
+          "detection_rate": 0.9442846872753414,
+          "escalation_rate": 0.04457225017972682,
+          "triage_coverage": 0.9888569374550683,
+          "miss_rate": 0.011143062544931704,
+          "mean_prob": 0.7000387832963239,
+          "mean_uncert": 0.0633003117769884,
+          "high_uncert_rate": 0.21603163191948238
         }
       },
       "0.1": {
         "alpha": 0.1,
         "B": {
-          "detection_rate": 0.8921852387843705,
-          "escalation_rate": 0.07995658465991316,
-          "triage_coverage": 0.9721418234442837,
-          "miss_rate": 0.027858176555716353,
-          "mean_prob": 0.8097767066547455,
-          "mean_uncert": 0.07012354353148044,
-          "high_uncert_rate": 0.29667149059334297
+          "detection_rate": 0.9496764917325665,
+          "escalation_rate": 0.04205607476635514,
+          "triage_coverage": 0.9917325664989216,
+          "miss_rate": 0.00826743350107836,
+          "mean_prob": 0.8768377201628318,
+          "mean_uncert": 0.05987100802968255,
+          "high_uncert_rate": 0.202372393961179
         },
         "BK": {
-          "detection_rate": 0.6617221418234442,
-          "escalation_rate": 0.1450795947901592,
-          "triage_coverage": 0.8068017366136034,
-          "miss_rate": 0.19319826338639653,
-          "mean_prob": 0.6739936747620902,
-          "mean_uncert": 0.07012354353148044,
-          "high_uncert_rate": 0.29667149059334297
+          "detection_rate": 0.9586628324946082,
+          "escalation_rate": 0.03414809489575845,
+          "triage_coverage": 0.9928109273903667,
+          "miss_rate": 0.007189072609633357,
+          "mean_prob": 0.706266083667727,
+          "mean_uncert": 0.05987100802968255,
+          "high_uncert_rate": 0.202372393961179
         }
       },
       "0.2": {
         "alpha": 0.2,
         "B": {
-          "detection_rate": 0.8968885672937771,
-          "escalation_rate": 0.07272069464544138,
-          "triage_coverage": 0.9696092619392185,
-          "miss_rate": 0.030390738060781478,
-          "mean_prob": 0.8043154004156622,
-          "mean_uncert": 0.06974159513272321,
-          "high_uncert_rate": 0.2796671490593343
+          "detection_rate": 0.9604601006470166,
+          "escalation_rate": 0.03450754852624011,
+          "triage_coverage": 0.9949676491732566,
+          "miss_rate": 0.0050323508267433505,
+          "mean_prob": 0.884287057797298,
+          "mean_uncert": 0.057455121402862415,
+          "high_uncert_rate": 0.18799424874191228
         },
         "BK": {
-          "detection_rate": 0.658465991316932,
-          "escalation_rate": 0.12988422575976846,
-          "triage_coverage": 0.7883502170767004,
-          "miss_rate": 0.21164978292329956,
-          "mean_prob": 0.6711420627526014,
-          "mean_uncert": 0.06974159513272321,
-          "high_uncert_rate": 0.2796671490593343
+          "detection_rate": 0.9651329978432782,
+          "escalation_rate": 0.03055355859094177,
+          "triage_coverage": 0.99568655643422,
+          "miss_rate": 0.004313443565780014,
+          "mean_prob": 0.7087383580181177,
+          "mean_uncert": 0.057455121402862415,
+          "high_uncert_rate": 0.18799424874191228
         }
       },
       "0.3": {
         "alpha": 0.3,
         "B": {
-          "detection_rate": 0.9081041968162084,
-          "escalation_rate": 0.05752532561505065,
-          "triage_coverage": 0.965629522431259,
-          "miss_rate": 0.034370477568740954,
-          "mean_prob": 0.7952702218325008,
-          "mean_uncert": 0.07063231493956942,
-          "high_uncert_rate": 0.2738784370477569
+          "detection_rate": 0.9615384615384616,
+          "escalation_rate": 0.03235082674335011,
+          "triage_coverage": 0.9938892882818117,
+          "miss_rate": 0.006110711718188354,
+          "mean_prob": 0.8890580000606245,
+          "mean_uncert": 0.055231523839300724,
+          "high_uncert_rate": 0.16750539180445723
         },
         "BK": {
-          "detection_rate": 0.6599131693198264,
-          "escalation_rate": 0.12301013024602026,
-          "triage_coverage": 0.7829232995658466,
-          "miss_rate": 0.2170767004341534,
-          "mean_prob": 0.6666678399205249,
-          "mean_uncert": 0.07063231493956942,
-          "high_uncert_rate": 0.2738784370477569
+          "detection_rate": 0.9672897196261683,
+          "escalation_rate": 0.027677929547088427,
+          "triage_coverage": 0.9949676491732566,
+          "miss_rate": 0.0050323508267433505,
+          "mean_prob": 0.7105654350600435,
+          "mean_uncert": 0.055231523839300724,
+          "high_uncert_rate": 0.16750539180445723
         }
       },
       "0.4": {
         "alpha": 0.4,
         "B": {
-          "detection_rate": 0.9070188133140377,
-          "escalation_rate": 0.0625904486251809,
-          "triage_coverage": 0.9696092619392185,
-          "miss_rate": 0.030390738060781478,
-          "mean_prob": 0.7864131378196921,
-          "mean_uncert": 0.0708373593107589,
-          "high_uncert_rate": 0.2586830680173661
+          "detection_rate": 0.9672897196261683,
+          "escalation_rate": 0.029115744069015098,
+          "triage_coverage": 0.9964054636951833,
+          "miss_rate": 0.0035945363048166786,
+          "mean_prob": 0.8922319574935039,
+          "mean_uncert": 0.05482926870838774,
+          "high_uncert_rate": 0.16391085549964055
         },
         "BK": {
-          "detection_rate": 0.6577424023154848,
-          "escalation_rate": 0.11939218523878437,
-          "triage_coverage": 0.7771345875542692,
-          "miss_rate": 0.22286541244573083,
-          "mean_prob": 0.6619014112149852,
-          "mean_uncert": 0.0708373593107589,
-          "high_uncert_rate": 0.2586830680173661
+          "detection_rate": 0.9701653486700216,
+          "escalation_rate": 0.026599568655643422,
+          "triage_coverage": 0.996764917325665,
+          "miss_rate": 0.003235082674335011,
+          "mean_prob": 0.7139303266649261,
+          "mean_uncert": 0.05482926870838774,
+          "high_uncert_rate": 0.16391085549964055
         }
       },
       "0.5": {
         "alpha": 0.5,
         "B": {
-          "detection_rate": 0.9044862518089725,
-          "escalation_rate": 0.06765557163531115,
-          "triage_coverage": 0.9721418234442837,
-          "miss_rate": 0.027858176555716353,
-          "mean_prob": 0.7745835768702802,
-          "mean_uncert": 0.07105472840974579,
-          "high_uncert_rate": 0.2590448625180897
+          "detection_rate": 0.9701653486700216,
+          "escalation_rate": 0.027677929547088427,
+          "triage_coverage": 0.9978432782171099,
+          "miss_rate": 0.002156721782890007,
+          "mean_prob": 0.8941002078729298,
+          "mean_uncert": 0.05553326594952453,
+          "high_uncert_rate": 0.16391085549964055
         },
         "BK": {
-          "detection_rate": 0.6562952243125905,
-          "escalation_rate": 0.11432706222865413,
-          "triage_coverage": 0.7706222865412445,
-          "miss_rate": 0.22937771345875543,
-          "mean_prob": 0.6566608396955016,
-          "mean_uncert": 0.07105472840974579,
-          "high_uncert_rate": 0.2590448625180897
+          "detection_rate": 0.9716031631919483,
+          "escalation_rate": 0.025521207764198417,
+          "triage_coverage": 0.9971243709561467,
+          "miss_rate": 0.002875629043853343,
+          "mean_prob": 0.7140669478136995,
+          "mean_uncert": 0.05553326594952453,
+          "high_uncert_rate": 0.16391085549964055
         }
       },
       "0.6": {
         "alpha": 0.6,
         "B": {
-          "detection_rate": 0.8950795947901592,
-          "escalation_rate": 0.07452966714905933,
-          "triage_coverage": 0.9696092619392185,
-          "miss_rate": 0.030390738060781478,
-          "mean_prob": 0.761146357385007,
-          "mean_uncert": 0.06969221102649295,
-          "high_uncert_rate": 0.23769898697539799
+          "detection_rate": 0.9719626168224299,
+          "escalation_rate": 0.026599568655643422,
+          "triage_coverage": 0.9985621854780733,
+          "miss_rate": 0.0014378145219266715,
+          "mean_prob": 0.8942206659154078,
+          "mean_uncert": 0.05627995127890531,
+          "high_uncert_rate": 0.1689432063263839
         },
         "BK": {
-          "detection_rate": 0.6570188133140377,
-          "escalation_rate": 0.09442836468885674,
-          "triage_coverage": 0.7514471780028944,
-          "miss_rate": 0.24855282199710566,
-          "mean_prob": 0.6489052019651788,
-          "mean_uncert": 0.06969221102649295,
-          "high_uncert_rate": 0.23769898697539799
+          "detection_rate": 0.9759166067577283,
+          "escalation_rate": 0.022645578720345075,
+          "triage_coverage": 0.9985621854780733,
+          "miss_rate": 0.0014378145219266715,
+          "mean_prob": 0.7141407434477074,
+          "mean_uncert": 0.05627995127890531,
+          "high_uncert_rate": 0.1689432063263839
         }
       },
       "0.7": {
         "alpha": 0.7,
         "B": {
-          "detection_rate": 0.8827785817655571,
-          "escalation_rate": 0.08068017366136035,
-          "triage_coverage": 0.9634587554269175,
-          "miss_rate": 0.03654124457308249,
-          "mean_prob": 0.7471774438993841,
-          "mean_uncert": 0.06824465949029707,
-          "high_uncert_rate": 0.2170767004341534
+          "detection_rate": 0.9701653486700216,
+          "escalation_rate": 0.027677929547088427,
+          "triage_coverage": 0.9978432782171099,
+          "miss_rate": 0.002156721782890007,
+          "mean_prob": 0.8912319064523294,
+          "mean_uncert": 0.058682190881360216,
+          "high_uncert_rate": 0.17181883537023723
         },
         "BK": {
-          "detection_rate": 0.6537626628075254,
-          "escalation_rate": 0.08827785817655572,
-          "triage_coverage": 0.742040520984081,
-          "miss_rate": 0.257959479015919,
-          "mean_prob": 0.6425015026235625,
-          "mean_uncert": 0.06824465949029707,
-          "high_uncert_rate": 0.2170767004341534
+          "detection_rate": 0.9755571531272466,
+          "escalation_rate": 0.023005032350826744,
+          "triage_coverage": 0.9985621854780733,
+          "miss_rate": 0.0014378145219266715,
+          "mean_prob": 0.7129537730647143,
+          "mean_uncert": 0.058682190881360216,
+          "high_uncert_rate": 0.17181883537023723
         }
       },
       "0.8": {
         "alpha": 0.8,
         "B": {
-          "detection_rate": 0.8632416787264834,
-          "escalation_rate": 0.09334298118668596,
-          "triage_coverage": 0.9565846599131693,
-          "miss_rate": 0.04341534008683068,
-          "mean_prob": 0.7338523377975895,
-          "mean_uncert": 0.06781414212128646,
-          "high_uncert_rate": 0.20332850940665703
+          "detection_rate": 0.9730409777138749,
+          "escalation_rate": 0.025521207764198417,
+          "triage_coverage": 0.9985621854780733,
+          "miss_rate": 0.0014378145219266715,
+          "mean_prob": 0.8845872238123057,
+          "mean_uncert": 0.06177336610210082,
+          "high_uncert_rate": 0.1790079079798706
         },
         "BK": {
-          "detection_rate": 0.6490593342981187,
-          "escalation_rate": 0.08321273516642547,
-          "triage_coverage": 0.7322720694645442,
-          "miss_rate": 0.26772793053545585,
-          "mean_prob": 0.6358106714307669,
-          "mean_uncert": 0.06781414212128646,
-          "high_uncert_rate": 0.20332850940665703
+          "detection_rate": 0.9766355140186916,
+          "escalation_rate": 0.022645578720345075,
+          "triage_coverage": 0.9992810927390366,
+          "miss_rate": 0.0007189072609633358,
+          "mean_prob": 0.7095306327755313,
+          "mean_uncert": 0.06177336610210082,
+          "high_uncert_rate": 0.1790079079798706
         }
       },
       "1.0": {
         "alpha": 1.0,
         "B": {
-          "detection_rate": 0.8469609261939218,
-          "escalation_rate": 0.0886396526772793,
-          "triage_coverage": 0.9356005788712012,
-          "miss_rate": 0.06439942112879884,
-          "mean_prob": 0.7077339593693496,
-          "mean_uncert": 0.07011406949192943,
-          "high_uncert_rate": 0.20296671490593343
+          "detection_rate": 0.9640546369518332,
+          "escalation_rate": 0.03378864126527678,
+          "triage_coverage": 0.9978432782171099,
+          "miss_rate": 0.002156721782890007,
+          "mean_prob": 0.8682361180973751,
+          "mean_uncert": 0.06808402667839433,
+          "high_uncert_rate": 0.2113587347232207
         },
         "BK": {
-          "detection_rate": 0.6410998552821997,
-          "escalation_rate": 0.08031837916063676,
-          "triage_coverage": 0.7214182344428365,
-          "miss_rate": 0.2785817655571635,
-          "mean_prob": 0.6229666054495244,
-          "mean_uncert": 0.07011406949192943,
-          "high_uncert_rate": 0.20296671490593343
+          "detection_rate": 0.9687275341480949,
+          "escalation_rate": 0.029115744069015098,
+          "triage_coverage": 0.9978432782171099,
+          "miss_rate": 0.002156721782890007,
+          "mean_prob": 0.7027072251039891,
+          "mean_uncert": 0.06808402667839433,
+          "high_uncert_rate": 0.2113587347232207
         }
       }
     },
@@ -448,190 +448,190 @@
       "0.0": {
         "alpha": 0.0,
         "B": {
-          "detection_rate": 0.8784370477568741,
-          "escalation_rate": 0.09225759768451519,
-          "triage_coverage": 0.9706946454413893,
-          "miss_rate": 0.02930535455861071,
-          "mean_prob": 0.80722127987177,
-          "mean_uncert": 0.07222493156733369,
-          "high_uncert_rate": 0.3096960926193922
+          "detection_rate": 0.9367361610352265,
+          "escalation_rate": 0.05212077641984184,
+          "triage_coverage": 0.9888569374550683,
+          "miss_rate": 0.011143062544931704,
+          "mean_prob": 0.866371117966028,
+          "mean_uncert": 0.06341015552487086,
+          "high_uncert_rate": 0.22106398274622574
         },
         "BK": {
-          "detection_rate": 0.6638929088277858,
-          "escalation_rate": 0.14001447178002893,
-          "triage_coverage": 0.8039073806078147,
-          "miss_rate": 0.19609261939218525,
-          "mean_prob": 0.6728849873946546,
-          "mean_uncert": 0.07222493156733369,
-          "high_uncert_rate": 0.3096960926193922
+          "detection_rate": 0.9435657800143782,
+          "escalation_rate": 0.04601006470165349,
+          "triage_coverage": 0.9895758447160317,
+          "miss_rate": 0.010424155283968369,
+          "mean_prob": 0.7001896667970685,
+          "mean_uncert": 0.06341015552487086,
+          "high_uncert_rate": 0.22106398274622574
         }
       },
       "0.1": {
         "alpha": 0.1,
         "B": {
-          "detection_rate": 0.8968885672937771,
-          "escalation_rate": 0.07272069464544138,
-          "triage_coverage": 0.9696092619392185,
-          "miss_rate": 0.030390738060781478,
-          "mean_prob": 0.8165432339461383,
-          "mean_uncert": 0.06641168530478918,
-          "high_uncert_rate": 0.2630246020260492
+          "detection_rate": 0.9633357296908699,
+          "escalation_rate": 0.029475197699496764,
+          "triage_coverage": 0.9928109273903667,
+          "miss_rate": 0.007189072609633357,
+          "mean_prob": 0.8990296382566821,
+          "mean_uncert": 0.04583439324924675,
+          "high_uncert_rate": 0.13587347232207045
         },
         "BK": {
-          "detection_rate": 0.66027496382055,
-          "escalation_rate": 0.12662807525325614,
-          "triage_coverage": 0.7869030390738061,
-          "miss_rate": 0.21309696092619393,
-          "mean_prob": 0.6769176546059931,
-          "mean_uncert": 0.06641168530478918,
-          "high_uncert_rate": 0.2630246020260492
+          "detection_rate": 0.9701653486700216,
+          "escalation_rate": 0.02372393961179008,
+          "triage_coverage": 0.9938892882818117,
+          "miss_rate": 0.006110711718188354,
+          "mean_prob": 0.7174577138096758,
+          "mean_uncert": 0.04583439324924675,
+          "high_uncert_rate": 0.13587347232207045
         }
       },
       "0.2": {
         "alpha": 0.2,
         "B": {
-          "detection_rate": 0.9135311143270622,
-          "escalation_rate": 0.04956584659913169,
-          "triage_coverage": 0.9630969609261939,
-          "miss_rate": 0.03690303907380608,
-          "mean_prob": 0.818227626464172,
-          "mean_uncert": 0.06290419856521036,
-          "high_uncert_rate": 0.2304630969609262
+          "detection_rate": 0.9766355140186916,
+          "escalation_rate": 0.017972681524083392,
+          "triage_coverage": 0.994608195542775,
+          "miss_rate": 0.005391804457225018,
+          "mean_prob": 0.915040852728291,
+          "mean_uncert": 0.03617756812775897,
+          "high_uncert_rate": 0.08554996405463695
         },
         "BK": {
-          "detection_rate": 0.6591895803183792,
-          "escalation_rate": 0.10455861070911722,
-          "triage_coverage": 0.7637481910274964,
-          "miss_rate": 0.2362518089725036,
-          "mean_prob": 0.6783644242186315,
-          "mean_uncert": 0.06290419856521036,
-          "high_uncert_rate": 0.2304630969609262
+          "detection_rate": 0.9809489575844716,
+          "escalation_rate": 0.01509705248023005,
+          "triage_coverage": 0.9960460100647016,
+          "miss_rate": 0.003953989935298346,
+          "mean_prob": 0.7256755802825918,
+          "mean_uncert": 0.03617756812775897,
+          "high_uncert_rate": 0.08554996405463695
         }
       },
       "0.3": {
         "alpha": 0.3,
         "B": {
-          "detection_rate": 0.9232995658465991,
-          "escalation_rate": 0.04160636758321273,
-          "triage_coverage": 0.9649059334298119,
-          "miss_rate": 0.03509406657018813,
-          "mean_prob": 0.815447855834457,
-          "mean_uncert": 0.06003655869124239,
-          "high_uncert_rate": 0.2011577424023155
+          "detection_rate": 0.9856218547807333,
+          "escalation_rate": 0.009705248023005032,
+          "triage_coverage": 0.9953271028037384,
+          "miss_rate": 0.004672897196261682,
+          "mean_prob": 0.9249440893145193,
+          "mean_uncert": 0.03014087606372203,
+          "high_uncert_rate": 0.054636951833213515
         },
         "BK": {
-          "detection_rate": 0.6548480463096961,
-          "escalation_rate": 0.09840810419681621,
-          "triage_coverage": 0.7532561505065123,
-          "miss_rate": 0.2467438494934877,
-          "mean_prob": 0.6762522064408324,
-          "mean_uncert": 0.06003655869124239,
-          "high_uncert_rate": 0.2011577424023155
+          "detection_rate": 0.9884974838245866,
+          "escalation_rate": 0.007189072609633357,
+          "triage_coverage": 0.99568655643422,
+          "miss_rate": 0.004313443565780014,
+          "mean_prob": 0.7302383956674147,
+          "mean_uncert": 0.03014087606372203,
+          "high_uncert_rate": 0.054636951833213515
         }
       },
       "0.4": {
         "alpha": 0.4,
         "B": {
-          "detection_rate": 0.9356005788712012,
-          "escalation_rate": 0.030390738060781478,
-          "triage_coverage": 0.9659913169319826,
-          "miss_rate": 0.03400868306801737,
-          "mean_prob": 0.8133131426640459,
-          "mean_uncert": 0.057257478892201404,
-          "high_uncert_rate": 0.16027496382054993
+          "detection_rate": 0.992451473759885,
+          "escalation_rate": 0.004313443565780014,
+          "triage_coverage": 0.996764917325665,
+          "miss_rate": 0.003235082674335011,
+          "mean_prob": 0.9309122922135976,
+          "mean_uncert": 0.02580334568091184,
+          "high_uncert_rate": 0.03666427030913012
         },
         "BK": {
-          "detection_rate": 0.6548480463096961,
-          "escalation_rate": 0.07452966714905933,
-          "triage_coverage": 0.7293777134587555,
-          "miss_rate": 0.2706222865412446,
-          "mean_prob": 0.675398294419155,
-          "mean_uncert": 0.057257478892201404,
-          "high_uncert_rate": 0.16027496382054993
+          "detection_rate": 0.9928109273903667,
+          "escalation_rate": 0.003953989935298346,
+          "triage_coverage": 0.996764917325665,
+          "miss_rate": 0.003235082674335011,
+          "mean_prob": 0.7328390700141361,
+          "mean_uncert": 0.02580334568091184,
+          "high_uncert_rate": 0.03666427030913012
         }
       },
       "0.5": {
         "alpha": 0.5,
         "B": {
-          "detection_rate": 0.9439218523878437,
-          "escalation_rate": 0.022793053545586108,
-          "triage_coverage": 0.9667149059334298,
-          "miss_rate": 0.03328509406657019,
-          "mean_prob": 0.8092203050064712,
-          "mean_uncert": 0.055082790140219585,
-          "high_uncert_rate": 0.111794500723589
+          "detection_rate": 0.9960460100647016,
+          "escalation_rate": 0.002156721782890007,
+          "triage_coverage": 0.9982027318475917,
+          "miss_rate": 0.0017972681524083393,
+          "mean_prob": 0.933693936023671,
+          "mean_uncert": 0.02271862453305176,
+          "high_uncert_rate": 0.020848310567936738
         },
         "BK": {
-          "detection_rate": 0.6577424023154848,
-          "escalation_rate": 0.04884225759768451,
-          "triage_coverage": 0.7065846599131693,
-          "miss_rate": 0.2934153400868307,
-          "mean_prob": 0.6734448081998484,
-          "mean_uncert": 0.055082790140219585,
-          "high_uncert_rate": 0.111794500723589
+          "detection_rate": 0.99568655643422,
+          "escalation_rate": 0.0017972681524083393,
+          "triage_coverage": 0.9974838245866283,
+          "miss_rate": 0.0025161754133716753,
+          "mean_prob": 0.7336516030330953,
+          "mean_uncert": 0.02271862453305176,
+          "high_uncert_rate": 0.020848310567936738
         }
       },
       "0.6": {
         "alpha": 0.6,
         "B": {
-          "detection_rate": 0.9609261939218524,
-          "escalation_rate": 0.01121562952243126,
-          "triage_coverage": 0.9721418234442837,
-          "miss_rate": 0.027858176555716353,
-          "mean_prob": 0.803664627249114,
-          "mean_uncert": 0.05523815501717832,
-          "high_uncert_rate": 0.0788712011577424
+          "detection_rate": 0.998921639108555,
+          "escalation_rate": 0.0,
+          "triage_coverage": 0.998921639108555,
+          "miss_rate": 0.0010783608914450035,
+          "mean_prob": 0.9343693712840057,
+          "mean_uncert": 0.020106138110958075,
+          "high_uncert_rate": 0.009345794392523364
         },
         "BK": {
-          "detection_rate": 0.6617221418234442,
-          "escalation_rate": 0.03328509406657019,
-          "triage_coverage": 0.6950072358900145,
-          "miss_rate": 0.30499276410998555,
-          "mean_prob": 0.6710995989166808,
-          "mean_uncert": 0.05523815501717832,
-          "high_uncert_rate": 0.0788712011577424
+          "detection_rate": 0.9982027318475917,
+          "escalation_rate": 0.0007189072609633358,
+          "triage_coverage": 0.998921639108555,
+          "miss_rate": 0.0010783608914450035,
+          "mean_prob": 0.7343876352366314,
+          "mean_uncert": 0.020106138110958075,
+          "high_uncert_rate": 0.009345794392523364
         }
       },
       "0.7": {
         "alpha": 0.7,
         "B": {
-          "detection_rate": 0.9667149059334298,
-          "escalation_rate": 0.005788712011577424,
-          "triage_coverage": 0.9725036179450073,
-          "miss_rate": 0.027496382054992764,
-          "mean_prob": 0.795900069290365,
-          "mean_uncert": 0.05392313752371909,
-          "high_uncert_rate": 0.04775687409551375
+          "detection_rate": 1.0,
+          "escalation_rate": 0.0,
+          "triage_coverage": 1.0,
+          "miss_rate": 0.0,
+          "mean_prob": 0.933117784372257,
+          "mean_uncert": 0.018787173225727177,
+          "high_uncert_rate": 0.005751258087706686
         },
         "BK": {
-          "detection_rate": 0.6635311143270622,
-          "escalation_rate": 0.01808972503617945,
-          "triage_coverage": 0.6816208393632417,
-          "miss_rate": 0.3183791606367583,
-          "mean_prob": 0.6671847419930954,
-          "mean_uncert": 0.05392313752371909,
-          "high_uncert_rate": 0.04775687409551375
+          "detection_rate": 1.0,
+          "escalation_rate": 0.0,
+          "triage_coverage": 1.0,
+          "miss_rate": 0.0,
+          "mean_prob": 0.7338209900118566,
+          "mean_uncert": 0.018787173225727177,
+          "high_uncert_rate": 0.005751258087706686
         }
       },
       "0.8": {
         "alpha": 0.8,
         "B": {
-          "detection_rate": 0.9717800289435601,
-          "escalation_rate": 0.004703328509406657,
-          "triage_coverage": 0.9764833574529667,
-          "miss_rate": 0.023516642547033284,
-          "mean_prob": 0.7872154213347932,
-          "mean_uncert": 0.05283454543400108,
-          "high_uncert_rate": 0.027496382054992764
+          "detection_rate": 1.0,
+          "escalation_rate": 0.0,
+          "triage_coverage": 1.0,
+          "miss_rate": 0.0,
+          "mean_prob": 0.9315878801385248,
+          "mean_uncert": 0.018209897536969537,
+          "high_uncert_rate": 0.0017972681524083393
         },
         "BK": {
-          "detection_rate": 0.6642547033285094,
-          "escalation_rate": 0.007959479015918957,
-          "triage_coverage": 0.6722141823444283,
-          "miss_rate": 0.32778581765557163,
-          "mean_prob": 0.6624596287641191,
-          "mean_uncert": 0.05283454543400108,
-          "high_uncert_rate": 0.027496382054992764
+          "detection_rate": 1.0,
+          "escalation_rate": 0.0,
+          "triage_coverage": 1.0,
+          "miss_rate": 0.0,
+          "mean_prob": 0.7335828776939322,
+          "mean_uncert": 0.018209897536969537,
+          "high_uncert_rate": 0.0017972681524083393
         }
       },
       "1.0": {
@@ -641,147 +641,147 @@
           "escalation_rate": 0.0,
           "triage_coverage": 1.0,
           "miss_rate": 0.0,
-          "mean_prob": 0.757465278662407,
-          "mean_uncert": 0.06458557830508879,
-          "high_uncert_rate": 0.008321273516642547
+          "mean_prob": 0.9172017547314669,
+          "mean_uncert": 0.022802925655433518,
+          "high_uncert_rate": 0.0
         },
         "BK": {
-          "detection_rate": 0.650506512301013,
-          "escalation_rate": 0.002532561505065123,
-          "triage_coverage": 0.6530390738060782,
-          "miss_rate": 0.3469609261939218,
-          "mean_prob": 0.6479622399695245,
-          "mean_uncert": 0.06458557830508879,
-          "high_uncert_rate": 0.008321273516642547
+          "detection_rate": 1.0,
+          "escalation_rate": 0.0,
+          "triage_coverage": 1.0,
+          "miss_rate": 0.0,
+          "mean_prob": 0.7257347992808162,
+          "mean_uncert": 0.022802925655433518,
+          "high_uncert_rate": 0.0
         }
       }
     }
   },
   "per_family_slow_encrypt_alpha05": {
     "Conti": {
-      "n": 456,
+      "n": 476,
       "B": {
-        "detection_rate": 0.9517543859649122,
-        "escalation_rate": 0.02412280701754386,
-        "triage_coverage": 0.9758771929824561,
-        "miss_rate": 0.02412280701754386,
-        "mean_prob": 0.8633463599375988,
-        "mean_uncert": 0.056418362722564654,
-        "high_uncert_rate": 0.21271929824561403
+        "detection_rate": 0.957983193277311,
+        "escalation_rate": 0.03361344537815126,
+        "triage_coverage": 0.9915966386554622,
+        "miss_rate": 0.008403361344537815,
+        "mean_prob": 0.899603337206009,
+        "mean_uncert": 0.051944807592482004,
+        "high_uncert_rate": 0.12394957983193278
       },
       "BK": {
-        "detection_rate": 1.0,
-        "escalation_rate": 0.0,
-        "triage_coverage": 1.0,
-        "miss_rate": 0.0,
-        "mean_prob": 0.9301142917880625,
-        "mean_uncert": 0.056418362722564654,
-        "high_uncert_rate": 0.21271929824561403
+        "detection_rate": 0.9600840336134454,
+        "escalation_rate": 0.031512605042016806,
+        "triage_coverage": 0.9915966386554622,
+        "miss_rate": 0.008403361344537815,
+        "mean_prob": 0.7170922472102552,
+        "mean_uncert": 0.051944807592482004,
+        "high_uncert_rate": 0.12394957983193278
       }
     },
     "Darkside": {
-      "n": 465,
+      "n": 445,
       "B": {
-        "detection_rate": 0.9440860215053763,
-        "escalation_rate": 0.04086021505376344,
-        "triage_coverage": 0.9849462365591398,
-        "miss_rate": 0.015053763440860216,
-        "mean_prob": 0.8897279261260904,
-        "mean_uncert": 0.03837654007503623,
-        "high_uncert_rate": 0.11397849462365592
+        "detection_rate": 0.9820224719101124,
+        "escalation_rate": 0.01348314606741573,
+        "triage_coverage": 0.9955056179775281,
+        "miss_rate": 0.0044943820224719105,
+        "mean_prob": 0.9460591054699394,
+        "mean_uncert": 0.023214369339690535,
+        "high_uncert_rate": 0.0696629213483146
       },
       "BK": {
-        "detection_rate": 0.8602150537634409,
-        "escalation_rate": 0.09462365591397849,
-        "triage_coverage": 0.9548387096774194,
-        "miss_rate": 0.04516129032258064,
-        "mean_prob": 0.591871241840624,
-        "mean_uncert": 0.03837654007503623,
-        "high_uncert_rate": 0.11397849462365592
+        "detection_rate": 0.9887640449438202,
+        "escalation_rate": 0.008988764044943821,
+        "triage_coverage": 0.9977528089887641,
+        "miss_rate": 0.0022471910112359553,
+        "mean_prob": 0.7437539217344831,
+        "mean_uncert": 0.023214369339690535,
+        "high_uncert_rate": 0.0696629213483146
       }
     },
     "LockBit": {
       "n": 471,
       "B": {
-        "detection_rate": 0.9490445859872612,
-        "escalation_rate": 0.03397027600849257,
-        "triage_coverage": 0.9830148619957537,
-        "miss_rate": 0.016985138004246284,
-        "mean_prob": 0.8500611023728255,
-        "mean_uncert": 0.058037925900638325,
-        "high_uncert_rate": 0.23991507430997877
+        "detection_rate": 0.9766454352441614,
+        "escalation_rate": 0.014861995753715499,
+        "triage_coverage": 0.9915074309978769,
+        "miss_rate": 0.008492569002123142,
+        "mean_prob": 0.9257709732291045,
+        "mean_uncert": 0.035260126722339864,
+        "high_uncert_rate": 0.07855626326963906
       },
       "BK": {
-        "detection_rate": 1.0,
-        "escalation_rate": 0.0,
-        "triage_coverage": 1.0,
-        "miss_rate": 0.0,
-        "mean_prob": 0.8550765581919383,
-        "mean_uncert": 0.058037925900638325,
-        "high_uncert_rate": 0.23991507430997877
+        "detection_rate": 0.9787685774946921,
+        "escalation_rate": 0.012738853503184714,
+        "triage_coverage": 0.9915074309978769,
+        "miss_rate": 0.008492569002123142,
+        "mean_prob": 0.7309181130077935,
+        "mean_uncert": 0.035260126722339864,
+        "high_uncert_rate": 0.07855626326963906
       }
     },
     "REvil": {
       "n": 463,
       "B": {
-        "detection_rate": 0.9028077753779697,
-        "escalation_rate": 0.058315334773218146,
-        "triage_coverage": 0.9611231101511879,
-        "miss_rate": 0.038876889848812095,
-        "mean_prob": 0.8283165051977976,
-        "mean_uncert": 0.06008282695699797,
-        "high_uncert_rate": 0.20086393088552915
+        "detection_rate": 0.9676025917926566,
+        "escalation_rate": 0.03023758099352052,
+        "triage_coverage": 0.9978401727861771,
+        "miss_rate": 0.0021598272138228943,
+        "mean_prob": 0.8766204408384038,
+        "mean_uncert": 0.05374088523141058,
+        "high_uncert_rate": 0.16846652267818574
       },
       "BK": {
-        "detection_rate": 0.02159827213822894,
-        "escalation_rate": 0.20086393088552915,
-        "triage_coverage": 0.2224622030237581,
-        "miss_rate": 0.7775377969762419,
-        "mean_prob": 0.419275998871333,
-        "mean_uncert": 0.06008282695699797,
-        "high_uncert_rate": 0.20086393088552915
+        "detection_rate": 0.978401727861771,
+        "escalation_rate": 0.019438444924406047,
+        "triage_coverage": 0.9978401727861771,
+        "miss_rate": 0.0021598272138228943,
+        "mean_prob": 0.7056619138426709,
+        "mean_uncert": 0.05374088523141058,
+        "high_uncert_rate": 0.16846652267818574
       }
     },
     "Ryuk": {
       "n": 484,
       "B": {
-        "detection_rate": 0.9710743801652892,
-        "escalation_rate": 0.01652892561983471,
-        "triage_coverage": 0.987603305785124,
-        "miss_rate": 0.012396694214876033,
-        "mean_prob": 0.8550263398811837,
-        "mean_uncert": 0.05642869840578122,
-        "high_uncert_rate": 0.13429752066115702
+        "detection_rate": 0.96900826446281,
+        "escalation_rate": 0.028925619834710745,
+        "triage_coverage": 0.9979338842975206,
+        "miss_rate": 0.002066115702479339,
+        "mean_prob": 0.8889145028492635,
+        "mean_uncert": 0.049268842032102265,
+        "high_uncert_rate": 0.14669421487603307
       },
       "BK": {
-        "detection_rate": 1.0,
-        "escalation_rate": 0.0,
+        "detection_rate": 0.9793388429752066,
+        "escalation_rate": 0.02066115702479339,
         "triage_coverage": 1.0,
         "miss_rate": 0.0,
-        "mean_prob": 0.9246502906268785,
-        "mean_uncert": 0.05642869840578122,
-        "high_uncert_rate": 0.13429752066115702
+        "mean_prob": 0.7130275928099786,
+        "mean_uncert": 0.049268842032102265,
+        "high_uncert_rate": 0.14669421487603307
       }
     },
     "WannaCry": {
-      "n": 425,
+      "n": 443,
       "B": {
-        "detection_rate": 0.8094117647058824,
-        "escalation_rate": 0.12470588235294118,
-        "triage_coverage": 0.9341176470588235,
-        "miss_rate": 0.06588235294117648,
-        "mean_prob": 0.7292526610546253,
-        "mean_uncert": 0.09112263526329223,
-        "high_uncert_rate": 0.3788235294117647
+        "detection_rate": 0.9548532731376975,
+        "escalation_rate": 0.04288939051918736,
+        "triage_coverage": 0.9977426636568849,
+        "miss_rate": 0.002257336343115124,
+        "mean_prob": 0.8710752934486549,
+        "mean_uncert": 0.08550951173728748,
+        "high_uncert_rate": 0.3160270880361174
       },
       "BK": {
-        "detection_rate": 0.002352941176470588,
-        "escalation_rate": 0.3788235294117647,
-        "triage_coverage": 0.3811764705882353,
-        "miss_rate": 0.6188235294117647,
-        "mean_prob": 0.3697333750432795,
-        "mean_uncert": 0.09112263526329223,
-        "high_uncert_rate": 0.3788235294117647
+        "detection_rate": 0.9683972911963883,
+        "escalation_rate": 0.029345372460496615,
+        "triage_coverage": 0.9977426636568849,
+        "miss_rate": 0.002257336343115124,
+        "mean_prob": 0.7007698775784157,
+        "mean_uncert": 0.08550951173728748,
+        "high_uncert_rate": 0.3160270880361174
       }
     }
   },

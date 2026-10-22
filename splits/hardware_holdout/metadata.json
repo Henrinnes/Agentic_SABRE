@@ -27,10 +27,10 @@
   ],
   "seed": 42,
   "train": {
-    "n_sessions": 1203,
-    "n_windows": 24296,
-    "ransom_windows": 12437,
-    "benign_windows": 11859,
+    "n_sessions": 1224,
+    "n_windows": 24709,
+    "ransom_windows": 12599,
+    "benign_windows": 12110,
     "families": [
       "AESCrypt",
       "Conti",
@@ -47,10 +47,10 @@
     ]
   },
   "val": {
-    "n_sessions": 213,
-    "n_windows": 4278,
-    "ransom_windows": 2185,
-    "benign_windows": 2093,
+    "n_sessions": 216,
+    "n_windows": 4357,
+    "ransom_windows": 2225,
+    "benign_windows": 2132,
     "families": [
       "AESCrypt",
       "Conti",

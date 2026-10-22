@@ -31,8 +31,9 @@ from sklearn.model_selection import train_test_split
 
 SEED = 42
 
-RANSMAP_PARQUET  = "/home/henry_k/Datasets/ransmap_extracted/ransmap_train.parquet"
-RDSET_PARQUET    = "/home/henry_k/Datasets/RDset/semantic_dataset_with_embeddings.parquet"
+DATA_DIR         = Path(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"))
+RANSMAP_PARQUET  = str(DATA_DIR / "ransmap_extracted" / "ransmap_train.parquet")
+RDSET_PARQUET    = str(DATA_DIR / "RDset" / "semantic_dataset_with_embeddings.parquet")
 SPLITS_DIR       = Path(__file__).parent
 
 # Families held out entirely from training in the family holdout split

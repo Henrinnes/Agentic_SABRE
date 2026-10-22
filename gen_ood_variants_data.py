@@ -25,7 +25,7 @@ os.chdir(Path(__file__).parent)
 import eval_sabre2 as E
 from Agentic_SABRE.agents.behavioural import BehavioralAgent
 
-PARQUET   = "/home/henry_k/Datasets/ransmap_extracted/ransmap_ood_variants.parquet"
+PARQUET   = os.path.join(os.environ.get("SABRE_DATA_DIR", "/home/henry_k/Datasets"), "ransmap_extracted/ransmap_ood_variants.parquet")
 THRESHOLD = 0.5
 
 FEATURE_COLS = [
