@@ -40,3 +40,11 @@ desktop.ini
 
 # Claude Code internal
 .claude/
+
+# Paper and thesis sources live in private repos
+Henry_Kabuye_Thesis/
+Henry_Kabuye_Thesis.zip
+ESWA_Submission/
+TIFS_Submission/
+TIFS2_Submission/
+TIFS3_Submission/
